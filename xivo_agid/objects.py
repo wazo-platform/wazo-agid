@@ -187,7 +187,7 @@ class BossSecretaryFilter:
                      "INNER JOIN callfiltermember "
                      "ON callfilter.id = callfiltermember.callfilterid "
                      "INNER JOIN userfeatures "
-                     "ON callfiltermember.typeval = userfeatures.id "
+                     "ON " + cursor.cast('callfiltermember.typeval', 'int') + " = userfeatures.id "
                      "WHERE callfilter.type = 'bosssecretary' "
                      "AND callfilter.commented = 0 "
                      "AND callfiltermember.type = 'user' "
@@ -229,7 +229,7 @@ class BossSecretaryFilter:
                    'userfeatures.ringseconds')
 
         cursor.query("SELECT ${columns} FROM callfiltermember INNER JOIN userfeatures "
-                     "ON callfiltermember.typeval = userfeatures.id "
+                     "ON " + cursor.cast('callfiltermember.typeval','int') + " = userfeatures.id "
                      "WHERE callfiltermember.callfilterid = %s "
                      "AND callfiltermember.type = 'user' "
                      "AND callfiltermember.bstype = 'secretary' "
@@ -1028,10 +1028,10 @@ class DialAction:
         self.category = category
 
         cursor.query("SELECT ${columns} FROM dialaction "
-                     "WHERE event = %s "
-                     "AND category = %s "
-                     "AND categoryval = %s "
-                     "AND linked = 1",
+                     "WHERE event = %%s "
+                     "AND category = %%s "
+                     "AND %s = %%s "
+                     "AND linked = 1" % cursor.cast('categoryval', 'int'),
                      ('action', 'actionarg1', 'actionarg2'),
                      (event, category, categoryval))
         res = cursor.fetchone()
