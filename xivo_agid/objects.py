@@ -952,8 +952,16 @@ class Queue:
         self.preprocess_subroutine = res['queuefeatures.preprocess_subroutine']
 
     def set_dial_actions(self):
-        for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
+        for event in ('congestion', 'busy', 'chanunavail'):
             DialAction(self.agi, self.cursor, event, "queue", self.id).set_variables()
+
+        # case NOANSWER (timeout): we also set correct queuelog event
+        action = DialAction(self.agi, self.cursor, 'noanswer', "queue", self.id)
+        action.set_variables()
+        if action.action in ('voicemail','voicemenu','sound'):
+            self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTE_GUIDE")
+        else:
+            self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTE_NUMBER")
 
     def rewrite_cid(self):
         CallerID(self.agi, self.cursor, "queue", self.id).rewrite(force_rewrite=False)
@@ -1028,10 +1036,10 @@ class DialAction:
         self.category = category
 
         cursor.query("SELECT ${columns} FROM dialaction "
-                     "WHERE event = %%s "
-                     "AND category = %%s "
-                     "AND %s = %%s "
-                     "AND linked = 1" % cursor.cast('categoryval', 'int'),
+                     "WHERE event = %s "
+                     "AND category = %s "
+                     "AND " + cursor.cast('categoryval','int') + " = %s "
+                     "AND linked = 1",
                      ('action', 'actionarg1', 'actionarg2'),
                      (event, category, categoryval))
         res = cursor.fetchone()
