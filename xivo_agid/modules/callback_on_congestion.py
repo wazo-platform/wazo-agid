@@ -23,7 +23,7 @@ import ConfigParser
 
 from xivo_agid import agid
 
-CONFIG_FILE = '/etc/asterisk/xivo_callback_on_congestion.conf'
+CONFIG_FILE = '/etc/pf-xivo/asterisk/xivo_callback_on_congestion.conf'
 
 max_retries = None
 retry_time = None

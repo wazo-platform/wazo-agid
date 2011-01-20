@@ -16,7 +16,7 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-RULES_FILE = '/etc/asterisk/xivo_in_callerid.conf'
+RULES_FILE = '/etc/pf-xivo/asterisk/xivo_in_callerid.conf'
 
 import re
 import sys
