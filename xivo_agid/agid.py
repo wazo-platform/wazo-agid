@@ -139,7 +139,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
             try:
                 fagi.verbose(message)
                 # TODO: see under
-                fagi.appexec('Goto', 'macro-agi_fail|s|1')
+                fagi.appexec('Goto', 'macro-agi_fail,s,1')
                 fagi.fail()
             except Exception:
                 pass
@@ -151,7 +151,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
                 # TODO: (important!)
                 #   - rename macro-agi_fail, or find a better way
                 #   - move at the beginning of a safe block
-                fagi.appexec('Goto', 'macro-agi_fail|s|1')
+                fagi.appexec('Goto', 'macro-agi_fail,s,1')
                 fagi.fail()
             except Exception:
                 pass

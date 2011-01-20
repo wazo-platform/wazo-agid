@@ -39,7 +39,7 @@ def conf_authentication(agi, meetme, adminflag):
     retry = 0
 
     while retry < 3:
-        agi.appexec('Read', "PIN|conf-getpin|%s" % meetme.pin_len_max())
+        agi.appexec('Read', "PIN,conf-getpin,%s" % meetme.pin_len_max())
         rs = meetme.authenticate(agi.get_variable('PIN'),
                                  calleridnum,
                                  adminflag)
@@ -57,7 +57,7 @@ def conf_exceed_max_number(agi, confno, maxuser):
     if not maxuser or int(maxuser) < 1:
         return False
 
-    agi.appexec('MeetMeCount',"%s|MEETMECOUNT" % confno)
+    agi.appexec('MeetMeCount',"%s,MEETMECOUNT" % confno)
     meetmecount = agi.get_variable('MEETMECOUNT')
 
     if not meetmecount.isdigit():
