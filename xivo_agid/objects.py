@@ -959,9 +959,9 @@ class Queue:
         action = DialAction(self.agi, self.cursor, 'noanswer', "queue", self.id)
         action.set_variables()
         if action.action in ('voicemail','voicemenu','sound'):
-            self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTE_GUIDE")
+            self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTEGUIDE")
         else:
-            self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTE_NUMBER")
+            self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTENUMBER")
 
     def rewrite_cid(self):
         CallerID(self.agi, self.cursor, "queue", self.id).rewrite(force_rewrite=False)
