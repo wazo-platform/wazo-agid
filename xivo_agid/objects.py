@@ -1271,10 +1271,10 @@ class Schedule:
         diversion = ('','','')
         if match is None:
             diversion = (
-								res['fallback_action'],
-								res['fallback_actionid'],
-						    res['fallback_actionargs']
-						)
+                res['fallback_action'],
+                res['fallback_actionid'],
+                res['fallback_actionargs']
+            )
 
             cursor.query("SELECT ${columns} FROM schedule_time WHERE mode='closed' "
                 "AND schedule_id = %s",
