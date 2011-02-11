@@ -106,7 +106,6 @@ def incoming_queue_set_features(agi, cursor, args):
     # schedule
 		# 'incall' schedule has priority over queue's schedule
     path = agi.get_variable('XIVO_PATH')
-    print 'schedpath=', path
     if path is None or len(path) == 0:
         agi.set_variable('XIVO_PATH'   , 'queue')
         agi.set_variable('XIVO_PATH_ID', queue.id)

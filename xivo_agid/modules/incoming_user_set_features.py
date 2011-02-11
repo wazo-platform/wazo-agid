@@ -262,5 +262,11 @@ def incoming_user_set_features(agi, cursor, args):
         mbox_lang = user.language
 
     agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
+
+    # schedule
+    path = agi.get_variable('XIVO_PATH')
+    if path is None or len(path) == 0:
+        agi.set_variable('XIVO_PATH'   , 'user')
+        agi.set_variable('XIVO_PATH_ID', user.id)
     
 agid.register(incoming_user_set_features)

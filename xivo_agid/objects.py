@@ -590,7 +590,7 @@ class Group:
         groupfeatures_columns = ('id', 'number', 'context', 'name',
                                  'timeout', 'transfer_user', 'transfer_call',
                                  'write_caller', 'write_calling', 'preprocess_subroutine')
-        queue_columns = ('musiconhold',)
+        queue_columns = ('musicclass',)
         columns = ["groupfeatures." + c for c in groupfeatures_columns] + ["queue." + c for c in queue_columns]
 
         if xid:
@@ -633,7 +633,7 @@ class Group:
         self.write_caller = res['groupfeatures.write_caller']
         self.write_calling = res['groupfeatures.write_calling']
         self.preprocess_subroutine = res['groupfeatures.preprocess_subroutine']
-        self.musiconhold = res['queue.musiconhold']
+        self.musicclass = res['queue.musicclass']
 
     def set_dial_actions(self):
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):

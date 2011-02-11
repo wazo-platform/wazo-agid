@@ -43,7 +43,7 @@ def incoming_group_set_features(agi, cursor, args):
     if group.write_calling:
         options += "W"
 
-    if not group.musiconhold:
+    if not group.musicclass:
         options += "r"
         needanswer = "0"
 
@@ -85,5 +85,11 @@ def incoming_group_set_features(agi, cursor, args):
 
     if referer == ("group:%s" % group.id) or referer.startswith("voicemenu:"):
         group.rewrite_cid()
+
+    # schedule
+    path = agi.get_variable('XIVO_PATH')
+    if path is None or len(path) == 0:
+        agi.set_variable('XIVO_PATH'   , 'group')
+        agi.set_variable('XIVO_PATH_ID', group.id)
 
 agid.register(incoming_group_set_features)
