@@ -11,4 +11,3 @@ DEB_PKG="pf-xivo-agid"
 DEB_TB_DEPS=""
 
 default:
-
