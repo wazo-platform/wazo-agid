@@ -1237,7 +1237,7 @@ class Outcall:
             except LookupError:
                 continue
 
-            selff.trunks.append(trunk)
+            self.trunks.append(trunk)
 
 
 class Schedule:
@@ -1247,14 +1247,13 @@ class Schedule:
 
         columns = ('id','name','timezone','fallback_action','fallback_actionid','fallback_actionargs')
 
-        path_ = path if path in ('incall','outcall','voicemenu') else 'default'
         cursor.query("SELECT ${columns} FROM schedule s, schedule_path p "
                      "WHERE s.id = p.schedule_id "
 										 "AND p.path = %s "
 										 "AND p.pathid = %s "
                      "AND s.commented = 0",
                      columns,
-                     (path_, pathid))
+                     (path, pathid))
         res = cursor.fetchone()
 
         if not res:
@@ -1262,15 +1261,11 @@ class Schedule:
             print("No schedule for (%s/%s) path" % (path,pathid))
             agi.set_variable('XIVO_SCHEDULE_STATUS', 'opened'); return
 
-        print res
-
         cursor.query("SELECT ${columns} FROM schedule_time WHERE mode='opened' "
 				  "AND schedule_id = %s",
 					('hours','weekdays','monthdays','months'), (res['id'],))
         times = cursor.fetchall()
-        print times
         match = self._checkSchedule(res['timezone'], times)
-        print 'match=', match
 
         # set non-matching action
         diversion = ('','','')
@@ -1287,7 +1282,6 @@ class Schedule:
 								(res['id'],))
             times = cursor.fetchall()
             cmatch = self._checkSchedule(res['timezone'], times)
-            print 'closematch', cmatch
             if cmatch is not None:
                 diversion = (cmatch['action'], cmatch['actionid'], cmatch['actionargs'])
 
@@ -1297,15 +1291,14 @@ class Schedule:
         for i in xrange(len(keys)):
             agi.set_variable('XIVO_FWD_SCHEDULE_OUT_'+ keys[i], diversion[i])
 
+
     def _checkSchedule(self, timezone, intervals):
 			  # convert local server time to timezone time
         tz  = pytz.timezone(timezone)
         now = datetime.now(pytz.utc)
         now = now.astimezone(tz)
-        print 'now=', now
 
         for i in intervals:
-            print 'i', i
             if self._inInterval(now, i):
 							return i
 
@@ -1328,7 +1321,6 @@ class Schedule:
 			}
 
 			for k in ('months','monthdays','weekdays','hours'):
-				print k
 				if not values[k][1](values[k][0](now), filter[k]):
 					return False
 
@@ -1342,7 +1334,6 @@ class Schedule:
 
         for m in interval.split(','):
             m = [int(n) for n in (m.split('-', 1) if '-' in m else (m,m))]
-            print m, value
 
             if m[0] <= value <= m[1]:
 							return True
@@ -1363,7 +1354,6 @@ class Schedule:
             if len(m) != 2:
                 continue
 
-            print 'dt', m, time
             if (time[0] > m[0][0] and\
                 time[0] < m[1][0]) or\
                (time[0] == m[0][0] and time[1] >= m[0][1]) or\
