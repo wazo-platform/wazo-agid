@@ -67,6 +67,7 @@ def incoming_queue_set_features(agi, cursor, args):
     agi.set_variable('XIVO_QUEUEURL', queue.url)
     agi.set_variable('XIVO_QUEUEANNOUNCEOVERRIDE', queue.announceoverride)
 
+
     pickupmark = [] 
     memberlist = agi.get_variable("QUEUE_MEMBER_LIST(%s)" % queue.name).split(',')
 
@@ -99,5 +100,15 @@ def incoming_queue_set_features(agi, cursor, args):
 
     if referer == ("queue:%s" % queue.id) or referer.startswith("voicemenu:"):
         queue.rewrite_cid()
+
+    agi.set_variable('XIVO_QUEUESTATUS','ok');
+
+    # schedule
+		# 'incall' schedule has priority over queue's schedule
+    path = agi.get_variable('XIVO_PATH')
+    print 'schedpath=', path
+    if path is None or len(path) == 0:
+        agi.set_variable('XIVO_PATH'   , 'queue')
+        agi.set_variable('XIVO_PATH_ID', queue.id)
 
 agid.register(incoming_queue_set_features)

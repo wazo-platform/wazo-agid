@@ -37,6 +37,11 @@ def incoming_did_set_features(agi, cursor, args):
     agi.set_variable('XIVO_FAXDETECT_EMAIL', did.faxdetectemail)
     agi.set_variable('XIVO_DIDPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
+    # schedule
+    print "did=",did.id
+    agi.set_variable('XIVO_PATH'   , 'incall')
+    agi.set_variable('XIVO_PATH_ID', did.id)
+
     did.set_dial_actions()
     did.rewrite_cid()
 
