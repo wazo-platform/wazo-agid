@@ -1327,9 +1327,10 @@ class Schedule:
                 ('hours','weekdays','monthdays','months','action','actionid','actionargs'),
 								(res['id'],))
             times = cursor.fetchall()
-            match = self._checkSchedule(res['timezone'], times)
-            if match is not None:
-                diversion = (match['action'], Watch['actionid'], match['actionargs'])
+            cmatch = self._checkSchedule(res['timezone'], times)
+            print 'closematch', cmatch
+            if cmatch is not None:
+                diversion = (cmatch['action'], cmatch['actionid'], cmatch['actionargs'])
 
 				# set AGI variables
         agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed' if match is None else	'opened')
