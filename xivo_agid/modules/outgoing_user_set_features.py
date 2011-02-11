@@ -103,4 +103,10 @@ def outgoing_user_set_features(agi, cursor, args):
     agi.set_variable('XIVO_OUTCALLPREPROCESS_SUBROUTINE', preprocess_subroutine)
     agi.set_variable('XIVO_HANGUPRINGTIME', hangupringtime)
 
+    # schedule path
+    path = agi.get_variable('XIVO_PATH')
+    if path is None or len(path) == 0:
+        agi.set_variable('XIVO_PATH'   , 'outcall')
+        agi.set_variable('XIVO_PATH_ID', outcall.id)
+
 agid.register(outgoing_user_set_features)
