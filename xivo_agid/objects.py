@@ -1239,47 +1239,6 @@ class Outcall:
 
             selff.trunks.append(trunk)
 
-# OLD SCHEDULE
-class _Schedule:
-    @staticmethod
-    def forgetimefield(start, end):
-        if start == '*':
-            return '*'
-        else:
-            if end in (None, ''):
-                return '%s' % (start,)
-            else:
-                return '%s-%s' % (start, end)
-
-    def __init__(self, agi, cursor, xid):
-        self.agi = agi
-        self.cursor = cursor
-
-        columns = ('timebeg', 'timeend', 'daynamebeg', 'daynameend',
-                   'daynumbeg', 'daynumend', 'monthbeg', 'monthend')
-
-        cursor.query("SELECT ${columns} FROM schedule "
-                     "WHERE id = %s "
-                     "AND commented = 0",
-                     columns,
-                     (xid,))
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find schedule entry (id: %d)" % (xid,))
-
-        self.id = xid
-        self.timerange = '|'.join((
-                self.forgetimefield(res['timebeg'], res['timeend']),
-                self.forgetimefield(res['daynamebeg'], res['daynameend']),
-                self.forgetimefield(res['daynumbeg'], res['daynumend']),
-                self.forgetimefield(res['monthbeg'], res['monthend'])
-        ))
-
-    def set_dial_actions(self):
-        DialAction(self.agi, self.cursor, "inschedule", "schedule", self.id).set_variables()
-        DialAction(self.agi, self.cursor, "outschedule", "schedule", self.id).set_variables()
-
 
 class Schedule:
     def __init__(self, agi, cursor, path, pathid):
