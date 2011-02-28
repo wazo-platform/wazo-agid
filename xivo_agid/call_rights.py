@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 # TODO: handle rules priority.
 # TODO: merge into objects and adapt modules.
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Object classes for XIVO AGI
 
 Copyright (C) 2007-2010  Proformatique <technique@proformatique.com>
@@ -904,7 +905,8 @@ class Queue:
                    'transfer_user', 'transfer_call',
                    'write_caller', 'write_calling',
                    'url', 'announceoverride', 'timeout',
-                   'preprocess_subroutine')
+                   'preprocess_subroutine','ctipresence','nonctipresence',
+									 'waittime','waitratio')
         columns = ["queuefeatures." + c for c in columns]
 
         if xid:
@@ -952,9 +954,17 @@ class Queue:
         self.announceoverride = res['queuefeatures.announceoverride']
         self.timeout = res['queuefeatures.timeout']
         self.preprocess_subroutine = res['queuefeatures.preprocess_subroutine']
+        self.ctipresence    = res['queuefeatures.ctipresence']
+        self.ctipresence    = [] if self.ctipresence is None else self.ctipresence.split(',')
+        self.nonctipresence = res['queuefeatures.nonctipresence']
+        self.nonctipresence = [] if self.nonctipresence is None else \
+					self.nonctipresence.split(',')
+        self.waittime       = res['queuefeatures.waittime']
+        self.waitratio      = res['queuefeatures.waitratio']
 
     def set_dial_actions(self):
-        for event in ('congestion', 'busy', 'chanunavail'):
+        for event in ('congestion', 'busy', 'chanunavail', 'qctipresence', 'qnonctipresence',
+										  'qwaittime', 'qwaitratio'):
             DialAction(self.agi, self.cursor, event, "queue", self.id).set_variables()
 
         # case NOANSWER (timeout): we also set correct queuelog event
@@ -1542,6 +1552,22 @@ class CallerID:
 
             if not force_rewrite:
                 self.agi.set_variable('XIVO_CID_REWRITTEN', 1)
+
+class CTIPresence:
+    @staticmethod
+    def status(agi, cursor, status_ids=None):
+        """
+					we get a list of status ids, and want in return the presence+status names
+					in the form:
+						"pname:sname"
+        """
+        columns = ('s.name','p.name')
+        cursor.query("SELECT ${columns} FROM ctistatus s, ctipresences p "
+          "WHERE s.id IN ("+','.join(status_ids)+") "
+          "AND s.presence_id = p.id",
+          columns)
+
+        return ["%s:%s" % (r['p.name'], r['s.name']) for r in cursor.fetchall()]
 
 
 class ChanSIP:
