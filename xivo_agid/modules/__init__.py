@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re as _re
 import os as _os
 
