@@ -905,8 +905,8 @@ class Queue:
                    'transfer_user', 'transfer_call',
                    'write_caller', 'write_calling',
                    'url', 'announceoverride', 'timeout',
-                   'preprocess_subroutine','ctipresence','nonctipresence',
-									 'waittime','waitratio')
+                   'preprocess_subroutine', 'announce_holdtime',
+									 'ctipresence','nonctipresence', 'waittime','waitratio')
         columns = ["queuefeatures." + c for c in columns]
 
         if xid:
@@ -954,6 +954,7 @@ class Queue:
         self.announceoverride = res['queuefeatures.announceoverride']
         self.timeout = res['queuefeatures.timeout']
         self.preprocess_subroutine = res['queuefeatures.preprocess_subroutine']
+        self.announce_holdtime = res['queuefeatures.announce_holdtime']
         self.ctipresence    = res['queuefeatures.ctipresence']
         self.ctipresence    = [] if self.ctipresence is None else self.ctipresence.split(',')
         self.nonctipresence = res['queuefeatures.nonctipresence']
