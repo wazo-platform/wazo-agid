@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # TODO: see the call_rights module.
 
 __version__ = "$Revision$ $Date$"
