@@ -111,4 +111,24 @@ def incoming_queue_set_features(agi, cursor, args):
         agi.set_variable('XIVO_PATH'   , 'queue')
         agi.set_variable('XIVO_PATH_ID', queue.id)
 
+
+def holdtime_announce(agi, cursor, args):
+    queueid = agi.get_variable('XIVO_DSTID')
+    try:
+        queue = objects.Queue(agi, cursor, xid=int(queueid))
+    except (ValueError, LookupError), e:
+        agi.dp_break(str(e))
+
+    if queue.announce_holdtime != 1:
+        return
+
+    holdtime = agi.get_variable('QUEUEHOLDTIME')
+    holdtime = max(1, (int(holdtime) + 59) / 60)                                           
+
+    agi.stream_file('queue-holdtime')                                                           
+    agi.stream_file('queue-less-than')                                                          
+    agi.stream_file('digits/%s' % holdtime)                                             
+    agi.stream_file('queue-minutes')  
+
 agid.register(incoming_queue_set_features)
+agid.register(holdtime_announce)
