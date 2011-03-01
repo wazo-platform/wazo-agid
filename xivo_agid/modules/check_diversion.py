@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __version__ = "$Revision$"
 __license__ = """
     Copyright (C) 2010  Guillaume Bour <gbour@proformatique.com>, Proformatique
@@ -55,18 +56,24 @@ def check_diversion(agi, cursor, args):
 
 		# . holdtime
 		# set by QUEUE_VARIABLES(${XIVO_QUEUENAME})
-		if event == 'none' and queue.waittime is not None:
+		# NOTE: why testing waitingcalls ?
+		#       once there are no more calls in queue, QUEUEHOLDTIME will NEVER be
+		#       updated.
+		#       Thus if we are over threshold, we can never go over.
+		#       So, once queue is empty, we accept new incoming call event if holdtime
+		#       is over threshold
+		waitingcalls  = agi.get_variable('XIVO_QUEUE_CALLS_COUNT')
+		if event == 'none' and int(waitingcalls) > 0 and queue.waittime is not None:
 			holdtime  = agi.get_variable('QUEUEHOLDTIME')
 			if int(holdtime) > queue.waittime:
 				event = 'DIVERT_HOLDTIME'; dialaction = 'qwaittime'
 	
 		# . calls/agents ratio
 		if event == 'none' and queue.waitratio is not None:
-			calls  = agi.get_variable('XIVO_QUEUE_CALLS_COUNT')
 			agents = agi.get_variable('XIVO_QUEUE_MEMBERS_COUNT')
 
 			if int(agents) == 0 or\
-				 int(calls)+1 / int(agents) > (queue.waitratio / 100):
+				 int(waitingcalls)+1 / int(agents) > (queue.waitratio / 100):
 				event = 'DIVERT_CA_RATIO'; dialaction = 'qwaitratio'
 
 		agi.set_variable('XIVO_DIVERT_EVENT', event)
