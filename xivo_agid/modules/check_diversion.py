@@ -35,22 +35,24 @@ def check_diversion(agi, cursor, args):
 		# . agent status presence
 		presences = agi.get_variable('XIVO_PRESENCE')
 		#TMP: simulating presences
-		presences = '{"xivo:available":1}'
+		presences = '{"xivo:available":3}'
 		try:
 			presences = json.decode(presences)
 		except Exception, e:
 			agi.dp_break(str(e))
 
 		if len(queue.ctipresence) > 0:
-			for status in objects.CTIPresence.status(agi, cursor, queue.ctipresence):
-				if status in presences:
+			dbpresences = objects.CTIPresence.status(agi, cursor, queue.ctipresence.keys());
+			for id, status in dbpresences.iteritems():
+				if presences.get(status,0) >= queue.ctipresence[id]:
 					event = 'DIVERT_PRESENCE'; dialaction = 'qctipresence'
 					break
 
 		# . agent status non presence
 		if event == 'none' and len(queue.nonctipresence) > 0:
-			for status in objects.CTIPresence.status(agi, cursor, queue.nonctipresence):
-				if status not in presences:
+			dbpresences = objects.CTIPresence.status(agi, cursor,	queue.nonctipresence.keys())
+			for id, status in dbpresences.iteritems():
+				if presences.get(status,0) <= queue.nonctipresence[id]:
 					event = 'DIVERT_NONPRESENCE'; dialaction = 'qnonctipresence'
 					break
 

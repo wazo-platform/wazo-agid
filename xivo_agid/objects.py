@@ -955,11 +955,17 @@ class Queue:
         self.timeout = res['queuefeatures.timeout']
         self.preprocess_subroutine = res['queuefeatures.preprocess_subroutine']
         self.announce_holdtime = res['queuefeatures.announce_holdtime']
-        self.ctipresence    = res['queuefeatures.ctipresence']
-        self.ctipresence    = [] if self.ctipresence is None else self.ctipresence.split(',')
-        self.nonctipresence = res['queuefeatures.nonctipresence']
-        self.nonctipresence = [] if self.nonctipresence is None else \
-					self.nonctipresence.split(',')
+        pres = res['queuefeatures.ctipresence']
+        if pres is None:
+            self.ctipresence    = {} 
+        else:
+            self.ctipresence = dict([[int(y) for y in s.split(':')] for s in pres.split(',')])
+
+        pres = res['queuefeatures.nonctipresence']
+        if pres is None:
+            self.nonctipresence = {}
+        else:
+            self.nonctipresence = dict([[int(y) for y in x.split(':')] for x in pres.split(',')])
         self.waittime       = res['queuefeatures.waittime']
         self.waitratio      = res['queuefeatures.waitratio']
 
@@ -1562,13 +1568,13 @@ class CTIPresence:
 					in the form:
 						"pname:sname"
         """
-        columns = ('s.name','p.name')
+        columns = ('s.id', 's.name','p.name')
         cursor.query("SELECT ${columns} FROM ctistatus s, ctipresences p "
-          "WHERE s.id IN ("+','.join(status_ids)+") "
+          "WHERE s.id IN ("+','.join([str(id) for id in status_ids])+") "
           "AND s.presence_id = p.id",
           columns)
 
-        return ["%s:%s" % (r['p.name'], r['s.name']) for r in cursor.fetchall()]
+        return dict([(r['s.id'], "%s:%s" % (r['p.name'], r['s.name'])) for r in cursor.fetchall()])
 
 
 class ChanSIP:
