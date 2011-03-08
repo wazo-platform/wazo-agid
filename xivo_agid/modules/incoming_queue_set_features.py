@@ -111,6 +111,10 @@ def incoming_queue_set_features(agi, cursor, args):
         agi.set_variable('XIVO_PATH'   , 'queue')
         agi.set_variable('XIVO_PATH_ID', queue.id)
 
+		# pickup
+    pickups = queue.pickupgroups()
+    agi.set_variable('XIVO_PICKUPGROUP', ','.join(pickups))
+
 
 def holdtime_announce(agi, cursor, args):
     queueid = agi.get_variable('XIVO_DSTID')

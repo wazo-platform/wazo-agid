@@ -985,6 +985,20 @@ class Queue:
     def rewrite_cid(self):
         CallerID(self.agi, self.cursor, "queue", self.id).rewrite(force_rewrite=False)
 
+    def pickupgroups(self):
+        self.cursor.query("SELECT ${columns} FROM pickup p, pickupmember pm "
+            "WHERE p.commented = 0 AND p.id = pm.pickupid "
+            "AND pm.category = 'member' AND pm.membertype = 'queue'"
+            "AND pm.memberid = %s",
+            ('p.id',), (self.id,))
+
+        res = self.cursor.fetchall()
+        if res is None:
+            raise LookupError("Unable to fetch queue %s pickupgroups" % (self.id))
+
+        return [str(row[0]) for row in res]
+
+ 
 
 class Agent:
     def __init__(self, agi, cursor, xid=None, number=None):
