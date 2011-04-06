@@ -385,31 +385,27 @@ class VMBox:
         else:
             self.commented = enabled
 
-
-class User:
+class Lines:
     def __init__(self, agi, cursor, xid=None, exten=None, context=None, name=None, protocol=None):
         self.agi = agi
         self.cursor = cursor
+	self.interfaces = {}
+	self.lines = []
+	self.interface = None
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid',
-                   'firstname', 'lastname', 'name',
-                   'ringseconds', 'simultcalls', 'enablevoicemail',
-                   'voicemailid', 'enablexfer', 'enableautomon',
-                   'callrecord', 'incallfilter', 'enablednd',
-                   'enableunc', 'destunc', 'enablerna', 'destrna',
-                   'enablebusy', 'destbusy', 'musiconhold',
-                   'outcallerid', 'bsfilter', 'preprocess_subroutine', 'mobilephonenumber')
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name',
+                   'rules_type', 'rules_time', 'rules_order', 'rules_group')
 
         if xid:
-            cursor.query("SELECT ${columns} FROM userfeatures "
-                         "WHERE id = %s "
+            cursor.query("SELECT ${columns} FROM linefeatures "
+                         "WHERE iduserfeatures = %s "
                          "AND internal = 0 "
                          "AND commented = 0",
                          columns,
                          (xid,))
         elif exten and context:
             contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM userfeatures "
+            cursor.query("SELECT ${columns} FROM linefeatures "
                          "WHERE number = %s "
                          "AND context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
                          "AND internal = 0 "
@@ -422,7 +418,7 @@ class User:
             if protocol == 'iax2':
                 protocol = 'iax'
 
-            cursor.query("SELECT ${columns} FROM userfeatures "
+            cursor.query("SELECT ${columns} FROM linefeatures "
                          "WHERE name = %s "
                          "AND protocol = %s "
                          "AND internal = 0 "
@@ -432,39 +428,100 @@ class User:
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
+        res = cursor.fetchall()
+
+        if not res:
+            raise LookupError("Unable to find line entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
+
+	for l in res:
+		line = {'id' : l['id'],
+			'number' : l['number'],
+			'context' : l['context'],
+			'protocol' : l['protocol'],
+			'protocolid' : l['protocolid'],
+			'name' : l['name'],
+			'rules_type' : l['rules_type'],
+			'rules_time' : l['rules_time'],
+			'rules_order' : l['rules_order'],
+			'rules_group' : l['rules_group']
+			}
+
+		self.lines.append(line)
+		agi.verbose(line)
+
+	interfaces = []
+	nb_interfaces = 0
+	for l in range(len(self.lines)):
+		if self.lines[l]['rules_type'] == 'simul':
+			interfaces.append(self.lines[l]['protocol'] + '/' + self.lines[l]['name'])
+		else:
+			
+			agi.set_variable('XIVO_INTERFACE_' + str(l), self.lines[l]['protocol'] + '/' + self.lines[l]['name'])
+			nb_interfaces = nb_interfaces + 1
+
+	self.interface_group = '&'.join(interfaces)
+	agi.set_variable('XIVO_INTERFACE_GROUP', self.interface_group)
+	agi.set_variable('XIVO_INTERFACE_NB', nb_interfaces)
+
+
+
+class User:
+    def __init__(self, agi, cursor, xid=None, exten=None, context=None, name=None, protocol=None):
+        self.agi = agi
+        self.cursor = cursor
+
+        columns = ('id', 'firstname', 'lastname', 
+	       'ringseconds', 'simultcalls', 'enablevoicemail',
+	       'voicemailid', 'enablexfer', 'enableautomon',
+	       'callrecord', 'incallfilter', 'enablednd',
+	       'enableunc', 'destunc', 'enablerna', 'destrna',
+	       'enablebusy', 'destbusy', 'musiconhold', 'language',
+               'ringintern', 'ringextern', 'ringforward', 'ringgroup',
+	       'outcallerid', 'bsfilter', 'preprocess_subroutine', 'mobilephonenumber')
+
+        if xid:
+             cursor.query("SELECT ${columns} FROM userfeatures "
+		       "WHERE id = %s "
+		       "AND commented = 0",
+		       columns,
+		       (xid,))
+
+        else:
+            raise LookupError("id or exten@context must be provided to look up an user entry")
+
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find user entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
+	     raise LookupError("Unable to find user entry (id: %s)" % xid)
 
-        self.id = res['id']
-        self.number = res['number']
-        self.context = res['context']
-        self.protocol = res['protocol']
-        self.protocolid = res['protocolid']
-        self.firstname = res['firstname']
-        self.lastname = res['lastname']
-        self.name = res['name']
-        self.ringseconds = int(res['ringseconds'])
-        self.simultcalls = res['simultcalls']
-        self.enablevoicemail = res['enablevoicemail']
-        self.voicemailid = res['voicemailid']
-        self.enablexfer = res['enablexfer']
-        self.enableautomon = res['enableautomon']
-        self.callrecord = res['callrecord']
-        self.incallfilter = res['incallfilter']
-        self.enablednd = res['enablednd']
-        self.enableunc = res['enableunc']
-        self.destunc = res['destunc']
-        self.enablerna = res['enablerna']
-        self.destrna = res['destrna']
-        self.enablebusy = res['enablebusy']
-        self.destbusy = res['destbusy']
-        self.musiconhold = res['musiconhold']
-        self.outcallerid = res['outcallerid']
-        self.preprocess_subroutine = res['preprocess_subroutine']
-        self.mobilephonenumber = res['mobilephonenumber']
-        self.bsfilter = res['bsfilter']
+	self.id = res['id']
+	self.firstname = res['firstname']
+	self.lastname = res['lastname']
+	self.ringseconds = int(res['ringseconds'])
+	self.simultcalls = res['simultcalls']
+	self.enablevoicemail = res['enablevoicemail']
+	self.voicemailid = res['voicemailid']
+	self.enablexfer = res['enablexfer']
+	self.enableautomon = res['enableautomon']
+	self.callrecord = res['callrecord']
+	self.incallfilter = res['incallfilter']
+	self.enablednd = res['enablednd']
+	self.enableunc = res['enableunc']
+	self.destunc = res['destunc']
+	self.enablerna = res['enablerna']
+	self.destrna = res['destrna']
+	self.enablebusy = res['enablebusy']
+	self.destbusy = res['destbusy']
+	self.musiconhold = res['musiconhold']
+	self.outcallerid = res['outcallerid']
+	self.preprocess_subroutine = res['preprocess_subroutine']
+	self.mobilephonenumber = res['mobilephonenumber']
+	self.bsfilter = res['bsfilter']
+        self.language = res['language']
+	self.ringintern = res['ringintern']
+	self.ringextern = res['ringextern']
+	self.ringforward = res['ringforward']
+	self.ringgroup = res['ringgroup']
 
         if self.destunc == '':
             self.enableunc = 0
@@ -474,8 +531,6 @@ class User:
 
         if self.destbusy == '':
             self.enablebusy = 0
-
-        self.interface = protocol_intf_and_suffix(cursor, self.protocol, 'user', self.protocolid)[0]
 
         if self.bsfilter == "boss":
             try:
@@ -506,15 +561,6 @@ class User:
         if res[0] > 0:
             self.skills = xid
 
-        ###
-        self.language = None
-        if self.protocol in ('sip', 'iax'):
-            cursor.query("SELECT ${columns} FROM user" + self.protocol + \
-                " WHERE id = %s AND category = 'user' AND commented = 0",
-                ('language',), (self.protocolid,))
-            res = cursor.fetchone()
-            if res:
-                self.language = res[0]
 
     def disable_forwards(self):
         self.cursor.query("UPDATE userfeatures "

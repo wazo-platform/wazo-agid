@@ -36,6 +36,7 @@ def incoming_user_set_features(agi, cursor, args):
 
     if userid:
         try:
+	    lines = objects.Lines(agi, cursor, int(userid))
             caller = objects.User(agi, cursor, int(userid))
         except (ValueError, LookupError):
             caller = None
@@ -43,15 +44,18 @@ def incoming_user_set_features(agi, cursor, args):
         caller = None
 
     try:
+	lines = objects.Lines(agi, cursor, int(dstid))
         user = objects.User(agi, cursor, int(dstid))
     except (ValueError, LookupError), e:
         agi.dp_break(str(e))
 
+    #agi.set_variable('XIVO_INTERFACE', 'lines.interfaces')
+
     agi.set_variable('XIVO_DST_FIRSTNAME', user.firstname)
     agi.set_variable('XIVO_DST_LASTNAME', user.lastname)
 
-    agi.set_variable('XIVO_REAL_NUMBER', user.number)
-    agi.set_variable('XIVO_REAL_CONTEXT', user.context)
+    #agi.set_variable('XIVO_REAL_NUMBER', user.number)
+    #agi.set_variable('XIVO_REAL_CONTEXT', user.context)
 
     ufilter = user.filter
 
@@ -108,7 +112,6 @@ def incoming_user_set_features(agi, cursor, args):
         options += "p"
 
     agi.set_variable('XIVO_CALLOPTIONS', options)
-    agi.set_variable('XIVO_INTERFACE', user.interface)
     agi.set_variable('XIVO_SIMULTCALLS', user.simultcalls)
 
     if user.ringseconds > 0:
