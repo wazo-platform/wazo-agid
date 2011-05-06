@@ -389,18 +389,17 @@ class Lines:
     def __init__(self, agi, cursor, xid=None, exten=None, context=None, name=None, protocol=None):
         self.agi = agi
         self.cursor = cursor
-	self.interfaces = {}
-	self.lines = []
-	self.interface = None
+        self.lines = []
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name',
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name',	'line_num',
                    'rules_type', 'rules_time', 'rules_order', 'rules_group')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
                          "WHERE iduserfeatures = %s "
                          "AND internal = 0 "
-                         "AND commented = 0",
+                         "AND commented = 0 "
+                         "ORDER BY line_num ASC, rules_order ASC",
                          columns,
                          (xid,))
         elif exten and context:
@@ -433,36 +432,22 @@ class Lines:
         if not res:
             raise LookupError("Unable to find line entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
 
-	for l in res:
-		line = {'id' : l['id'],
-			'number' : l['number'],
-			'context' : l['context'],
-			'protocol' : l['protocol'],
-			'protocolid' : l['protocolid'],
-			'name' : l['name'],
-			'rules_type' : l['rules_type'],
-			'rules_time' : l['rules_time'],
-			'rules_order' : l['rules_order'],
-			'rules_group' : l['rules_group']
-			}
+        for l in res:
+            line = {
+        			'id'          : l['id'],
+        			'number'      : l['number'],
+        			'context'     : l['context'],
+        			'protocol'    : l['protocol'].upper(),
+        			'protocolid'  : l['protocolid'],
+        			'name'        : l['name'],
+        			'num'         : l['line_num'],
+        			'rules_type'  : l['rules_type'],
+       	  		'rules_time'  : l['rules_time'],
+        			'rules_order' : l['rules_order'],
+        			'rules_group' : l['rules_group']
+        		}
 
-		self.lines.append(line)
-		agi.verbose(line)
-
-	interfaces = []
-	nb_interfaces = 0
-	for l in range(len(self.lines)):
-		if self.lines[l]['rules_type'] == 'simul':
-			interfaces.append(self.lines[l]['protocol'] + '/' + self.lines[l]['name'])
-		else:
-			
-			agi.set_variable('XIVO_INTERFACE_' + str(l), self.lines[l]['protocol'] + '/' + self.lines[l]['name'])
-			nb_interfaces = nb_interfaces + 1
-
-	self.interface_group = '&'.join(interfaces)
-	agi.set_variable('XIVO_INTERFACE_GROUP', self.interface_group)
-	agi.set_variable('XIVO_INTERFACE_NB', nb_interfaces)
-
+            self.lines.append(line)
 
 
 class User:

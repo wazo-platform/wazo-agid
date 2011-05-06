@@ -24,8 +24,9 @@ from xivo_agid import objects
 
 def incoming_user_set_features(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
-    dstid = agi.get_variable('XIVO_DSTID')
-    zone = agi.get_variable('XIVO_CALLORIGIN')
+    dstid  = agi.get_variable('XIVO_DSTID')
+    lineid = agi.get_variable('XIVO_LINEID')
+    zone   = agi.get_variable('XIVO_CALLORIGIN')
     bypass_filter = agi.get_variable('XIVO_CALLFILTER_BYPASS')
 
     # FIXME: this is only for the callrecord feature, which is likely to change
@@ -36,7 +37,7 @@ def incoming_user_set_features(agi, cursor, args):
 
     if userid:
         try:
-	    lines = objects.Lines(agi, cursor, int(userid))
+            lines = objects.Lines(agi, cursor, int(userid))
             caller = objects.User(agi, cursor, int(userid))
         except (ValueError, LookupError):
             caller = None
@@ -44,12 +45,39 @@ def incoming_user_set_features(agi, cursor, args):
         caller = None
 
     try:
-	lines = objects.Lines(agi, cursor, int(dstid))
+        lines = objects.Lines(agi, cursor, int(dstid))
         user = objects.User(agi, cursor, int(dstid))
     except (ValueError, LookupError), e:
         agi.dp_break(str(e))
 
-    #agi.set_variable('XIVO_INTERFACE', 'lines.interfaces')
+
+    agi.set_variable('XIVO_INTERFACE_NB', 0)
+		# not on user primary line: we make only ring this line, then divert
+    if lineid and len(lines.lines) > 0 and str(lines.lines[0]['id']) != lineid:
+        try:
+            curline = [l for l in lines.lines if str(l['id']) == lineid][0]
+            agi.set_variable('XIVO_INTERFACE_NB', 1)
+            agi.set_variable('XIVO_INTERFACE_0' , "%s/%s" % 
+				    		(curline['protocol'], curline['name']))
+        except:
+            pass
+
+		# init lines sequence
+    else:
+        num      = 0
+        curlines = []				
+        for i in xrange(len(lines.lines)):
+            if num < lines.lines[i]['num']:
+                agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
+                num += 1; del curlines[:]
+
+            curlines.append('%s/%s' % (lines.lines[i]['protocol'], lines.lines[i]['name']))
+
+        if len(curlines) > 0:
+            agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines)); num += 1
+
+        agi.set_variable('XIVO_INTERFACE_NB', num)						
+				
 
     agi.set_variable('XIVO_DST_FIRSTNAME', user.firstname)
     agi.set_variable('XIVO_DST_LASTNAME', user.lastname)
