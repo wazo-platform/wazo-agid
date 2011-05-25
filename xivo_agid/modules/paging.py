@@ -26,10 +26,13 @@ logger = logging.getLogger(__name__)
 
 def paging(agi, cursor, args):
 
+    userid = agi.get_variable('XIVO_USERID')
+
     try:
         paging = objects.Paging (agi,
                                  cursor,
-                                 args[0])
+                                 args[0],
+                                 userid)
     except (ValueError, LookupError), e:
         agi.dp_break(str(e))
 
@@ -56,13 +59,14 @@ def paging(agi, cursor, args):
     if paging.callnotbusy:
             paging_opts = paging_opts + 's'
 
-    if paging.force_page:
+    if paging.ignore:
             paging_opts = paging_opts + 'i'
 
     if paging.announcement_play:
-            paging_opts = paging_opts + 'A(%s)' % paging.announcement_file
+            paging_dir_sound = '/var/lib/pf-xivo/sounds/playback'
+            paging_opts = paging_opts + 'A(%s/%s)' % (paging_dir_sound, paging.announcement_file)
 
-    if not paging.default_group:
+    if paging.announcement_caller:
             paging_opts = paging_opts + 'n'
 
     agi.set_variable('XIVO_PAGING_OPTS', paging_opts)

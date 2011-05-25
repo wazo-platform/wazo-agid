@@ -385,14 +385,13 @@ class VMBox:
         else:
             self.commented = enabled
 
-
 class Paging:
-    def __init__(self, agi, cursor, number):
+    def __init__(self, agi, cursor, number, userid):
         self.agi = agi
         self.cursor = cursor
         self.lines = []
 
-        columns = ('id', 'number', 'force_page', 'duplex', 'default_group', 'record', 'quiet', 'callnotbusy', 'timeout', 'announcement_file', 'announcement_play', 'commented')
+        columns = ('id', 'number', 'duplex', 'ignore', 'record', 'quiet', 'callnotbusy', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented')
 
 
         cursor.query("SELECT ${columns} FROM paging "
@@ -408,20 +407,33 @@ class Paging:
         id = res['id']
         self.number = res['number']
         self.duplex = res['duplex']
-        self.force_page = res['force_page']
-        self.default_group = res['default_group']
+        self.ignore = res['ignore']
         self.record = res['record']
         self.quiet = res['quiet']
         self.callnotbusy = res['callnotbusy']
         self.timeout = res['timeout']
         self.announcement_file = res['announcement_file']
         self.announcement_play = res['announcement_play']
+        self.announcement_caller = res['announcement_caller']
+
+        columns = ('userfeaturesid',)
+
+        cursor.query("SELECT ${columns} FROM paginguser "
+                     "WHERE userfeaturesid=%s AND pagingid=%s "
+                     "AND caller = 1",
+                     columns,
+                     (userid, id))
+        res = cursor.fetchone()
+
+        if not res:
+            raise LookupError("Unable to find paging caller entry (userfeaturesid: %s)" % (userid,))
 
         columns = ('protocol', 'name')
 
         cursor.query("SELECT ${columns} FROM linefeatures "
-                     "INNER JOIN paginguser on paginguser.pagingid=%s"
-                     "WHERE linefeatures.iduserfeatures = paginguser.userfeaturesid",
+                     "INNER JOIN paginguser on paginguser.pagingid=%s "
+                     "WHERE linefeatures.iduserfeatures = paginguser.userfeaturesid "
+                     "AND paginguser.caller = 0",
                      columns,
                      (id,))
         res = cursor.fetchall()
