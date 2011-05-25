@@ -385,6 +385,54 @@ class VMBox:
         else:
             self.commented = enabled
 
+
+class Paging:
+    def __init__(self, agi, cursor, number):
+        self.agi = agi
+        self.cursor = cursor
+        self.lines = []
+
+        columns = ('id', 'number', 'force_page', 'duplex', 'default_group', 'record', 'quiet', 'callnotbusy', 'timeout', 'announcement_file', 'announcement_play', 'commented')
+
+
+        cursor.query("SELECT ${columns} FROM paging "
+                     "WHERE number = %s "
+                     "AND commented = 0",
+                     columns,
+                     (number,))
+        res = cursor.fetchone()
+
+        if not res:
+            raise LookupError("Unable to find paging entry (id: %d)" % (number,))
+
+        id = res['id']
+        self.number = res['number']
+        self.duplex = res['duplex']
+        self.force_page = res['force_page']
+        self.default_group = res['default_group']
+        self.record = res['record']
+        self.quiet = res['quiet']
+        self.callnotbusy = res['callnotbusy']
+        self.timeout = res['timeout']
+        self.announcement_file = res['announcement_file']
+        self.announcement_play = res['announcement_play']
+
+        columns = ('protocol', 'name')
+
+        cursor.query("SELECT ${columns} FROM linefeatures "
+                     "INNER JOIN paginguser on paginguser.pagingid=%s"
+                     "WHERE linefeatures.iduserfeatures = paginguser.userfeaturesid",
+                     columns,
+                     (id,))
+        res = cursor.fetchall()
+
+        if not res:
+            raise LookupError("Unable to find paging users entry (id: %d)" % (id,))
+
+        for l in res:
+            line = l['protocol'].upper() + '/' + l['name']
+            self.lines.append(line)
+
 class Lines:
     def __init__(self, agi, cursor, xid=None, exten=None, context=None, name=None, protocol=None):
         self.agi = agi
