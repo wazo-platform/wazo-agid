@@ -402,7 +402,7 @@ class Paging:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find paging entry (id: %d)" % (number,))
+            raise LookupError("Unable to find paging entry (id: %s)" % (number,))
 
         id = res['id']
         self.number = res['number']
@@ -419,7 +419,7 @@ class Paging:
         columns = ('userfeaturesid',)
 
         cursor.query("SELECT ${columns} FROM paginguser "
-                     "WHERE userfeaturesid=%s AND pagingid=%s "
+                     "WHERE userfeaturesid = %s AND pagingid = %s "
                      "AND caller = 1",
                      columns,
                      (userid, id))
@@ -431,7 +431,7 @@ class Paging:
         columns = ('protocol', 'name')
 
         cursor.query("SELECT ${columns} FROM linefeatures "
-                     "INNER JOIN paginguser on paginguser.pagingid=%s "
+                     "INNER JOIN paginguser on paginguser.pagingid = %s "
                      "WHERE linefeatures.iduserfeatures = paginguser.userfeaturesid "
                      "AND paginguser.caller = 0",
                      columns,
@@ -439,7 +439,7 @@ class Paging:
         res = cursor.fetchall()
 
         if not res:
-            raise LookupError("Unable to find paging users entry (id: %d)" % (id,))
+            raise LookupError("Unable to find paging users entry (id: %s)" % (id,))
 
         for l in res:
             line = l['protocol'].upper() + '/' + l['name']
