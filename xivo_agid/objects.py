@@ -1303,24 +1303,30 @@ class Outcall:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'exten', 'context', 'externprefix', 'stripnum',
-                   'setcallerid', 'callerid', 'useenum', 'internal',
-                   'preprocess_subroutine', 'hangupringtime')
+        columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal', 
+                   'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
+                   'outcall.routing', 'outcall.id', 'dialpattern.typeid', 'dialpattern.type',
+                   'dialpattern.exten', 'dialpattern.stripnum', 'dialpattern.externprefix',
+                   'dialpattern.emergency', 'dialpattern.setcallerid', 'dialpattern.callerid',
+                   'dialpattern.prefix')
 
         if xid:
-            cursor.query("SELECT ${columns} FROM outcall "
-                         "WHERE id = %s "
-                         "AND commented = 0",
+            cursor.query("SELECT ${columns} FROM outcall, dialpattern "
+                         "WHERE dialpattern.typeid = outcall.id "
+                         "AND dialpattern.type = 'outcall' "
+                         "AND dialpattern.id = %s"
+                         "AND outcall.commented = 0",
                          columns,
                          (xid,))
-        elif exten and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM outcall "
-                         "WHERE exten = %s "
-                         "AND context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND commented = 0",
-                         columns,
-                         [exten] + contextinclude)
+        
+        #elif exten and context:
+        #    contextinclude = Context(agi, cursor, context).include
+        #    cursor.query("SELECT ${columns} FROM outcall "
+        #                 "WHERE exten = %s "
+        #                 "AND context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
+        #                 "AND commented = 0",
+        #                 columns,
+        #                 [exten] + contextinclude)
         else:
             raise LookupError("id or exten@context must be provided to look up an outcall entry")
 
@@ -1329,17 +1335,20 @@ class Outcall:
         if not res:
             raise LookupError("Unable to find outcall entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
 
-        self.id = res['id']
-        self.exten = res['exten']
-        self.context = res['context']
-        self.externprefix = res['externprefix']
-        self.stripnum = res['stripnum']
-        self.setcallerid = res['setcallerid']
-        self.callerid = res['callerid']
-        self.useenum = res['useenum']
-        self.internal = res['internal']
-        self.preprocess_subroutine = res['preprocess_subroutine']
-        self.hangupringtime = res['hangupringtime']
+
+        self.id = res['outcall.id']
+        self.exten = res['dialpattern.exten']
+        self.context = res['outcall.context']
+        self.externprefix = res['dialpattern.externprefix']
+        self.stripnum = res['dialpattern.stripnum']
+        self.setcallerid = res['dialpattern.setcallerid']
+        self.callerid = res['dialpattern.callerid']
+        self.useenum = res['outcall.useenum']
+        self.internal = res['outcall.internal']
+        self.preprocess_subroutine = res['outcall.preprocess_subroutine']
+        self.hangupringtime = res['outcall.hangupringtime']
+        self.emergency = res['dialpattern.emergency']
+        self.routing = res['outcall.routing']
 
         cursor.query("SELECT ${columns} FROM outcalltrunk "
                      "WHERE outcallid = %s "
