@@ -43,7 +43,8 @@ def phone_set_feature(agi, cursor, args):
         else:
             try:
                 userid = int(userid)
-                user = objects.User(agi, cursor, userid)
+                user = objects.User(agi, cursor, userid)                
+                lines = objects.Lines(agi, cursor, int(userid))
             except (ValueError, LookupError), e:
                 agi.dp_break(str(e))
 
@@ -115,10 +116,14 @@ def phone_set_feature(agi, cursor, args):
 
         if xlen < 2:
             agi.dp_break("Invalid number of arguments for bsfilter")
+            
+        master_line = objects.MasterLineUser(agi, cursor, int(user.id))
+        
+        ml_number = master_line.line['number']
 
         try:
             num1, num2 = args[1].split('*')
-            if user.number not in (num1, num2):
+            if ml_number not in (num1, num2):
                 raise ValueError("Invalid number")
         except ValueError:
             agi.dp_break("Invalid number")
@@ -127,7 +132,7 @@ def phone_set_feature(agi, cursor, args):
         secretary = None
 
         # Both the boss and secretary numbers are passed, so select the one
-        if user.number == num1:
+        if ml_number == num1:
             number = num2
         else:
             number = num1
@@ -153,7 +158,7 @@ def phone_set_feature(agi, cursor, args):
         cursor.query("SELECT ${columns} FROM callfiltermember "
                      "WHERE callfilterid = %s "
                      "AND type = %s "
-                     "AND typeval = %s "
+                     "AND " + cursor.cast('typeval', 'int') + " = %s "
                      "AND bstype = %s",
                      ('active',),
                      (bsf.id, "user", secretary.id, "secretary"))
@@ -167,7 +172,7 @@ def phone_set_feature(agi, cursor, args):
                      "SET active = %s "
                      "WHERE callfilterid = %s "
                      "AND type = %s "
-                     "AND typeval = %s "
+                     "AND " + cursor.cast('typeval', 'int') + " = %s "
                      "AND bstype = %s",
                      parameters = (new_state, bsf.id, "user", secretary.id, "secretary"))
 

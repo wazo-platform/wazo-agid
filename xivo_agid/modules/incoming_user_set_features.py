@@ -50,22 +50,21 @@ def incoming_user_set_features(agi, cursor, args):
     except (ValueError, LookupError), e:
         agi.dp_break(str(e))
 
-
     agi.set_variable('XIVO_INTERFACE_NB', 0)
-		# not on user primary line: we make only ring this line, then divert
+        # not on user primary line: we make only ring this line, then divert
     if lineid and len(lines.lines) > 0 and str(lines.lines[0]['id']) != lineid:
         try:
             curline = [l for l in lines.lines if str(l['id']) == lineid][0]
             agi.set_variable('XIVO_INTERFACE_NB', 1)
             agi.set_variable('XIVO_INTERFACE_0' , "%s/%s" % 
-				    		(curline['protocol'], curline['name']))
+                            (curline['protocol'], curline['name']))
         except:
             pass
 
-		# init lines sequence
+        # init lines sequence
     else:
         num      = 0
-        curlines = []				
+        curlines = []                
         for i in xrange(len(lines.lines)):
             if num < lines.lines[i]['num']:
                 agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
@@ -76,8 +75,8 @@ def incoming_user_set_features(agi, cursor, args):
         if len(curlines) > 0:
             agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines)); num += 1
 
-        agi.set_variable('XIVO_INTERFACE_NB', num)						
-				
+        agi.set_variable('XIVO_INTERFACE_NB', num)                        
+                
 
     agi.set_variable('XIVO_DST_FIRSTNAME', user.firstname)
     agi.set_variable('XIVO_DST_LASTNAME', user.lastname)
@@ -85,7 +84,7 @@ def incoming_user_set_features(agi, cursor, args):
     #agi.set_variable('XIVO_REAL_NUMBER', user.number)
     #agi.set_variable('XIVO_REAL_CONTEXT', user.context)
 
-    ufilter = user.filter
+    ufilter = user.filter    
 
     # Special case. If a boss-secretary filter is set, the code will prematurely
     # exit because the other normally set variables are skipped.

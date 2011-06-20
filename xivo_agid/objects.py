@@ -26,10 +26,13 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
 import re
 import time
 import pytz
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 class DBUpdateException(Exception):
@@ -37,7 +40,7 @@ class DBUpdateException(Exception):
 
 
 class ExtenFeatures:
-    FEATURES    = {
+    FEATURES = {
         'agents':   (('agentdynamiclogin',),
                      ('agentstaticlogin',),
                      ('agentstaticlogoff',),
@@ -50,14 +53,14 @@ class ExtenFeatures:
                      ('queueremovemember',),
                      ('queuetogglemember',)),
 
-        'forwards': (('fwdbusy',    'busy'),
-                     ('fwdrna',     'rna'),
-                     ('fwdunc',     'unc')),
+        'forwards': (('fwdbusy', 'busy'),
+                     ('fwdrna', 'rna'),
+                     ('fwdunc', 'unc')),
 
-        'services': (('enablevm',       'enablevoicemail'),
-                     ('callrecord',     'callrecord'),
-                     ('incallfilter',   'incallfilter'),
-                     ('enablednd',      'enablednd'))}
+        'services': (('enablevm', 'enablevoicemail'),
+                     ('callrecord', 'callrecord'),
+                     ('incallfilter', 'incallfilter'),
+                     ('enablednd', 'enablednd'))}
 
     def __init__(self, agi, cursor):
         self.agi = agi
@@ -104,8 +107,8 @@ class ExtenFeatures:
         return res['name']
 
     def get_exten_by_name(self, name, commented=None):
-        query   = "SELECT ${columns} FROM extensions WHERE name = %s"
-        params  = [name]
+        query = "SELECT ${columns} FROM extensions WHERE name = %s"
+        params = [name]
 
         if commented is not None:
             params.append(int(bool(commented)))
@@ -166,7 +169,7 @@ class BossSecretaryFilter:
 
     """
 
-    def __init__(self, agi, cursor, boss_number, boss_context):
+    def __init__(self, agi, cursor, line):
         self.agi = agi
         self.cursor = cursor
         self.id = None
@@ -176,39 +179,53 @@ class BossSecretaryFilter:
         self.callfrom = None
         self.ringseconds = None
         self.boss = None
-        self.secretaries = None
+        self.secretaries = None        
+        self.line = line;
+        
+        boss_number = self.line['number']
+        boss_context = self.line['context']
 
         contextinclude = Context(agi, cursor, boss_context).include
 
-        columns = ('callfilter.id', 'callfilter.bosssecretary',
-                   'callfilter.callfrom', 'callfilter.ringseconds',
+        columns = ('callfilter.id', 
+                   'callfilter.bosssecretary',
+                   'callfilter.callfrom', 
+                   'callfilter.ringseconds',
                    'callfiltermember.ringseconds',
-                   'userfeatures.id', 'userfeatures.protocol',
-                   'userfeatures.protocolid')
+                   'userfeatures.id', 
+                   'linefeatures.protocol',
+                   'linefeatures.protocolid',
+                   'linefeatures.number',
+                   'linefeatures.context')
 
+        t = tuple([boss_number] + contextinclude)
+        
         cursor.query("SELECT ${columns} FROM callfilter "
                      "INNER JOIN callfiltermember "
                      "ON callfilter.id = callfiltermember.callfilterid "
                      "INNER JOIN userfeatures "
                      "ON " + cursor.cast('callfiltermember.typeval', 'int') + " = userfeatures.id "
+                     "INNER JOIN linefeatures "
+                     "ON linefeatures.iduserfeatures = userfeatures.id "
                      "WHERE callfilter.type = 'bosssecretary' "
                      "AND callfilter.commented = 0 "
                      "AND callfiltermember.type = 'user' "
                      "AND callfiltermember.bstype = 'boss' "
-                     "AND userfeatures.number = %s "
-                     "AND userfeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                     "AND userfeatures.internal = 0 "
                      "AND userfeatures.bsfilter = 'boss' "
-                     "AND userfeatures.commented = 0",
+                     "AND linefeatures.number = %s "
+                     "AND linefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
+                     "AND linefeatures.internal = 0 "
+                     "AND linefeatures.commented = 0",
                      columns,
-                     [boss_number] + contextinclude)
+                     t)
+        
         res = cursor.fetchone()
 
         if not res:
             raise LookupError("Unable to find call filter ID for boss (number = %r, context = %r)" % (boss_number, boss_context))
 
-        protocol = res['userfeatures.protocol']
-        protocolid = res['userfeatures.protocolid']
+        protocol = res['linefeatures.protocol']
+        protocolid = res['linefeatures.protocolid']
 
         self.id = res['callfilter.id']
         self.context = boss_context
@@ -227,36 +244,44 @@ class BossSecretaryFilter:
         except (ValueError, LookupError), e:
             self.agi.dp_break(str(e))
 
-        columns = ('callfiltermember.active', 'userfeatures.id', 'userfeatures.protocol',
-                   'userfeatures.protocolid', 'userfeatures.number',
+        columns = ('callfiltermember.active', 
+                   'userfeatures.id', 
+                   'linefeatures.protocol',
+                   'linefeatures.protocolid', 
+                   'linefeatures.number',
                    'userfeatures.ringseconds')
+        
+        t = tuple([self.id] + contextinclude)
 
-        cursor.query("SELECT ${columns} FROM callfiltermember INNER JOIN userfeatures "
-                     "ON " + cursor.cast('callfiltermember.typeval','int') + " = userfeatures.id "
+        cursor.query("SELECT ${columns} FROM callfiltermember "
+                     "INNER JOIN userfeatures "
+                     "ON " + cursor.cast('callfiltermember.typeval', 'int') + " = userfeatures.id "
+                     "INNER JOIN linefeatures "
+                     "ON linefeatures.iduserfeatures = userfeatures.id "
                      "WHERE callfiltermember.callfilterid = %s "
                      "AND callfiltermember.type = 'user' "
                      "AND callfiltermember.bstype = 'secretary' "
-                     "AND COALESCE(userfeatures.number,'') != '' "
-                     "AND userfeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                     "AND userfeatures.internal = 0 "
+                     "AND COALESCE(linefeatures.number,'') != '' "
+                     "AND linefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
+                     "AND linefeatures.internal = 0 "
                      "AND userfeatures.bsfilter = 'secretary' "
                      "AND userfeatures.commented = 0 "
                      "ORDER BY priority ASC",
                      columns,
-                     [self.id] + contextinclude)
+                     t)
         res = cursor.fetchall()
 
         if not res:
             raise LookupError("Unable to find secretaries for call filter ID %d (context = %r)" % (self.id, boss_context))
 
         for row in res:
-            protocol = row['userfeatures.protocol']
-            protocolid = row['userfeatures.protocolid']
+            protocol = row['linefeatures.protocol']
+            protocolid = row['linefeatures.protocolid']
             secretary = BossSecretaryFilterMember(self.agi,
                                                   row['callfiltermember.active'],
                                                   'secretary',
                                                   row['userfeatures.id'],
-                                                  row['userfeatures.number'],
+                                                  row['linefeatures.number'],
                                                   row['userfeatures.ringseconds'])
 
             if secretary.active:
@@ -338,7 +363,7 @@ class VMBox:
             cursor.query("SELECT ${columns} FROM voicemail "
                          "INNER JOIN voicemailfeatures "
                          "ON voicemail.uniqueid = voicemailfeatures.voicemailid "
-                         "WHERE voicemail.uniqueid = %s " +
+                         "WHERE voicemail.uniqueid = %s " + 
                          where_comment,
                          columns,
                          (xid,))
@@ -348,7 +373,7 @@ class VMBox:
                          "INNER JOIN voicemailfeatures "
                          "ON voicemail.uniqueid = voicemailfeatures.voicemailid "
                          "WHERE voicemail.mailbox = %s "
-                         "AND voicemail.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") " +
+                         "AND voicemail.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") " + 
                          where_comment,
                          columns,
                          [mailbox] + contextinclude)
@@ -378,7 +403,7 @@ class VMBox:
         self.cursor.query("UPDATE voicemail "
                           "SET commented = %s "
                           "WHERE uniqueid = %s",
-                          parameters = (enabled, self.id))
+                          parameters=(enabled, self.id))
 
         if self.cursor.rowcount != 1:
             raise DBUpdateException("Unable to perform the requested update")
@@ -451,7 +476,7 @@ class Lines:
         self.cursor = cursor
         self.lines = []
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name',	'line_num',
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name',     'line_num',
                    'rules_type', 'rules_time', 'rules_order', 'rules_group')
 
         if xid:
@@ -494,20 +519,59 @@ class Lines:
 
         for l in res:
             line = {
-        			'id'          : l['id'],
-        			'number'      : l['number'],
-        			'context'     : l['context'],
-        			'protocol'    : l['protocol'].upper(),
-        			'protocolid'  : l['protocolid'],
-        			'name'        : l['name'],
-        			'num'         : l['line_num'],
-        			'rules_type'  : l['rules_type'],
-       	  		'rules_time'  : l['rules_time'],
-        			'rules_order' : l['rules_order'],
-        			'rules_group' : l['rules_group']
-        		}
+                    'id'          : l['id'],
+                    'number'      : l['number'],
+                    'context'     : l['context'],
+                    'protocol'    : l['protocol'].upper(),
+                    'protocolid'  : l['protocolid'],
+                    'name'        : l['name'],
+                    'num'         : l['line_num'],
+                    'rules_type'  : l['rules_type'],
+                         'rules_time'  : l['rules_time'],
+                    'rules_order' : l['rules_order'],
+                    'rules_group' : l['rules_group']
+                }
 
             self.lines.append(line)
+
+
+class MasterLineUser:
+    def __init__(self, agi, cursor, xid):
+        self.agi = agi
+        self.cursor = cursor
+        self.line = {}
+        
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num',
+                   'rules_type', 'rules_time', 'rules_order', 'rules_group')
+        
+        cursor.query("SELECT ${columns} FROM linefeatures "
+                         "WHERE iduserfeatures = %s "
+                         "AND internal = 0 "
+                         "AND commented = 0 "
+                         "AND line_num = 0 "
+                         "AND rules_order = 1 "
+                         "ORDER BY line_num ASC, rules_order ASC",
+                         columns,
+                         (xid,))
+        
+        res = cursor.fetchone()
+
+        if not res:
+            raise LookupError("Unable to find master line entry (id: %s)" % (xid))
+
+        self.line = {
+            'id'          : res['id'],
+            'number'      : res['number'],
+            'context'     : res['context'],
+            'protocol'    : res['protocol'].upper(),
+            'protocolid'  : res['protocolid'],
+            'name'        : res['name'],
+            'num'         : res['line_num'],
+            'rules_type'  : res['rules_type'],                        
+            'rules_time'  : res['rules_time'],
+            'rules_order' : res['rules_order'],
+            'rules_group' : res['rules_group']
+        }
 
 
 class User:
@@ -515,58 +579,57 @@ class User:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'firstname', 'lastname', 
-	       'ringseconds', 'simultcalls', 'enablevoicemail',
-	       'voicemailid', 'enablexfer', 'enableautomon',
-	       'callrecord', 'incallfilter', 'enablednd',
-	       'enableunc', 'destunc', 'enablerna', 'destrna',
-	       'enablebusy', 'destbusy', 'musiconhold', 'language',
-               'ringintern', 'ringextern', 'ringforward', 'ringgroup',
-	       'outcallerid', 'bsfilter', 'preprocess_subroutine', 'mobilephonenumber')
+        columns = ('id', 'firstname', 'lastname',
+                   'ringseconds', 'simultcalls', 'enablevoicemail',
+                   'voicemailid', 'enablexfer', 'enableautomon',
+                   'callrecord', 'incallfilter', 'enablednd',
+                   'enableunc', 'destunc', 'enablerna', 'destrna',
+                   'enablebusy', 'destbusy', 'musiconhold', 'language',
+                   'ringintern', 'ringextern', 'ringforward', 'ringgroup',
+                   'outcallerid', 'bsfilter', 'preprocess_subroutine', 'mobilephonenumber')
 
         if xid:
-             cursor.query("SELECT ${columns} FROM userfeatures "
-		       "WHERE id = %s "
-		       "AND commented = 0",
-		       columns,
-		       (xid,))
-
+            cursor.query("SELECT ${columns} FROM userfeatures "
+                         "WHERE id = %s "
+                         "AND commented = 0",
+                         columns,
+                         (xid,))
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
         res = cursor.fetchone()
 
         if not res:
-	     raise LookupError("Unable to find user entry (id: %s)" % xid)
+            raise LookupError("Unable to find user entry (id: %s)" % xid)
 
-	self.id = res['id']
-	self.firstname = res['firstname']
-	self.lastname = res['lastname']
-	self.ringseconds = int(res['ringseconds'])
-	self.simultcalls = res['simultcalls']
-	self.enablevoicemail = res['enablevoicemail']
-	self.voicemailid = res['voicemailid']
-	self.enablexfer = res['enablexfer']
-	self.enableautomon = res['enableautomon']
-	self.callrecord = res['callrecord']
-	self.incallfilter = res['incallfilter']
-	self.enablednd = res['enablednd']
-	self.enableunc = res['enableunc']
-	self.destunc = res['destunc']
-	self.enablerna = res['enablerna']
-	self.destrna = res['destrna']
-	self.enablebusy = res['enablebusy']
-	self.destbusy = res['destbusy']
-	self.musiconhold = res['musiconhold']
-	self.outcallerid = res['outcallerid']
-	self.preprocess_subroutine = res['preprocess_subroutine']
-	self.mobilephonenumber = res['mobilephonenumber']
-	self.bsfilter = res['bsfilter']
+        self.id = res['id']
+        self.firstname = res['firstname']
+        self.lastname = res['lastname']
+        self.ringseconds = int(res['ringseconds'])
+        self.simultcalls = res['simultcalls']
+        self.enablevoicemail = res['enablevoicemail']
+        self.voicemailid = res['voicemailid']
+        self.enablexfer = res['enablexfer']
+        self.enableautomon = res['enableautomon']
+        self.callrecord = res['callrecord']
+        self.incallfilter = res['incallfilter']
+        self.enablednd = res['enablednd']
+        self.enableunc = res['enableunc']
+        self.destunc = res['destunc']
+        self.enablerna = res['enablerna']
+        self.destrna = res['destrna']
+        self.enablebusy = res['enablebusy']
+        self.destbusy = res['destbusy']
+        self.musiconhold = res['musiconhold']
+        self.outcallerid = res['outcallerid']
+        self.preprocess_subroutine = res['preprocess_subroutine']
+        self.mobilephonenumber = res['mobilephonenumber']
+        self.bsfilter = res['bsfilter']
         self.language = res['language']
-	self.ringintern = res['ringintern']
-	self.ringextern = res['ringextern']
-	self.ringforward = res['ringforward']
-	self.ringgroup = res['ringgroup']
+        self.ringintern = res['ringintern']
+        self.ringextern = res['ringextern']
+        self.ringforward = res['ringforward']
+        self.ringgroup = res['ringgroup']
 
         if self.destunc == '':
             self.enableunc = 0
@@ -578,9 +641,12 @@ class User:
             self.enablebusy = 0
 
         if self.bsfilter == "boss":
+            master_line = MasterLineUser(agi, cursor, xid) 
             try:
-                self.filter = BossSecretaryFilter(agi, cursor, self.number, self.context)
+                self.filter = BossSecretaryFilter(agi, cursor, master_line.line)        
             except LookupError:
+                import traceback
+                traceback.print_exc()
                 self.filter = None
         else:
             self.filter = None
@@ -613,14 +679,14 @@ class User:
                           "    enablerna = 0, "
                           "    enableunc = 0 "
                           "WHERE id = %s",
-                          parameters = (self.id,))
+                          parameters=(self.id,))
 
         if self.cursor.rowcount != 1:
             raise DBUpdateException("Unable to perform the requested update")
         else:
             self.enablebusy = 0
-            self.enablerna  = 0
-            self.enableunc  = 0
+            self.enablerna = 0
+            self.enableunc = 0
 
     def set_feature(self, feature, enabled, arg):
         enabled = int(bool(enabled))
@@ -638,12 +704,12 @@ class User:
                               "SET enable%s = %%s, "
                               "    dest%s = %%s "
                               "WHERE id = %%s" % (feature, feature),
-                              parameters = (enabled, dest, self.id))
+                              parameters=(enabled, dest, self.id))
         else:
             self.cursor.query("UPDATE userfeatures "
                               "SET enable%s = %%s "
                               "WHERE id = %%s" % feature,
-                              parameters = (enabled, self.id))
+                              parameters=(enabled, self.id))
 
         if self.cursor.rowcount != 1:
             raise DBUpdateException("Unable to perform the requested update")
@@ -666,7 +732,7 @@ class User:
         self.cursor.query("UPDATE userfeatures "
                           "SET %s = %%s "
                           "WHERE id = %%s" % feature,
-                          parameters = (enabled, self.id))
+                          parameters=(enabled, self.id))
 
         if self.cursor.rowcount != 1:
             raise DBUpdateException("Unable to perform the requested update")
@@ -736,16 +802,16 @@ class Group:
 
 
 class MeetMe:
-    FLAG_ADMIN      = (1 << 0)
-    FLAG_USER       = (1 << 1)
+    FLAG_ADMIN = (1 << 0)
+    FLAG_USER = (1 << 1)
 
-    OPTIONS_GLOBAL  = {'talkeroptimization':        '', # Disabled
+    OPTIONS_GLOBAL = {'talkeroptimization':        '', # Disabled
                        'record':                    'r',
                        'talkerdetection':           '', # Disabled
                        'noplaymsgfirstenter':       '1',
                        'closeconfdurationexceeded': 'L'}
 
-    OPTIONS_COMMON  = {'mode':              {'listen':  'l',
+    OPTIONS_COMMON = {'mode':              {'listen':  'l',
                                              'talk':    't',
                                              'all':     ''},
                        'announceusercount': 'c',
@@ -759,24 +825,24 @@ class MeetMe:
                        'starmenu':          's',
                        'enableexitcontext': 'X'}
 
-    OPTIONS_ADMIN   = {'moderationmode':            'k',
+    OPTIONS_ADMIN = {'moderationmode':            'k',
                        'closeconflastmarkedexit':   'x'}
 
-    OPTIONS_USER    = {'hiddencalls':   'h'}
+    OPTIONS_USER = {'hiddencalls':   'h'}
 
     def __init__(self, agi, cursor, xid=None, name=None, number=None, context=None):
         self.agi = agi
         self.cursor = cursor
 
-        meetmefeatures_columns =    (('id', 'name', 'confno', 'context',
+        meetmefeatures_columns = (('id', 'name', 'number', 'context',
                                       'admin_typefrom', 'admin_internalid', 'admin_externalid',
-                                      'admin_identification', 'admin_exitcontext') +
-                                      tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() +
-                                                                      self.OPTIONS_ADMIN.keys())]) +
+                                      'admin_identification', 'admin_exitcontext') + 
+                                      tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() + 
+                                                                      self.OPTIONS_ADMIN.keys())]) + 
                                       ('user_exitcontext',) + \
-                                      tuple(["user_%s" % x for x in (self.OPTIONS_COMMON.keys() +
-                                                                     self.OPTIONS_USER.keys())]) +
-                                      tuple(x for x in self.OPTIONS_GLOBAL.keys()) +
+                                      tuple(["user_%s" % x for x in (self.OPTIONS_COMMON.keys() + 
+                                                                     self.OPTIONS_USER.keys())]) + 
+                                      tuple(x for x in self.OPTIONS_GLOBAL.keys()) + 
                                       ('durationm', 'nbuserstartdeductduration',
                                        'timeannounceclose', 'maxusers',
                                        'startdate', 'preprocess_subroutine'))
@@ -833,8 +899,8 @@ class MeetMe:
                               "(id: %s, name: %s, number: %s, context: %s)"
                               % (xid, name, number, context))
 
-        (self.confno, self.pin, self.pinadmin)  = (res['staticmeetme.var_val'] + ",,").split(',', 3)[:3]
-        self.admin_number                       = res['linefeatures.number']
+        (self.confno, self.pin, self.pinadmin) = (res['staticmeetme.var_val'] + ",,").split(',', 3)[:3]
+        self.admin_number = res['userfeatures.number']
 
         if res['meetmefeatures.startdate']:
             self.starttime = time.mktime(
@@ -1003,7 +1069,7 @@ class Queue:
                    'write_caller', 'write_calling',
                    'url', 'announceoverride', 'timeout',
                    'preprocess_subroutine', 'announce_holdtime',
-									 'ctipresence','nonctipresence', 'waittime','waitratio')
+                                     'ctipresence', 'nonctipresence', 'waittime', 'waitratio')
         columns = ["queuefeatures." + c for c in columns]
 
         if xid:
@@ -1054,7 +1120,7 @@ class Queue:
         self.announce_holdtime = res['queuefeatures.announce_holdtime']
         pres = res['queuefeatures.ctipresence']
         if pres is None:
-            self.ctipresence    = {} 
+            self.ctipresence = {} 
         else:
             self.ctipresence = dict([[int(y) for y in s.split(':')] for s in pres.split(',')])
 
@@ -1063,18 +1129,18 @@ class Queue:
             self.nonctipresence = {}
         else:
             self.nonctipresence = dict([[int(y) for y in x.split(':')] for x in pres.split(',')])
-        self.waittime       = res['queuefeatures.waittime']
-        self.waitratio      = res['queuefeatures.waitratio']
+        self.waittime = res['queuefeatures.waittime']
+        self.waitratio = res['queuefeatures.waitratio']
 
     def set_dial_actions(self):
         for event in ('congestion', 'busy', 'chanunavail', 'qctipresence', 'qnonctipresence',
-										  'qwaittime', 'qwaitratio'):
+                                          'qwaittime', 'qwaitratio'):
             DialAction(self.agi, self.cursor, event, "queue", self.id).set_variables()
 
         # case NOANSWER (timeout): we also set correct queuelog event
         action = DialAction(self.agi, self.cursor, 'noanswer', "queue", self.id)
         action.set_variables()
-        if action.action in ('voicemail','voicemenu','sound'):
+        if action.action in ('voicemail', 'voicemenu', 'sound'):
             self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTEGUIDE")
         else:
             self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTENUMBER")
@@ -1168,7 +1234,7 @@ class DialAction:
         cursor.query("SELECT ${columns} FROM dialaction "
                      "WHERE event = %s "
                      "AND category = %s "
-                     "AND " + cursor.cast('categoryval','int') + " = %s "
+                     "AND " + cursor.cast('categoryval', 'int') + " = %s "
                      "AND linked = 1",
                      ('action', 'actionarg1', 'actionarg2'),
                      (event, category, categoryval))
@@ -1309,7 +1375,7 @@ class Outcall:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal', 
+        columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal',
                    'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
                    'outcall.routing', 'outcall.id', 'dialpattern.typeid', 'dialpattern.type',
                    'dialpattern.exten', 'dialpattern.stripnum', 'dialpattern.externprefix',
@@ -1382,12 +1448,12 @@ class Schedule:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id','name','timezone','fallback_action','fallback_actionid','fallback_actionargs')
+        columns = ('id', 'name', 'timezone', 'fallback_action', 'fallback_actionid', 'fallback_actionargs')
 
         cursor.query("SELECT ${columns} FROM schedule s, schedule_path p "
                      "WHERE s.id = p.schedule_id "
-										 "AND p.path = %s "
-										 "AND p.pathid = %s "
+                                         "AND p.path = %s "
+                                         "AND p.pathid = %s "
                      "AND s.commented = 0",
                      columns,
                      (path, pathid))
@@ -1395,17 +1461,17 @@ class Schedule:
 
         if not res:
             # no schedule for this path
-            print("No schedule for (%s/%s) path" % (path,pathid))
+            print("No schedule for (%s/%s) path" % (path, pathid))
             agi.set_variable('XIVO_SCHEDULE_STATUS', 'opened'); return
 
         cursor.query("SELECT ${columns} FROM schedule_time WHERE mode='opened' "
-				  "AND schedule_id = %s",
-					('hours','weekdays','monthdays','months'), (res['id'],))
+                  "AND schedule_id = %s",
+                    ('hours', 'weekdays', 'monthdays', 'months'), (res['id'],))
         times = cursor.fetchall()
         match = self._checkSchedule(res['timezone'], times)
 
         # set non-matching action
-        diversion = ('','','')
+        diversion = ('', '', '')
         if match is None:
             diversion = (
                 res['fallback_action'],
@@ -1415,53 +1481,53 @@ class Schedule:
 
             cursor.query("SELECT ${columns} FROM schedule_time WHERE mode='closed' "
                 "AND schedule_id = %s",
-                ('hours','weekdays','monthdays','months','action','actionid','actionargs'),
-								(res['id'],))
+                ('hours', 'weekdays', 'monthdays', 'months', 'action', 'actionid', 'actionargs'),
+                                (res['id'],))
             times = cursor.fetchall()
             cmatch = self._checkSchedule(res['timezone'], times)
             if cmatch is not None:
                 diversion = (cmatch['action'], cmatch['actionid'], cmatch['actionargs'])
 
-				# set AGI variables
-        agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed' if match is None else	'opened')
+                # set AGI variables
+        agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed' if match is None else    'opened')
         keys = ('ACTION', 'ACTIONARG1', 'ACTIONARG2')
         for i in xrange(len(keys)):
-            agi.set_variable('XIVO_FWD_SCHEDULE_OUT_'+ keys[i], diversion[i])
+            agi.set_variable('XIVO_FWD_SCHEDULE_OUT_' + keys[i], diversion[i])
 
 
     def _checkSchedule(self, timezone, intervals):
-			  # convert local server time to timezone time
-        tz  = pytz.timezone(timezone)
+              # convert local server time to timezone time
+        tz = pytz.timezone(timezone)
         now = datetime.now(pytz.utc)
         now = now.astimezone(tz)
 
         for i in intervals:
             if self._inInterval(now, i):
-							return i
+                            return i
 
         return None
 
     def _inInterval(self, now, filter):
-			"""Return true if system current date is in the interval
+            """Return true if system current date is in the interval
 
 
-				timezone: string, official timezone (i.e Europe/Paris)
-				filter  : dict
-					keys are: 'hours','weekdays','monthdays','months'
-					values are list of integer ranges: 1,2,10-12
-			"""
-			values = {
-					'months'   : (lambda d: d.month           , self._matchval),
-					'monthdays': (lambda d: d.day             , self._matchval),
-					'weekdays' : (lambda d: d.isoweekday()    , self._matchval),
-					'hours'    : (lambda d: (d.hour, d.minute), self._matchtime)
-			}
+                timezone: string, official timezone (i.e Europe/Paris)
+                filter  : dict
+                    keys are: 'hours','weekdays','monthdays','months'
+                    values are list of integer ranges: 1,2,10-12
+            """
+            values = {
+                    'months'   : (lambda d: d.month           , self._matchval),
+                    'monthdays': (lambda d: d.day             , self._matchval),
+                    'weekdays' : (lambda d: d.isoweekday()    , self._matchval),
+                    'hours'    : (lambda d: (d.hour, d.minute), self._matchtime)
+            }
 
-			for k in ('months','monthdays','weekdays','hours'):
-				if not values[k][1](values[k][0](now), filter[k]):
-					return False
+            for k in ('months', 'monthdays', 'weekdays', 'hours'):
+                if not values[k][1](values[k][0](now), filter[k]):
+                    return False
 
-			return True
+            return True
 
     def _matchval(self, value, interval):
         """
@@ -1470,18 +1536,18 @@ class Schedule:
             return True
 
         for m in interval.split(','):
-            m = [int(n) for n in (m.split('-', 1) if '-' in m else (m,m))]
+            m = [int(n) for n in (m.split('-', 1) if '-' in m else (m, m))]
 
             if m[0] <= value <= m[1]:
-							return True
+                            return True
 
         return False
 
     def _matchtime(self, time, filter):
         """Check if time is in filter interval
 
-				time  : (hours, minutes) tuple
-				    filter: time intervals (str. i.e: 7:30-12,14-18:45)
+                time  : (hours, minutes) tuple
+                    filter: time intervals (str. i.e: 7:30-12,14-18:45)
         """
         if filter == '*':
             return True
@@ -1684,13 +1750,13 @@ class CTIPresence:
     @staticmethod
     def status(agi, cursor, status_ids=None):
         """
-					we get a list of status ids, and want in return the presence+status names
-					in the form:
-						"pname:sname"
+                    we get a list of status ids, and want in return the presence+status names
+                    in the form:
+                        "pname:sname"
         """
-        columns = ('s.id', 's.name','p.name')
+        columns = ('s.id', 's.name', 'p.name')
         cursor.query("SELECT ${columns} FROM ctistatus s, ctipresences p "
-          "WHERE s.id IN ("+','.join([str(id) for id in status_ids])+") "
+          "WHERE s.id IN (" + ','.join([str(id) for id in status_ids]) + ") "
           "AND s.presence_id = p.id",
           columns)
 
@@ -1791,10 +1857,10 @@ def protocol_intf_and_suffix(cursor, protocol, category, xid):
 
 class Static:
     def __init__(self, cursor, protocol):
-        if protocol not in ('sip','iax','sccp'):
+        if protocol not in ('sip', 'iax', 'sccp'):
             raise ValueError("invalid type")
 
-        cursor.query("SELECT ${columns} FROM static"+protocol+" WHERE commented = 0",
+        cursor.query("SELECT ${columns} FROM static" + protocol + " WHERE commented = 0",
                      ('var_name', 'var_val'))
 
         for r in cursor.fetchall():
