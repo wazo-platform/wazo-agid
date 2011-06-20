@@ -173,12 +173,12 @@ def incoming_meetme_set_features(agi, cursor, args):
         pin     = meetme.pin
         options += ''.join(meetme.get_user_options())
 
-        if argv.maxuser and conf_exceed_max_number(agi, meetme.confno, meetme.maxuser):
+        if argv.maxuser and conf_exceed_max_number(agi, meetme.confno, meetme.maxusers):
             # TODO: Change sound by conf-maxuserexceeded
             agi.appexec('Playback', "conf-locked&vm-goodbye")
             agi.dp_break("Unable to join the conference room, max number of users exceeded "
                          "(max number: %s, id: %s, name: %s, confno: %s)"
-                         % (meetme.maxuser, meetme.id, meetme.name, meetme.confno))
+                         % (meetme.maxusers, meetme.id, meetme.name, meetme.confno))
     elif flag & meetme.FLAG_ADMIN:
         pin     = meetme.pinadmin
         options += ''.join(meetme.get_admin_options())
@@ -203,11 +203,11 @@ def incoming_meetme_set_features(agi, cursor, args):
     agi.set_variable('MEETME_EXIT_CONTEXT', exitcontext)
     agi.set_variable('MEETME_RECORDINGFILE', MEETME_RECORDINGDIR + "meetme-%s-%s" % (meetme.confno, int(time.time())))
 
-    agi.set_variable('XIVO_REAL_NUMBER', meetme.number)
+    agi.set_variable('XIVO_REAL_NUMBER', meetme.confno)
     agi.set_variable('XIVO_REAL_CONTEXT', meetme.context)
     agi.set_variable('XIVO_MEETMECONFNO', meetme.confno)
     agi.set_variable('XIVO_MEETMENAME', meetme.name)
-    agi.set_variable('XIVO_MEETMENUMBER', meetme.number)
+    agi.set_variable('XIVO_MEETMENUMBER', meetme.confno)
     agi.set_variable('XIVO_MEETMEPIN', pin)
     agi.set_variable('XIVO_MEETMEOPTIONS', options)
     agi.set_variable('XIVO_MEETMEPREPROCESS_SUBROUTINE', preprocess_subroutine)

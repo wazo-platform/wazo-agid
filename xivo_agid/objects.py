@@ -768,7 +768,7 @@ class MeetMe:
         self.agi = agi
         self.cursor = cursor
 
-        meetmefeatures_columns =    (('id', 'name', 'number', 'context',
+        meetmefeatures_columns =    (('id', 'name', 'confno', 'context',
                                       'admin_typefrom', 'admin_internalid', 'admin_externalid',
                                       'admin_identification', 'admin_exitcontext') +
                                       tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() +
@@ -778,12 +778,12 @@ class MeetMe:
                                                                      self.OPTIONS_USER.keys())]) +
                                       tuple(x for x in self.OPTIONS_GLOBAL.keys()) +
                                       ('durationm', 'nbuserstartdeductduration',
-                                       'timeannounceclose', 'maxuser',
+                                       'timeannounceclose', 'maxusers',
                                        'startdate', 'preprocess_subroutine'))
 
         columns = ["meetmefeatures." + c for c in meetmefeatures_columns] + \
                   ['staticmeetme.var_val'] + \
-                  ['userfeatures.number']
+                  ['linefeatures.number']
 
         if xid:
             cursor.query("SELECT ${columns} FROM meetmefeatures "
@@ -791,6 +791,8 @@ class MeetMe:
                          "ON meetmefeatures.meetmeid = staticmeetme.id "
                          "LEFT JOIN userfeatures "
                          "ON meetmefeatures.admin_internalid = userfeatures.id "
+                         "LEFT JOIN linefeatures "
+                         "ON userfeatures.id = linefeatures.iduserfeatures "
                          "WHERE meetmefeatures.id = %s "
                          "AND staticmeetme.commented = 0",
                          columns,
@@ -801,6 +803,8 @@ class MeetMe:
                          "ON meetmefeatures.meetmeid = staticmeetme.id "
                          "LEFT JOIN userfeatures "
                          "ON meetmefeatures.admin_internalid = userfeatures.id "
+                         "LEFT JOIN linefeatures "
+                         "ON userfeatures.id = linefeatures.iduserfeatures "
                          "WHERE meetmefeatures.name = %s "
                          "AND staticmeetme.commented = 0",
                          columns,
@@ -812,6 +816,8 @@ class MeetMe:
                          "ON meetmefeatures.meetmeid = staticmeetme.id "
                          "LEFT JOIN userfeatures "
                          "ON meetmefeatures.admin_internalid = userfeatures.id "
+                         "LEFT JOIN linefeatures "
+                         "ON userfeatures.id = linefeatures.iduserfeatures "
                          "WHERE meetmefeatures.number = %s "
                          "AND meetmefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
                          "AND staticmeetme.commented = 0",
@@ -828,7 +834,7 @@ class MeetMe:
                               % (xid, name, number, context))
 
         (self.confno, self.pin, self.pinadmin)  = (res['staticmeetme.var_val'] + ",,").split(',', 3)[:3]
-        self.admin_number                       = res['userfeatures.number']
+        self.admin_number                       = res['linefeatures.number']
 
         if res['meetmefeatures.startdate']:
             self.starttime = time.mktime(
@@ -838,7 +844,7 @@ class MeetMe:
             self.starttime = None
 
         for name, value in res.iteritems():
-            if name not in('staticmeetme.var_val', 'userfeatures.number'):
+            if name not in('staticmeetme.var_val', 'linefeatures.number'):
                 setattr(self, name.split('.', 1)[1], value)
 
         self.options = ()
