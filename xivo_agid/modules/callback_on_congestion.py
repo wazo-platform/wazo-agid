@@ -41,7 +41,7 @@ def callback_on_congestion(agi, cursor, args):
     srcnum = agi.get_variable('XIVO_SRCNUM')
     dstnum = agi.get_variable('XIVO_DSTNUM')
     context = agi.get_variable('XIVO_CONTEXT')
-    spooldir = agi.get_variable('GETCONF(SPOOL_DIR)')
+    spooldir = agi.get_variable('AST_CONFIG(asterisk.conf,directories,astspooldir)')
 
     if srcnum in (None, ''):
         agi.dp_break("Unable to find srcnum, srcnum = %r" % srcnum)

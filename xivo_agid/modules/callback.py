@@ -33,7 +33,7 @@ ASTERISK_UID, ASTERISK_GID = get_uid_gid("asterisk")
 def callback(agi, cursor, args):
     context = args[0]
     srcnum = agi.get_variable('XIVO_SRCNUM')
-    spooldir = agi.get_variable('GETCONF(SPOOL_DIR)')
+    spooldir = agi.get_variable('AST_CONFIG(asterisk.conf,directories,astspooldir)')
 
     if srcnum in (None, ''):
         agi.dp_break("Unable to find srcnum, srcnum = %r" % srcnum)
