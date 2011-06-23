@@ -834,7 +834,7 @@ class MeetMe:
         self.agi = agi
         self.cursor = cursor
 
-        meetmefeatures_columns = (('id', 'name', 'number', 'context',
+        meetmefeatures_columns = (('id', 'name', 'confno', 'context',
                                       'admin_typefrom', 'admin_internalid', 'admin_externalid',
                                       'admin_identification', 'admin_exitcontext') + 
                                       tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() + 
@@ -900,7 +900,7 @@ class MeetMe:
                               % (xid, name, number, context))
 
         (self.confno, self.pin, self.pinadmin) = (res['staticmeetme.var_val'] + ",,").split(',', 3)[:3]
-        self.admin_number = res['userfeatures.number']
+        self.admin_number = res['linefeatures.number']
 
         if res['meetmefeatures.startdate']:
             self.starttime = time.mktime(
