@@ -884,7 +884,7 @@ class MeetMe:
                          "ON meetmefeatures.admin_internalid = userfeatures.id "
                          "LEFT JOIN linefeatures "
                          "ON userfeatures.id = linefeatures.iduserfeatures "
-                         "WHERE meetmefeatures.number = %s "
+                         "WHERE meetmefeatures.confno = %s "
                          "AND meetmefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
                          "AND staticmeetme.commented = 0",
                          columns,
