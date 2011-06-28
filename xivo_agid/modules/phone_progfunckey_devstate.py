@@ -104,6 +104,6 @@ def phone_progfunckey_devstate(agi, cursor, args):
                              dest)))
 
     for x in xset:
-        agi.set_variable("DEVSTATE(Custom:%s)" % x, devstate)
+        agi.set_variable("DEVICE_STATE(Custom:%s)" % x, devstate)
 
 agid.register(phone_progfunckey_devstate)

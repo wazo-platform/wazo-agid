@@ -17,8 +17,11 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
 from xivo_agid import agid
 from xivo_agid import objects
+
+logger = logging.getLogger(__name__)
 
 def agent_get_options(agi, cursor, args):
     agi.set_variable('XIVO_AGENTEXISTS', 0)
@@ -50,21 +53,22 @@ def agent_get_options(agi, cursor, args):
     if lang is None or len(lang) == 0:
         userid = agi.get_variable('XIVO_USERID')
         if userid:
-            try:				
+            try:                
                 caller = objects.User(agi, cursor, int(userid))
-                lang = caller.language						
+                masterline = objects.MasterLineUser(agi, cursor, int(userid))
+                lang = caller.language    
 
                 # get channel default lang
                 if lang is None or len(lang) == 0:
-                    static = objects.Static(cursor, caller.protocol)
-                    lang = static.language										
+                    static = objects.Static(cursor, masterline.line['protocol'])
+                    lang = static.language                                        
 
             except (ValueError, LookupError), e:
                 pass
 
     if lang is None or len(lang) == 0:
         # setting default value
-        lang = 'en_US'
+        lang = 'fr_FR'
 
     agi.set_variable('_XIVO_AGENTLANGUAGE', lang)
 
