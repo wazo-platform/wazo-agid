@@ -586,7 +586,8 @@ class User:
                    'enableunc', 'destunc', 'enablerna', 'destrna',
                    'enablebusy', 'destbusy', 'musiconhold', 'language',
                    'ringintern', 'ringextern', 'ringforward', 'ringgroup',
-                   'outcallerid', 'bsfilter', 'preprocess_subroutine', 'mobilephonenumber')
+                   'outcallerid', 'bsfilter', 'preprocess_subroutine',
+                   'pitch', 'pitchdirection', 'mobilephonenumber')
 
         if xid:
             cursor.query("SELECT ${columns} FROM userfeatures "
@@ -630,6 +631,8 @@ class User:
         self.ringextern = res['ringextern']
         self.ringforward = res['ringforward']
         self.ringgroup = res['ringgroup']
+        self.pitch = res['pitch']
+        self.pitchdirection = res['pitchdirection']
 
         if self.destunc == '':
             self.enableunc = 0

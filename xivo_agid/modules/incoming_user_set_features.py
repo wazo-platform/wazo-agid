@@ -271,9 +271,19 @@ def incoming_user_set_features(agi, cursor, args):
     else:
         mobilephonenumber = ""
 
+    if user.pitch:
+        pitch = user.pitch
+        pitchdirection = user.pitchdirection
+    else:
+        pitch = ""
+        pitchdirection = ""
+
     agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
     agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
     agi.set_variable('XIVO_MOBILEPHONENUMBER', mobilephonenumber)
+    agi.set_variable('XIVO_PITCH', pitch)
+    agi.set_variable('XIVO_PITCHDIRECTION', pitchdirection)
+
     
     # voicemail lang
     vmbox = None
