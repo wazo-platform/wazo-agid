@@ -43,8 +43,7 @@ def phone_set_feature(agi, cursor, args):
         else:
             try:
                 userid = int(userid)
-                user = objects.User(agi, cursor, userid)                
-                lines = objects.Lines(agi, cursor, int(userid))
+                user = objects.User(agi, cursor, userid)        
             except (ValueError, LookupError), e:
                 agi.dp_break(str(e))
 

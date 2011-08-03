@@ -476,7 +476,7 @@ class Lines:
         self.cursor = cursor
         self.lines = []
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name',     'line_num',
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num',
                    'rules_type', 'rules_time', 'rules_order', 'rules_group')
 
         if xid:
@@ -519,18 +519,18 @@ class Lines:
 
         for l in res:
             line = {
-                    'id'          : l['id'],
-                    'number'      : l['number'],
-                    'context'     : l['context'],
-                    'protocol'    : l['protocol'].upper(),
-                    'protocolid'  : l['protocolid'],
-                    'name'        : l['name'],
-                    'num'         : l['line_num'],
-                    'rules_type'  : l['rules_type'],
-                         'rules_time'  : l['rules_time'],
-                    'rules_order' : l['rules_order'],
-                    'rules_group' : l['rules_group']
-                }
+                'id'          : l['id'],
+                'number'      : l['number'],
+                'context'     : l['context'],
+                'protocol'    : l['protocol'].upper(),
+                'protocolid'  : l['protocolid'],
+                'name'        : l['name'],
+                'num'         : l['line_num'],
+                'rules_type'  : l['rules_type'],
+                'rules_time'  : l['rules_time'],
+                'rules_order' : l['rules_order'],
+                'rules_group' : l['rules_group']
+            }
 
             self.lines.append(line)
 
@@ -545,14 +545,14 @@ class MasterLineUser:
                    'rules_type', 'rules_time', 'rules_order', 'rules_group')
         
         cursor.query("SELECT ${columns} FROM linefeatures "
-                         "WHERE iduserfeatures = %s "
-                         "AND internal = 0 "
-                         "AND commented = 0 "
-                         "AND line_num = 0 "
-                         "AND rules_order = 1 "
-                         "ORDER BY line_num ASC, rules_order ASC",
-                         columns,
-                         (xid,))
+                     "WHERE iduserfeatures = %s "
+                     "AND internal = 0 "
+                     "AND commented = 0 "
+                     "AND line_num = 0 "
+                     "AND rules_order = 1 "
+                     "ORDER BY line_num ASC, rules_order ASC",
+                     columns,
+                     (xid,))
         
         res = cursor.fetchone()
 
@@ -1499,7 +1499,7 @@ class Schedule:
 
 
     def _checkSchedule(self, timezone, intervals):
-              # convert local server time to timezone time
+        # convert local server time to timezone time
         tz = pytz.timezone(timezone)
         now = datetime.now(pytz.utc)
         now = now.astimezone(tz)
