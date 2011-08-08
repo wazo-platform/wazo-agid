@@ -65,7 +65,7 @@ def conf_exceed_max_number(agi, confno, maxuser):
 
 def conf_is_open(starttime, durationm):
     if not starttime:
-        return None
+        return True
     elif starttime > time.time():
         return False
     elif durationm:
