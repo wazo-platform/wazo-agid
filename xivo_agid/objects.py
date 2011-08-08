@@ -1040,8 +1040,8 @@ class MeetMe:
 
         return True
 
-    def authenticate(self, pin=None, calleridnum=None, adminflag=False):
-        if adminflag or self.is_admin(pin, calleridnum):
+    def authenticate(self, pin=None, calleridnum=None):
+        if self.is_admin(pin, calleridnum):
             return self.FLAG_ADMIN
         elif not self.pin or self.pin == pin:
             return self.FLAG_USER
