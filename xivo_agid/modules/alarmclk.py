@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 
-__version__ = "$Revision$ $Date$"
 __license__ = """
     Copyright (C) 2011  Proformatique <technique@proformatique.com>
 
@@ -18,24 +17,75 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import json
 import logging
+import urllib2
 from xivo_agid import agid
 from xivo_agid import objects
 
 logger = logging.getLogger(__name__)
 
+USERS_URL = 'https://localhost/service/ipbx/json.php/private/pbx_settings/users/'
+TIMEOUT = 10
 
-def _update_alarmclock(cursor, userid, alarm_clock):
-    # Update the alarm clock for a given user
+
+def _get_user_webi(userid):
+    url = USERS_URL + '?act=view&id=%s' % userid
+    f = urllib2.urlopen(url, timeout=TIMEOUT)
+    try:
+        return json.load(f)
+    finally:
+        f.close()
+
+
+def _set_user_webi(userid, content):
+    url = USERS_URL + '?act=edit&id=%s' % userid
+    data = json.dumps(content)
+    request = urllib2.Request(url, data)
+    f = urllib2.urlopen(request, timeout=TIMEOUT)
+    try:
+        f.read()
+    finally:
+        f.close()
+
+
+def _update_alarmclock_webi(userid, alarm_clock):
+    content = _get_user_webi(userid)
+    new_content = {
+        'userfeatures': content['userfeatures'],
+        'dialaction': {
+            'noanswer': {'actiontype': 'none'},
+            'busy': {'actiontype': 'none'},
+            'congestion': {'actiontype': 'none'},
+            'chanunavail': {'actiontype': 'none'},
+        }
+    }
+    new_content['userfeatures']['alarmclock'] = alarm_clock
+    _set_user_webi(userid, new_content)
+
+
+def _get_alarmclock_db(cursor, userid):
+    cursor.query("SELECT ${columns} "
+                 "FROM userfeatures "
+                 "WHERE id = %s",
+                 ('alarmclock',),
+                 (userid,))
+    results = cursor.fetchall()
+    if not results:
+        logger.warning('Could not retrieve alarmclock for user %s: no such user',
+                       userid)
+        return ''
+    else:
+        return results[0][0]
+
+
+def _update_alarmclock_db(cursor, userid, alarm_clock):
+    # Only to be used when the alarm scheduler in the CTI server doesn't
+    # need to be warned the alarm clock field of a user changed.
     cursor.query("UPDATE userfeatures "
                  "SET alarmclock = %s "
                  "WHERE id = %s",
                  parameters=(alarm_clock, userid))
-
-
-def _clear_alarmclock(cursor, userid):
-    # Equivalent to "_update_alarmclock(cursor, userid, '')" 
-    _update_alarmclock(cursor, userid, '')
 
 
 def _set_interface_vars(agi, cursor, userid):
@@ -55,7 +105,7 @@ def _set_interface_vars(agi, cursor, userid):
 def alarmclk_pre_execute(agi, cursor, args):
     userid = int(args[0])
     
-    _clear_alarmclock(cursor, userid)
+    _update_alarmclock_db(cursor, userid, '')
     _set_interface_vars(agi, cursor, userid)
 
 
@@ -86,14 +136,18 @@ def alarmclk_set(agi, cursor, args):
         agi.set_variable('XIVO_ALARMCLK_OK', '0')
     else:
         alarm_clock = '%s:%s' % (hour, minute)
-        _update_alarmclock(cursor, userid, alarm_clock)
+        _update_alarmclock_webi(userid, alarm_clock)
         agi.set_variable('XIVO_ALARMCLK_OK', '1')
 
 
 def alarmclk_clear(agi, cursor, args):
     userid = int(args[0])
     
-    _clear_alarmclock(cursor, userid)
+    cur_alarmclock = _get_alarmclock_db(cursor, userid)
+    if cur_alarmclock:
+        _update_alarmclock_webi(userid, '')
+    else:
+        logger.info('No alarm clock set for user %s', userid)
 
 
 agid.register(alarmclk_pre_execute)
