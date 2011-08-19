@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 AUTOPROV_URL = 'https://localhost/xivo/configuration/json.php/private/provisioning/autoprov?act=configure'
 HEADERS = {'Content-Type': 'application/json'}
-TIMEOUT = 30
+TIMEOUT = 10
 
 
 def _do_provision(provcode, ip):
