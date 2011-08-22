@@ -27,4 +27,8 @@ def voicemenu(agi, cursor, args):
 
     agi.set_variable("XIVO_VCMN_CONTEXT", "voicemenu-" + vmenu.name)
 
+    # schedule
+    agi.set_variable('XIVO_PATH'   , 'voicemenu')
+    agi.set_variable('XIVO_PATH_ID', vmenu.id)
+
 agid.register(voicemenu)
