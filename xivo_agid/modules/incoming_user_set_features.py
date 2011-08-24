@@ -74,7 +74,7 @@ def incoming_user_set_features(agi, cursor, args):
             agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines)); num += 1
 
         agi.set_variable('XIVO_INTERFACE_NB', num)                        
-                
+
 
     agi.set_variable('XIVO_DST_FIRSTNAME', user.firstname)
     agi.set_variable('XIVO_DST_LASTNAME', user.lastname)
@@ -82,7 +82,7 @@ def incoming_user_set_features(agi, cursor, args):
     #agi.set_variable('XIVO_REAL_NUMBER', user.number)
     #agi.set_variable('XIVO_REAL_CONTEXT', user.context)
 
-    ufilter = user.filter    
+    ufilter = user.filter
 
     # Special case. If a boss-secretary filter is set, the code will prematurely
     # exit because the other normally set variables are skipped.
@@ -253,9 +253,10 @@ def incoming_user_set_features(agi, cursor, args):
     if user.musiconhold:
         agi.set_variable('CHANNEL(musicclass)', user.musiconhold)
 
-    if feature_list.callrecord and user.callrecord: # pylint: disable-msg=E1101
-        # BUGBUG the context is missing in the filename TODO use ids
-        callrecordfile = "user-%s-%s-%s.wav" % (srcnum, dstnum, int(time.time()))
+    if feature_list.callrecord:
+        if user.callrecord or caller.callrecord: # pylint: disable-msg=E1101
+            # BUGBUG the context is missing in the filename TODO use ids
+            callrecordfile = "user-%s-%s-%s.wav" % (srcnum, dstnum, int(time.time()))
     else:
         callrecordfile = ""
 
