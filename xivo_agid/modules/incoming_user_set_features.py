@@ -253,10 +253,13 @@ def incoming_user_set_features(agi, cursor, args):
     if user.musiconhold:
         agi.set_variable('CHANNEL(musicclass)', user.musiconhold)
 
+    callrecordfile = ""
     if feature_list.callrecord:
         if user.callrecord or caller.callrecord: # pylint: disable-msg=E1101
             # BUGBUG the context is missing in the filename TODO use ids
             callrecordfile = "user-%s-%s-%s.wav" % (srcnum, dstnum, int(time.time()))
+        else:
+            callrecordfile = ""
     else:
         callrecordfile = ""
 
