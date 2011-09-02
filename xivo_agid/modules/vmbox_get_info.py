@@ -28,9 +28,10 @@ def vmbox_get_info(agi, cursor, args):
     if xlen > 0 and args[0] != '':
         try:
             if xlen == 1:
-                userid  = agi.get_variable('XIVO_USERID')
-                caller  = objects.User(agi, cursor, xid=int(userid))
-                context = caller.context
+                xid = int(agi.get_variable('XIVO_USERID'))
+                caller = objects.User(agi, cursor, xid=xid)
+                caller_masterline = objects.MasterLineUser(agi, cursor, xid)
+                context = caller_masterline.line['context']
             else:
                 context = args[1]
 
