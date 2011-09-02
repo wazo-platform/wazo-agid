@@ -476,8 +476,9 @@ class Lines:
         self.cursor = cursor
         self.lines = []
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num',
-                   'rules_type', 'rules_time', 'rules_order', 'rules_group')
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid',
+                   'iduserfeatures', 'name', 'line_num', 'rules_type',
+                   'rules_time', 'rules_order', 'rules_group')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
@@ -524,6 +525,7 @@ class Lines:
                 'context'     : l['context'],
                 'protocol'    : l['protocol'].upper(),
                 'protocolid'  : l['protocolid'],
+                'iduserfeatures': l['iduserfeatures'],
                 'name'        : l['name'],
                 'num'         : l['line_num'],
                 'rules_type'  : l['rules_type'],
@@ -575,7 +577,7 @@ class MasterLineUser:
 
 
 class User:
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None, name=None, protocol=None):
+    def __init__(self, agi, cursor, xid=None, exten=None, context=None):
         self.agi = agi
         self.cursor = cursor
 
@@ -595,6 +597,16 @@ class User:
                          "AND commented = 0",
                          columns,
                          (xid,))
+        elif exten and context:
+            line = Lines(agi, cursor, exten=exten, context=context)
+            for line_dict in line.lines:
+                if line_dict['iduserfeatures']:
+                    cursor.query("SELECT ${columns} FROM userfeatures "
+                                 "WHERE id = %s "
+                                 "AND commented = 0",
+                                 columns,
+                                 (line_dict['iduserfeatures'],))
+                    break
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 

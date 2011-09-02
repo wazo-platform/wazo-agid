@@ -1,4 +1,3 @@
-__version__ = "$Revision$ $Date$"
 __license__ = """
     Copyright (C) 2006-2010  Proformatique <technique@proformatique.com>
 
@@ -27,7 +26,8 @@ def user_get_vmbox(agi, cursor, args):
     if xlen > 0 and args[0] != '':
         try:
             if xlen == 1:
-                context = objects.User(agi, cursor, xid=int(userid)).context
+                masterline = objects.MasterLineUser(agi, cursor, int(userid))
+                context = masterline.line['context']
             else:
                 context = args[1]
 
