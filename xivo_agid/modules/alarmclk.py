@@ -25,7 +25,7 @@ from xivo_agid import objects
 
 logger = logging.getLogger(__name__)
 
-USERS_URL = 'https://localhost/service/ipbx/json.php/private/pbx_settings/users/'
+USERS_URL = 'http://localhost/service/ipbx/json.php/private/pbx_settings/users/'
 TIMEOUT = 10
 
 
