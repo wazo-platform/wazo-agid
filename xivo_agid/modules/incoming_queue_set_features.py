@@ -75,12 +75,13 @@ def incoming_queue_set_features(agi, cursor, args):
     for member in memberlist:
         try: 
             protocol, name = member.split('/', 1)
-            user = objects.User(agi, cursor, name=name, protocol=protocol)
+            lines = objects.Lines(agi, cursor, name=name, protocol=protocol)
         except (ValueError, LookupError):
             continue
 
-        if user.number:
-            pickupmark.append("%s%%%s" % (user.number, user.context))
+        # for line in lines.lines:
+        # if line.number:
+        # pickupmark.append("%s%%%s" % (line.number, line.context))
 
     agi.set_variable('__PICKUPMARK', '&'.join(pickupmark))
 
