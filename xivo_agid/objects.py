@@ -1305,41 +1305,6 @@ class Trunk:
                                                                      self.protocolid)
 
 
-class HandyNumber:
-    def __init__(self, agi, cursor, xid=None, exten=None):
-        self.agi = agi
-        self.cursor = cursor
-
-        columns = ('id', 'exten', 'trunkfeaturesid', 'type')
-
-        if xid:
-            cursor.query("SELECT ${columns} FROM handynumbers "
-                         "WHERE id = %s "
-                         "AND commented = 0",
-                         columns,
-                         (xid,))
-        elif exten:
-            cursor.query("SELECT ${columns} FROM handynumbers "
-                         "WHERE exten = %s "
-                         "AND commented = 0",
-                         columns,
-                         (exten,))
-        else:
-            raise LookupError("id or exten must be provided to look up a handy number")
-
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find handy number (id: %s, exten: %s)" % (xid, exten))
-
-        self.id = res['id']
-        self.exten = res['exten']
-        self.trunkfeaturesid = int(res['trunkfeaturesid'])
-        self.type = res['type']
-
-        self.trunk = Trunk(agi, cursor, self.trunkfeaturesid)
-
-
 class DID:
     def __init__(self, agi, cursor, xid=None, exten=None, context=None):
         self.agi = agi
