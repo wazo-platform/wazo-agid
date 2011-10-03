@@ -26,8 +26,8 @@ def check_schedule(agi, cursor, args):
     if path is None or len(path) == 0:
         return
 
-		# set following variables:
-		#   . XIVO_SCHEDULE_STATUS = opened|closed
+    # set following variables:
+    #   . XIVO_SCHEDULE_STATUS = opened|closed
     schedule = objects.Schedule(agi, cursor, path=path, pathid=pathid)
 
     # erase path for next schedule check
