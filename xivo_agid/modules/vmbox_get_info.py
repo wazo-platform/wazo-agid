@@ -1,4 +1,5 @@
-__version__ = "$Revision$ $Date$"
+# -*- coding: utf-8 -*-
+
 __license__ = """
     Copyright (C) 2006-2010  Proformatique <technique@proformatique.com>
 

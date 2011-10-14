@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__version__ = "$Revision$"
+
 __license__ = """
     Copyright (C) 2010  Guillaume Bour <gbour@proformatique.com>, Proformatique
 

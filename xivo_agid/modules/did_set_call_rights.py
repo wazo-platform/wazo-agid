@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # TODO: see the call_rights module.
 
-__version__ = "$Revision$ $Date$"
 __license__ = """
     Copyright (C) 2006-2010  Proformatique <technique@proformatique.com>
 

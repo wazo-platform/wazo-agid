@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 
-__version__ = "$Revision: 10770 $ $Date: 2011-05-10 18:52:51 +0200 (Tue, 10 May 2011) $"
 __license__ = """
     Copyright (C) 2011  Proformatique <technique@proformatique.com>
 

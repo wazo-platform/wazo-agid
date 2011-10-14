@@ -1,8 +1,7 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # TODO: handle rules priority.
 # TODO: merge into objects and adapt modules.
 
-__version__ = "$Revision$ $Date$"
 __license__ = """
     Copyright (C) 2006-2010  Proformatique <technique@proformatique.com>
 
