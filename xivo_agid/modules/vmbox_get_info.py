@@ -17,34 +17,44 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
 from xivo_agid import agid
 from xivo_agid import objects
 
+logger = logging.getLogger(__name__)
+
+
 def vmbox_get_info(agi, cursor, args):
-    vmboxid = agi.get_variable('XIVO_VMBOXID')
-
+    caller = None
+    vmbox = None
     xlen = len(args)
-
-    caller = vmbox = None
     if xlen > 0 and args[0] != '':
         try:
             if xlen == 1:
-                xid = int(agi.get_variable('XIVO_USERID'))
-                caller = objects.User(agi, cursor, xid=xid)
-                caller_masterline = objects.MasterLineUser(agi, cursor, xid)
-                context = caller_masterline.line['context']
+                xivo_userid = agi.get_variable('XIVO_USERID')
+                if xivo_userid:
+                    userid = int(agi.get_variable('XIVO_USERID'))
+                    caller = objects.User(agi, cursor, xid=userid)
+                    caller_masterline = objects.MasterLineUser(agi, cursor, userid)
+                    context = caller_masterline.line['context']
+                else:
+                    context = agi.get_variable('XIVO_BASE_CONTEXT')
             else:
                 context = args[1]
 
             vmbox = objects.VMBox(agi, cursor, mailbox=args[0], context=context)
         except (ValueError, LookupError), e:
+            logger.error('Error while retrieving vmbox from userid',
+                         exc_info=True)
             agi.dp_break(str(e))
     else:
         try:
-            vmbox = objects.VMBox(agi, cursor, int(vmboxid))
+            vmboxid = int(agi.get_variable('XIVO_VMBOXID'))
+            vmbox = objects.VMBox(agi, cursor, vmboxid)
         except (ValueError, LookupError), e:
+            logger.error('Error while retrieving vmbox from vmboxid',
+                         exc_info=True)
             agi.dp_break(str(e))
-
 
     if vmbox and vmbox.skipcheckpass:
         vmmain_options = "s"
@@ -54,14 +64,14 @@ def vmbox_get_info(agi, cursor, args):
     if caller and caller.language:
         mbox_lang = caller.language
     elif vmbox and vmbox.language:
-        mbox_lang = vmbox.language  
+        mbox_lang = vmbox.language
     else:
         mbox_lang = ''
-
 
     agi.set_variable('XIVO_VMMAIN_OPTIONS', vmmain_options)
     agi.set_variable('XIVO_MAILBOX', vmbox.mailbox)
     agi.set_variable('XIVO_MAILBOX_CONTEXT', vmbox.context)
     agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
+
 
 agid.register(vmbox_get_info)
