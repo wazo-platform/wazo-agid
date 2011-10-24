@@ -45,7 +45,7 @@ def phone_progfunckey_devstate(agi, cursor, args):
     if xlen > 3 and args[3] != '':
         try:
             if xlen == 4:
-                context = objects.User(agi, cursor, xid=int(userid)).context
+                context = objects.MasterLineUser(agi, cursor, xid=int(userid)).line['context']
             else:
                 context = args[4]
 

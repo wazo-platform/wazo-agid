@@ -569,7 +569,7 @@ class MasterLineUser:
             'protocolid'  : res['protocolid'],
             'name'        : res['name'],
             'num'         : res['line_num'],
-            'rules_type'  : res['rules_type'],                        
+            'rules_type'  : res['rules_type'],
             'rules_time'  : res['rules_time'],
             'rules_order' : res['rules_order'],
             'rules_group' : res['rules_group']

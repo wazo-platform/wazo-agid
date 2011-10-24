@@ -32,16 +32,15 @@ def phone_progfunckey(agi, cursor, args):
     if xlen > 1 and args[1] != '':
         try:
             if xlen == 2:
-                context = objects.User(agi, cursor, xid=int(userid)).context
+                context = objects.MasterLineUser(agi, cursor, xid=int(userid)).line['context']
             else:
                 context = args[2]
 
-            user = objects.User(agi, cursor, exten=args[1], context=context)
         except (ValueError, LookupError), e:
             agi.dp_break(str(e))
     else:
         try:
-            user = objects.User(agi, cursor, int(userid))
+            context = objects.MasterLineUser(agi, cursor, xid=int(userid)).line['context']
         except (ValueError, LookupError), e:
             agi.dp_break(str(e))
 
@@ -62,7 +61,7 @@ def phone_progfunckey(agi, cursor, args):
         feature = ""
         agi.verbose(str(e))
 
-    agi.set_variable('XIVO_PHONE_CONTEXT', user.context)
+    agi.set_variable('XIVO_PHONE_CONTEXT', context)
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY', ''.join(fklist[1:]))
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY_STATE', 'NOTHING')
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY_FEATURE', feature)
