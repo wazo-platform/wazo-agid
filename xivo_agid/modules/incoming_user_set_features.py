@@ -174,13 +174,15 @@ def incoming_user_set_features(agi, cursor, args):
     unc_actionarg1  = ""
     unc_actionarg2  = ""
 
+    called_line = objects.Lines(agi, cursor, int(dstid)).lines[0]
+
     if feature_list.fwdunc: # pylint: disable-msg=E1101
         enableunc = user.enableunc
 
-        if enableunc:
+        if enableunc and 'context' in called_line:
             unc_action      = 'extension'
             unc_actionarg1  = user.destunc
-            unc_actionarg2  = user.context
+            unc_actionarg2  = called_line['context']
 
     agi.set_variable('XIVO_ENABLEUNC', enableunc)
     objects.DialAction.set_agi_variables(agi,
@@ -200,10 +202,10 @@ def incoming_user_set_features(agi, cursor, args):
     if feature_list.fwdbusy: # pylint: disable-msg=E1101
         enablebusy = user.enablebusy
 
-        if enablebusy:
+        if enablebusy and 'context' in called_line:
             busy_action     = 'extension'
             busy_actionarg1 = user.destbusy
-            busy_actionarg2 = user.context
+            busy_actionarg2 = called_line['context']
         else:
             setbusy = True
             objects.DialAction(agi, cursor, 'busy', 'user', user.id).set_variables()
@@ -228,10 +230,10 @@ def incoming_user_set_features(agi, cursor, args):
     if feature_list.fwdrna: # pylint: disable-msg=E1101
         enablerna = user.enablerna
 
-        if enablerna:
+        if enablerna and 'context' in called_line:
             rna_action     = 'extension'
             rna_actionarg1 = user.destrna
-            rna_actionarg2 = user.context
+            rna_actionarg2 = called_line['context']
         else:
             setrna = True
             objects.DialAction(agi, cursor, 'noanswer', 'user', user.id).set_variables()
