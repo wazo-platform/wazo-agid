@@ -174,7 +174,7 @@ def incoming_user_set_features(agi, cursor, args):
     unc_actionarg1  = ""
     unc_actionarg2  = ""
 
-    called_line = objects.Lines(agi, cursor, int(dstid)).lines[0]
+    called_line = lines.lines[0]
 
     if feature_list.fwdunc: # pylint: disable-msg=E1101
         enableunc = user.enableunc
