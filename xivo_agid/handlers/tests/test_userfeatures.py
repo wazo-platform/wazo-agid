@@ -43,7 +43,7 @@ class TestUserFeatures(unittest.TestCase):
         userfeatures._set_feature_list = Mock()
         userfeatures._set_caller = Mock()
 
-        userfeatures.set_members()
+        userfeatures._set_members()
 
         objects.ExtenFeatures = Mock()
         objects.User = Mock()
@@ -79,11 +79,29 @@ class TestUserFeatures(unittest.TestCase):
 
         with patch.object(objects.User, '__init__') as user_init:
             user_init.return_value = None
-            userfeatures._set_caller()
-            user_init.assert_called_with(self._agi, self._cursor, self._variables['XIVO_USERID'])
 
+            userfeatures._set_caller()
+
+            user_init.assert_called_with(self._agi, self._cursor, self._variables['XIVO_USERID'])
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
+
+    def test_set_lines(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._set_lines()
+
+        self.assertEqual(userfeatures._lines, None)
+
+        userfeatures._dstid = self._variables['XIVO_DSTID']
+        with patch.object(objects.Lines, '__init__') as lines_init:
+            lines_init.return_value = None
+
+            userfeatures._set_lines()
+
+            lines_init.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_DSTID']))
+        self.assertNotEqual(userfeatures._lines, None)
+        self.assertTrue(isinstance(userfeatures._lines, objects.Lines))
 
 
 if __name__ == "__main__":

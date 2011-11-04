@@ -16,8 +16,9 @@ class UserFeatures(Handler):
         self._dstnum = None
         self._feature_list = None
         self._caller = None
+        self._lines = None
 
-    def set_members(self):
+    def _set_members(self):
         self._userid = self._agi.get_variable('XIVO_USERID')
         self._dstid = self._agi.get_variable('XIVO_DSTID')
         self._lineid = self._agi.get_variable('XIVO_LINEID')
@@ -37,3 +38,10 @@ class UserFeatures(Handler):
                 self._caller = objects.User(self._agi, self._cursor, int(self._userid))
             except (ValueError, LookupError):
                 self._caller = None
+
+    def _set_lines(self):
+        if self._dstid:
+            try:
+                self._lines = objects.Lines(self._agi, self._cursor, int(self._dstid))
+            except (ValueError, LookupError), e:
+                self._agi.dp_break(str(e))
