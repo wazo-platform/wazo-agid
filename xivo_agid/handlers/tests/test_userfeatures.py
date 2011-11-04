@@ -23,13 +23,9 @@ class TestUserFeatures(unittest.TestCase):
         self._agi.get_variable = get_variable
         self._cursor = Mock()
         self._args = Mock()
-        self._old_extenfeatures = objects.ExtenFeatures
-        objects.ExtenFeatures = Mock
 
     def tearDown(self):
-        objects.ExtenFeatures = self._old_extenfeatures
-        self._old_extenfeatures = None
-
+        pass
 
     def test_userfeatures(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -42,11 +38,13 @@ class TestUserFeatures(unittest.TestCase):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._set_feature_list = Mock()
         userfeatures._set_caller = Mock()
+        userfeatures._set_lines = Mock()
+        userfeatures._set_user = Mock()
 
         userfeatures._set_members()
 
         objects.ExtenFeatures = Mock()
-        objects.User = Mock()
+        old_user, objects.User = objects.User, Mock()
 
         self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
         self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
@@ -57,6 +55,10 @@ class TestUserFeatures(unittest.TestCase):
         self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
         self.assertTrue(userfeatures._set_feature_list.called)
         self.assertTrue(userfeatures._set_caller.called)
+        self.assertTrue(userfeatures._set_lines.called)
+        self.assertTrue(userfeatures._set_user.called)
+
+        objects.User, old_user = old_user, None
 
     def test_set_feature_list(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -103,9 +105,74 @@ class TestUserFeatures(unittest.TestCase):
         self.assertNotEqual(userfeatures._lines, None)
         self.assertTrue(isinstance(userfeatures._lines, objects.Lines))
 
+    def test_set_user(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        userfeatures._set_xivo_user_name = Mock()
+
+        userfeatures._set_user()
+
+        self.assertTrue(userfeatures._user is None)
+        self.assertEqual(userfeatures._set_xivo_user_name.call_count, 0)
+
+        userfeatures._dstid = self._variables['XIVO_DSTID']
+
+        with patch.object(objects.User, '__init__') as user_init:
+            user_init.return_value = None
+
+            userfeatures._set_user()
+
+            self.assertEqual(userfeatures._set_xivo_user_name.call_count, 1)
+            self.assertTrue(userfeatures._user is not None)
+            self.assertTrue(isinstance(userfeatures._user, objects.User))
+
     def test_execute(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        
+        userfeatures._set_members = Mock()
+        userfeatures._set_xivo_ifaces = Mock()
+
+        userfeatures.execute()
+
+        self.assertEqual(userfeatures._set_members.call_count, 1)
+        self.assertEqual(userfeatures._set_xivo_ifaces.call_count, 1)
+
+    def test_xivo_set_iface_nb(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        self._agi.set_variable = Mock()
+
+        userfeatures._set_xivo_iface_nb(0)
+
+        self._agi.set_variable.assert_called_once_with('XIVO_INTERFACE_NB', 0)
+
+    def test_is_main_line(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        self.assertFalse(userfeatures._is_main_line())
+
+        lineid = '97'
+        userfeatures._lineid = lineid
+        userfeatures._lines = Mock()
+        userfeatures._lines.lines = [{'id': lineid}, ]
+
+        self.assertTrue(userfeatures._is_main_line())
+
+    def test_set_xivo_user_name(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        self._agi.set_variable = Mock()
+
+        userfeatures._set_xivo_user_name()
+
+        self.assertEqual(self._agi.call_count, 0)
+
+        self._agi.set_variable.reset_mock()
+
+        userfeatures._user = Mock()
+        userfeatures._user.firstname = 'firstname'
+        userfeatures._user.lastname = 'lastname'
+
+        userfeatures._set_xivo_user_name()
+
+        self.assertEqual(self._agi.set_variable.call_count, 2)
 
 
 if __name__ == "__main__":

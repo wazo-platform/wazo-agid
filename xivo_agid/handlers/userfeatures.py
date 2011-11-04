@@ -2,6 +2,8 @@
 from xivo_agid.handlers.Handler import Handler
 from xivo_agid import objects
 
+import time
+
 
 class UserFeatures(Handler):
 
@@ -17,6 +19,7 @@ class UserFeatures(Handler):
         self._feature_list = None
         self._caller = None
         self._lines = None
+        self._user = None
 
     def _set_members(self):
         self._userid = self._agi.get_variable('XIVO_USERID')
@@ -28,6 +31,8 @@ class UserFeatures(Handler):
         self._dstnum = self._agi.get_variable('XIVO_DSTNUM')
         self._set_feature_list()
         self._set_caller()
+        self._set_lines()
+        self._set_user()
 
     def _set_feature_list(self):
         self._feature_list = objects.ExtenFeatures(self._agi, self._cursor)
@@ -45,3 +50,294 @@ class UserFeatures(Handler):
                 self._lines = objects.Lines(self._agi, self._cursor, int(self._dstid))
             except (ValueError, LookupError), e:
                 self._agi.dp_break(str(e))
+
+    def _set_user(self):
+        if self._dstid:
+            try:
+                self._user = objects.User(self._agi, self._cursor, int(self._dstid))
+            except (ValueError, LookupError), e:
+                self._agi.dp_break(str(e))
+            self._set_xivo_user_name()
+
+    def _is_main_line(self):
+        return self._lineid and self._lines.lines and str(self._lines.lines[0]['id']) == self._lineid
+
+    def _ring_main_line_only(self):
+        try:
+            curline = [line for line in self._lines.lines if str(line['id']) == self._lineid][0]
+            self._set_xivo_iface_nb(1)
+            self._agi.set_variable('XIVO_INTERFACE_0', "%s/%s" % (curline['protocol'], curline['name']))
+        except Exception:
+            pass
+
+    def _ring_line_sequence(self):
+        num = 0
+        curlines = []
+        for line in self._lines.lines:
+            if num < line['num']:
+                self._agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
+                num += 1
+                del curlines[:]
+            curlines.append('%s/%s' % (line['protocol'], line['name']))
+        if len(curlines) > 0:
+            self._agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
+            num += 1
+        self._agi.set_variable('XIVO_INTERFACE_NB', num)
+
+    def _set_xivo_ifaces(self):
+        self._set_xivo_iface_nb(0)
+        if not self._is_main_line():
+            self._ring_main_line_only()
+        else:
+            self._ring_line_sequence()
+
+    def execute(self):
+        self._set_members()
+        self._set_xivo_ifaces()
+        self._set_user_filter()
+
+    def _set_xivo_user_name(self):
+        if self._user:
+            if self._user.firstname:
+                self._agi.set_variable('XIVO_DST_FIRSTNAME', self._user.firstname)
+            if self._user.lastname:
+                self._agi.set_variable('XIVO_DST_LASTNAME', self._user.lastname)
+
+
+    def _set_user_filter(self):
+        self._user_filter = self._user.filter
+
+    def _set_xivo_iface_nb(self, number):
+        self._agi.set_variable('XIVO_INTERFACE_NB', 0)
+
+    def to_refactor(self):
+        # Special case. If a boss-secretary filter is set, the code will prematurely
+        # exit because the other normally set variables are skipped.
+        if not self._bypass_filter and self._user_filter and self._user_filter.active:
+            zone_applies = self._user_filter.check_zone(self._zone)
+
+            if self._caller:
+                secretary = self._user_filter.get_secretary_by_id(self._caller.id)
+            else:
+                secretary = None
+
+            if zone_applies and not secretary:
+                if self._user_filter.mode in ("bossfirst-simult", "bossfirst-serial", "all"):
+                    self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', self._user_filter.boss.interface)
+                    self._agi.set_variable('XIVO_CALLFILTER_BOSS_TIMEOUT', self._user_filter.boss.ringseconds)
+
+                if self._user_filter.mode in ("bossfirst-simult", "secretary-simult", "all"):
+                    interface = '&'.join(secretary.interface for secretary in self._user_filter.secretaries if secretary.active)
+                    self._agi.set_variable('XIVO_CALLFILTER_INTERFACE', interface)
+                    self._agi.set_variable('XIVO_CALLFILTER_TIMEOUT', self._user_filter.ringseconds)
+                elif self._user_filter.mode in ("bossfirst-serial", "secretary-serial"):
+                    index = 0
+
+                    for secretary in self._user_filter.secretaries:
+                        if secretary.active:
+                            self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_INTERFACE' % (index,), secretary.interface)
+                            self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_TIMEOUT' % (index,), secretary.ringseconds)
+                            index += 1
+
+                self._user_filter.set_dial_actions()
+                self._user_filter.rewrite_cid()
+
+                self._agi.set_variable('XIVO_CALLFILTER', '1')
+                self._agi.set_variable('XIVO_CALLFILTER_MODE', self._user_filter.mode)
+                return
+
+        # Options
+        options = ""
+
+        if self._user.enablexfer:
+            options += "t"
+
+        if self._caller and self._caller.enablexfer:
+            options += "T"
+
+        if self._user.enableautomon:
+            options += "w"
+
+        if self._caller and self._caller.enableautomon:
+            options += "W"
+
+        if self._feature_list.incallfilter and self._user.incallfilter:
+            options += "p"
+
+        self._agi.set_variable('XIVO_CALLOPTIONS', options)
+        self._agi.set_variable('XIVO_SIMULTCALLS', self._user.simultcalls)
+
+        if self._user.ringseconds > 0:
+            ringseconds = self._user.ringseconds
+        else:
+            ringseconds = ""
+
+        self._agi.set_variable('XIVO_RINGSECONDS', ringseconds)
+
+        if self._feature_list.enablednd:
+            enablednd = self._user.enablednd
+        else:
+            enablednd = 0
+
+        self._agi.set_variable('XIVO_ENABLEDND', enablednd)
+
+        mailbox         = ""
+        mailbox_context = ""
+        useremail       = ""
+
+        if self._user.vmbox:
+            mailbox = self._user.vmbox.mailbox
+            mailbox_context = self._user.vmbox.context
+
+            if self._user.vmbox.email:
+                useremail = self._user.vmbox.email
+
+        self._agi.set_variable('XIVO_ENABLEVOICEMAIL', self._user.enablevoicemail)
+        self._agi.set_variable('XIVO_MAILBOX', mailbox)
+        self._agi.set_variable('XIVO_MAILBOX_CONTEXT', mailbox_context)
+        self._agi.set_variable('XIVO_USEREMAIL', useremail)
+
+        enableunc       = 0
+        unc_action      = 'none'
+        unc_actionarg1  = ""
+        unc_actionarg2  = ""
+
+        called_line = self.lines.lines[0]
+
+        if self.feature_list.fwdunc: # pylint: disable-msg=E1101
+            enableunc = self.user.enableunc
+
+            if enableunc and 'context' in called_line:
+                unc_action      = 'extension'
+                unc_actionarg1  = self.user.destunc
+                unc_actionarg2  = called_line['context']
+
+        self._agi.set_variable('XIVO_ENABLEUNC', enableunc)
+        objects.DialAction.set_agi_variables(self._agi,
+                                             'unc',
+                                             'user',
+                                             unc_action,
+                                             unc_actionarg1,
+                                             unc_actionarg2,
+                                             False)
+
+        setbusy         = False
+        enablebusy      = 0
+        busy_action     = 'none'
+        busy_actionarg1 = ""
+        busy_actionarg2 = ""
+
+        if self._feature_list.fwdbusy: # pylint: disable-msg=E1101
+            enablebusy = self._user.enablebusy
+
+            if enablebusy and 'context' in called_line:
+                busy_action     = 'extension'
+                busy_actionarg1 = self._user.destbusy
+                busy_actionarg2 = called_line['context']
+            else:
+                setbusy = True
+                objects.DialAction(self._agi, self._cursor, 'busy', 'user', self._user.id).set_variables()
+
+        self._agi.set_variable('XIVO_ENABLEBUSY', enablebusy)
+
+        if not setbusy:
+            objects.DialAction.set_agi_variables(self._agi,
+                                                 'busy',
+                                                 'user',
+                                                 busy_action,
+                                                 busy_actionarg1,
+                                                 busy_actionarg2,
+                                                 False)
+
+        setrna         = False
+        enablerna      = 0
+        rna_action     = 'none'
+        rna_actionarg1 = ""
+        rna_actionarg2 = ""
+
+        if self._feature_list.fwdrna: # pylint: disable-msg=E1101
+            enablerna = self._user.enablerna
+
+            if enablerna and 'context' in called_line:
+                rna_action     = 'extension'
+                rna_actionarg1 = self._user.destrna
+                rna_actionarg2 = called_line['context']
+            else:
+                setrna = True
+                objects.DialAction(self._agi, self._cursor, 'noanswer', 'user', self._user.id).set_variables()
+
+        self._agi.set_variable('XIVO_ENABLERNA', enablerna)
+
+        if not setrna:
+            objects.DialAction.set_agi_variables(self._agi,
+                                                 'noanswer',
+                                                 'user',
+                                                 rna_action,
+                                                 rna_actionarg1,
+                                                 rna_actionarg2,
+                                                 False)
+
+        objects.DialAction(self._agi, self._cursor, 'congestion', 'user', self._user.id).set_variables()
+        objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
+
+        if self._user.musiconhold:
+            self._agi.set_variable('CHANNEL(musicclass)', self._user.musiconhold)
+
+        callrecordfile = ""
+        if self._feature_list.callrecord:
+            if self._user.callrecord or self._caller.callrecord:
+                # BUGBUG the context is missing in the filename TODO use ids
+                callrecordfile = "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
+            else:
+                callrecordfile = ""
+        else:
+            callrecordfile = ""
+
+        if self._user.preprocess_subroutine:
+            preprocess_subroutine = self._user.preprocess_subroutine
+        else:
+            preprocess_subroutine = ""
+
+        if self._user.mobilephonenumber:
+            mobilephonenumber = self._user.mobilephonenumber
+        else:
+            mobilephonenumber = ""
+
+        if self._user.pitch:
+            pitch = self._user.pitch
+            pitchdirection = self._user.pitchdirection
+        else:
+            pitch = ""
+            pitchdirection = ""
+
+        self._agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
+        self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
+        self._agi.set_variable('XIVO_MOBILEPHONENUMBER', mobilephonenumber)
+        self._agi.set_variable('XIVO_PITCH', pitch)
+        self._agi.set_variable('XIVO_PITCHDIRECTION', pitchdirection)
+
+        # voicemail lang
+        vmbox = None
+        if len(mailbox) > 0:
+            try:
+                vmbox = objects.VMBox(self._agi, self._cursor, mailbox=mailbox, context=mailbox_context)
+            except (ValueError, LookupError), e:
+                self._agi.dp_break(str(e))
+
+        mbox_lang = ''
+
+        if self._zone == 'intern' and self._caller and self._caller.language:
+            mbox_lang = self._caller.language
+        elif vmbox and vmbox.language:
+            mbox_lang = vmbox.language
+        elif self._user and self._user.language:
+            mbox_lang = self._user.language
+
+        self._agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
+
+        # schedule
+        path = self._agi.get_variable('XIVO_PATH')
+        if path is None or len(path) == 0:
+            self._agi.set_variable('XIVO_PATH'   , 'user')
+            self._agi.set_variable('XIVO_PATH_ID', self._user.id)
+
