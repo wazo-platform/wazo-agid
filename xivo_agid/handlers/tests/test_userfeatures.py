@@ -103,6 +103,10 @@ class TestUserFeatures(unittest.TestCase):
         self.assertNotEqual(userfeatures._lines, None)
         self.assertTrue(isinstance(userfeatures._lines, objects.Lines))
 
+    def test_execute(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_']
