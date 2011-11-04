@@ -309,23 +309,23 @@ class UserFeatures(Handler):
         unc_action = 'none'
         unc_actionarg1 = ""
         unc_actionarg2 = ""
-        if self.feature_list.fwdunc:
-            enableunc = self.user.enableunc
+        if self._feature_list.fwdunc:
+            enableunc = self._user.enableunc
             if enableunc and 'context' in called_line:
                 unc_action = 'extension'
-                unc_actionarg1 = self.user.destunc
+                unc_actionarg1 = self._user.destunc
                 unc_actionarg2 = called_line['context']
         self._agi.set_variable('XIVO_ENABLEUNC', enableunc)
         objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
 
     def _set_call_forwards(self):
-        called_line = self.lines.lines[0]
+        called_line = self._lines.lines[0]
         self._set_enableunc(called_line)
         self._setbusy(called_line)
         self._setrna(called_line)
 
     def _set_dial_action_congestion(self):
-        return objects.DialAction(self._agi, self._cursor, 'congestion', 'user', self._user.id).set_variables()
+        objects.DialAction(self._agi, self._cursor, 'congestion', 'user', self._user.id).set_variables()
 
     def _set_dial_action_chanunavail(self):
-        return objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
+        objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
