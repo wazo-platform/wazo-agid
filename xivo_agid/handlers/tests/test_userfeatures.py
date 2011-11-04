@@ -129,6 +129,8 @@ class TestUserFeatures(unittest.TestCase):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._set_members = Mock()
         userfeatures._set_xivo_ifaces = Mock()
+        userfeatures._set_user_filter = Mock()
+        userfeatures._boss_secretary_filter = Mock()
 
         userfeatures.execute()
 
