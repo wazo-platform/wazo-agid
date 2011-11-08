@@ -109,7 +109,7 @@ class UserFeatures(Handler):
 
     def _set_xivo_ifaces(self):
         self._set_xivo_iface_nb(0)
-        if not self._is_main_line():
+        if self._is_main_line():
             self._ring_main_line_only()
         else:
             self._ring_line_sequence()
