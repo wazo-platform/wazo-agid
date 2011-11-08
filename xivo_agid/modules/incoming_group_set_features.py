@@ -54,21 +54,6 @@ def incoming_group_set_features(agi, cursor, args):
     agi.set_variable('XIVO_GROUPOPTIONS', options)
     agi.set_variable('XIVO_GROUPNEEDANSWER', needanswer)
 
-    pickupmark = [] 
-    memberlist = agi.get_variable("QUEUE_MEMBER_LIST(%s)" % group.name).split(',')
-
-    for member in memberlist:
-        try: 
-            protocol, name = member.split('/', 1)
-            user = objects.User(agi, cursor, name=name, protocol=protocol)
-        except (ValueError, LookupError):
-            continue
-
-        if user.number:
-            pickupmark.append("%s%%%s" % (user.number, user.context))
-
-    agi.set_variable('__PICKUPMARK', '&'.join(pickupmark))
-
     if group.preprocess_subroutine:
         preprocess_subroutine = group.preprocess_subroutine
     else:

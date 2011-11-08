@@ -68,23 +68,6 @@ def incoming_queue_set_features(agi, cursor, args):
     agi.set_variable('XIVO_QUEUEURL', queue.url)
     agi.set_variable('XIVO_QUEUEANNOUNCEOVERRIDE', queue.announceoverride)
 
-
-    pickupmark = [] 
-    memberlist = agi.get_variable("QUEUE_MEMBER_LIST(%s)" % queue.name).split(',')
-
-    for member in memberlist:
-        try: 
-            protocol, name = member.split('/', 1)
-            lines = objects.Lines(agi, cursor, name=name, protocol=protocol)
-        except (ValueError, LookupError):
-            continue
-
-    # for line in lines.lines:
-    # if line.number:
-    # pickupmark.append("%s%%%s" % (line.number, line.context))
-
-    agi.set_variable('__PICKUPMARK', '&'.join(pickupmark))
-
     if queue.preprocess_subroutine:
         preprocess_subroutine = queue.preprocess_subroutine
     else:
