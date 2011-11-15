@@ -77,7 +77,7 @@ def _new_mail_backend(subject, content_file):
                                  "-e", "set realname='XiVO Fax'",
                                  "-e", "set use_from=yes",
                                  "-s", subject % fmt_dict,
-                                 "-a", pdffile,
+                                 "-a", pdffile, "--",
                                  email],
                                  stdin=subprocess.PIPE,
                                  close_fds=True)
@@ -158,9 +158,8 @@ def _do_handle_fax(faxfile, dstnum, args):
         try:
             backend(faxfile, dstnum, args)
         except Exception:
-            # XXX should we raise an exception if one backend fails or is it
-            #     logging the exception just fine...
             logger.error("Fax backend %s failed to handle fax", backend, exc_info=True)
+            raise
     
     try:
         os.remove(faxfile)
