@@ -33,9 +33,6 @@ def incoming_did_set_features(agi, cursor, args):
 
     agi.set_variable('XIVO_REAL_NUMBER', did.exten)
     agi.set_variable('XIVO_REAL_CONTEXT', did.context)
-    agi.set_variable('XIVO_FAXDETECT_ENABLE', did.faxdetectenable)
-    agi.set_variable('XIVO_FAXDETECT_TIMEOUT', did.faxdetecttimeout)
-    agi.set_variable('XIVO_FAXDETECT_EMAIL', did.faxdetectemail)
     agi.set_variable('XIVO_DIDPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     # schedule

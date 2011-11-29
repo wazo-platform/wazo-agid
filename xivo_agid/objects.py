@@ -1310,8 +1310,7 @@ class DID:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'exten', 'context', 'preprocess_subroutine',
-                   'faxdetectenable', 'faxdetecttimeout', 'faxdetectemail')
+        columns = ('id', 'exten', 'context', 'preprocess_subroutine')
 
         if xid:
             cursor.query("SELECT ${columns} FROM incall "
@@ -1339,9 +1338,6 @@ class DID:
         self.exten = res['exten']
         self.context = res['context']
         self.preprocess_subroutine = res['preprocess_subroutine']
-        self.faxdetectenable = int(bool(res['faxdetectenable']))
-        self.faxdetecttimeout = res['faxdetecttimeout']
-        self.faxdetectemail = res['faxdetectemail']
 
     def set_dial_actions(self):
         DialAction(self.agi, self.cursor, "answer", "incall", self.id).set_variables()
