@@ -1350,37 +1350,32 @@ class Outcall:
     def __init__(self, agi, cursor, xid=None, exten=None, context=None):
         self.agi = agi
         self.cursor = cursor
+        self.xid = xid
+        self.exten = exten
+        self.context = context
 
+    def retrieve_values(self, xid=None, exten=None, context=None):
         columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal',
                    'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
                    'outcall.id', 'dialpattern.typeid', 'dialpattern.type','dialpattern.exten', 
                    'dialpattern.stripnum', 'dialpattern.externprefix', 'dialpattern.emergency', 
                    'dialpattern.setcallerid', 'dialpattern.callerid', 'dialpattern.prefix')
 
-        if xid:
-            cursor.query("SELECT ${columns} FROM outcall, dialpattern "
+        if self.xid:
+            self.cursor.query("SELECT ${columns} FROM outcall, dialpattern "
                          "WHERE dialpattern.typeid = outcall.id "
                          "AND dialpattern.type = 'outcall' "
                          "AND dialpattern.id = %s"
                          "AND outcall.commented = 0",
                          columns,
-                         (xid,))
-        
-        #elif exten and context:
-        #    contextinclude = Context(agi, cursor, context).include
-        #    cursor.query("SELECT ${columns} FROM outcall "
-        #                 "WHERE exten = %s "
-        #                 "AND context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-        #                 "AND commented = 0",
-        #                 columns,
-        #                 [exten] + contextinclude)
+                         (self.xid,))
         else:
             raise LookupError("id or exten@context must be provided to look up an outcall entry")
 
-        res = cursor.fetchone()
+        res = self.cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find outcall entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
+            raise LookupError("Unable to find outcall entry (id: %s, exten: %s, context: %s)" % (self.xid, self.exten, self.context))
 
 
         self.id = res['outcall.id']
@@ -1396,21 +1391,21 @@ class Outcall:
         self.hangupringtime = res['outcall.hangupringtime']
         self.emergency = res['dialpattern.emergency']
 
-        cursor.query("SELECT ${columns} FROM outcalltrunk "
+        self.cursor.query("SELECT ${columns} FROM outcalltrunk "
                      "WHERE outcallid = %s "
                      "ORDER BY priority ASC",
                      ('trunkfeaturesid',),
                      (self.id,))
-        res = cursor.fetchall()
+        res = self.cursor.fetchall()
 
         if not res:
-            raise ValueError("No trunk associated with outcall (id: %d)" % (xid,))
+            raise ValueError("No trunk associated with outcall (id: %d)" % (self.xid,))
 
         self.trunks = []
 
         for row in res:
             try:
-                trunk = Trunk(agi, cursor, row['trunkfeaturesid'])
+                trunk = Trunk(self.agi, self.cursor, row['trunkfeaturesid'])
             except LookupError:
                 continue
 
