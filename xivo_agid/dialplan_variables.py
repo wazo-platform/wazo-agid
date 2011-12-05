@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from xivo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 __license__ = """
     Copyright (C) 2006-2010  Avencall
@@ -18,14 +17,17 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
-from xivo_agid import agid
-
-
-def outgoing_user_set_features(agi, cursor, args):
-    outgoing_features_handler = OutgoingFeatures(agi, cursor, args)
-    outgoing_features_handler.execute()
-
-
-
-agid.register(outgoing_user_set_features)
+CALL_OPTIONS = 'XIVO_CALLOPTIONS'
+CALL_RECORD_FILE_NAME = 'XIVO_CALLRECORDFILE'
+DESTINATION_ID = 'XIVO_DSTID'
+DESTINATION_NUMBER = 'XIVO_DSTNUM'
+HANGUP_RING_TIME = 'XIVO_HANGUPRINGTIME'
+INTERFACE = 'XIVO_INTERFACE'
+OUTCALL_ID = 'XIVO_OUTCALLID'
+OUTCALL_PREPROCESS_SUBROUTINE = 'XIVO_OUTCALLPREPROCESS_SUBROUTINE'
+PATH = 'XIVO_PATH'
+PATH_ID = 'XIVO_PATH_ID'
+SOURCE_NUMBER = 'XIVO_SRCNUM'
+TRUNK_EXTEN = 'XIVO_TRUNKEXTEN'
+TRUNK_SUFFIX = 'XIVO_TRUNKSUFFIX'
+USERID = 'XIVO_USERID'

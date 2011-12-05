@@ -6,6 +6,8 @@ import time
 
 
 class UserFeatures(Handler):
+    
+    PATH_TYPE = 'user'
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
@@ -42,7 +44,7 @@ class UserFeatures(Handler):
         self._set_mobile_number()
         self._set_pitch()
         self._set_vmbox_lang()
-        self._set_path()
+        self._set_path(UserFeatures.PATH_TYPE,self._user.id)
 
     def _set_members(self):
         self._userid = self._agi.get_variable('XIVO_USERID')
@@ -188,13 +190,6 @@ class UserFeatures(Handler):
         elif self._user and self._user.language:
             mbox_lang = self._user.language
         self._agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
-
-    def _set_path(self):
-        # schedule
-        path = self._agi.get_variable('XIVO_PATH')
-        if path is None or len(path) == 0:
-            self._agi.set_variable('XIVO_PATH', 'user')
-            self._agi.set_variable('XIVO_PATH_ID', self._user.id)
 
     def _set_pitch(self):
         if self._user.pitch:
