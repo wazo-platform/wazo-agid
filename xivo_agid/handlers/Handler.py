@@ -11,8 +11,8 @@ class Handler(object):
 
     def _set_path(self, path_type, path_id):
         # schedule path
-        path = self.agi.get_variable(dialplan_variables.PATH)
+        path = self._agi.get_variable(dialplan_variables.PATH)
         if path is None or len(path) == 0:
-            self.agi.set_variable(dialplan_variables.PATH, path_type)
-            self.agi.set_variable(dialplan_variables.PATH_ID, path_id)
+            self._agi.set_variable(dialplan_variables.PATH, path_type)
+            self._agi.set_variable(dialplan_variables.PATH_ID, path_id)
 

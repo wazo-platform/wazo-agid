@@ -1347,14 +1347,12 @@ class DID:
 
 
 class Outcall:
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None):
+    def __init__(self, agi, cursor):
         self.agi = agi
         self.cursor = cursor
-        self.xid = xid
-        self.exten = exten
-        self.context = context
 
-    def retrieve_values(self, xid=None, exten=None, context=None):
+    def retrieve_values(self, xid):
+        self.xid = xid
         columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal',
                    'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
                    'outcall.id', 'dialpattern.typeid', 'dialpattern.type','dialpattern.exten', 
@@ -1375,7 +1373,7 @@ class Outcall:
         res = self.cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find outcall entry (id: %s, exten: %s, context: %s)" % (self.xid, self.exten, self.context))
+            raise LookupError("Unable to find outcall entry (id: %s)" % (self.xid))
 
 
         self.id = res['outcall.id']
