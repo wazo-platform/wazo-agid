@@ -1356,8 +1356,8 @@ class Outcall:
         columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal',
                    'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
                    'outcall.id', 'dialpattern.typeid', 'dialpattern.type','dialpattern.exten', 
-                   'dialpattern.stripnum', 'dialpattern.externprefix', 'dialpattern.emergency', 
-                   'dialpattern.setcallerid', 'dialpattern.callerid', 'dialpattern.prefix')
+                   'dialpattern.stripnum', 'dialpattern.externprefix', 
+                   'dialpattern.callerid', 'dialpattern.prefix')
 
         if self.xid:
             self.cursor.query("SELECT ${columns} FROM outcall, dialpattern "
@@ -1381,13 +1381,11 @@ class Outcall:
         self.context = res['outcall.context']
         self.externprefix = res['dialpattern.externprefix']
         self.stripnum = res['dialpattern.stripnum']
-        self.setcallerid = res['dialpattern.setcallerid']
         self.callerid = res['dialpattern.callerid']
         self.useenum = res['outcall.useenum']
         self.internal = res['outcall.internal']
         self.preprocess_subroutine = res['outcall.preprocess_subroutine']
         self.hangupringtime = res['outcall.hangupringtime']
-        self.emergency = res['dialpattern.emergency']
 
         self.cursor.query("SELECT ${columns} FROM outcalltrunk "
                      "WHERE outcallid = %s "
