@@ -66,8 +66,9 @@ class OutgoingFeatures(Handler):
 
 
     def _set_caller_id(self):
-        if self.callerid in (None, '', 'default') and self.outcall.callerid:
-            self.callerid = self.outcall.callerid
+        if not self.outcall.internal:
+            if self.callerid in (None, '', 'default') and self.outcall.callerid:
+                self.callerid = self.outcall.callerid
         if self.callerid and self.callerid != 'default':
             objects.CallerID.set(self._agi, self.callerid)
             if self.callerid == 'anonymous':
