@@ -27,6 +27,25 @@ class TestUserFeatures(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_set_dest_context(self):
+        context = 'foo'
+        number = '101'
+        line_list = [{'id': '1',
+                      'number': '100',
+                      'context': 'bar'},
+                     {'id': '2',
+                      'number': number,
+                      'context': context}]
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        self.assertEqual(None, userfeatures._dstcontext)
+
+        userfeatures._lines = Mock(objects.Lines)
+        userfeatures._lines.lines = line_list
+        userfeatures._dstnum = number
+        userfeatures._set_dest_context()
+
+        self.assertEqual(context, userfeatures._dstcontext)
+
     def test_userfeatures(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
