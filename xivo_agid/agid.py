@@ -26,15 +26,10 @@ from threading import Lock
 from xivo import agitb
 from xivo import anysql
 from xivo import moresynchro
-from xivo.BackSQL import backmysql
-from xivo.BackSQL import backsqlite
 
 from xivo_agid import fastagi
 
 
-NAME = "agid"
-VERSION_MAJOR = 0
-VERSION_MINOR = 1
 AGI_CONFFILE = "/etc/pf-xivo/agid.conf"
 LISTEN_ADDR_DEFAULT = "127.0.0.1"
 LISTEN_PORT_DEFAULT = 4573
@@ -46,7 +41,7 @@ _server = None
 _handlers = {}
 
 
-class DBConnectionPool:
+class DBConnectionPool(object):
     def __init__(self):
         self.conns = []
         self.size = 0
@@ -54,57 +49,35 @@ class DBConnectionPool:
         self.lock = Lock()
 
     def reload(self, size, db_uri):
-        self.lock.acquire()
-        try:
+        with self.lock:
             for conn in self.conns:
                 conn.close()
 
-            del self.conns[:]
-
-            while len(self.conns) < size:
-                self.conns.append(anysql.connect_by_uri(db_uri))
+            self.conns = [anysql.connect_by_uri(db_uri) for _ in xrange(size)]
 
             self.size = size
             self.db_uri = db_uri
-            log.debug("reloaded db conn pool")
-            log.debug("%s", self)
-        finally:
-            self.lock.release()
+        log.debug("reloaded db conn pool")
 
     def acquire(self):
-        self.lock.acquire()
-        try:
+        with self.lock:
             try:
                 conn = self.conns.pop()
                 log.debug("acquiring connection: got connection from pool")
             except IndexError:
                 conn = anysql.connect_by_uri(self.db_uri)
                 log.debug("acquiring connection: pool empty, created new connection")
-        finally:
-            log.debug("%s", self)
-            self.lock.release()
 
         return conn
 
     def release(self, conn):
-        self.lock.acquire()
-        try:
+        with self.lock:
             if len(self.conns) < self.size:
                 self.conns.append(conn)
                 log.debug("releasing connection: pool not full, refilled with connection")
             else:
                 conn.close()
                 log.debug("releasing connection: pool full, connection closed")
-
-        finally:
-            log.debug("%s", self)
-            self.lock.release()
-
-    # The connection pool lock must be hold.
-    def __str__(self):
-        return ("connection pool: size = %d\n"
-                "connection pool: available connections = %d\n"
-                "connection pool: db_uri = %s") % (self.size, len(self.conns), self.db_uri)
 
 
 class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
@@ -163,7 +136,7 @@ class AGID(SocketServer.ThreadingTCPServer):
     initialized = False
 
     def __init__(self):
-        log.info('%s %s.%s starting...', NAME, VERSION_MAJOR, VERSION_MINOR)
+        log.info('agid starting...')
 
         signal.signal(signal.SIGHUP, sighup_handle)
 
@@ -204,7 +177,7 @@ class AGID(SocketServer.ThreadingTCPServer):
         self.db_conn_pool.reload(conn_pool_size, db_uri)
 
 
-class Handler:
+class Handler(object):
     def __init__(self, handler_name, setup_fn, handle_fn):
         self.handler_name = handler_name
         self.setup_fn = setup_fn
@@ -216,18 +189,16 @@ class Handler:
             self.setup_fn(cursor)
 
     def reload(self, cursor):
-        if not self.setup_fn:
-            return
-
-        if not self.lock.acquire_write():
-            log.error("deadlock detected and avoided for %r", self.handler_name)
-            log.error("%r has not be reloaded", self.handler_name)
-            return
-        try:
-            self.setup_fn(cursor)
-            log.debug('handler %r reloaded', self.handler_name)
-        finally:
-            self.lock.release()
+        if self.setup_fn:
+            if not self.lock.acquire_write():
+                log.error("deadlock detected and avoided for %r", self.handler_name)
+                log.error("%r has not be reloaded", self.handler_name)
+                return
+            try:
+                self.setup_fn(cursor)
+                log.debug('handler %r reloaded', self.handler_name)
+            finally:
+                self.lock.release()
 
     def handle(self, agi, cursor, args):
         self.lock.acquire_read()
@@ -237,7 +208,7 @@ class Handler:
             self.lock.release()
 
 
-def register(handle_fn, setup_fn = None):
+def register(handle_fn, setup_fn=None):
     handler_name = handle_fn.__name__
 
     if handler_name in _handlers:
@@ -247,21 +218,18 @@ def register(handle_fn, setup_fn = None):
 
 
 def sighup_handle(signum, frame): # pylint: disable-msg=W0613
+    log.debug("reloading core engine")
+    _server.setup()
+
+    conn = _server.db_conn_pool.acquire()
     try:
-        log.debug("reloading core engine")
-
-        _server.setup()
-
-        log.debug("reloading handlers")
-
-        conn = _server.db_conn_pool.acquire()
         cursor = conn.cursor()
 
+        log.debug("reloading handlers")
         for handler in _handlers.itervalues():
             handler.reload(cursor)
 
         conn.commit()
-
         log.debug("finished reload")
     finally:
         _server.db_conn_pool.release(conn)
@@ -269,15 +237,17 @@ def sighup_handle(signum, frame): # pylint: disable-msg=W0613
 
 def run():
     conn = _server.db_conn_pool.acquire()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    log.debug("list of handlers: %s", ', '.join(sorted(_handlers.iterkeys())))
+        log.debug("list of handlers: %s", ', '.join(sorted(_handlers.iterkeys())))
 
-    for handler in _handlers.itervalues():
-        handler.setup(cursor)
+        for handler in _handlers.itervalues():
+            handler.setup(cursor)
 
-    conn.commit()
-    _server.db_conn_pool.release(conn)
+        conn.commit()
+    finally:
+        _server.db_conn_pool.release(conn)
 
     _server.serve_forever()
 
