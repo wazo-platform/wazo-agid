@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
         
         self.outgoing_features._set_caller_id()
         
-        self.assertIsNone(self.outgoing_features.callerid, 'caller id should not be set for internal interconnexions')
+        self.assertEqual(None, self.outgoing_features.callerid, 'caller id should not be set for internal interconnexions')
         
 
     def test_set_caller_id_no_forced_caller_id(self):
