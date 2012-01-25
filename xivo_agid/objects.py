@@ -739,7 +739,8 @@ class User:
             feature = "enablevoicemail"
         elif feature == "dnd":
             feature = "enablednd"
-        elif feature not in ("callrecord", "incallfilter"):
+
+        if feature not in ("enablevoicemail", "enablednd", "callrecord", "incallfilter"):
             raise ValueError("invalid feature")
 
         enabled = int(not getattr(self, feature))

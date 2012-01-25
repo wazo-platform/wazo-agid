@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-    Copyright (C) 2006-2010  Avencall
+    Copyright (C) 2006-2012  Avencall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,166 +20,177 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 
+
 def phone_set_feature(agi, cursor, args):
-    userid  = agi.get_variable('XIVO_USERID')
-    xlen    = len(args)
+    try:
+        feature_name = args[0]
+    except IndexError:
+        agi.dp_break('Missing feature name argument')
 
-    if xlen == 0:
-        agi.dp_break("Invalid number of arguments")
+    function_name = '_phone_set_%s' % feature_name
+    try:
+        function = globals()[function_name]
+    except KeyError:
+        agi.dp_break('Unknown feature name %r' % feature_name)
 
-    feature = args[0]
+    try:
+        function(agi, cursor, args)
+    except LookupError, e:
+        agi.dp_break(str(e))
 
-    if feature in ("vm", "dnd", "callrecord", "incallfilter"):
-        if xlen > 1 and args[1] != '':
-            try:
-                if xlen == 2:
-                    context = objects.User(agi, cursor, xid=int(userid)).context
-                else:
-                    context = args[2]
 
-                user = objects.User(agi, cursor, exten=args[1], context=context)
-            except (ValueError, LookupError), e:
-                agi.dp_break(str(e))
-        else:
-            try:
-                userid = int(userid)
-                user = objects.User(agi, cursor, userid)        
-            except (ValueError, LookupError), e:
-                agi.dp_break(str(e))
+def _phone_set_callrecord(agi, cursor, args):
+    calling_user = _get_calling_user(agi, cursor)
+    calling_user.toggle_feature('callrecord')
 
-        if feature == "vm" and user.id != userid:
-            if user.vmbox:
-                passwd = user.vmbox.password
-            else:
-                try:
-                    passwd = objects.VMBox(agi, cursor, int(user.voicemailid), commentcond=False).password
-                except (ValueError, LookupError), e:
-                    agi.dp_break(str(e))
+    agi.set_variable('XIVO_CALLRECORDENABLED', calling_user.callrecord)
+    agi.set_variable('XIVO_USERID_OWNER', calling_user.id)
 
-            if passwd != '':
-                agi.appexec('Authenticate', passwd)
 
-        try:
-            user.toggle_feature(feature)
-        except objects.DBUpdateException, e:
-            agi.verbose(str(e))
+def _get_calling_user(agi, cursor):
+    return objects.User(agi, cursor, _get_id_of_calling_user(agi))
 
-        if feature == "vm":
-            agi.set_variable('XIVO_VMENABLED', user.enablevoicemail)
-        elif feature == "dnd":
-            agi.set_variable('XIVO_DNDENABLED', user.enablednd)
-        elif feature == "callrecord":
-            agi.set_variable('XIVO_CALLRECORDENABLED', user.callrecord)
-        elif feature == "incallfilter":
-            agi.set_variable('XIVO_INCALLFILTERENABLED', user.incallfilter)
-        agi.set_variable('XIVO_USERID_OWNER', user.id)
-    elif feature in ("unc", "rna", "busy"):
-        if xlen < 2:
-            agi.dp_break("Invalid number of arguments for %s" % feature)
 
-        enabled = int(args[1])
+def _get_id_of_calling_user(agi):
+    return int(agi.get_variable('XIVO_USERID'))
 
-        if xlen > 2:
-            arg = args[2]
-        else:
-            arg = None
 
-        if xlen > 3 and args[3] != '':
-            try:
-                if xlen == 4:
-                    context = objects.User(agi, cursor, xid=int(userid)).context
-                else:
-                    context = args[4]
+def _phone_set_dnd(agi, cursor, args):
+    calling_user = _get_calling_user(agi, cursor)
+    calling_user.toggle_feature('enablednd')
 
-                user = objects.User(agi, cursor, exten=args[3], context=context)
-            except (ValueError, LookupError), e:
-                agi.dp_break(str(e))
-        else:
-            try:
-                user = objects.User(agi, cursor, int(userid))
-            except (ValueError, LookupError), e:
-                agi.dp_break(str(e))
+    agi.set_variable('XIVO_DNDENABLED', calling_user.enablednd)
+    agi.set_variable('XIVO_USERID_OWNER', calling_user.id)
 
-        try:
-            user.set_feature(feature, enabled, arg)
-        except objects.DBUpdateException, e:
-            agi.verbose(str(e))
 
-        agi.set_variable("XIVO_%sENABLED" % feature.upper(), getattr(user, "enable%s" % feature))
-        agi.set_variable('XIVO_USERID_OWNER', user.id)
-    elif feature == "bsfilter":
-        try:
-            user = objects.User(agi, cursor, int(userid))
-        except (ValueError, LookupError), e:
-            agi.dp_break(str(e))
+def _phone_set_incallfilter(agi, cursor, args):
+    calling_user = _get_calling_user(agi, cursor)
+    calling_user.toggle_feature('incallfilter')
 
-        if xlen < 2:
-            agi.dp_break("Invalid number of arguments for bsfilter")
-            
-        master_line = objects.MasterLineUser(agi, cursor, int(user.id))
-        
-        ml_number = master_line.line['number']
+    agi.set_variable('XIVO_INCALLFILTERENABLED', calling_user.incallfilter)
+    agi.set_variable('XIVO_USERID_OWNER', calling_user.id)
 
-        try:
-            num1, num2 = args[1].split('*')
-            if ml_number not in (num1, num2):
-                raise ValueError("Invalid number")
-        except ValueError:
-            agi.dp_break("Invalid number")
 
-        bsf = None
-        secretary = None
-
-        # Both the boss and secretary numbers are passed, so select the one
-        if ml_number == num1:
-            number = num2
-        else:
-            number = num1
-
-        if user.bsfilter == "secretary":
-            try:
-                bsf = objects.BossSecretaryFilter(agi, cursor, number, user.context)
-                secretary_number = user.number
-            except LookupError:
-                pass
-        elif user.bsfilter == "boss":
-            bsf = user.filter
-            secretary_number = number
-
-        if bsf:
-            bsf.set_dial_actions()
-            secretary = bsf.get_secretary_by_number(secretary_number)
-
-        if not secretary:
-            agi.dp_break("Unable to find boss-secretary filter")
-
-        agi.verbose("Filter exists! (Caller: %r, secretary number: %r)" % (user.bsfilter, secretary_number))
-        cursor.query("SELECT ${columns} FROM callfiltermember "
-                     "WHERE callfilterid = %s "
-                     "AND type = %s "
-                     "AND " + cursor.cast('typeval', 'int') + " = %s "
-                     "AND bstype = %s",
-                     ('active',),
-                     (bsf.id, "user", secretary.id, "secretary"))
-        res = cursor.fetchone()
-
-        if not res:
-            agi.dp_break("Unable to find secretary (id = %d)" % secretary.id)
-
-        new_state = int(not res['active'])
-        cursor.query("UPDATE callfiltermember "
-                     "SET active = %s "
-                     "WHERE callfilterid = %s "
-                     "AND type = %s "
-                     "AND " + cursor.cast('typeval', 'int') + " = %s "
-                     "AND bstype = %s",
-                     parameters = (new_state, bsf.id, "user", secretary.id, "secretary"))
-
-        if cursor.rowcount != 1:
-            agi.dp_break("Unable to perform the requested update")
-
-        agi.set_variable('XIVO_BSFILTERENABLED', new_state)
+def _phone_set_vm(agi, cursor, args):
+    exten = args[1]
+    if exten:
+        user = _get_user_from_exten(agi, cursor, exten)
     else:
-        agi.dp_break("Unknown feature %r" % feature)
+        user = _get_calling_user(agi, cursor)
+
+    vmbox = objects.VMBox(agi, cursor, user.voicemailid, commentcond=False)
+    if vmbox.password and user.id != _get_id_of_calling_user(agi):
+        agi.appexec('Authenticate', vmbox.password)
+
+    user.toggle_feature('enablevoicemail')
+
+    agi.set_variable('XIVO_VMENABLED', user.enablevoicemail)
+    agi.set_variable('XIVO_USERID_OWNER', user.id)
+
+
+def _get_user_from_exten(agi, cursor, exten):
+    context = _get_context_of_calling_user(agi, cursor)
+
+    return objects.User(agi, cursor, exten=exten, context=context)
+
+
+def _get_context_of_calling_user(agi, cursor):
+    master_line = objects.MasterLineUser(agi, cursor, _get_id_of_calling_user(agi))
+    return master_line.line['context']
+
+
+def _phone_set_bsfilter(agi, cursor, args):
+    exten = args[1]
+    calling_user = _get_calling_user(agi, cursor)
+
+    master_line = objects.MasterLineUser(agi, cursor, calling_user.id)
+
+    ml_number = master_line.line['number']
+
+    try:
+        num1, num2 = exten.split('*')
+        if ml_number not in (num1, num2):
+            raise ValueError('Invalid number')
+    except ValueError:
+        agi.dp_break('Invalid number')
+
+    bsf = None
+    secretary = None
+
+    # Both the boss and secretary numbers are passed, so select the one
+    if ml_number == num1:
+        number = num2
+    else:
+        number = num1
+
+    if calling_user.bsfilter == 'secretary':
+        try:
+            bsf = objects.BossSecretaryFilter(agi, cursor, master_line.line)
+            secretary_number = ml_number
+        except LookupError:
+            pass
+    elif calling_user.bsfilter == 'boss':
+        bsf = calling_user.filter
+        secretary_number = number
+
+    if bsf:
+        bsf.set_dial_actions()
+        secretary = bsf.get_secretary_by_number(secretary_number)
+
+    if not secretary:
+        agi.dp_break("Unable to find boss-secretary filter")
+
+    agi.verbose("Filter exists! (Caller: %r, secretary number: %r)" % (calling_user.bsfilter,
+                                                                       secretary_number))
+    cursor.query("SELECT ${columns} FROM callfiltermember "
+                 "WHERE callfilterid = %s "
+                 "AND type = %s "
+                 "AND " + cursor.cast('typeval', 'int') + " = %s "
+                 "AND bstype = %s",
+                 ('active',),
+                 (bsf.id, "user", secretary.id, "secretary"))
+    res = cursor.fetchone()
+
+    if not res:
+        agi.dp_break("Unable to find secretary (id = %d)" % secretary.id)
+
+    new_state = int(not res['active'])
+    cursor.query("UPDATE callfiltermember "
+                 "SET active = %s "
+                 "WHERE callfilterid = %s "
+                 "AND type = %s "
+                 "AND " + cursor.cast('typeval', 'int') + " = %s "
+                 "AND bstype = %s",
+                 parameters=(new_state, bsf.id, "user", secretary.id, "secretary"))
+
+    if cursor.rowcount != 1:
+        agi.dp_break('Unable to perform the requested update')
+
+    agi.set_variable('XIVO_BSFILTERENABLED', new_state)
+
+
+def _phone_set_unc(agi, cursor, args):
+    _do_phone_set_forward(agi, cursor, args, 'unc')
+
+
+def _phone_set_rna(agi, cursor, args):
+    _do_phone_set_forward(agi, cursor, args, 'rna')
+
+
+def _phone_set_busy(agi, cursor, args):
+    _do_phone_set_forward(agi, cursor, args, 'busy')
+
+
+def _do_phone_set_forward(agi, cursor, args, forward_name):
+    enable = int(args[1])
+    destination = args[2]
+
+    calling_user = _get_calling_user(agi, cursor)
+    calling_user.set_feature(forward_name, enable, destination)
+
+    agi.set_variable('XIVO_%sENABLED' % forward_name.upper(),
+                     getattr(calling_user, 'enable%s' % forward_name))
+    agi.set_variable('XIVO_USERID_OWNER', calling_user.id)
+
 
 agid.register(phone_set_feature)
