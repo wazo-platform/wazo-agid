@@ -103,7 +103,10 @@ class UserFeatures(Handler):
         try:
             curline = [line for line in self._lines.lines if str(line['id']) == self._lineid][0]
             self._set_xivo_iface_nb(1)
-            self._agi.set_variable('XIVO_INTERFACE_0', "%s/%s" % (curline['protocol'], curline['name']))
+            if curline['protocol'].lower() == 'custom':
+                self._agi.set_variable('XIVO_INTERFACE_0', "%s" % (curline['name']))
+            else:
+                self._agi.set_variable('XIVO_INTERFACE_0', "%s/%s" % (curline['protocol'], curline['name']))
         except Exception:
             pass
 
