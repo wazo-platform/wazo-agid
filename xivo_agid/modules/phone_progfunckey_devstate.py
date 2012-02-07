@@ -85,23 +85,19 @@ def phone_progfunckey_devstate(agi, cursor, args):
     xset = set()
     forwards = dict(extenfeatures.FEATURES['forwards'])
 
-    if forwards.has_key(feature):
+    if feature in forwards:
         try:
             xset.add(fkey_extension(ppfkexten,
                                     (user.id,
                                      featureexten,
                                      getattr(user, "dest%s" % forwards[feature], ""))))
-
-            xset.add(fkey_extension(ppfkexten,
-                                    (user.id,
-                                     featureexten)))
         except ValueError, e:
             agi.verbose(str(e))
-
-    xset.add(fkey_extension(ppfkexten,
-                            (user.id,
-                             featureexten,
-                             dest)))
+    else:
+        xset.add(fkey_extension(ppfkexten,
+                                (user.id,
+                                 featureexten,
+                                 dest)))
 
     for x in xset:
         agi.set_variable("DEVICE_STATE(Custom:%s)" % x, devstate)
