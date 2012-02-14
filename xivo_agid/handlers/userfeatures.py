@@ -7,7 +7,7 @@ import time
 
 
 class UserFeatures(Handler):
-    
+
     PATH_TYPE = 'user'
 
     def __init__(self, agi, cursor, args):

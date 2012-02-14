@@ -20,7 +20,11 @@ __license__ = """
 from xivo_agid import dialplan_variables
 from xivo_agid.handlers.Handler import Handler
 from xivo_agid import objects
+
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class OutgoingFeatures(Handler):
@@ -50,6 +54,7 @@ class OutgoingFeatures(Handler):
     def _retrieve_user(self):
         try:
             self.user = objects.User(self._agi, self._cursor, int(self.userid))
+            self.callerid = self.user.callerid
             if self.user.enablexfer:
                 self.options += 'T'
 
@@ -59,7 +64,7 @@ class OutgoingFeatures(Handler):
                     self.options += "W"
                 self.callrecord = self.user.callrecord
         except (ValueError, LookupError):
-            pass
+            logger.debug('Could not retrieve user %s', self.userid)
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)
 
     def _set_caller_id(self):

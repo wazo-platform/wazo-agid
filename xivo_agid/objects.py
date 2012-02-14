@@ -581,7 +581,7 @@ class User:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'firstname', 'lastname',
+        columns = ('id', 'firstname', 'lastname', 'callerid',
                    'ringseconds', 'simultcalls', 'enablevoicemail',
                    'voicemailid', 'enablexfer', 'enableautomon',
                    'callrecord', 'incallfilter', 'enablednd',
@@ -618,6 +618,7 @@ class User:
         self.id = res['id']
         self.firstname = res['firstname']
         self.lastname = res['lastname']
+        self.callerid = res['callerid']
         self.ringseconds = int(res['ringseconds'])
         self.simultcalls = res['simultcalls']
         self.enablevoicemail = res['enablevoicemail']
