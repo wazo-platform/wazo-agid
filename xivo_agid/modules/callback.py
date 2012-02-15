@@ -20,15 +20,11 @@ __license__ = """
 import os
 import pwd
 import time
-
 from xivo_agid import agid
 
-def get_uid_gid(name):
-    # pylint: disable-msg=W0612
-    pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell = pwd.getpwnam(name)
-    return pw_uid, pw_gid
+ASTERISK_UID = None
+ASTERISK_GID = None
 
-ASTERISK_UID, ASTERISK_GID = get_uid_gid("asterisk")
 
 def callback(agi, cursor, args):
     context = args[0]
@@ -62,4 +58,16 @@ def callback(agi, cursor, args):
     os.chown(tmpfile, ASTERISK_UID, ASTERISK_GID)
     os.rename(tmpfile, realfile)
 
-agid.register(callback)
+
+def setup_callback(cursor):
+    global ASTERISK_UID, ASTERISK_GID
+    ASTERISK_UID, ASTERISK_GID = _get_uid_gid("asterisk")
+
+
+def _get_uid_gid(name):
+    # pylint: disable-msg=W0612
+    pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell = pwd.getpwnam(name)
+    return pw_uid, pw_gid
+
+
+agid.register(callback, setup_callback)
