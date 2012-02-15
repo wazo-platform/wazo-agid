@@ -1,8 +1,15 @@
+# -*- coding: UTF-8 -*-
+
 import unittest
 from mock import Mock, patch
 
 from xivo_agid.handlers.userfeatures import UserFeatures
 from xivo_agid import objects
+
+
+class NotEmptyStringMatcher(object):
+    def __eq__(self, other):
+        return isinstance(other, basestring) and bool(other)
 
 
 class TestUserFeatures(unittest.TestCase):
@@ -14,7 +21,7 @@ class TestUserFeatures(unittest.TestCase):
                            'XIVO_CALLORIGIN' : 'my_origin',
                            'XIVO_CALLFILTER_BYPASS': 'my_filter',
                            'XIVO_SRCNUM': '1000',
-                           'XIVO_DSTNUM': '1003',}
+                           'XIVO_DSTNUM': '1003', }
 
         def get_variable(key):
             return self._variables[key]
@@ -24,15 +31,12 @@ class TestUserFeatures(unittest.TestCase):
         self._cursor = Mock()
         self._args = Mock()
 
-    def tearDown(self):
-        pass
-
     def test_set_pickup_info(self):
         context = 'foo'
         number = '101'
         line_list = [{'id': '2',
                       'number': number,
-                      'context': context},]
+                      'context': context}, ]
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         self.assertEqual(None, userfeatures._pickup_context)
 
@@ -79,7 +83,7 @@ class TestUserFeatures(unittest.TestCase):
 
     def test_set_feature_list(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        
+
         with patch.object(objects.ExtenFeatures, '__init__') as extenfeatures_init:
             extenfeatures_init.return_value = None
             userfeatures._set_feature_list()
@@ -104,6 +108,18 @@ class TestUserFeatures(unittest.TestCase):
             user_init.assert_called_with(self._agi, self._cursor, self._variables['XIVO_USERID'])
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
+
+    def test_set_call_recordfile_doesnt_raise_when_caller_is_none(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        userfeatures._feature_list = Mock()
+        userfeatures._feature_list.callrecord = True
+        userfeatures._user = Mock()
+        userfeatures._user.callrecord = True
+
+        userfeatures._set_call_recordfile()
+
+        self._agi.set_variable.assert_called_once_with('XIVO_CALLRECORDFILE',
+                                                       NotEmptyStringMatcher())
 
     def test_set_lines(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -156,7 +172,6 @@ class TestUserFeatures(unittest.TestCase):
 
     def test_xivo_set_iface_nb(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        self._agi.set_variable = Mock()
 
         userfeatures._set_xivo_iface_nb(0)
 
@@ -177,8 +192,6 @@ class TestUserFeatures(unittest.TestCase):
     def test_set_xivo_user_name(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
-        self._agi.set_variable = Mock()
-
         userfeatures._set_xivo_user_name()
 
         self.assertEqual(self._agi.call_count, 0)
@@ -192,8 +205,3 @@ class TestUserFeatures(unittest.TestCase):
         userfeatures._set_xivo_user_name()
 
         self.assertEqual(self._agi.set_variable.call_count, 2)
-
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.test_']
-    unittest.main()
