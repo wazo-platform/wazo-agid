@@ -233,7 +233,7 @@ class UserFeatures(Handler):
     def _set_call_recordfile(self):
         callrecordfile = ""
         if self._feature_list.callrecord:
-            if self._user.callrecord or self._caller.callrecord: # BUGBUG the context is missing in the filename TODO use ids
+            if self._user.callrecord or (self._caller and self._caller.callrecord):
                 callrecordfile = "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
             else:
                 callrecordfile = ""
