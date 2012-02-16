@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# TODO: handle rules priority.
-# TODO: merge into objects and adapt modules.
 
 __license__ = """
     Copyright (C) 2006-2010  Avencall

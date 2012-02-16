@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# TODO: see the call_rights module.
 
 __license__ = """
     Copyright (C) 2006-2010  Avencall
@@ -21,6 +20,7 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 from xivo_agid import call_rights
+
 
 def _did_set_call_rights(agi, cursor, args):
     srcnum = agi.get_variable('XIVO_SRCNUM')
@@ -45,7 +45,7 @@ def _did_set_call_rights(agi, cursor, args):
                  "INNER JOIN rightcallmember "
                  "ON rightcall.id = rightcallmember.rightcallid "
                  "INNER JOIN incall "
-                 "ON rightcallmember.typeval = incall.id "
+                 "ON CAST(rightcallmember.typeval AS integer) = incall.id "
                  "WHERE rightcall.id IN " + rightcallids + " "
                  "AND rightcallmember.type = 'incall' "
                  "AND incall.exten = %s "
@@ -57,10 +57,12 @@ def _did_set_call_rights(agi, cursor, args):
     call_rights.apply_rules(agi, res)
     call_rights.allow(agi)
 
+
 def did_set_call_rights(agi, cursor, args):
     try:
         _did_set_call_rights(agi, cursor, args)
     except call_rights.RuleAppliedException:
         return
+
 
 agid.register(did_set_call_rights)

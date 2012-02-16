@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# TODO: see the call_rights module.
 
 __license__ = """
     Copyright (C) 2006-2010  Avencall
@@ -21,6 +20,7 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 from xivo_agid import call_rights
+
 
 def _user_set_call_rights(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
@@ -106,10 +106,12 @@ def _user_set_call_rights(agi, cursor, args):
 
     call_rights.allow(agi)
 
+
 def user_set_call_rights(agi, cursor, args):
     try:
         _user_set_call_rights(agi, cursor, args)
     except call_rights.RuleAppliedException:
         return
+
 
 agid.register(user_set_call_rights)
