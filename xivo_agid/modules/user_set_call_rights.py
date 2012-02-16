@@ -52,7 +52,7 @@ def _user_set_call_rights(agi, cursor, args):
                      "ON rightcall.id = rightcallmember.rightcallid "
                      "WHERE rightcall.id IN " + rightcallids + " "
                      "AND rightcallmember.type = 'user' "
-                     "AND rightcallmember.typeval = %s "
+                     "AND rightcallmember.typeval = '%s' "
                      "AND rightcall.commented = 0",
                      (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME, call_rights.RIGHTCALL_PASSWD_COLNAME),
                      (user.id,))
@@ -82,7 +82,7 @@ def _user_set_call_rights(agi, cursor, args):
                          "ON rightcall.id = rightcallmember.rightcallid "
                          "WHERE rightcall.id IN " + rightcallids + " "
                          "AND rightcallmember.type = 'group' "
-                         "AND rightcallmember.typeval IN (" + ", ".join(["%s"] * len(res)) + ") "
+                         "AND rightcallmember.typeval IN (" + ", ".join(["'%s'"] * len(res)) + ") "
                          "AND rightcall.commented = 0",
                          (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME, call_rights.RIGHTCALL_PASSWD_COLNAME),
                          groupids)
@@ -94,7 +94,7 @@ def _user_set_call_rights(agi, cursor, args):
                      "INNER JOIN rightcallmember "
                      "ON rightcall.id = rightcallmember.rightcallid "
                      "INNER JOIN outcall "
-                     "ON rightcallmember.typeval = outcall.id "
+                     "ON CAST(rightcallmember.typeval AS integer) = outcall.id "
                      "WHERE rightcall.id IN " + rightcallids + " "
                      "AND rightcallmember.type = 'outcall' "
                      "AND outcall.id = %s "
