@@ -113,6 +113,7 @@ def holdtime_announce(agi, cursor, args):
     holdtime = agi.get_variable('QUEUEHOLDTIME')
     holdtime = max(1, (int(holdtime) + 59) / 60)                                           
 
+    agi.answer()
     agi.stream_file('queue-holdtime')                                                           
     agi.stream_file('queue-less-than')                                                          
     agi.stream_file('digits/%s' % holdtime)                                             
