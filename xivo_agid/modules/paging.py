@@ -33,7 +33,9 @@ def paging(agi, cursor, args):
                                  args[0],
                                  userid)
     except (ValueError, LookupError), e:
-        agi.dp_break(str(e))
+        agi.answer()
+        agi.stream_file('vm-incorrect')
+        agi.dp_break('Sorry you are not authorize to page this group : %s' % str(e))
 
     paging_line = ''
     paging_opts = ''
