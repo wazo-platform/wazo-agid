@@ -17,10 +17,10 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import cjson as json
-
+import json
 from xivo_agid import agid
 from xivo_agid import objects
+
 
 def check_diversion(agi, cursor, args):
         queueid = agi.get_variable('XIVO_DSTID')
@@ -37,7 +37,7 @@ def check_diversion(agi, cursor, args):
         #TMP: simulating presences
         presences = '{"xivo:available":3}'
         try:
-            presences = json.decode(presences)
+            presences = json.loads(presences)
         except Exception, e:
             agi.dp_break(str(e))
 
