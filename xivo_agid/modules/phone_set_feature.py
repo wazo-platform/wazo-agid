@@ -108,8 +108,8 @@ def _phone_set_bsfilter(agi, cursor, args):
     ml_number = master_line.line['number']
 
     try:
-        num1, num2 = exten.split('*')
-        if ml_number not in (num1, num2):
+        boss_number, secretary_number = exten.split('*')
+        if ml_number not in (boss_number, secretary_number):
             raise ValueError('Invalid number')
     except ValueError:
         agi.dp_break('Invalid number')
@@ -117,31 +117,25 @@ def _phone_set_bsfilter(agi, cursor, args):
     bsf = None
     secretary = None
 
-    # Both the boss and secretary numbers are passed, so select the one
-    if ml_number == num1:
-        number = num2
-    else:
-        number = num1
-
     if calling_user.bsfilter == 'secretary':
         try:
-            bsf = objects.BossSecretaryFilter(agi, cursor, master_line.line)
+            context = master_line.line['context']
+            boss_lines = objects.Lines(agi, cursor, exten=boss_number, context=context)
+            line = [line for line in boss_lines.lines if line['number'] == boss_number][0]
+            bsf = objects.BossSecretaryFilter(agi, cursor, line)
             secretary_number = ml_number
         except LookupError:
-            pass
+            agi.dp_break('Could not find filter')
     elif calling_user.bsfilter == 'boss':
         bsf = calling_user.filter
-        secretary_number = number
 
     if bsf:
         bsf.set_dial_actions()
         secretary = bsf.get_secretary_by_number(secretary_number)
 
     if not secretary:
-        agi.dp_break("Unable to find boss-secretary filter")
+        agi.dp_break("Unable to find secretary")
 
-    agi.verbose("Filter exists! (Caller: %r, secretary number: %r)" % (calling_user.bsfilter,
-                                                                       secretary_number))
     cursor.query("SELECT ${columns} FROM callfiltermember "
                  "WHERE callfilterid = %s "
                  "AND type = %s "
