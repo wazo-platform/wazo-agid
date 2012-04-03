@@ -1419,21 +1419,22 @@ class Schedule:
 
         cursor.query("SELECT ${columns} FROM schedule s, schedule_path p "
                      "WHERE s.id = p.schedule_id "
-                                         "AND p.path = %s "
-                                         "AND p.pathid = %s "
+                     "AND p.path = %s "
+                     "AND p.pathid = %s "
                      "AND s.commented = 0",
                      columns,
                      (path, pathid))
         res = cursor.fetchone()
 
         if not res:
-            # no schedule for this path
-            print("No schedule for (%s/%s) path" % (path, pathid))
-            agi.set_variable('XIVO_SCHEDULE_STATUS', 'opened'); return
+            agi.set_variable('XIVO_SCHEDULE_STATUS', 'opened')
+            return
 
-        cursor.query("SELECT ${columns} FROM schedule_time WHERE mode='opened' "
-                  "AND schedule_id = %s",
-                    ('hours', 'weekdays', 'monthdays', 'months'), (res['id'],))
+        cursor.query("SELECT ${columns} FROM schedule_time "
+                     "WHERE mode = 'opened' "
+                     "AND schedule_id = %s",
+                     ('hours', 'weekdays', 'monthdays', 'months'),
+                     (res['id'],))
         times = cursor.fetchall()
         match = self._checkSchedule(res['timezone'], times)
 
@@ -1455,7 +1456,7 @@ class Schedule:
             if cmatch is not None:
                 diversion = (cmatch['action'], cmatch['actionid'], cmatch['actionargs'])
 
-                # set AGI variables
+        # set AGI variables
         agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed' if match is None else    'opened')
         keys = ('ACTION', 'ACTIONARG1', 'ACTIONARG2')
         for i in xrange(len(keys)):
@@ -1470,7 +1471,7 @@ class Schedule:
 
         for i in intervals:
             if self._inInterval(now, i):
-                            return i
+                return i
 
         return None
 
@@ -1506,7 +1507,7 @@ class Schedule:
             m = [int(n) for n in (m.split('-', 1) if '-' in m else (m, m))]
 
             if m[0] <= value <= m[1]:
-                            return True
+                return True
 
         return False
 
