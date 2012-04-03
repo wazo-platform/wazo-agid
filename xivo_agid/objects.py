@@ -1431,33 +1431,35 @@ class Schedule:
             return
 
         cursor.query("SELECT ${columns} FROM schedule_time "
-                     "WHERE mode = 'opened' "
+                     "WHERE mode = 'closed' "
                      "AND schedule_id = %s",
-                     ('hours', 'weekdays', 'monthdays', 'months'),
-                     (res['id'],))
-        times = cursor.fetchall()
-        match = self._checkSchedule(res['timezone'], times)
-
-        # set non-matching action
-        diversion = ('', '', '')
-        if match is None:
-            diversion = (
-                res['fallback_action'],
-                res['fallback_actionid'],
-                res['fallback_actionargs']
-            )
-
-            cursor.query("SELECT ${columns} FROM schedule_time WHERE mode='closed' "
-                "AND schedule_id = %s",
                 ('hours', 'weekdays', 'monthdays', 'months', 'action', 'actionid', 'actionargs'),
                                 (res['id'],))
+        times = cursor.fetchall()
+        cmatch = self._checkSchedule(res['timezone'], times)
+        logger.debug('%r', cmatch)
+        if cmatch is not None:
+            diversion = (cmatch['action'], cmatch['actionid'], cmatch['actionargs'])
+        else:
+            cursor.query("SELECT ${columns} FROM schedule_time "
+                         "WHERE mode = 'opened' "
+                         "AND schedule_id = %s",
+                         ('hours', 'weekdays', 'monthdays', 'months'),
+                         (res['id'],))
             times = cursor.fetchall()
-            cmatch = self._checkSchedule(res['timezone'], times)
-            if cmatch is not None:
-                diversion = (cmatch['action'], cmatch['actionid'], cmatch['actionargs'])
+            match = self._checkSchedule(res['timezone'], times)
+
+            # set non-matching action
+            diversion = ('', '', '')
+            if match is None:
+                diversion = (
+                    res['fallback_action'],
+                    res['fallback_actionid'],
+                    res['fallback_actionargs']
+                )
 
         # set AGI variables
-        agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed' if match is None else    'opened')
+        agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed' if cmatch is not None or match is None else 'opened')
         keys = ('ACTION', 'ACTIONARG1', 'ACTIONARG2')
         for i in xrange(len(keys)):
             agi.set_variable('XIVO_FWD_SCHEDULE_OUT_' + keys[i], diversion[i])
