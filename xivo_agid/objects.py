@@ -29,8 +29,7 @@ __license__ = """
 import logging
 import re
 import time
-import pytz
-from datetime import datetime
+from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule
 
 logger = logging.getLogger(__name__)
 
@@ -1410,130 +1409,60 @@ class Outcall:
             self.trunks.append(trunk)
 
 
-class Schedule:
-    def __init__(self, agi, cursor, path, pathid):
-        self.agi = agi
-        self.cursor = cursor
+class NoScheduleException(object):
+    pass
 
-        columns = ('id', 'name', 'timezone', 'fallback_action', 'fallback_actionid', 'fallback_actionargs')
 
-        cursor.query("SELECT ${columns} FROM schedule s, schedule_path p "
-                     "WHERE s.id = p.schedule_id "
-                     "AND p.path = %s "
+class ScheduleDataMapper(object):
+    @classmethod
+    def get_from_path(cls, cursor, path, path_id):
+        # fetch schedule info
+        columns = ('id', 'timezone', 'fallback_action', 'fallback_actionid', 'fallback_actionargs')
+        cursor.query("SELECT ${columns} FROM schedule_path p "
+                     "LEFT JOIN schedule s ON p.schedule_id = s.id "
+                     "WHERE p.path = %s "
                      "AND p.pathid = %s "
                      "AND s.commented = 0",
                      columns,
-                     (path, pathid))
+                     (path, path_id))
         res = cursor.fetchone()
 
         if not res:
-            agi.set_variable('XIVO_SCHEDULE_STATUS', 'opened')
-            return
+            raise NoScheduleException()
 
+        schedule_id = res['id']
+        timezone = res['timezone']
+        default_action = ScheduleAction(res['fallback_action'],
+                                        res['fallback_actionid'],
+                                        res['fallback_actionargs'])
+
+        # fetch schedule periods
+        columns = ('mode', 'hours', 'weekdays', 'monthdays', 'months', 'action', 'actionid', 'actionargs')
         cursor.query("SELECT ${columns} FROM schedule_time "
-                     "WHERE mode = 'closed' "
-                     "AND schedule_id = %s",
-                ('hours', 'weekdays', 'monthdays', 'months', 'action', 'actionid', 'actionargs'),
-                                (res['id'],))
-        times = cursor.fetchall()
-        cmatch = self._checkSchedule(res['timezone'], times)
-        logger.debug('%r', cmatch)
-        if cmatch is not None:
-            diversion = (cmatch['action'], cmatch['actionid'], cmatch['actionargs'])
-        else:
-            cursor.query("SELECT ${columns} FROM schedule_time "
-                         "WHERE mode = 'opened' "
-                         "AND schedule_id = %s",
-                         ('hours', 'weekdays', 'monthdays', 'months'),
-                         (res['id'],))
-            times = cursor.fetchall()
-            match = self._checkSchedule(res['timezone'], times)
+                     "WHERE schedule_id = %s",
+                     columns,
+                     (schedule_id,))
+        res = cursor.fetchall()
 
-            # set non-matching action
-            diversion = ('', '', '')
-            if match is None:
-                diversion = (
-                    res['fallback_action'],
-                    res['fallback_actionid'],
-                    res['fallback_actionargs']
-                )
+        opened_periods = []
+        closed_periods = []
+        for res_period in res:
+            period_builder = SchedulePeriodBuilder()
+            period_builder.hours(res_period['hours'])
+            period_builder.weekdays(res_period['weekdays'])
+            period_builder.days(res_period['monthdays'])
+            period_builder.months(res_period['months'])
 
-        # set AGI variables
-        agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed' if cmatch is not None or match is None else 'opened')
-        keys = ('ACTION', 'ACTIONARG1', 'ACTIONARG2')
-        for i in xrange(len(keys)):
-            agi.set_variable('XIVO_FWD_SCHEDULE_OUT_' + keys[i], diversion[i])
+            if res_period['mode'] == 'opened':
+                opened_periods.append(period_builder.build())
+            else:
+                action = ScheduleAction(res_period['action'],
+                                        res_period['actionid'],
+                                        res_period['actionargs'])
+                period_builder.action(action)
+                closed_periods.append(period_builder.build())
 
-
-    def _checkSchedule(self, timezone, intervals):
-        # convert local server time to timezone time
-        tz = pytz.timezone(timezone)
-        now = datetime.now(pytz.utc)
-        now = now.astimezone(tz)
-
-        for i in intervals:
-            if self._inInterval(now, i):
-                return i
-
-        return None
-
-    def _inInterval(self, now, filter):
-            """Return true if system current date is in the interval
-
-
-                timezone: string, official timezone (i.e Europe/Paris)
-                filter  : dict
-                    keys are: 'hours','weekdays','monthdays','months'
-                    values are list of integer ranges: 1,2,10-12
-            """
-            values = {
-                    'months'   : (lambda d: d.month           , self._matchval),
-                    'monthdays': (lambda d: d.day             , self._matchval),
-                    'weekdays' : (lambda d: d.isoweekday()    , self._matchval),
-                    'hours'    : (lambda d: (d.hour, d.minute), self._matchtime)
-            }
-
-            for k in ('months', 'monthdays', 'weekdays', 'hours'):
-                if not values[k][1](values[k][0](now), filter[k]):
-                    return False
-
-            return True
-
-    def _matchval(self, value, interval):
-        """
-        """
-        if interval == '*':
-            return True
-
-        for m in interval.split(','):
-            m = [int(n) for n in (m.split('-', 1) if '-' in m else (m, m))]
-
-            if m[0] <= value <= m[1]:
-                return True
-
-        return False
-
-    def _matchtime(self, time, filter):
-        """Check if time is in filter interval
-
-                time  : (hours, minutes) tuple
-                    filter: time intervals (str. i.e: 7:30-12,14-18:45)
-        """
-        if filter == '*':
-            return True
-
-        for m in filter.split(','):
-            m = [[int(o) for o in (n.split(':') if ':' in n else (n, 0))] for n in m.split('-')]
-            if len(m) != 2:
-                continue
-
-            if (time[0] > m[0][0] and\
-                time[0] < m[1][0]) or\
-               (time[0] == m[0][0] and time[1] >= m[0][1]) or\
-               (time[0] == m[1][0] and time[1] <= m[1][1]):
-                return True
-
-        return False
+        return Schedule(opened_periods, closed_periods, default_action, timezone)
 
 
 class VoiceMenu:

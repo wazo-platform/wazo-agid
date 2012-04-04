@@ -17,18 +17,31 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
 from xivo_agid import agid
 from xivo_agid import objects
+from xivo_agid.objects import NoScheduleException
+
+logger = logging.getLogger(__name__)
 
 
 def check_schedule(agi, cursor, args):
     path = agi.get_variable('XIVO_PATH')
-    pathid = agi.get_variable('XIVO_PATH_ID')
+    path_id = agi.get_variable('XIVO_PATH_ID')
 
     if not path:
         return
 
-    objects.Schedule(agi, cursor, path=path, pathid=pathid)
+    try:
+        schedule = objects.ScheduleDataMapper.get_from_path(cursor, path, path_id)
+    except NoScheduleException:
+        pass
+    else:
+        logger.info('Found a schedule for %s:%s', path, path_id)
+        schedule_state = schedule.compute_state_for_now()
+        if schedule_state.state == 'closed':
+            agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed')
+            schedule_state.action.set_variables_in_agi(agi)
 
     # erase path for next schedule check
     agi.set_variable('XIVO_PATH', '')
