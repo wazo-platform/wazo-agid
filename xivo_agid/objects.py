@@ -1409,7 +1409,7 @@ class Outcall:
             self.trunks.append(trunk)
 
 
-class NoScheduleException(object):
+class NoScheduleException(Exception):
     pass
 
 
