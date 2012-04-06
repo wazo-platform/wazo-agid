@@ -48,6 +48,14 @@ class Schedule(object):
         return utc_now.astimezone(timezone)
 
 
+class AlwaysOpenedSchedule(object):
+    def compute_state(self, current_datetime):
+        return ScheduleState.new_opened_state()
+
+    def compute_state_for_now(self):
+        return ScheduleState.new_opened_state()
+
+
 class ScheduleState(object):
     def __init__(self, state, action):
         self.state = state

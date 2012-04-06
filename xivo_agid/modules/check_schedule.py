@@ -20,7 +20,6 @@ __license__ = """
 import logging
 from xivo_agid import agid
 from xivo_agid import objects
-from xivo_agid.objects import NoScheduleException
 
 logger = logging.getLogger(__name__)
 
@@ -32,16 +31,12 @@ def check_schedule(agi, cursor, args):
     if not path:
         return
 
-    try:
-        schedule = objects.ScheduleDataMapper.get_from_path(cursor, path, path_id)
-    except NoScheduleException:
-        pass
-    else:
-        logger.info('Found a schedule for %s:%s', path, path_id)
-        schedule_state = schedule.compute_state_for_now()
-        if schedule_state.state == 'closed':
-            agi.set_variable('XIVO_SCHEDULE_STATUS', 'closed')
-            schedule_state.action.set_variables_in_agi(agi)
+    schedule = objects.ScheduleDataMapper.get_from_path(cursor, path, path_id)
+    schedule_state = schedule.compute_state_for_now()
+
+    agi.set_variable('XIVO_SCHEDULE_STATUS', schedule_state.state)
+    if schedule_state.state == 'closed':
+        schedule_state.action.set_variables_in_agi(agi)
 
     # erase path for next schedule check
     agi.set_variable('XIVO_PATH', '')

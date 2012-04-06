@@ -29,7 +29,8 @@ __license__ = """
 import logging
 import re
 import time
-from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule
+from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule,\
+    AlwaysOpenedSchedule
 
 logger = logging.getLogger(__name__)
 
@@ -1409,10 +1410,6 @@ class Outcall:
             self.trunks.append(trunk)
 
 
-class NoScheduleException(Exception):
-    pass
-
-
 class ScheduleDataMapper(object):
     @classmethod
     def get_from_path(cls, cursor, path, path_id):
@@ -1428,7 +1425,7 @@ class ScheduleDataMapper(object):
         res = cursor.fetchone()
 
         if not res:
-            raise NoScheduleException()
+            return AlwaysOpenedSchedule()
 
         schedule_id = res['id']
         timezone = res['timezone']
