@@ -63,7 +63,6 @@ def phone_progfunckey(agi, cursor, args):
 
     agi.set_variable('XIVO_PHONE_CONTEXT', context)
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY', ''.join(fklist[1:]))
-    agi.set_variable('XIVO_PHONE_PROGFUNCKEY_STATE', 'NOTHING')
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY_FEATURE', feature)
 
 agid.register(phone_progfunckey)
