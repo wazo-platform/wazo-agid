@@ -46,13 +46,6 @@ class ExtenFeatures:
                      ('agentstaticlogoff',),
                      ('agentstaticlogtoggle',)),
 
-        'groups':   (('groupaddmember',),
-                     ('groupremovemember',),
-                     ('grouptogglemember',),
-                     ('queueaddmember',),
-                     ('queueremovemember',),
-                     ('queuetogglemember',)),
-
         'forwards': (('fwdbusy', 'busy'),
                      ('fwdrna', 'rna'),
                      ('fwdunc', 'unc')),
