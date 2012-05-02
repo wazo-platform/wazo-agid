@@ -1570,7 +1570,6 @@ class CallerID:
         res = cursor.fetchone()
 
         self.mode = None
-        self.callerdisplay = ''
         self.calleridname = None
         self.calleridnum = None
 
@@ -1579,7 +1578,6 @@ class CallerID:
 
             if cid_parsed:
                 self.mode = res['mode']
-                self.callerdisplay = res['callerdisplay']
                 self.calleridname, self.calleridnum = cid_parsed
                 self.calleridname = self.calleridname.encode('UTF-8')
 
