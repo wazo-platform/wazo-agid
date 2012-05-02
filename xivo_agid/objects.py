@@ -1630,7 +1630,8 @@ class CallerID:
             else:
                 raise RuntimeError("Unknown callerid mode: %r" % self.mode)
 
-            self.agi.appexec('SetCallerPres', 'allowed')
+            self.agi.set_variable('CALLERID(name-pres)', 'allowed')
+            self.agi.set_variable('CALLERID(num-pres)', 'allowed')
             self.agi.set_variable('CALLERID(all)', '"%s" <%s>' % (name, calleridnum))
 
             if not force_rewrite:
