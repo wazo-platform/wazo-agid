@@ -92,17 +92,41 @@ def _new_mail_backend(subject, content_file):
     return aux
 
 
-def _new_printer_backend(name=None):
+def _new_printer_backend(name=None, convert_to_pdf=None):
     # Return a backend taking no additional argument, which prints the fax
     # to the given printer when called.
     # Note that if name is None, it use the default printer.
+    convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
     def aux(faxfile, dstnum, args):
-        lp_cmd = [LP_PATH]
+        lp_cmd = [LP_PATH, '-s']
         if name:
-            lp_cmd.extend(["-d", name])
-        lp_cmd.append(faxfile)
-        subprocess.check_call(lp_cmd, close_fds=True)
+            lp_cmd.extend(['-d', name])
+        if convert_to_pdf:
+            pdffile = _convert_tiff_to_pdf(faxfile)
+            lp_cmd.append(pdffile)
+        else:
+            lp_cmd.append(faxfile)
+        try:
+            subprocess.check_call(lp_cmd, close_fds=True)
+        finally:
+            if convert_to_pdf:
+                try:
+                    os.remove(pdffile)
+                except OSError, e:
+                    logger.info('Could not remove pdffile %s: %s', pdffile, e)
     return aux
+
+
+def _convert_config_value_to_bool(config_value, default, param_name):
+    if config_value is None:
+        return default
+    elif config_value == '0':
+        return False
+    elif config_value == '1':
+        return True
+    else:
+        logger.warning('invalid param %s: %r', param_name, config_value)
+        return default
 
 
 def _new_ftp_backend(host, username, password, directory=None):
