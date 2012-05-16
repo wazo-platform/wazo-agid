@@ -246,7 +246,7 @@ class UserFeatures(Handler):
             self._agi.set_variable('CHANNEL(musicclass)', self._user.musiconhold)
 
     def _set_options(self):
-        options = ""
+        options = "hH"
         if self._user.enablexfer:
             options += "t"
         if self._caller and self._caller.enablexfer:
