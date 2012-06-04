@@ -45,7 +45,6 @@ class UserFeatures(Handler):
         self._set_call_recordfile()
         self._set_preprocess_subroutine()
         self._set_mobile_number()
-        self._set_pitch()
         self._set_vmbox_lang()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
 
@@ -206,15 +205,6 @@ class UserFeatures(Handler):
             mbox_lang = self._user.language
         self._agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
 
-    def _set_pitch(self):
-        if self._user.pitch:
-            pitch = self._user.pitch
-            pitchdirection = self._user.pitchdirection
-        else:
-            pitch = ""
-            pitchdirection = ""
-        self._agi.set_variable('XIVO_PITCH', pitch)
-        self._agi.set_variable('XIVO_PITCHDIRECTION', pitchdirection)
 
     def _set_mobile_number(self):
         if self._user.mobilephonenumber:
