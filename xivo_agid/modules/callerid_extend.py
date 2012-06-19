@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 
 def callerid_extend(agi, cursor, args):
-    logger.warning('callerid_extend not yet implemented -- doing nothing')
+    if 'agi_callington' in agi.env:
+        agi.set_variable('XIVO_SRCTON', agi.env['agi_callington'])
 
 
 agid.register(callerid_extend)
