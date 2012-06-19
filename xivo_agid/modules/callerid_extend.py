@@ -17,10 +17,7 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import logging
 from xivo_agid import agid
-
-logger = logging.getLogger(__name__)
 
 
 def callerid_extend(agi, cursor, args):
