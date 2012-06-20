@@ -23,7 +23,7 @@
 
 import unittest
 from mock import Mock
-from xivo_cti.directory.data_sources.ldap import LDAPDirectoryDataSource
+from xivo_agid.directory.data_sources.ldap import LDAPDirectoryDataSource
 
 class TestLDAPDirectoryDataSource(unittest.TestCase):
     def setUp(self):
