@@ -32,30 +32,6 @@ def check_diversion(agi, cursor, args):
         event = 'none'
         dialaction = ''
 
-        # . agent status presence
-        presences = agi.get_variable('XIVO_PRESENCE')
-        #TMP: simulating presences
-        presences = '{"xivo:available":3}'
-        try:
-            presences = json.loads(presences)
-        except Exception, e:
-            agi.dp_break(str(e))
-
-        if len(queue.ctipresence) > 0:
-            dbpresences = objects.CTIPresence.status(agi, cursor, queue.ctipresence.keys());
-            for id, status in dbpresences.iteritems():
-                if presences.get(status, 0) >= queue.ctipresence[id]:
-                    event = 'DIVERT_PRESENCE'; dialaction = 'qctipresence'
-                    break
-
-        # . agent status non presence
-        if event == 'none' and len(queue.nonctipresence) > 0:
-            dbpresences = objects.CTIPresence.status(agi, cursor, 	queue.nonctipresence.keys())
-            for id, status in dbpresences.iteritems():
-                if presences.get(status, 0) <= queue.nonctipresence[id]:
-                    event = 'DIVERT_NONPRESENCE'; dialaction = 'qnonctipresence'
-                    break
-
         # . holdtime
         # set by QUEUE_VARIABLES(${XIVO_QUEUENAME})
         # NOTE: why testing waitingcalls ?

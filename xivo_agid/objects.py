@@ -29,7 +29,7 @@ __license__ = """
 import logging
 import re
 import time
-from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule,\
+from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
 
 logger = logging.getLogger(__name__)
@@ -172,27 +172,27 @@ class BossSecretaryFilter:
         self.callfrom = None
         self.ringseconds = None
         self.boss = None
-        self.secretaries = None        
+        self.secretaries = None
         self.line = line;
-        
+
         boss_number = self.line['number']
         boss_context = self.line['context']
 
         contextinclude = Context(agi, cursor, boss_context).include
 
-        columns = ('callfilter.id', 
+        columns = ('callfilter.id',
                    'callfilter.bosssecretary',
-                   'callfilter.callfrom', 
+                   'callfilter.callfrom',
                    'callfilter.ringseconds',
                    'callfiltermember.ringseconds',
-                   'userfeatures.id', 
+                   'userfeatures.id',
                    'linefeatures.protocol',
                    'linefeatures.protocolid',
                    'linefeatures.number',
                    'linefeatures.context')
 
         t = tuple([boss_number] + contextinclude)
-        
+
         cursor.query("SELECT ${columns} FROM callfilter "
                      "INNER JOIN callfiltermember "
                      "ON callfilter.id = callfiltermember.callfilterid "
@@ -211,7 +211,7 @@ class BossSecretaryFilter:
                      "AND linefeatures.commented = 0",
                      columns,
                      t)
-        
+
         res = cursor.fetchone()
 
         if not res:
@@ -237,13 +237,13 @@ class BossSecretaryFilter:
         except (ValueError, LookupError), e:
             self.agi.dp_break(str(e))
 
-        columns = ('callfiltermember.active', 
-                   'userfeatures.id', 
+        columns = ('callfiltermember.active',
+                   'userfeatures.id',
                    'linefeatures.protocol',
-                   'linefeatures.protocolid', 
+                   'linefeatures.protocolid',
                    'linefeatures.number',
                    'userfeatures.ringseconds')
-        
+
         t = tuple([self.id] + contextinclude)
 
         cursor.query("SELECT ${columns} FROM callfiltermember "
@@ -356,7 +356,7 @@ class VMBox:
             cursor.query("SELECT ${columns} FROM voicemail "
                          "INNER JOIN voicemailfeatures "
                          "ON voicemail.uniqueid = voicemailfeatures.voicemailid "
-                         "WHERE voicemail.uniqueid = %s " + 
+                         "WHERE voicemail.uniqueid = %s " +
                          where_comment,
                          columns,
                          (xid,))
@@ -366,7 +366,7 @@ class VMBox:
                          "INNER JOIN voicemailfeatures "
                          "ON voicemail.uniqueid = voicemailfeatures.voicemailid "
                          "WHERE voicemail.mailbox = %s "
-                         "AND voicemail.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") " + 
+                         "AND voicemail.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") " +
                          where_comment,
                          columns,
                          [mailbox] + contextinclude)
@@ -535,10 +535,10 @@ class MasterLineUser:
         self.agi = agi
         self.cursor = cursor
         self.line = {}
-        
+
         columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num',
                    'rules_type', 'rules_time', 'rules_order', 'rules_group')
-        
+
         cursor.query("SELECT ${columns} FROM linefeatures "
                      "WHERE iduserfeatures = %s "
                      "AND internal = 0 "
@@ -548,7 +548,7 @@ class MasterLineUser:
                      "ORDER BY line_num ASC, rules_order ASC",
                      columns,
                      (xid,))
-        
+
         res = cursor.fetchone()
 
         if not res:
@@ -648,9 +648,9 @@ class User:
             self.enablebusy = 0
 
         if self.bsfilter == "boss":
-            master_line = MasterLineUser(agi, cursor, xid) 
+            master_line = MasterLineUser(agi, cursor, xid)
             try:
-                self.filter = BossSecretaryFilter(agi, cursor, master_line.line)        
+                self.filter = BossSecretaryFilter(agi, cursor, master_line.line)
             except LookupError:
                 import traceback
                 traceback.print_exc()
@@ -844,13 +844,13 @@ class MeetMe:
 
         meetmefeatures_columns = (('id', 'name', 'confno', 'context',
                                       'admin_typefrom', 'admin_internalid', 'admin_externalid',
-                                      'admin_identification', 'admin_exitcontext') + 
-                                      tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() + 
-                                                                      self.OPTIONS_ADMIN.keys())]) + 
+                                      'admin_identification', 'admin_exitcontext') +
+                                      tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() +
+                                                                      self.OPTIONS_ADMIN.keys())]) +
                                       ('user_exitcontext',) + \
-                                      tuple(["user_%s" % x for x in (self.OPTIONS_COMMON.keys() + 
-                                                                     self.OPTIONS_USER.keys())]) + 
-                                      tuple(x for x in self.OPTIONS_GLOBAL.keys()) + 
+                                      tuple(["user_%s" % x for x in (self.OPTIONS_COMMON.keys() +
+                                                                     self.OPTIONS_USER.keys())]) +
+                                      tuple(x for x in self.OPTIONS_GLOBAL.keys()) +
                                       ('durationm', 'nbuserstartdeductduration',
                                        'timeannounceclose', 'maxusers',
                                        'startdate', 'preprocess_subroutine'))
@@ -1076,8 +1076,7 @@ class Queue:
                    'transfer_user', 'transfer_call',
                    'write_caller', 'write_calling',
                    'url', 'announceoverride', 'timeout',
-                   'preprocess_subroutine', 'announce_holdtime',
-                                     'ctipresence', 'nonctipresence', 'waittime', 'waitratio')
+                   'preprocess_subroutine', 'announce_holdtime', 'waittime', 'waitratio')
         columns = ["queuefeatures." + c for c in columns]
 
         if xid:
@@ -1126,23 +1125,11 @@ class Queue:
         self.timeout = res['queuefeatures.timeout']
         self.preprocess_subroutine = res['queuefeatures.preprocess_subroutine']
         self.announce_holdtime = res['queuefeatures.announce_holdtime']
-        pres = res['queuefeatures.ctipresence']
-        if pres is None:
-            self.ctipresence = {} 
-        else:
-            self.ctipresence = dict([[int(y) for y in s.split(':')] for s in pres.split(',')])
-
-        pres = res['queuefeatures.nonctipresence']
-        if pres is None:
-            self.nonctipresence = {}
-        else:
-            self.nonctipresence = dict([[int(y) for y in x.split(':')] for x in pres.split(',')])
         self.waittime = res['queuefeatures.waittime']
         self.waitratio = res['queuefeatures.waitratio']
 
     def set_dial_actions(self):
-        for event in ('congestion', 'busy', 'chanunavail', 'qctipresence', 'qnonctipresence',
-                                          'qwaittime', 'qwaitratio'):
+        for event in ('congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio'):
             DialAction(self.agi, self.cursor, event, "queue", self.id).set_variables()
 
         # case NOANSWER (timeout): we also set correct queuelog event
@@ -1169,7 +1156,7 @@ class Queue:
 
         return [str(row[0]) for row in res]
 
- 
+
 
 class Agent:
     def __init__(self, agi, cursor, xid=None, number=None):
@@ -1348,8 +1335,8 @@ class Outcall:
         self.xid = xid
         columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal',
                    'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
-                   'outcall.id', 'dialpattern.typeid', 'dialpattern.type','dialpattern.exten', 
-                   'dialpattern.stripnum', 'dialpattern.externprefix', 
+                   'outcall.id', 'dialpattern.typeid', 'dialpattern.type', 'dialpattern.exten',
+                   'dialpattern.stripnum', 'dialpattern.externprefix',
                    'dialpattern.callerid', 'dialpattern.prefix')
 
         if self.xid:
@@ -1642,7 +1629,7 @@ class CTIPresence:
                         "pname:sname"
         """
         columns = ('s.id', 's.name', 'p.name')
-        cursor.query("SELECT ${columns} FROM ctistatus s, ctipresences p "
+        cursor.query("SELECT ${columns} FROM ctistatus s"
           "WHERE s.id IN (" + ','.join([str(id) for id in status_ids]) + ") "
           "AND s.presence_id = p.id",
           columns)
@@ -1740,7 +1727,7 @@ def protocol_intf_and_suffix(cursor, protocol, category, xid):
     if protocol in CHAN_PROTOCOL:
         return CHAN_PROTOCOL[protocol].get_intf_and_suffix(cursor, category, xid)
     else:
-        raise ValueError("Unknown protocol %r" % protocol)        
+        raise ValueError("Unknown protocol %r" % protocol)
 
 class Static:
     def __init__(self, cursor, protocol):
