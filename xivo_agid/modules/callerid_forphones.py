@@ -21,6 +21,7 @@ import json
 import logging
 import re
 import socket
+import time
 import threading
 import urllib2
 from xivo.moresynchro import RWLock
@@ -33,6 +34,7 @@ CTI_CONFIG_URL = 'http://localhost/service/ipbx/json.php/private/ctiserver/confi
 PHONEBOOK_URL = 'http://localhost/service/ipbx/json.php/private/pbx_services/phonebook'
 UPDATE_ADDRESS = 'localhost'
 UPDATE_PORT = 5042
+FETCH_URL_RETRY_INTERVAL = 10
 
 _update_thread = None
 _displays_mgr = directory.DisplaysMgr()
@@ -73,8 +75,6 @@ def _resolve_incoming_caller_id(channel, cid_name, cid_number):
 def _get_cid_directory_lookup(original_cid, pattern):
     if _rw_lock.acquire_read(5):
         try:
-            # FIXME the context '*' must always be there, which is not
-            #       guaranteed currently
             context_obj = _contexts_mgr.contexts['*']
             lookup_result = context_obj.lookup_reverse(None, pattern)
         finally:
@@ -115,44 +115,11 @@ def _build_agi_caller_id(cid_all, cid_name, cid_number):
 
 
 def setup_callerid_forphones(cursor):
-    _update_cti_config()
-    _update_phonebook()
     if _update_thread is None:
         update_socket = _create_update_socket()
         _start_update_thread(update_socket)
-
-
-def _update_cti_config():
-    cti_config = _fetch_from_ws(CTI_CONFIG_URL)
-    if _rw_lock.acquire_write():
-        try:
-            _displays_mgr.update(cti_config['displays'])
-            _directories_mgr.update(cti_config['directories'])
-            _contexts_mgr.update(_displays_mgr.displays,
-                                 _directories_mgr.directories,
-                                 cti_config['contexts'])
-        finally:
-            _rw_lock.release()
-    else:
-        logger.error('could not update callerid_forphones config: lock acquisition failed')
-
-
-def _fetch_from_ws(url):
-    fobj = urllib2.urlopen(url, timeout=10)
-    try:
-        return json.load(fobj)
-    finally:
-        fobj.close()
-
-
-def _update_phonebook():
-    global _phonebook
-    try:
-        raw_phonebook = _fetch_from_ws(PHONEBOOK_URL)
-        _phonebook = _convert_raw_phonebook_to_phonebook_dict(raw_phonebook)
-    except ValueError:
-        # empty phonebook
-        _phonebook = {}
+        update_socket.sendto('update-config', update_socket.getsockname())
+        update_socket.sendto('update-phonebook', update_socket.getsockname())
 
 
 def _convert_raw_phonebook_to_phonebook_dict(raw_phonebook):
@@ -201,14 +168,59 @@ def _update_thread_loop(update_socket):
             data, _ = update_socket.recvfrom(1024)
             data = data.rstrip()
             logger.info('executing update command %r', data)
-            if data == 'update-phonebook':
-                _update_phonebook()
-            elif data == 'update-config':
-                _update_cti_config()
-            else:
-                logger.warning('received unknown command: %r', data)
+            try:
+                if data == 'update-config':
+                    _update_cti_config()
+                elif data == 'update-phonebook':
+                    _update_phonebook()
+                else:
+                    logger.warning('received unknown command: %r', data)
+            except Exception:
+                logger.error('exception during update: %s', exc_info=True)
     finally:
         update_socket.close()
+
+
+def _update_cti_config():
+    cti_config = _fetch_from_ws(CTI_CONFIG_URL)
+    if _rw_lock.acquire_write():
+        try:
+            _displays_mgr.update(cti_config['displays'])
+            _directories_mgr.update(cti_config['directories'])
+            _contexts_mgr.update(_displays_mgr.displays,
+                                 _directories_mgr.directories,
+                                 cti_config['contexts'])
+        finally:
+            _rw_lock.release()
+    else:
+        logger.error('could not update callerid_forphones config: lock acquisition failed')
+
+
+def _fetch_from_ws(url):
+    while True:
+        try:
+            fobj = urllib2.urlopen(url, timeout=10)
+        except urllib2.HTTPError:
+            raise
+        except urllib2.URLError as e:
+            logger.warning('error while fetching url %s: %s', url, e)
+            logger.warning('sleeping %s seconds before retrying', FETCH_URL_RETRY_INTERVAL)
+            time.sleep(FETCH_URL_RETRY_INTERVAL)
+        else:
+            try:
+                return json.load(fobj)
+            finally:
+                fobj.close()
+
+
+def _update_phonebook():
+    global _phonebook
+    try:
+        raw_phonebook = _fetch_from_ws(PHONEBOOK_URL)
+        _phonebook = _convert_raw_phonebook_to_phonebook_dict(raw_phonebook)
+    except ValueError:
+        # empty phonebook
+        _phonebook = {}
 
 
 agid.register(callerid_forphones, setup_callerid_forphones)
