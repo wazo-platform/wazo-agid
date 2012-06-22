@@ -34,14 +34,14 @@ CTI_CONFIG_URL = 'http://localhost/service/ipbx/json.php/private/ctiserver/confi
 PHONEBOOK_URL = 'http://localhost/service/ipbx/json.php/private/pbx_services/phonebook'
 UPDATE_ADDRESS = 'localhost'
 UPDATE_PORT = 5042
-FETCH_URL_RETRY_INTERVAL = 10
+FETCH_WS_RETRY_INTERVAL = 10
 
 _update_thread = None
 _displays_mgr = directory.DisplaysMgr()
 _contexts_mgr = directory.ContextsMgr()
 _directories_mgr = directory.DirectoriesMgr()
 _rw_lock = RWLock()
-# XXX ugly because its imported in other modules
+# XXX the following names are imported in xivo_agid.directory submodules
 _phonebook = {}
 _cursor = None
 
@@ -175,8 +175,8 @@ def _update_thread_loop(update_socket):
                     _update_phonebook()
                 else:
                     logger.warning('received unknown command: %r', data)
-            except Exception:
-                logger.error('exception during update: %s', exc_info=True)
+            except Exception as e:
+                logger.error('exception during update: %s', e, exc_info=True)
     finally:
         update_socket.close()
 
@@ -204,8 +204,8 @@ def _fetch_from_ws(url):
             raise
         except urllib2.URLError as e:
             logger.warning('error while fetching url %s: %s', url, e)
-            logger.warning('sleeping %s seconds before retrying', FETCH_URL_RETRY_INTERVAL)
-            time.sleep(FETCH_URL_RETRY_INTERVAL)
+            logger.warning('sleeping %s seconds before retrying', FETCH_WS_RETRY_INTERVAL)
+            time.sleep(FETCH_WS_RETRY_INTERVAL)
         else:
             try:
                 return json.load(fobj)
