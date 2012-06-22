@@ -100,8 +100,13 @@ class Context(object):
     @staticmethod
     def _directories_from_contents(avail_directories, contents):
         directory_ids = contents.get('directories', [])
-        directories = [avail_directories[directory_id] for directory_id in
-                       directory_ids]
+        directories = []
+        for directory_id in directory_ids:
+            try:
+                directories.append(avail_directories[directory_id])
+            except KeyError:
+                logger.error('directory %r in directories could not be added: no such directory',
+                             directory_id)
         return directories
 
     @staticmethod
@@ -114,8 +119,13 @@ class Context(object):
         raw_didextens = contents.get('didextens', {})
         didextens = {}
         for exten, directory_ids in raw_didextens.iteritems():
-            directories = [avail_directories[directory_id] for directory_id in
-                           directory_ids]
+            directories = []
+            for directory_id in directory_ids:
+                try:
+                    directories.append(avail_directories[directory_id])
+                except KeyError:
+                    logger.error('directory %r in didextens could not be added: no such directory',
+                                 directory_id)
             didextens[exten] = directories
         return didextens
 
