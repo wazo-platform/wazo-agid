@@ -209,24 +209,16 @@ class DirectoryAdapter(object):
 class ContextsMgr(object):
     def __init__(self):
         self.contexts = {}
-        self._old_contents = {}
 
     def update(self, avail_displays, avail_directories, contents):
-        # remove old contexts
-        # deleting a key will raise a RuntimeError if you do not use .keys() here
-        for context_id in self.contexts.keys():
-            if context_id not in contents:
-                del self.contexts[context_id]
-        # add/update contexts
+        self.contexts = {}
         for context_id, context_contents in contents.iteritems():
-            if context_contents != self._old_contents.get(context_id):
-                try:
-                    self.contexts[context_id] = Context.new_from_contents(
-                            avail_displays, avail_directories, context_contents)
-                except Exception:
-                    logger.error('Error while creating context %s from %s',
-                                 context_id, context_contents, exc_info=True)
-        self._old_contents = contents
+            try:
+                self.contexts[context_id] = Context.new_from_contents(
+                        avail_displays, avail_directories, context_contents)
+            except Exception:
+                logger.error('Error while creating context %s from %s',
+                             context_id, context_contents, exc_info=True)
 
 
 class DisplaysMgr(object):
