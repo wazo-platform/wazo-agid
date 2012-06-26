@@ -63,8 +63,8 @@ def callerid_forphones(agi, cursor, args):
 
 
 def _resolve_incoming_caller_id(channel, cid_name, cid_number):
-    logger.info('Resolving caller ID: channel=%s incoming caller ID=%s %s',
-                channel, cid_name, cid_number)
+    logger.debug('Resolving caller ID: channel=%s incoming caller ID=%s %s',
+                 channel, cid_name, cid_number)
 
     if cid_name == cid_number or cid_name == 'unknown':
         return _build_agi_caller_id(*_get_cid_directory_lookup(cid_number, cid_number))
