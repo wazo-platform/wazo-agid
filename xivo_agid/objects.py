@@ -1129,16 +1129,14 @@ class Queue:
         self.waitratio = res['queuefeatures.waitratio']
 
     def set_dial_actions(self):
-        for event in ('congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio'):
+        for event in ['congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio']:
             DialAction(self.agi, self.cursor, event, "queue", self.id).set_variables()
 
         # case NOANSWER (timeout): we also set correct queuelog event
         action = DialAction(self.agi, self.cursor, 'noanswer', "queue", self.id)
         action.set_variables()
-        if action.action in ('voicemail', 'voicemenu', 'sound'):
+        if action.action in ['voicemail', 'voicemenu', 'sound']:
             self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTEGUIDE")
-        else:
-            self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTENUMBER")
 
     def rewrite_cid(self):
         CallerID(self.agi, self.cursor, "queue", self.id).rewrite(force_rewrite=False)
