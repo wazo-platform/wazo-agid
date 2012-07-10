@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 __license__ = """
-    Copyright (C) 2011  Avencall
+    Copyright (C) 2012  Avencall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,30 +23,27 @@ from xivo_agid import objects
 
 logger = logging.getLogger(__name__)
 
+
 def paging(agi, cursor, args):
 
     userid = agi.get_variable('XIVO_USERID')
 
     try:
-        paging = objects.Paging (agi,
-                                 cursor,
-                                 args[0],
-                                 userid)
+        paging = objects.Paging(agi,
+                                cursor,
+                                args[0],
+                                userid)
     except (ValueError, LookupError), e:
         agi.answer()
         agi.stream_file('vm-incorrect')
         agi.dp_break('Sorry you are not authorize to page this group : %s' % str(e))
 
-    paging_line = ''
-    paging_opts = ''
-    try:
-        paging_line = '&'.join(paging.lines)
-    except:
-        pass
-
+    paging_line = '&'.join(paging.lines) if len(paging.lines) else ''
 
     agi.set_variable('XIVO_PAGING_LINES', paging_line)
     agi.set_variable('XIVO_PAGING_TIMEOUT', paging.timeout)
+
+    paging_opts = ''
 
     if paging.duplex:
             paging_opts = paging_opts + 'd'
