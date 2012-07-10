@@ -460,8 +460,13 @@ class Paging:
             raise LookupError("Unable to find paging users entry (id: %s)" % (id,))
 
         for l in res:
-            line = l['protocol'].upper() + '/' + l['name']
+            proto_upper = l['protocol'].upper()
+            if proto_upper == 'SCCP':
+                line = '%s/%s/%s' % (proto_upper, l['name'], 'autoanswer')
+            else:
+                line = '%s/%s' % (proto_upper, l['name'])
             self.lines.append(line)
+
 
 class Lines:
     def __init__(self, agi, cursor, xid=None, exten=None, context=None, name=None, protocol=None):
