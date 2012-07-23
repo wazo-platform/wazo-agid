@@ -34,14 +34,12 @@ class TestUserFeatures(unittest.TestCase):
     def test_set_pickup_info(self):
         context = 'foo'
         number = '101'
-        line_list = [{'id': '2',
-                      'number': number,
-                      'context': context}, ]
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         self.assertEqual(None, userfeatures._pickup_context)
 
-        userfeatures._lines = Mock(objects.Lines)
-        userfeatures._lines.lines = line_list
+        userfeatures._master_line = {'id': '2',
+                                     'number': number,
+                                     'context': context}
         userfeatures._dstnum = number
         userfeatures._set_pickup_info()
 
@@ -123,20 +121,22 @@ class TestUserFeatures(unittest.TestCase):
 
     def test_set_lines(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        mocked_line = Mock()
+        mocked_line.lines = [{'number': '1001'}]
 
         userfeatures._set_lines()
 
         self.assertEqual(userfeatures._lines, None)
 
         userfeatures._dstid = self._variables['XIVO_DSTID']
-        with patch.object(objects.Lines, '__init__') as lines_init:
-            lines_init.return_value = None
+        with patch('xivo_agid.objects.Lines') as lines_cls:
+            lines_cls.return_value = mocked_line
 
             userfeatures._set_lines()
 
-            lines_init.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_DSTID']))
-        self.assertNotEqual(userfeatures._lines, None)
-        self.assertTrue(isinstance(userfeatures._lines, objects.Lines))
+            lines_cls.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_DSTID']))
+        self.assertEqual(mocked_line, userfeatures._lines)
+        self.assertEqual(mocked_line.lines[0], userfeatures._master_line)
 
     def test_set_user(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -184,8 +184,7 @@ class TestUserFeatures(unittest.TestCase):
 
         lineid = '97'
         userfeatures._lineid = lineid
-        userfeatures._lines = Mock()
-        userfeatures._lines.lines = [{'id': lineid}, ]
+        userfeatures._master_line = {'id': lineid}
 
         self.assertTrue(userfeatures._is_main_line())
 

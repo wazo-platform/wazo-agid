@@ -22,6 +22,7 @@ class UserFeatures(Handler):
         self._feature_list = None
         self._caller = None
         self._lines = None
+        self._master_line = None
         self._user = None
         self._pickup_context = None
         self._pickup_exten = None
@@ -49,8 +50,8 @@ class UserFeatures(Handler):
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
 
     def _set_pickup_info(self):
-        if self._lines and len(self._lines.lines):
-            line = self._lines.lines[0]
+        if self._master_line:
+            line = self._master_line
             self._pickup_context = line['context']
             self._pickup_exten = line['number']
             self._agi.set_variable(dialplan_variables.PICKUP_CONTEXT, self._pickup_context)
@@ -86,6 +87,9 @@ class UserFeatures(Handler):
                 self._lines = objects.Lines(self._agi, self._cursor, int(self._dstid))
             except (ValueError, LookupError), e:
                 self._agi.dp_break(str(e))
+            else:
+                self._master_line = self._lines.lines[0]
+                self._agi.set_variable('XIVO_DST_USERNUM', self._master_line['number'])
 
     def _set_user(self):
         if self._dstid:
@@ -96,7 +100,7 @@ class UserFeatures(Handler):
             self._set_xivo_user_name()
 
     def _is_main_line(self):
-        return self._lineid and self._lines.lines and str(self._lines.lines[0]['id']) == self._lineid
+        return self._lineid and str(self._master_line['id']) == self._lineid
 
     def _ring_main_line_only(self):
         try:
@@ -319,7 +323,7 @@ class UserFeatures(Handler):
         objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
 
     def _set_call_forwards(self):
-        called_line = self._lines.lines[0]
+        called_line = self._master_line
         self._set_enableunc(called_line)
         self._setbusy(called_line)
         self._setrna(called_line)
