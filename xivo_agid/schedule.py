@@ -79,7 +79,8 @@ class ScheduleAction(object):
     def set_variables_in_agi(self, agi):
         agi.set_variable('XIVO_FWD_SCHEDULE_OUT_ACTION', self.action)
         agi.set_variable('XIVO_FWD_SCHEDULE_OUT_ACTIONARG1', self.actionarg1)
-        agi.set_variable('XIVO_FWD_SCHEDULE_OUT_ACTIONARG2', self.actionarg2)
+        if self.actionarg2 is not None:
+            agi.set_variable('XIVO_FWD_SCHEDULE_OUT_ACTIONARG2', self.actionarg2)
 
 
 class ScheduleBuilder(object):

@@ -2,9 +2,10 @@
 
 import datetime
 import unittest
-from mock import Mock
+from mock import Mock, call
 from xivo_agid.schedule import ScheduleBuilder, SchedulePeriodBuilder, \
-    HoursChecker, WeekdaysChecker, DaysChecker, MonthsChecker, SchedulePeriod
+    HoursChecker, WeekdaysChecker, DaysChecker, MonthsChecker, SchedulePeriod, \
+    ScheduleAction
 
 
 class TestHoursChecker(unittest.TestCase):
@@ -301,3 +302,16 @@ class _DatetimeBuilder(object):
 
     def build(self):
         return datetime.datetime(self._year, self._month, self._day, self._hour, self._minute)
+
+
+class TestScheduleAction(unittest.TestCase):
+
+    def test_action_arg2_is_not_set_if_none(self):
+        action = ScheduleAction('foo', 'bar', None)
+        agi = Mock()
+
+        action.set_variables_in_agi(agi)
+
+        expected_call_args = [call('XIVO_FWD_SCHEDULE_OUT_ACTION', 'foo'),
+                              call('XIVO_FWD_SCHEDULE_OUT_ACTIONARG1', 'bar')]
+        self.assertEqual(expected_call_args, agi.set_variable.call_args_list)
