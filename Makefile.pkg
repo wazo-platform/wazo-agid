@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 # -*- mode: makefile; coding: utf-8 -*-
 
-DEB_PKG="pf-xivo-agid"
+DEB_PKG="xivo-agid"
 DEB_TB_DEPS=""
 
 default:
