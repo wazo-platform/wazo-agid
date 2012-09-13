@@ -26,8 +26,8 @@ from xivo_agid import agid
 from xivo_agid.modules import *
 from xivo import daemonize
 
-PIDFILE = "/var/run/agid.pid"
-SYSLOG_NAME = 'agid'
+PIDFILE = "/var/run/xivo-agid.pid"
+SYSLOG_NAME = 'xivo-agid'
 
 logging.basicConfig(level=logging.DEBUG)
 sysloghandler = SysLogHandler("/dev/log", SysLogHandler.LOG_DAEMON)
