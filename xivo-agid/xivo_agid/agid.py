@@ -35,7 +35,7 @@ LISTEN_ADDR_DEFAULT = "127.0.0.1"
 LISTEN_PORT_DEFAULT = 4573
 CONN_POOL_SIZE_DEFAULT = 10
 
-log = logging.getLogger('xivo_agid.agid') # pylint: disable-msg=C0103
+log = logging.getLogger('xivo_agid.agid')
 
 _server = None
 _handlers = {}
@@ -217,7 +217,7 @@ def register(handle_fn, setup_fn=None):
     _handlers[handler_name] = Handler(handler_name, setup_fn, handle_fn)
 
 
-def sighup_handle(signum, frame): # pylint: disable-msg=W0613
+def sighup_handle(signum, frame):
     log.debug("reloading core engine")
     _server.setup()
 

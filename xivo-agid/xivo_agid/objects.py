@@ -948,7 +948,7 @@ class MeetMe:
 
         return options
 
-    def get_global_options(self):   # pylint: disable-msg=E1101
+    def get_global_options(self):
         options = self._get_options(self.OPTIONS_GLOBAL.copy())
 
         if self.OPTIONS_GLOBAL['closeconfdurationexceeded'] in options:
@@ -969,7 +969,7 @@ class MeetMe:
 
         return set(options)
 
-    def get_admin_options(self):    # pylint: disable-msg=E1101
+    def get_admin_options(self):
         admin_options = self.OPTIONS_COMMON.copy()
         admin_options.update(self.OPTIONS_ADMIN)
         options = self._get_options(admin_options, "admin_")
@@ -983,7 +983,7 @@ class MeetMe:
 
         return set(options)
 
-    def get_user_options(self): # pylint: disable-msg=E1101
+    def get_user_options(self):
         user_options = self.OPTIONS_COMMON.copy()
         user_options.update(self.OPTIONS_USER)
         options = self._get_options(user_options, "user_")
@@ -1006,7 +1006,7 @@ class MeetMe:
             raise ValueError("Unable to find option %r, unknown MeetMe FLAG (flag: %r)"
                              % (option, flag))
 
-    def get_admin_identifiers(self):    # pylint: disable-msg=E1101
+    def get_admin_identifiers(self):
         if self.admin_typefrom in (None, 'none'):
             return None
 

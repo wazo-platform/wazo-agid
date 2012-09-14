@@ -65,7 +65,6 @@ def setup_callback(cursor):
 
 
 def _get_uid_gid(name):
-    # pylint: disable-msg=W0612
     pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell = pwd.getpwnam(name)
     return pw_uid, pw_gid
 

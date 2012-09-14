@@ -41,7 +41,7 @@ import re
 import pprint
 
 DEFAULT_TIMEOUT = 2000 # 2sec timeout used as default for functions that take timeouts
-DEFAULT_RECORD  = 20000 # 20sec record time
+DEFAULT_RECORD = 20000 # 20sec record time
 
 re_code = re.compile(r'(^\d*)\s*(.*)')
 re_kv = re.compile(r'(?P<key>\w+)=(?P<value>[^\s]+)\s*(?:\((?P<data>.*)\))*')
@@ -89,7 +89,7 @@ class FastAGI:
     It handles encoding commands to Asterisk and parsing responses from
     Asterisk. 
     """
-    
+
     def __init__(self, inf, outf):
         self.inf = inf
         self.outf = outf
@@ -206,7 +206,7 @@ class FastAGI:
         """agi.answer() --> None
         Answer channel if not already in answer state.
         """
-        self.execute('ANSWER')['result'][0] # pylint: disable-msg=W0104
+        self.execute('ANSWER')['result'][0]
 
     @staticmethod
     def code_to_char(code):
@@ -237,7 +237,7 @@ class FastAGI:
         transmission of text.
         Throws FastAGIError on error/hangup
         """
-        self.execute('SEND TEXT', self._quote(text))['result'][0] # pylint: disable-msg=W0104
+        self.execute('SEND TEXT', self._quote(text))['result'][0]
 
     def receive_char(self, timeout=DEFAULT_TIMEOUT):
         """agi.receive_char(timeout=DEFAULT_TIMEOUT) --> chr
@@ -256,7 +256,7 @@ class FastAGI:
         res = self.execute('TDD MODE', mode)['result'][0]
         if res == '0':
             raise FastAGIAppError('Channel %s is not TDD-capable')
-            
+
     def stream_file(self, filename, escape_digits='', sample_offset=0):
         """agi.stream_file(filename, escape_digits='', sample_offset=0) --> digit
         Send the given file, allowing playback to be interrupted by the given
@@ -271,7 +271,7 @@ class FastAGI:
         response = self.execute('STREAM FILE', filename, escape_digits, sample_offset)
         res = response['result'][0]
         return self.code_to_char(res)
-    
+
     def control_stream_file(self, filename, escape_digits='', skipms=3000, fwd='', rew='', pause=''):
         """
         Send the given file, allowing playback to be interrupted by the given
@@ -358,7 +358,7 @@ class FastAGI:
         escape_digits = self._process_digit_list(escape_digits)
         res = self.execute('SAY TIME', seconds, escape_digits)['result'][0]
         return self.code_to_char(res)
-    
+
     def say_datetime(self, seconds, escape_digits='', format='', zone=''):
         """agi.say_datetime(seconds, escape_digits='', format='', zone='') --> digit
         Say a given date in the format specfied (see voicemail.conf), returning
@@ -376,9 +376,9 @@ class FastAGI:
         Stream the given file and receive dialed digits
         """
         result = self.execute('GET DATA', filename, timeout, max_digits)
-        res, value = result['result'] # pylint: disable-msg=W0612
+        res, value = result['result']
         return res
-    
+
     def get_option(self, filename, escape_digits='', timeout=0):
         """agi.get_option(filename, escape_digits='', timeout=0) --> digit
         Send the given file, allowing playback to be interrupted by the given
@@ -494,7 +494,7 @@ class FastAGI:
         except FastAGIHangup:
             raise
         except FastAGIAppError:
-            result = {'result': ('-1','')}
+            result = {'result': ('-1', '')}
 
         return int(result['result'][0])
 
@@ -514,10 +514,10 @@ class FastAGI:
         except FastAGIResultHangup:
             result = {'result': ('1', 'hangup')}
 
-        res, value = result['result'] # pylint: disable-msg=W0612
+        res, value = result['result']
         return value
 
-    def get_full_variable(self, name, channel = None):
+    def get_full_variable(self, name, channel=None):
         """Get a channel variable.
 
         This function returns the value of the indicated channel variable.  If
@@ -532,7 +532,7 @@ class FastAGI:
         except FastAGIResultHangup:
             result = {'result': ('1', 'hangup')}
 
-        res, value = result['result'] # pylint: disable-msg=W0612
+        res, value = result['result']
         return value
 
     def verbose(self, message, level=1):
@@ -567,14 +567,14 @@ class FastAGI:
         res, value = result['result']
         if res == '0':
             raise FastAGIDBError('Unable to put vaule in databale: family=%s, key=%s, value=%s' % (family, key, value))
-            
+
     def database_del(self, family, key):
         """agi.database_del(family, key) --> None
         Deletes an entry in the Asterisk database for a
         given family and key.
         """
         result = self.execute('DATABASE DEL', self._quote(family), self._quote(key))
-        res, value = result['result']  # pylint: disable-msg=W0612
+        res, value = result['result']
         if res == '0':
             raise FastAGIDBError('Unable to delete from database: family=%s, key=%s' % (family, key))
 
@@ -584,7 +584,7 @@ class FastAGI:
         in the Asterisk database.
         """
         result = self.execute('DATABASE DELTREE', self._quote(family), self._quote(key))
-        res, value = result['result'] # pylint: disable-msg=W0612
+        res, value = result['result']
         if res == '0':
             raise FastAGIDBError('Unable to delete tree from database: family=%s, key=%s' % (family, key))
 
