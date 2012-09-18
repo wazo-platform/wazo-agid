@@ -136,7 +136,7 @@ class AGID(SocketServer.ThreadingTCPServer):
     initialized = False
 
     def __init__(self):
-        log.info('agid starting...')
+        log.info('xivo-agid starting...')
 
         signal.signal(signal.SIGHUP, sighup_handle)
 
