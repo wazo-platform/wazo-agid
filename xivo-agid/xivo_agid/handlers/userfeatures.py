@@ -24,8 +24,6 @@ class UserFeatures(Handler):
         self._lines = None
         self._master_line = None
         self._user = None
-        self._pickup_context = None
-        self._pickup_exten = None
 
     def execute(self):
         self._set_members()
@@ -49,14 +47,6 @@ class UserFeatures(Handler):
         self._set_vmbox_lang()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
 
-    def _set_pickup_info(self):
-        if self._master_line:
-            line = self._master_line
-            self._pickup_context = line['context']
-            self._pickup_exten = line['number']
-            self._agi.set_variable(dialplan_variables.PICKUP_CONTEXT, self._pickup_context)
-            self._agi.set_variable(dialplan_variables.PICKUP_EXTEN, self._pickup_exten)
-
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
@@ -69,7 +59,6 @@ class UserFeatures(Handler):
         self._set_caller()
         self._set_lines()
         self._set_user()
-        self._set_pickup_info()
 
     def _set_feature_list(self):
         self._feature_list = objects.ExtenFeatures(self._agi, self._cursor)

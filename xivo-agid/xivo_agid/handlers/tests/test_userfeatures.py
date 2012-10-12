@@ -31,21 +31,6 @@ class TestUserFeatures(unittest.TestCase):
         self._cursor = Mock()
         self._args = Mock()
 
-    def test_set_pickup_info(self):
-        context = 'foo'
-        number = '101'
-        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        self.assertEqual(None, userfeatures._pickup_context)
-
-        userfeatures._master_line = {'id': '2',
-                                     'number': number,
-                                     'context': context}
-        userfeatures._dstnum = number
-        userfeatures._set_pickup_info()
-
-        self.assertEqual(context, userfeatures._pickup_context)
-        self.assertEqual(number, userfeatures._pickup_exten)
-
     def test_userfeatures(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
