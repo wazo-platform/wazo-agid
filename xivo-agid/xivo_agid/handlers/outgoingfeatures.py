@@ -18,7 +18,7 @@ __license__ = """
 """
 
 from xivo_agid import dialplan_variables
-from xivo_agid.handlers.Handler import Handler
+from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
 
 import time

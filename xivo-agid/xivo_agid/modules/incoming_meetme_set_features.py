@@ -25,6 +25,7 @@ from xivo_agid import objects
 
 MEETME_RECORDINGDIR = '/var/lib/asterisk/sounds/meetme/'
 
+
 def conf_authentication(agi, meetme):
     global MEETME_RECORDINGDIR
 
@@ -51,17 +52,19 @@ def conf_authentication(agi, meetme):
 
     return False
 
+
 def conf_exceed_max_number(agi, confno, maxuser):
     if not maxuser or int(maxuser) < 1:
         return False
 
-    agi.appexec('MeetMeCount',"%s,MEETMECOUNT" % confno)
+    agi.appexec('MeetMeCount', "%s,MEETMECOUNT" % confno)
     meetmecount = agi.get_variable('MEETMECOUNT')
 
     if not meetmecount.isdigit():
         return None
 
     return (int(meetmecount) >= int(maxuser))
+
 
 def conf_is_open(starttime, durationm):
     if not starttime:
@@ -72,6 +75,7 @@ def conf_is_open(starttime, durationm):
         return ((starttime + (int(durationm) * 60)) > time.time())
     else:
         return True
+
 
 def incoming_meetme_set_features(agi, cursor, args):
     xid = agi.get_variable('XIVO_DSTID')
@@ -100,11 +104,11 @@ def incoming_meetme_set_features(agi, cursor, args):
         agi.dp_break("Conference room authentication failed (id: %s, name: %s, confno: %s)"
                      % (meetme.id, meetme.name, meetme.confno))
 
-    pin     = ''
+    pin = ''
     options = ''.join(meetme.get_global_options())
 
     if flag & meetme.FLAG_USER:
-        pin     = meetme.pin
+        pin = meetme.pin
         options += ''.join(meetme.get_user_options())
 
         if conf_exceed_max_number(agi, meetme.confno, meetme.maxusers):
@@ -114,7 +118,7 @@ def incoming_meetme_set_features(agi, cursor, args):
                          "(max number: %s, id: %s, name: %s, confno: %s)"
                          % (meetme.maxusers, meetme.id, meetme.name, meetme.confno))
     elif flag & meetme.FLAG_ADMIN:
-        pin     = meetme.pinadmin
+        pin = meetme.pinadmin
         options += ''.join(meetme.get_admin_options())
     else:
         agi.dp_break("Unknown MeetMe FLAG (flag: %r, id: %s, name: %s, confno: %s)"
@@ -145,5 +149,6 @@ def incoming_meetme_set_features(agi, cursor, args):
     agi.set_variable('XIVO_MEETMEPIN', pin)
     agi.set_variable('XIVO_MEETMEOPTIONS', options)
     agi.set_variable('XIVO_MEETMEPREPROCESS_SUBROUTINE', preprocess_subroutine)
+
 
 agid.register(incoming_meetme_set_features)

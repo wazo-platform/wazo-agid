@@ -20,6 +20,7 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 
+
 def incoming_queue_set_features(agi, cursor, args):
     queueid = agi.get_variable('XIVO_DSTID')
     referer = agi.get_variable('XIVO_FWD_REFERER')
@@ -86,7 +87,7 @@ def incoming_queue_set_features(agi, cursor, args):
     if referer == ("queue:%s" % queue.id) or referer.startswith("voicemenu:"):
         queue.rewrite_cid()
 
-    agi.set_variable('XIVO_QUEUESTATUS','ok');
+    agi.set_variable('XIVO_QUEUESTATUS', 'ok');
 
     # schedule
     # 'incall' schedule has priority over queue's schedule
@@ -111,13 +112,13 @@ def holdtime_announce(agi, cursor, args):
         return
 
     holdtime = agi.get_variable('QUEUEHOLDTIME')
-    holdtime = max(1, (int(holdtime) + 59) / 60)                                           
+    holdtime = max(1, (int(holdtime) + 59) / 60)
 
     agi.answer()
-    agi.stream_file('queue-holdtime')                                                           
-    agi.stream_file('queue-less-than')                                                          
-    agi.stream_file('digits/%s' % holdtime)                                             
-    agi.stream_file('queue-minutes')  
+    agi.stream_file('queue-holdtime')
+    agi.stream_file('queue-less-than')
+    agi.stream_file('digits/%s' % holdtime)
+    agi.stream_file('queue-minutes')
 
 agid.register(incoming_queue_set_features)
 agid.register(holdtime_announce)

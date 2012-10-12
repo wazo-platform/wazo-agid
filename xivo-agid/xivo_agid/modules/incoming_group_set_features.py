@@ -18,64 +18,11 @@ __license__ = """
 """
 
 from xivo_agid import agid
-from xivo_agid import objects
+from xivo_agid.handlers.groupfeatures import GroupFeatures
+
 
 def incoming_group_set_features(agi, cursor, args):
-    groupid = agi.get_variable('XIVO_DSTID')
-    referer = agi.get_variable('XIVO_FWD_REFERER')
-
-    try:
-        group = objects.Group(agi, cursor, xid=int(groupid))
-    except (ValueError, LookupError), e:
-        agi.dp_break(str(e))
-
-    options = ""
-    needanswer = "1"
-
-    if group.transfer_user:
-        options += "t"
-
-    if group.transfer_call:
-        options += "T"
-
-    if group.write_caller:
-        options += "w"
-
-    if group.write_calling:
-        options += "W"
-
-    if not group.musicclass:
-        options += "r"
-        needanswer = "0"
-
-    agi.set_variable('XIVO_REAL_NUMBER', group.number)
-    agi.set_variable('XIVO_REAL_CONTEXT', group.context)
-    agi.set_variable('XIVO_GROUPNAME', group.name)
-    agi.set_variable('XIVO_GROUPOPTIONS', options)
-    agi.set_variable('XIVO_GROUPNEEDANSWER', needanswer)
-
-    if group.preprocess_subroutine:
-        preprocess_subroutine = group.preprocess_subroutine
-    else:
-        preprocess_subroutine = ""
-
-    if group.timeout:
-        timeout = group.timeout
-    else:
-        timeout = ""
-
-    agi.set_variable('XIVO_GROUPPREPROCESS_SUBROUTINE', preprocess_subroutine)
-    agi.set_variable('XIVO_GROUPTIMEOUT', timeout)
-
-    group.set_dial_actions()
-
-    if referer == ("group:%s" % group.id) or referer.startswith("voicemenu:"):
-        group.rewrite_cid()
-
-    # schedule
-    path = agi.get_variable('XIVO_PATH')
-    if path is None or len(path) == 0:
-        agi.set_variable('XIVO_PATH'   , 'group')
-        agi.set_variable('XIVO_PATH_ID', group.id)
+    groupfeatures_handler = GroupFeatures(agi, cursor, args)
+    groupfeatures_handler.execute()
 
 agid.register(incoming_group_set_features)

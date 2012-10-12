@@ -20,11 +20,12 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 
+
 def incoming_did_set_features(agi, cursor, args):
     exten_pattern = agi.get_variable('XIVO_EXTENPATTERN')
     context = agi.get_variable('XIVO_CONTEXT')
 
-    did = objects.DID(agi, cursor, exten = exten_pattern, context = context)
+    did = objects.DID(agi, cursor, exten=exten_pattern, context=context)
 
     if did.preprocess_subroutine:
         preprocess_subroutine = did.preprocess_subroutine
@@ -41,5 +42,6 @@ def incoming_did_set_features(agi, cursor, args):
 
     did.set_dial_actions()
     did.rewrite_cid()
+
 
 agid.register(incoming_did_set_features)

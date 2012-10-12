@@ -2,7 +2,7 @@
 
 """Object classes for XIVO AGI
 
-Copyright (C) 2007-2010  Avencall
+Copyright (C) 2007-2012  Avencall
 
 This module provides a set of objects that are used by several AGI scripts
 in XIVO.
@@ -10,7 +10,7 @@ in XIVO.
 """
 
 __license__ = """
-    Copyright (C) 2007-2010  Avencall
+    Copyright (C) 2007-2012  Avencall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -684,7 +684,6 @@ class User:
         if res[0] > 0:
             self.skills = xid
 
-
     def disable_forwards(self):
         self.cursor.query("UPDATE userfeatures "
                           "SET enablebusy = 0, "
@@ -753,74 +752,13 @@ class User:
             setattr(self, feature, enabled)
 
 
-class Group:
-    def __init__(self, agi, cursor, xid=None, number=None, context=None):
-        self.agi = agi
-        self.cursor = cursor
-
-        groupfeatures_columns = ('id', 'number', 'context', 'name',
-                                 'timeout', 'transfer_user', 'transfer_call',
-                                 'write_caller', 'write_calling', 'preprocess_subroutine')
-        queue_columns = ('musicclass',)
-        columns = ["groupfeatures." + c for c in groupfeatures_columns] + ["queue." + c for c in queue_columns]
-
-        if xid:
-            cursor.query("SELECT ${columns} FROM groupfeatures "
-                         "INNER JOIN queue "
-                         "ON groupfeatures.name = queue.name "
-                         "WHERE groupfeatures.id = %s "
-                         "AND groupfeatures.deleted = 0 "
-                         "AND queue.category = 'group' "
-                         "AND queue.commented = 0",
-                         columns,
-                         (xid,))
-        elif number and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM groupfeatures "
-                         "INNER JOIN queue "
-                         "ON groupfeatures.name = queue.name "
-                         "WHERE groupfeatures.number = %s "
-                         "AND groupfeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND groupfeatures.deleted = 0 "
-                         "AND queue.category = 'group' "
-                         "AND queue.commented = 0",
-                         columns,
-                         [number] + contextinclude)
-        else:
-            raise LookupError("id or number@context must be provided to look up a group")
-
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find group (id: %s, number: %s, context: %s)" % (xid, number, context))
-
-        self.id = res['groupfeatures.id']
-        self.number = res['groupfeatures.number']
-        self.context = res['groupfeatures.context']
-        self.name = res['groupfeatures.name']
-        self.timeout = res['groupfeatures.timeout']
-        self.transfer_user = res['groupfeatures.transfer_user']
-        self.transfer_call = res['groupfeatures.transfer_call']
-        self.write_caller = res['groupfeatures.write_caller']
-        self.write_calling = res['groupfeatures.write_calling']
-        self.preprocess_subroutine = res['groupfeatures.preprocess_subroutine']
-        self.musicclass = res['queue.musicclass']
-
-    def set_dial_actions(self):
-        for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
-            DialAction(self.agi, self.cursor, event, "group", self.id).set_variables()
-
-    def rewrite_cid(self):
-        CallerID(self.agi, self.cursor, "group", self.id).rewrite(force_rewrite=False)
-
-
 class MeetMe:
     FLAG_ADMIN = (1 << 0)
     FLAG_USER = (1 << 1)
 
-    OPTIONS_GLOBAL = {'talkeroptimization':        '', # Disabled
+    OPTIONS_GLOBAL = {'talkeroptimization':        '',  # Disabled
                        'record':                    'r',
-                       'talkerdetection':           '', # Disabled
+                       'talkerdetection':           '',  # Disabled
                        'noplaymsgfirstenter':       '1',
                        'closeconfdurationexceeded': 'L'}
 
@@ -978,8 +916,8 @@ class MeetMe:
            and not self.admin_exitcontext:
             options.remove(self.OPTIONS_COMMON['enableexitcontext'])
 
-        options.add('a')    # Admin mode
-        options.add('A')    # Marked mode
+        options.add('a')  # Admin mode
+        options.add('A')  # Marked mode
 
         return set(options)
 

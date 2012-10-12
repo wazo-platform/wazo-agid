@@ -17,7 +17,6 @@
 
 
 from xivo_agid import agid
-
 from xivo_agid.handlers.userfeatures import UserFeatures
 
 

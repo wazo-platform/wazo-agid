@@ -27,11 +27,11 @@ from xivo_agid import agid
 
 logger = logging.getLogger(__name__)
 
-CONFIG_FILE   = "/etc/pf-xivo/asterisk/xivo_fax.conf"
+CONFIG_FILE = "/etc/pf-xivo/asterisk/xivo_fax.conf"
 TIFF2PDF_PATH = "/usr/bin/tiff2pdf"
-MUTT_PATH     = "/usr/bin/mutt"
-LP_PATH       = "/usr/bin/lp"
-DESTINATIONS  = {}
+MUTT_PATH = "/usr/bin/mutt"
+LP_PATH = "/usr/bin/lp"
+DESTINATIONS = {}
 
 
 def _pdffile_from_file(file):
@@ -50,8 +50,7 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
 # A backend is a callable object taking 3 arguments, in this order:
 #   faxfile -- the path to the fax file (in TIFF format)
 #   dstnum -- the content of the the XIVO_DSTNUM dialplan variable
-#   args -- args specific to the backend 
-
+#   args -- args specific to the backend
 def _new_mail_backend(subject, content_file):
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
@@ -61,13 +60,13 @@ def _new_mail_backend(subject, content_file):
         content = fobj.read()
     finally:
         fobj.close()
-    
+
     def aux(faxfile, dstnum, args):
         # args[0] is the email address to send the fax to
         email = args[0]
         if not email:
             raise ValueError("Invalid email value: %s" % email)
-        
+
         pdffile = _convert_tiff_to_pdf(faxfile)
         try:
             fmt_dict = {"dstnum": dstnum}
@@ -156,7 +155,7 @@ def _new_log_backend(file, msg):
     def aux(faxfile, dstnum, args):
         fobj = open(file, "a")
         try:
-            print >>fobj, time.strftime("%Y-%m-%d %H:%M:%S"), msg % {"dstnum": dstnum} 
+            print >> fobj, time.strftime("%Y-%m-%d %H:%M:%S"), msg % {"dstnum": dstnum}
         finally:
             fobj.close()
     return aux
@@ -167,7 +166,7 @@ def _do_handle_fax(faxfile, dstnum, args):
         raise ValueError("Invalid faxfile value: %s" % faxfile)
     if not dstnum:
         raise ValueError("Invalid dstnum value: %s" % dstnum)
-    
+
     if dstnum in DESTINATIONS:
         logger.debug("Using backends for destination %s", dstnum)
         backends = DESTINATIONS[dstnum]
@@ -177,14 +176,14 @@ def _do_handle_fax(faxfile, dstnum, args):
             backends = DESTINATIONS["default"]
         else:
             raise ValueError("No backends associated with dstnum %s" % dstnum)
-    
+
     for backend in backends:
         try:
             backend(faxfile, dstnum, args)
         except Exception:
             logger.error("Fax backend %s failed to handle fax", backend, exc_info=True)
             raise
-    
+
     try:
         os.remove(faxfile)
     except OSError, e:
@@ -214,7 +213,7 @@ def setup_handle_fax(cursor):
         config.readfp(fobj)
     finally:
         fobj.close()
-    
+
     # 2. read general section...
     global TIFF2PDF_PATH
     global MUTT_PATH
@@ -225,7 +224,7 @@ def setup_handle_fax(cursor):
         MUTT_PATH = config.get("general", "mutt")
     if config.has_option("general", "lp"):
         LP_PATH = config.get("general", "lp")
-    
+
     # 3. create backends
     backends = {}
     for backend_prefix, backend_factory in _BACKENDS_FACTORY:
@@ -241,7 +240,7 @@ def setup_handle_fax(cursor):
     global DESTINATIONS
     DESTINATIONS = {}
     for section in filter(lambda s: s.startswith("dstnum_"), config.sections()):
-        cur_destination = section[7:]   # 6 == len("dstnum_")
+        cur_destination = section[7:]  # 6 == len("dstnum_")
         cur_backend_ids = map(lambda s: s.strip(), config.get(section, "dest").split(","))
         cur_backends = map(lambda id_: backends[id_], cur_backend_ids)
         logger.debug('Creating destination, dstnum %s, backends %s', cur_destination,

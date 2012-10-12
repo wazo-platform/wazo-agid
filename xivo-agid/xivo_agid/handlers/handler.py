@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
+
 from xivo_agid import dialplan_variables
 
 
 class Handler(object):
-
     def __init__(self, agi, cursor, args):
         self._agi = agi
         self._cursor = cursor
@@ -15,4 +15,3 @@ class Handler(object):
         if path is None or len(path) == 0:
             self._agi.set_variable(dialplan_variables.PATH, path_type)
             self._agi.set_variable(dialplan_variables.PATH_ID, path_id)
-
