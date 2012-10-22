@@ -69,6 +69,8 @@ def incoming_queue_set_features(agi, cursor, args):
     agi.set_variable('XIVO_QUEUEURL', queue.url)
     agi.set_variable('XIVO_QUEUEANNOUNCEOVERRIDE', queue.announceoverride)
 
+    _set_wrapup_time(agi, queue)
+
     if queue.preprocess_subroutine:
         preprocess_subroutine = queue.preprocess_subroutine
     else:
@@ -99,6 +101,11 @@ def incoming_queue_set_features(agi, cursor, args):
     # pickup
     pickups = queue.pickupgroups()
     agi.set_variable('XIVO_PICKUPGROUP', ','.join(pickups))
+
+
+def _set_wrapup_time(agi, queue):
+    if queue.wrapuptime:
+        agi.set_variable('QUEUEWRAPUPTIME', queue.wrapuptime)
 
 
 def holdtime_announce(agi, cursor, args):

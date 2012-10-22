@@ -1013,14 +1013,18 @@ class Queue:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'number', 'context', 'name', 'data_quality',
-                   'hitting_callee', 'hitting_caller',
-                   'retries', 'ring',
-                   'transfer_user', 'transfer_call',
-                   'write_caller', 'write_calling',
-                   'url', 'announceoverride', 'timeout',
-                   'preprocess_subroutine', 'announce_holdtime', 'waittime', 'waitratio')
-        columns = ["queuefeatures." + c for c in columns]
+        queuefeatures_columns = [
+            'id', 'number', 'context', 'name', 'data_quality',
+            'hitting_callee', 'hitting_caller', 'retries', 'ring',
+            'transfer_user', 'transfer_call', 'write_caller',
+            'write_calling', 'url', 'announceoverride', 'timeout',
+            'preprocess_subroutine', 'announce_holdtime', 'waittime',
+            'waitratio'
+        ]
+        queuefeatures_columns = ["queuefeatures." + c for c in queuefeatures_columns]
+        queue_columns = ['queue.wrapuptime']
+
+        columns = queuefeatures_columns + queue_columns
 
         if xid:
             cursor.query("SELECT ${columns} FROM queuefeatures "
@@ -1070,6 +1074,7 @@ class Queue:
         self.announce_holdtime = res['queuefeatures.announce_holdtime']
         self.waittime = res['queuefeatures.waittime']
         self.waitratio = res['queuefeatures.waitratio']
+        self.wrapuptime = res['queue.wrapuptime']
 
     def set_dial_actions(self):
         for event in ['congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio']:
@@ -1085,18 +1090,19 @@ class Queue:
         CallerID(self.agi, self.cursor, "queue", self.id).rewrite(force_rewrite=False)
 
     def pickupgroups(self):
-        self.cursor.query("SELECT ${columns} FROM pickup p, pickupmember pm "
+        self.cursor.query(
+            "SELECT ${columns} FROM pickup p, pickupmember pm "
             "WHERE p.commented = 0 AND p.id = pm.pickupid "
             "AND pm.category = 'member' AND pm.membertype = 'queue'"
             "AND pm.memberid = %s",
-            ('p.id',), (self.id,))
+            ('p.id',), (self.id,)
+        )
 
         res = self.cursor.fetchall()
         if res is None:
             raise LookupError("Unable to fetch queue %s pickupgroups" % (self.id))
 
         return [str(row[0]) for row in res]
-
 
 
 class Agent:
