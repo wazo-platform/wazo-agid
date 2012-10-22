@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-    Copyright (C) 2006-2010  Avencall
+    Copyright (C) 2006-2012  Avencall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,13 +87,13 @@ def incoming_queue_set_features(agi, cursor, args):
     if referer == ("queue:%s" % queue.id) or referer.startswith("voicemenu:"):
         queue.rewrite_cid()
 
-    agi.set_variable('XIVO_QUEUESTATUS', 'ok');
+    agi.set_variable('XIVO_QUEUESTATUS', 'ok')
 
     # schedule
     # 'incall' schedule has priority over queue's schedule
     path = agi.get_variable('XIVO_PATH')
     if path is None or len(path) == 0:
-        agi.set_variable('XIVO_PATH'   , 'queue')
+        agi.set_variable('XIVO_PATH', 'queue')
         agi.set_variable('XIVO_PATH_ID', queue.id)
 
     # pickup
