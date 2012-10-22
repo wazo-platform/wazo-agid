@@ -5,6 +5,8 @@ from xivo_agid import objects
 from xivo_agid import fastagi
 from xivo_agid.modules import incoming_queue_set_features
 
+QUEUE_WRAPUP_TIME = '__QUEUEWRAPUPTIME'
+
 
 class TestQueue(unittest.TestCase):
 
@@ -14,15 +16,15 @@ class TestQueue(unittest.TestCase):
 
         queue.wrapuptime = None
         incoming_queue_set_features._set_wrapup_time(agi, queue)
-        self.assert_dialplan_variable_not_set(agi, 'QUEUEWRAPUPTIME')
+        self.assert_dialplan_variable_not_set(agi, QUEUE_WRAPUP_TIME)
 
         queue.wrapuptime = 0
         incoming_queue_set_features._set_wrapup_time(agi, queue)
-        self.assert_dialplan_variable_not_set(agi, 'QUEUEWRAPUPTIME')
+        self.assert_dialplan_variable_not_set(agi, QUEUE_WRAPUP_TIME)
 
         queue.wrapuptime = 30
         incoming_queue_set_features._set_wrapup_time(agi, queue)
-        self.assert_dialplan_variable_set(agi, 'QUEUEWRAPUPTIME', 30)
+        self.assert_dialplan_variable_set(agi, QUEUE_WRAPUP_TIME, 30)
 
     def assert_dialplan_variable_not_set(self, agi, unexpected_variable_name):
         value = self.get_channel_variable_value(agi, unexpected_variable_name)

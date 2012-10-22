@@ -105,7 +105,7 @@ def incoming_queue_set_features(agi, cursor, args):
 
 def _set_wrapup_time(agi, queue):
     if queue.wrapuptime:
-        agi.set_variable('QUEUEWRAPUPTIME', queue.wrapuptime)
+        agi.set_variable('__QUEUEWRAPUPTIME', queue.wrapuptime)
 
 
 def holdtime_announce(agi, cursor, args):
