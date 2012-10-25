@@ -46,8 +46,14 @@ class GroupFeatures(Handler):
         self._set_preprocess_subroutine()
         self._set_timeout()
         self._set_dial_action()
-        if self._referer == ("group:%s" % self._id) or self._referer.startswith("voicemenu:"):
+        self._set_schedule()
+        if self._needs_rewrite_cid():
             self._set_rewrite_cid()
+#        if self._referer == ("group:%s" % self._id) or self._referer.startswith("voicemenu:"):
+#            self._set_rewrite_cid()
+
+    def _needs_rewrite_cid(self):
+        return (self._referer == ("group:%s" % self._id) or self._referer.startswith("voicemenu:"))
 
     def _set_members(self):
         self._id = int(self._agi.get_variable(dialplan_variables.DESTINATION_ID))
