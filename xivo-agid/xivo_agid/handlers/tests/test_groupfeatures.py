@@ -74,7 +74,6 @@ class TestGroupFeatures(unittest.TestCase):
         self.assertTrue(self.group_features._needs_rewrite_cid())
 
     def test_set_schedule(self):
-
         self.group_features._id = 34
         self._agi.get_variable.return_value = ''
 

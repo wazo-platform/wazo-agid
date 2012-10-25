@@ -49,8 +49,6 @@ class GroupFeatures(Handler):
         self._set_schedule()
         if self._needs_rewrite_cid():
             self._set_rewrite_cid()
-#        if self._referer == ("group:%s" % self._id) or self._referer.startswith("voicemenu:"):
-#            self._set_rewrite_cid()
 
     def _needs_rewrite_cid(self):
         return (self._referer == ("group:%s" % self._id) or self._referer.startswith("voicemenu:"))
