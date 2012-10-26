@@ -21,21 +21,22 @@ import ConfigParser
 
 from xivo_agid import agid
 
-CONFIG_FILE     = "/etc/pf-xivo/asterisk/xivo_ring.conf"
-CONFIG_PARSER   = None
+CONFIG_FILE = "/etc/pf-xivo/asterisk/xivo_ring.conf"
+CONFIG_PARSER = None
+
 
 def getring(agi, cursor, args):
-    dstnum              = agi.get_variable('XIVO_REAL_NUMBER')
-    context             = agi.get_variable('XIVO_REAL_CONTEXT')
-    origin              = agi.get_variable('XIVO_CALLORIGIN')
-    referer             = agi.get_variable('XIVO_FWD_REFERER').split(':', 1)[0]
-    forwarded           = agi.get_variable('XIVO_CALLFORWARDED')
+    dstnum = agi.get_variable('XIVO_REAL_NUMBER')
+    context = agi.get_variable('XIVO_REAL_CONTEXT')
+    origin = agi.get_variable('XIVO_CALLORIGIN')
+    referer = agi.get_variable('XIVO_FWD_REFERER').split(':', 1)[0]
+    forwarded = agi.get_variable('XIVO_CALLFORWARDED')
     # TODO: maybe replace number@context with user id in conf file ?
-    dstnum_context      = "%s@%s" % (dstnum, context)
-    referer_origin      = "%s@%s" % (referer, origin)
-    origin_fwd          = "%s&forwarded" % origin
-    referer_origin_fwd  = "%s&forwarded" % referer_origin
-    section             = None
+    dstnum_context = "%s@%s" % (dstnum, context)
+    referer_origin = "%s@%s" % (referer, origin)
+    origin_fwd = "%s&forwarded" % origin
+    referer_origin_fwd = "%s&forwarded" % referer_origin
+    section = None
 
     if CONFIG_PARSER.has_option('number', "!%s" % dstnum_context):
         agi.set_variable('XIVO_RINGTYPE', "")
@@ -70,6 +71,7 @@ def getring(agi, cursor, args):
         agi.set_variable('XIVO_RINGTYPE', ringtype)
         agi.set_variable('XIVO_PHONETYPE', phonetype)
         agi.verbose("Using ring tone %s" % (ringtype,))
+
 
 def setup(cursor):
     global CONFIG_PARSER

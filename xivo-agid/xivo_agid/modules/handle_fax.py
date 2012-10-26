@@ -96,6 +96,7 @@ def _new_printer_backend(name=None, convert_to_pdf=None):
     # to the given printer when called.
     # Note that if name is None, it use the default printer.
     convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
+
     def aux(faxfile, dstnum, args):
         lp_cmd = [LP_PATH, '-s']
         if name:
@@ -203,6 +204,7 @@ _BACKENDS_FACTORY = [("mail", _new_mail_backend),
                      ("printer", _new_printer_backend),
                      ("ftp", _new_ftp_backend),
                      ("log", _new_log_backend)]
+
 
 def setup_handle_fax(cursor):
     # Raise an error if a backend creation failed, etc.

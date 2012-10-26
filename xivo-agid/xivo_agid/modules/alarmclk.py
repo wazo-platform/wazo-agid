@@ -104,7 +104,7 @@ def _set_interface_vars(agi, cursor, userid):
 
 def alarmclk_pre_execute(agi, cursor, args):
     userid = int(args[0])
-    
+
     _update_alarmclock_db(cursor, userid, '')
     _set_interface_vars(agi, cursor, userid)
 
@@ -128,7 +128,7 @@ def _parse_inputted_alarm_clock(raw_alarm_clock):
 def alarmclk_set(agi, cursor, args):
     userid = int(args[0])
     raw_alarm_clock = args[1]
-    
+
     try:
         hour, minute = _parse_inputted_alarm_clock(raw_alarm_clock)
     except ValueError, e:
@@ -142,7 +142,7 @@ def alarmclk_set(agi, cursor, args):
 
 def alarmclk_clear(agi, cursor, args):
     userid = int(args[0])
-    
+
     cur_alarmclock = _get_alarmclock_db(cursor, userid)
     if cur_alarmclock:
         _update_alarmclock_webi(userid, '')

@@ -20,6 +20,7 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 
+
 def phone_get_features(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
 
@@ -31,14 +32,14 @@ def phone_get_features(agi, cursor, args):
         agi.dp_break(str(e))
 
     for fwd in feature_list.FEATURES['forwards']:
-        fwdupper    = fwd[1].upper()
-        enable      = 0
-        dest        = ""
+        fwdupper = fwd[1].upper()
+        enable = 0
+        dest = ""
 
         if getattr(feature_list, fwd[0], 0) \
-            and getattr(user, "enable%s" % fwd[1], 0):
-            enable  = 1
-            dest    = getattr(user, "dest%s" % fwd[1], "")
+                and getattr(user, "enable%s" % fwd[1], 0):
+            enable = 1
+            dest = getattr(user, "dest%s" % fwd[1], "")
 
         agi.set_variable("XIVO_ENABLE%s" % fwdupper, enable)
         agi.set_variable("XIVO_DEST%s" % fwdupper, dest)

@@ -19,6 +19,7 @@ __license__ = """
 
 from xivo_agid import agid
 
+
 def monitoring(agi, cursor, args):
     agi.send_command("Status: OK")
 

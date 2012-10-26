@@ -33,6 +33,7 @@ log = logging.getLogger('xivo_agid.modules.in_callerid')
 config = None
 re_objs = {}
 
+
 def in_callerid(agi, cursor, args):
     callerid_num = agi.env['agi_callerid']
 
@@ -62,6 +63,7 @@ def in_callerid(agi, cursor, args):
         agi.set_variable('CALLERID(num)', "%s" % callerid_num)
 
         return
+
 
 def setup(cursor):
     global config

@@ -17,7 +17,6 @@ __license__ = """
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import json
 from xivo_agid import agid
 from xivo_agid import objects
 
@@ -46,17 +45,19 @@ def check_diversion(agi, cursor, args):
         if event == 'none' and int(waitingcalls) > 0 and queue.waittime is not None:
             holdtime = agi.get_variable('QUEUEHOLDTIME')
             if int(holdtime) > queue.waittime:
-                event = 'DIVERT_HOLDTIME'; dialaction = 'qwaittime'
+                event = 'DIVERT_HOLDTIME'
+                dialaction = 'qwaittime'
 
         # . calls/agents ratio
         if event == 'none' and queue.waitratio is not None:
             agents = agi.get_variable('XIVO_QUEUE_MEMBERS_COUNT')
 
-            if int(agents) == 0 or\
-                 int(waitingcalls) + 1 / int(agents) > (queue.waitratio / 100):
-                event = 'DIVERT_CA_RATIO'; dialaction = 'qwaitratio'
+            if int(agents) == 0 or \
+                    int(waitingcalls) + 1 / int(agents) > (queue.waitratio / 100):
+                event = 'DIVERT_CA_RATIO'
+                dialaction = 'qwaitratio'
 
         agi.set_variable('XIVO_DIVERT_EVENT', event)
-        agi.set_variable('XIVO_FWD_TYPE'    , 'queue_' + dialaction)
+        agi.set_variable('XIVO_FWD_TYPE', 'queue_' + dialaction)
 
 agid.register(check_diversion)

@@ -64,14 +64,14 @@ class GroupFeatures(Handler):
         columns = ["groupfeatures." + c for c in groupfeatures_columns] + ["queue." + c for c in queue_columns]
 
         self._cursor.query("SELECT ${columns} FROM groupfeatures "
-                         "INNER JOIN queue "
-                         "ON groupfeatures.name = queue.name "
-                         "WHERE groupfeatures.id = %s "
-                         "AND groupfeatures.deleted = 0 "
-                         "AND queue.category = 'group' "
-                         "AND queue.commented = 0",
-                         columns,
-                         (self._id,))
+                           "INNER JOIN queue "
+                           "ON groupfeatures.name = queue.name "
+                           "WHERE groupfeatures.id = %s "
+                           "AND groupfeatures.deleted = 0 "
+                           "AND queue.category = 'group' "
+                           "AND queue.commented = 0",
+                           columns,
+                           (self._id,))
         res = self._cursor.fetchone()
 
         if not res:

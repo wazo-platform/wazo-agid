@@ -216,7 +216,6 @@ class UserFeatures(Handler):
             mbox_lang = self._user.language
         self._agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
 
-
     def _set_mobile_number(self):
         if self._user.mobilephonenumber:
             mobilephonenumber = self._user.mobilephonenumber

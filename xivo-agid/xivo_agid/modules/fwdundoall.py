@@ -20,6 +20,7 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 
+
 def fwdundoall(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
 

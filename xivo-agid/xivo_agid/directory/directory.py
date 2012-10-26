@@ -139,6 +139,7 @@ def _apply_subs(display_elem, result):
     # in python2
     nb_subs = [0]
     nb_succesfull_subs = [0]
+
     def aux(m):
         nb_subs[0] += 1
         var_name = m.group(1)
@@ -187,7 +188,6 @@ class DirectoryAdapter(object):
     """Adapt a DirectoryDataSource instance to the Directory interface,
     i.e. to something with a name attribute, a lookup_direct and
     lookup_reverse method, etc...
-    
     """
     def __init__(self, directory_src, name, match_direct, match_reverse):
         self._directory_src = directory_src
@@ -225,7 +225,7 @@ class ContextsMgr(object):
         for context_id, context_contents in contents.iteritems():
             try:
                 self.contexts[context_id] = Context.new_from_contents(
-                        avail_displays, avail_directories, context_contents)
+                    avail_displays, avail_directories, context_contents)
             except Exception:
                 logger.error('Error while creating context %s from %s',
                              context_id, context_contents, exc_info=True)

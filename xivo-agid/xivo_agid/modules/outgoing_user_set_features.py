@@ -27,5 +27,4 @@ def outgoing_user_set_features(agi, cursor, args):
     outgoing_features_handler.execute()
 
 
-
 agid.register(outgoing_user_set_features)

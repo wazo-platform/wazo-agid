@@ -20,6 +20,7 @@ __license__ = """
 from xivo_agid import agid
 from xivo_agid import objects
 
+
 def user_get_vmbox(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
 

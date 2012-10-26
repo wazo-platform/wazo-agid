@@ -22,9 +22,10 @@ from xivo_agid import objects
 
 from xivo.xivo_helpers import fkey_extension
 
+
 def phone_progfunckey_devstate(agi, cursor, args):
-    userid  = agi.get_variable('XIVO_USERID')
-    xlen    = len(args)
+    userid = agi.get_variable('XIVO_USERID')
+    xlen = len(args)
 
     if xlen < 2:
         agi.dp_break("Invalid number of arguments (args: %r)" % args)
@@ -66,8 +67,8 @@ def phone_progfunckey_devstate(agi, cursor, args):
         dest = ""
 
     try:
-        extenfeatures   = objects.ExtenFeatures(agi, cursor)
-        ppfkexten       = extenfeatures.get_exten_by_name('phoneprogfunckey')
+        extenfeatures = objects.ExtenFeatures(agi, cursor)
+        ppfkexten = extenfeatures.get_exten_by_name('phoneprogfunckey')
     except LookupError, e:
         agi.verbose(str(e))
         return

@@ -50,6 +50,7 @@ class CSVFileDirectoryDataSource(DirectoryDataSource):
             filter_fun = self._new_filter_function(encoded_string, fields,
                                                    reader.fieldnames)
             map_fun = self._new_map_function(reader.fieldnames)
+
             def generator():
                 try:
                     for result in imap(map_fun, ifilter(filter_fun, reader)):
@@ -69,6 +70,7 @@ class CSVFileDirectoryDataSource(DirectoryDataSource):
             logger.warning('Requested fields %s but only fields %s are available',
                            requested_fields, available_fields)
         lowered_string = string.lower()
+
         def aux(row):
             for field in lookup_fields:
                 if lowered_string in row[field].lower():
@@ -83,6 +85,7 @@ class CSVFileDirectoryDataSource(DirectoryDataSource):
         if not mapping:
             logger.warning('Key mapping %s but only fields %s are available',
                            self._key_mapping, available_fields)
+
         def aux(row):
             return dict((std_key, row[src_key]) for (std_key, src_key) in mapping)
         return aux

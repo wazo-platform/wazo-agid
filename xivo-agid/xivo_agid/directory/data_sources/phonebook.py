@@ -39,6 +39,7 @@ class PhonebookDirectoryDataSource(DirectoryDataSource):
 
     def _new_filter_function(self, string, fields):
         lowered_string = string.lower()
+
         def aux(phonebook_entry):
             for field in fields:
                 if field in phonebook_entry:

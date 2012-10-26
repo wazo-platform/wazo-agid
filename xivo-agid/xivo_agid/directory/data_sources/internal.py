@@ -41,8 +41,8 @@ class InternalDirectoryDataSource(DirectoryDataSource):
 
         test_columns = fields
         request_beg = 'SELECT ${columns} FROM userfeatures ' \
-                'LEFT JOIN linefeatures ON userfeatures.id = linefeatures.iduserfeatures ' \
-                'WHERE '
+            'LEFT JOIN linefeatures ON userfeatures.id = linefeatures.iduserfeatures ' \
+            'WHERE '
         request_end = ' OR '.join('%s ILIKE %%s' % column for column in test_columns)
         request = request_beg + request_end
         params = ('%' + string + '%',) * len(test_columns)
@@ -51,6 +51,7 @@ class InternalDirectoryDataSource(DirectoryDataSource):
         # XXX ugly
         from xivo_agid.modules.callerid_forphones import _cursor
         _cursor.query(request, columns, params)
+
         def generator():
             while True:
                 row = _cursor.fetchone()

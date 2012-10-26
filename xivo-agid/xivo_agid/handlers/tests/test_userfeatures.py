@@ -18,7 +18,7 @@ class TestUserFeatures(unittest.TestCase):
         self._variables = {'XIVO_USERID': 42,
                            'XIVO_DSTID': 33,
                            'XIVO_LINEID': 5,
-                           'XIVO_CALLORIGIN' : 'my_origin',
+                           'XIVO_CALLORIGIN': 'my_origin',
                            'XIVO_CALLFILTER_BYPASS': 'my_filter',
                            'XIVO_SRCNUM': '1000',
                            'XIVO_DSTNUM': '1003', }

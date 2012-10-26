@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 __license__ = """
     Copyright (C) 2008-2010  Avencall
@@ -144,8 +144,8 @@ class AGID(SocketServer.ThreadingTCPServer):
         self.setup()
 
         SocketServer.ThreadingTCPServer.__init__(self,
-                (self.listen_addr, self.listen_port),
-                FastAGIRequestHandler)
+                                                 (self.listen_addr, self.listen_port),
+                                                 FastAGIRequestHandler)
 
         self.initialized = True
 

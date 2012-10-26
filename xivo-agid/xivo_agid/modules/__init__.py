@@ -5,8 +5,10 @@ import os as _os
 
 __version__ = "$Revision$ $Date$"
 
+
 def _package_path():
     return _os.path.dirname(_os.path.abspath(__file__))
+
 
 def _is_package_child(path, name):
     full = _os.path.join(path, name)
@@ -18,7 +20,8 @@ def _is_package_child(path, name):
             return False
     else:
         return _re.search(r"\.py[a-z]*$", name) \
-               and '__init__' not in name
+            and '__init__' not in name
+
 
 # Python doesn't really want us to do that because of
 # compatibility with stupid operating systems, but thanks

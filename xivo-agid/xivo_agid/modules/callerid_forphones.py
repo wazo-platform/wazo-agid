@@ -91,6 +91,7 @@ def _get_cid_directory_lookup(original_cid, pattern):
 
 _COMPLETE_CALLER_ID_PATTERN = re.compile('\"(.*)\" \<(\d+)\>')
 
+
 def _build_caller_id(caller_id, name, number):
     if _complete_caller_id(caller_id):
         cid_name, cid_number = _COMPLETE_CALLER_ID_PATTERN.search(caller_id).groups()

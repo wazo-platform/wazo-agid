@@ -46,6 +46,7 @@ class HTTPDirectoryDataSource(DirectoryDataSource):
                 line = line.decode(charset).rstrip()
                 headers = line.split(self._delimiter)
                 map_fun = self._new_map_function(headers, charset)
+
                 def generator():
                     try:
                         for result in imap(map_fun, fobj):
@@ -79,6 +80,7 @@ class HTTPDirectoryDataSource(DirectoryDataSource):
         mapping = [(std_key, headers_map[src_key]) for (std_key, src_key) in
                    self._key_mapping.iteritems() if
                    src_key in headers_map]
+
         def aux(line):
             line = line.decode(charset).rstrip()
             tokens = line.split(self._delimiter)

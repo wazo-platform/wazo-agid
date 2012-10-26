@@ -22,9 +22,10 @@ from xivo_agid import objects
 
 from xivo.xivo_helpers import split_extension
 
+
 def phone_progfunckey(agi, cursor, args):
-    userid  = agi.get_variable('XIVO_USERID')
-    xlen    = len(args)
+    userid = agi.get_variable('XIVO_USERID')
+    xlen = len(args)
 
     if xlen < 1:
         agi.dp_break("Invalid number of arguments (args: %r)" % args)
