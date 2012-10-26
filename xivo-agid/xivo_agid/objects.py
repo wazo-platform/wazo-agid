@@ -41,10 +41,10 @@ class DBUpdateException(Exception):
 
 class ExtenFeatures:
     FEATURES = {
-        'agents':   (('agentdynamiclogin',),
-                     ('agentstaticlogin',),
-                     ('agentstaticlogoff',),
-                     ('agentstaticlogtoggle',)),
+        'agents': (('agentdynamiclogin',),
+                   ('agentstaticlogin',),
+                   ('agentstaticlogoff',),
+                   ('agentstaticlogtoggle',)),
 
         'forwards': (('fwdbusy', 'busy'),
                      ('fwdrna', 'rna'),
@@ -87,7 +87,7 @@ class ExtenFeatures:
                           "WHERE name IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
                           "AND (exten = %s "
                           "OR (SUBSTR(exten,1,1) = '_' "
-                              "AND SUBSTR(exten, 2, %s) LIKE %s)) "
+                          "    AND SUBSTR(exten, 2, %s) LIKE %s)) "
                           "AND commented = 0",
                           ('name',),
                           self.featureslist + (exten, len(exten), "%s%%" % exten))
@@ -173,7 +173,7 @@ class BossSecretaryFilter:
         self.ringseconds = None
         self.boss = None
         self.secretaries = None
-        self.line = line;
+        self.line = line
 
         boss_number = self.line['number']
         boss_context = self.line['context']
@@ -403,6 +403,7 @@ class VMBox:
         else:
             self.commented = enabled
 
+
 class Paging:
     def __init__(self, agi, cursor, number, userid):
         self.agi = agi
@@ -410,7 +411,6 @@ class Paging:
         self.lines = []
 
         columns = ('id', 'number', 'duplex', 'ignore', 'record', 'quiet', 'callnotbusy', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented')
-
 
         cursor.query("SELECT ${columns} FROM paging "
                      "WHERE number = %s "
@@ -518,18 +518,18 @@ class Lines:
 
         for l in res:
             line = {
-                'id'          : l['id'],
-                'number'      : l['number'],
-                'context'     : l['context'],
-                'protocol'    : l['protocol'].upper(),
-                'protocolid'  : l['protocolid'],
+                'id': l['id'],
+                'number': l['number'],
+                'context': l['context'],
+                'protocol': l['protocol'].upper(),
+                'protocolid': l['protocolid'],
                 'iduserfeatures': l['iduserfeatures'],
-                'name'        : l['name'],
-                'num'         : l['line_num'],
-                'rules_type'  : l['rules_type'],
-                'rules_time'  : l['rules_time'],
-                'rules_order' : l['rules_order'],
-                'rules_group' : l['rules_group']
+                'name': l['name'],
+                'num': l['line_num'],
+                'rules_type': l['rules_type'],
+                'rules_time': l['rules_time'],
+                'rules_order': l['rules_order'],
+                'rules_group': l['rules_group']
             }
 
             self.lines.append(line)
@@ -560,17 +560,17 @@ class MasterLineUser:
             raise LookupError("Unable to find master line entry (id: %s)" % (xid))
 
         self.line = {
-            'id'          : res['id'],
-            'number'      : res['number'],
-            'context'     : res['context'],
-            'protocol'    : res['protocol'].upper(),
-            'protocolid'  : res['protocolid'],
-            'name'        : res['name'],
-            'num'         : res['line_num'],
-            'rules_type'  : res['rules_type'],
-            'rules_time'  : res['rules_time'],
-            'rules_order' : res['rules_order'],
-            'rules_group' : res['rules_group']
+            'id': res['id'],
+            'number': res['number'],
+            'context': res['context'],
+            'protocol': res['protocol'].upper(),
+            'protocolid': res['protocolid'],
+            'name': res['name'],
+            'num': res['line_num'],
+            'rules_type': res['rules_type'],
+            'rules_time': res['rules_time'],
+            'rules_order': res['rules_order'],
+            'rules_group': res['rules_group']
         }
 
 
@@ -756,47 +756,47 @@ class MeetMe:
     FLAG_ADMIN = (1 << 0)
     FLAG_USER = (1 << 1)
 
-    OPTIONS_GLOBAL = {'talkeroptimization':        '',  # Disabled
-                       'record':                    'r',
-                       'talkerdetection':           '',  # Disabled
-                       'noplaymsgfirstenter':       '1',
-                       'closeconfdurationexceeded': 'L'}
+    OPTIONS_GLOBAL = {'talkeroptimization': '',  # Disabled
+                      'record': 'r',
+                      'talkerdetection': '',  # Disabled
+                      'noplaymsgfirstenter': '1',
+                      'closeconfdurationexceeded': 'L'}
 
-    OPTIONS_COMMON = {'mode':              {'listen':  'l',
-                                             'talk':    't',
-                                             'all':     ''},
-                       'announceusercount': 'c',
-                       'announcejoinleave': {'no':          '',
-                                             'yes':         'i',
-                                             'noreview':    'I'},
-                       'initiallymuted':    'm',
-                       'musiconhold':       'M',
-                       'poundexit':         'p',
-                       'quiet':             'q',
-                       'starmenu':          's',
-                       'enableexitcontext': 'X'}
+    OPTIONS_COMMON = {'mode': {'listen': 'l',
+                               'talk': 't',
+                               'all': ''},
+                      'announceusercount': 'c',
+                      'announcejoinleave': {'no': '',
+                                            'yes': 'i',
+                                            'noreview': 'I'},
+                      'initiallymuted': 'm',
+                      'musiconhold': 'M',
+                      'poundexit': 'p',
+                      'quiet': 'q',
+                      'starmenu': 's',
+                      'enableexitcontext': 'X'}
 
-    OPTIONS_ADMIN = {'moderationmode':            'k',
-                       'closeconflastmarkedexit':   'x'}
+    OPTIONS_ADMIN = {'moderationmode': 'k',
+                     'closeconflastmarkedexit': 'x'}
 
-    OPTIONS_USER = {'hiddencalls':   'h'}
+    OPTIONS_USER = {'hiddencalls': 'h'}
 
     def __init__(self, agi, cursor, xid=None, name=None, number=None, context=None):
         self.agi = agi
         self.cursor = cursor
 
         meetmefeatures_columns = (('id', 'name', 'confno', 'context',
-                                      'admin_typefrom', 'admin_internalid', 'admin_externalid',
-                                      'admin_identification', 'admin_exitcontext') +
-                                      tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() +
-                                                                      self.OPTIONS_ADMIN.keys())]) +
-                                      ('user_exitcontext',) + \
-                                      tuple(["user_%s" % x for x in (self.OPTIONS_COMMON.keys() +
-                                                                     self.OPTIONS_USER.keys())]) +
-                                      tuple(x for x in self.OPTIONS_GLOBAL.keys()) +
-                                      ('durationm', 'nbuserstartdeductduration',
-                                       'timeannounceclose', 'maxusers',
-                                       'startdate', 'preprocess_subroutine'))
+                                   'admin_typefrom', 'admin_internalid', 'admin_externalid',
+                                   'admin_identification', 'admin_exitcontext') +
+                                  tuple(["admin_%s" % x for x in (self.OPTIONS_COMMON.keys() +
+                                                                  self.OPTIONS_ADMIN.keys())]) +
+                                  ('user_exitcontext',) +
+                                  tuple(["user_%s" % x for x in (self.OPTIONS_COMMON.keys() +
+                                                                 self.OPTIONS_USER.keys())]) +
+                                  tuple(x for x in self.OPTIONS_GLOBAL.keys()) +
+                                  ('durationm', 'nbuserstartdeductduration',
+                                   'timeannounceclose', 'maxusers',
+                                   'startdate', 'preprocess_subroutine'))
 
         columns = ["meetmefeatures." + c for c in meetmefeatures_columns] + \
                   ['staticmeetme.var_val'] + \
@@ -855,8 +855,8 @@ class MeetMe:
 
         if res['meetmefeatures.startdate']:
             self.starttime = time.mktime(
-                                time.strptime(res['meetmefeatures.startdate'],
-                                              '%Y-%m-%d %H:%M:%S'))
+                time.strptime(res['meetmefeatures.startdate'],
+                              '%Y-%m-%d %H:%M:%S'))
         else:
             self.starttime = None
 
@@ -913,7 +913,7 @@ class MeetMe:
         options = self._get_options(admin_options, "admin_")
 
         if self.OPTIONS_COMMON['enableexitcontext'] in options \
-           and not self.admin_exitcontext:
+                and not self.admin_exitcontext:
             options.remove(self.OPTIONS_COMMON['enableexitcontext'])
 
         options.add('a')  # Admin mode
@@ -930,7 +930,7 @@ class MeetMe:
             options.add(self.OPTIONS_ADMIN['moderationmode'])
 
         if self.OPTIONS_COMMON['enableexitcontext'] in options \
-           and not self.user_exitcontext:
+                and not self.user_exitcontext:
             options.remove(self.OPTIONS_COMMON['enableexitcontext'])
 
         return set(options)
@@ -949,7 +949,7 @@ class MeetMe:
             return None
 
         r = {'calleridnum': None,
-             'pin':         None}
+             'pin': None}
 
         if self.admin_identification in ('calleridnum', 'all'):
             if self.admin_typefrom == 'internal':
@@ -980,10 +980,10 @@ class MeetMe:
         if not admin_identifiers:
             return False
         elif admin_identifiers['calleridnum'] \
-             and admin_identifiers['calleridnum'] != calleridnum:
+                and admin_identifiers['calleridnum'] != calleridnum:
             return False
         elif admin_identifiers['pin'] \
-             and admin_identifiers['pin'] != pinadmin:
+                and admin_identifiers['pin'] != pinadmin:
             return False
 
         return True
@@ -1288,12 +1288,12 @@ class Outcall:
 
         if self.xid:
             self.cursor.query("SELECT ${columns} FROM outcall, dialpattern "
-                         "WHERE dialpattern.typeid = outcall.id "
-                         "AND dialpattern.type = 'outcall' "
-                         "AND dialpattern.id = %s"
-                         "AND outcall.commented = 0",
-                         columns,
-                         (self.xid,))
+                              "WHERE dialpattern.typeid = outcall.id "
+                              "AND dialpattern.type = 'outcall' "
+                              "AND dialpattern.id = %s"
+                              "AND outcall.commented = 0",
+                              columns,
+                              (self.xid,))
         else:
             raise LookupError("id or exten@context must be provided to look up an outcall entry")
 
@@ -1301,7 +1301,6 @@ class Outcall:
 
         if not res:
             raise LookupError("Unable to find outcall entry (id: %s)" % (self.xid))
-
 
         self.id = res['outcall.id']
         self.exten = res['dialpattern.exten']
@@ -1315,10 +1314,10 @@ class Outcall:
         self.hangupringtime = res['outcall.hangupringtime']
 
         self.cursor.query("SELECT ${columns} FROM outcalltrunk "
-                     "WHERE outcallid = %s "
-                     "ORDER BY priority ASC",
-                     ('trunkfeaturesid',),
-                     (self.id,))
+                          "WHERE outcallid = %s "
+                          "ORDER BY priority ASC",
+                          ('trunkfeaturesid',),
+                          (self.id,))
         res = self.cursor.fetchall()
 
         if not res:
@@ -1427,7 +1426,7 @@ class Context:
                      "WHERE context.name = %s "
                      "AND context.commented = 0 "
                      "AND (contextinclude.include IS NULL "
-                          "OR contextinc.name IS NOT NULL) "
+                     "     OR contextinc.name IS NOT NULL) "
                      "ORDER BY contextinclude.priority ASC",
                      columns,
                      (context,))
@@ -1448,6 +1447,7 @@ class Context:
 
 CALLERID_MATCHER = re.compile('^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<([0-9\*#]+)>)?$').match
 CALLERIDNUM_MATCHER = re.compile('^[0-9\*#]+$').match
+
 
 class CallerID:
     @staticmethod
@@ -1548,8 +1548,8 @@ class CallerID:
                 calleridname = calleridname[1:-1]
 
             if self.mode in ('prepend', 'append') \
-               and self.calleridname == calleridname \
-               and calleridnum == calleridname:
+                    and self.calleridname == calleridname \
+                    and calleridnum == calleridname:
                 name = calleridname
             elif self.mode == 'prepend':
                 name = "%s - %s" % (self.calleridname, calleridname)
@@ -1567,6 +1567,7 @@ class CallerID:
             if not force_rewrite:
                 self.agi.set_variable('XIVO_CID_REWRITTEN', 1)
 
+
 class CTIPresence:
     @staticmethod
     def status(agi, cursor, status_ids=None):
@@ -1577,9 +1578,9 @@ class CTIPresence:
         """
         columns = ('s.id', 's.name', 'p.name')
         cursor.query("SELECT ${columns} FROM ctistatus s"
-          "WHERE s.id IN (" + ','.join([str(id) for id in status_ids]) + ") "
-          "AND s.presence_id = p.id",
-          columns)
+                     "WHERE s.id IN (" + ','.join([str(id) for id in status_ids]) + ") "
+                     "AND s.presence_id = p.id",
+                     columns)
 
         return dict([(r['s.id'], "%s:%s" % (r['p.name'], r['s.name'])) for r in cursor.fetchall()])
 
@@ -1619,6 +1620,7 @@ class ChanIAX2:
 
         return ("IAX2/%s" % res['name'], None)
 
+
 class ChanSCCP:
     @staticmethod
     def get_intf_and_suffix(cursor, category, xid):
@@ -1636,6 +1638,7 @@ class ChanSCCP:
             raise LookupError("Unable to find usersccp entry (category: %s, id: %s)" % (category, xid))
 
         return ("SCCP/%s" % res['l.name'], None)
+
 
 class ChanCustom:
     @staticmethod
@@ -1660,11 +1663,12 @@ class ChanCustom:
 
 
 CHAN_PROTOCOL = {
-    'sip'   : ChanSIP,
-    'iax'   : ChanIAX2,
-    'sccp'  : ChanSCCP,
+    'sip': ChanSIP,
+    'iax': ChanIAX2,
+    'sccp': ChanSCCP,
     'custom': ChanCustom,
 }
+
 
 def protocol_intf_and_suffix(cursor, protocol, category, xid):
     """
@@ -1676,6 +1680,7 @@ def protocol_intf_and_suffix(cursor, protocol, category, xid):
     else:
         raise ValueError("Unknown protocol %r" % protocol)
 
+
 class Static:
     def __init__(self, cursor, protocol):
         if protocol not in ('sip', 'iax', 'sccp'):
@@ -1686,4 +1691,3 @@ class Static:
 
         for r in cursor.fetchall():
             setattr(self, r['var_name'], r['var_val'])
-
