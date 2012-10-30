@@ -1290,7 +1290,7 @@ class Outcall:
             self.cursor.query("SELECT ${columns} FROM outcall, dialpattern "
                               "WHERE dialpattern.typeid = outcall.id "
                               "AND dialpattern.type = 'outcall' "
-                              "AND dialpattern.id = %s"
+                              "AND outcall.id = %s"
                               "AND outcall.commented = 0",
                               columns,
                               (self.xid,))

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-    Copyright (C) 2006-2010  Avencall
+    Copyright (C) 2006-2012  Avencall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,8 @@ def _user_set_call_rights(agi, cursor, args):
                      "AND rightcallmember.type = 'user' "
                      "AND rightcallmember.typeval = '%s' "
                      "AND rightcall.commented = 0",
-                     (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME, call_rights.RIGHTCALL_PASSWD_COLNAME),
+                     (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
+                      call_rights.RIGHTCALL_PASSWD_COLNAME),
                      (user.id,))
         res = cursor.fetchall()
         call_rights.apply_rules(agi, res)
@@ -84,8 +85,9 @@ def _user_set_call_rights(agi, cursor, args):
                          "AND rightcallmember.type = 'group' "
                          "AND rightcallmember.typeval IN (" + ", ".join(["'%s'"] * len(res)) + ") "
                          "AND rightcall.commented = 0",
-                         (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME, call_rights.RIGHTCALL_PASSWD_COLNAME),
-                         groupids)
+                         (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
+                          call_rights.RIGHTCALL_PASSWD_COLNAME),
+                         (groupids,))
             res = cursor.fetchall()
             call_rights.apply_rules(agi, res)
 
@@ -99,8 +101,9 @@ def _user_set_call_rights(agi, cursor, args):
                      "AND rightcallmember.type = 'outcall' "
                      "AND outcall.id = %s "
                      "AND rightcall.commented = 0",
-                     (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME, call_rights.RIGHTCALL_PASSWD_COLNAME),
-                     outcallid)
+                     (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
+                      call_rights.RIGHTCALL_PASSWD_COLNAME),
+                     (outcallid,))
         res = cursor.fetchall()
         call_rights.apply_rules(agi, res)
 
