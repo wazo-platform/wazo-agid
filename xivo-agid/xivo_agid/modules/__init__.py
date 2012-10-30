@@ -3,8 +3,6 @@
 import re as _re
 import os as _os
 
-__version__ = "$Revision$ $Date$"
-
 
 def _package_path():
     return _os.path.dirname(_os.path.abspath(__file__))
