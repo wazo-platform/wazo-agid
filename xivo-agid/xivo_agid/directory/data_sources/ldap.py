@@ -91,7 +91,9 @@ class LDAPDirectoryDataSource(DirectoryDataSource):
     def _decode_results(self, ldap_results):
         decoded_results = []
         for entry in ldap_results:
-            decoded_results.append(self._decode_entry(entry))
+            domain_name, attributes = entry
+            if domain_name is not None:
+                decoded_results.append(self._decode_entry(entry))
         return decoded_results
 
     def _format_results(self, ldap_results):
