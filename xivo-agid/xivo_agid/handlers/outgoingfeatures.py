@@ -41,7 +41,7 @@ class OutgoingFeatures(Handler):
 
     def _retrieve_outcall(self):
         try:
-            self.outcall.retrieve_values(self.dstid)
+            self.outcall.retrieve_values(self.dialpattern_id)
         except (ValueError, LookupError) as e:
             self._agi.dp_break(str(e))
 
@@ -109,30 +109,20 @@ class OutgoingFeatures(Handler):
 
     def _extract_dialplan_variables(self):
         self.userid = self._agi.get_variable(dialplan_variables.USERID)
-        self.dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
+        self.dialpattern_id = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
         self.dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
         self.srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self.orig_dstnum = self.dstnum
 
     def execute(self):
         self._extract_dialplan_variables()
-
         self._retrieve_outcall()
-
         self._set_destination_number()
-
         self._retrieve_user()
-
         self._set_caller_id()
-
         self._set_trunk_info()
-
         self._set_record_file_name()
-
         self._set_preprocess_subroutine()
-
         self._set_hangup_ring_time()
-
         self._agi.set_variable(dialplan_variables.OUTCALL_ID, self.outcall.id)
-
         self._set_path(OutgoingFeatures.PATH_TYPE, self.outcall.id)

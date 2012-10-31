@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
     def test_retreive_outcall(self):
         outcall = Mock(objects.Outcall)
         self.outgoing_features.outcall = outcall
-        self.outgoing_features.dstid = 23
+        self.outgoing_features.dialpattern_id = 23
 
         self.outgoing_features._retrieve_outcall()
 
