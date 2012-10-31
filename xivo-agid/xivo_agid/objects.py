@@ -1278,29 +1278,28 @@ class Outcall:
         self.agi = agi
         self.cursor = cursor
 
-    def retrieve_values(self, xid):
-        self.xid = xid
+    def retrieve_values(self, dialpattern_id):
         columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal',
                    'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
                    'outcall.id', 'dialpattern.typeid', 'dialpattern.type', 'dialpattern.exten',
                    'dialpattern.stripnum', 'dialpattern.externprefix',
                    'dialpattern.callerid', 'dialpattern.prefix')
 
-        if self.xid:
+        if dialpattern_id:
             self.cursor.query("SELECT ${columns} FROM outcall, dialpattern "
                               "WHERE dialpattern.typeid = outcall.id "
                               "AND dialpattern.type = 'outcall' "
-                              "AND outcall.id = %s"
+                              "AND dialpattern.id = %s"
                               "AND outcall.commented = 0",
                               columns,
-                              (self.xid,))
+                              (dialpattern_id,))
         else:
             raise LookupError("id or exten@context must be provided to look up an outcall entry")
 
         res = self.cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find outcall entry (id: %s)" % (self.xid))
+            raise LookupError("Unable to find outcall entry (id: %s)" % dialpattern_id)
 
         self.id = res['outcall.id']
         self.exten = res['dialpattern.exten']
@@ -1321,7 +1320,7 @@ class Outcall:
         res = self.cursor.fetchall()
 
         if not res:
-            raise ValueError("No trunk associated with outcall (id: %d)" % (self.xid,))
+            raise ValueError("No trunk associated with outcall (id: %d)" % dialpattern_id)
 
         self.trunks = []
 
