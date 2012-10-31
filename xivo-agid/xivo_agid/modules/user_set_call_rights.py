@@ -87,7 +87,7 @@ def _user_set_call_rights(agi, cursor, args):
                          "AND rightcall.commented = 0",
                          (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
                           call_rights.RIGHTCALL_PASSWD_COLNAME),
-                         (groupids,))
+                         groupids)
             res = cursor.fetchall()
             call_rights.apply_rules(agi, res)
 
