@@ -41,8 +41,7 @@ class DBUpdateException(Exception):
 
 class ExtenFeatures:
     FEATURES = {
-        'agents': (('agentdynamiclogin',),
-                   ('agentstaticlogin',),
+        'agents': (('agentstaticlogin',),
                    ('agentstaticlogoff',),
                    ('agentstaticlogtoggle',)),
 
