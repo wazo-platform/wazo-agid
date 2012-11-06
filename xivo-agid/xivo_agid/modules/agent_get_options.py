@@ -40,8 +40,8 @@ def agent_get_options(agi, cursor, args):
 
     agi.set_variable('XIVO_AGENTEXISTS', 1)
     agi.set_variable('XIVO_AGENTPASSWD', agent.passwd)
-    agi.set_variable('_XIVO_AGENTID', agent.id)
-    agi.set_variable('_XIVO_AGENTNUM', agent.number)
+    agi.set_variable('XIVO_AGENTID', agent.id)
+    agi.set_variable('XIVO_AGENTNUM', agent.number)
 
     # get agent lang
     lang = agent.language
@@ -65,7 +65,7 @@ def agent_get_options(agi, cursor, args):
         # setting default value
         lang = 'fr_FR'
 
-    agi.set_variable('_XIVO_AGENTLANGUAGE', lang)
+    agi.set_variable('XIVO_AGENTLANGUAGE', lang)
 
 
 agid.register(agent_get_options)
