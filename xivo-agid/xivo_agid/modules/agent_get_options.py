@@ -34,7 +34,7 @@ def agent_get_options(agi, cursor, args):
             agent = objects.Agent(agi, cursor, xid=number[1:])
         else:
             agent = objects.Agent(agi, cursor, number=number)
-    except (LookupError, IndexError), e:
+    except (LookupError, IndexError) as e:
         agi.verbose(str(e))
         return
 
@@ -45,7 +45,7 @@ def agent_get_options(agi, cursor, args):
 
     # get agent lang
     lang = agent.language
-    if lang is None or len(lang) == 0:
+    if not lang:
         userid = agi.get_variable('XIVO_USERID')
         if userid:
             try:
@@ -54,14 +54,14 @@ def agent_get_options(agi, cursor, args):
                 lang = caller.language
 
                 # get channel default lang
-                if lang is None or len(lang) == 0:
+                if not lang:
                     static = objects.Static(cursor, masterline.line['protocol'])
                     lang = static.language
 
-            except (ValueError, LookupError), e:
+            except (ValueError, LookupError) as e:
                 pass
 
-    if lang is None or len(lang) == 0:
+    if not lang:
         # setting default value
         lang = 'fr_FR'
 
