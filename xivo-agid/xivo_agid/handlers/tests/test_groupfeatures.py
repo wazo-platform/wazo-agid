@@ -20,16 +20,6 @@ import unittest
 from xivo_agid.handlers.groupfeatures import GroupFeatures
 from mock import Mock, patch, call
 
-_set_members = Mock()
-_set_options = Mock()
-_set_vars = Mock()
-_set_preprocess_subroutine = Mock()
-_set_timeout = Mock()
-_set_dial_action = Mock()
-_set_schedule = Mock()
-_needs_rewrite_cid = Mock()
-_set_rewrite_cid = Mock()
-
 
 class TestGroupFeatures(unittest.TestCase):
 
@@ -39,16 +29,25 @@ class TestGroupFeatures(unittest.TestCase):
         self._args = Mock()
         self.group_features = GroupFeatures(self._agi, self._cursor, self._args)
 
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_members', _set_members)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_options', _set_options)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_vars', _set_vars)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_preprocess_subroutine', _set_preprocess_subroutine)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_timeout', _set_timeout)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_dial_action', _set_dial_action)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_schedule', _set_schedule)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._needs_rewrite_cid', _needs_rewrite_cid)
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_rewrite_cid', _set_rewrite_cid)
-    def test_execute(self):
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_members')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_options')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_vars')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_preprocess_subroutine')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_timeout')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_dial_action')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_schedule')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._needs_rewrite_cid')
+    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_rewrite_cid')
+    def test_execute(self,
+                     _set_rewrite_cid,
+                     _needs_rewrite_cid,
+                     _set_schedule,
+                     _set_dial_action,
+                     _set_timeout,
+                     _set_preprocess_subroutine,
+                     _set_vars,
+                     _set_options,
+                     _set_members):
         _needs_rewrite_cid.return_value = True
 
         self.group_features.execute()
