@@ -24,15 +24,14 @@ from xivo_agid.handlers import agent
 logger = logging.getLogger(__name__)
 
 
-def agent_login(agi, cursor, args):
+def agent_logoff(agi, cursor, args):
     try:
         agent_id = int(args[0])
-        interface = args[1]
 
-        agent.login_agent(agi, agent_id, interface)
+        agent.logoff_agent(agi, agent_id)
     except Exception as e:
-        logger.exception("Error while logging in agent")
+        logger.exception("Error while logging off agent")
         agi.dp_break(e)
 
 
-agid.register(agent_login)
+agid.register(agent_logoff)
