@@ -41,9 +41,9 @@ def _setup_client(fun):
 
 
 @_setup_client
-def login_agent(agi, agent_id, interface):
+def login_agent(agi, agent_id, extension, context):
     try:
-        _agent_client.login_agent(agent_id, interface)
+        _agent_client.login_agent(agent_id, extension, context)
     except AgentClientError as e:
         if e.error == error.ALREADY_LOGGED:
             agi.set_variable(AGENTSTATUS_VAR, 'already_logged')
