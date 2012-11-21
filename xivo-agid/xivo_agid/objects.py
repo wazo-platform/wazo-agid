@@ -409,7 +409,7 @@ class Paging:
         self.cursor = cursor
         self.lines = []
 
-        columns = ('id', 'number', 'duplex', 'ignore', 'record', 'quiet', 'callnotbusy', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented')
+        columns = ('id', 'number', 'duplex', 'ignore', 'record', 'quiet', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented')
 
         cursor.query("SELECT ${columns} FROM paging "
                      "WHERE number = %s "
@@ -427,7 +427,6 @@ class Paging:
         self.ignore = res['ignore']
         self.record = res['record']
         self.quiet = res['quiet']
-        self.callnotbusy = res['callnotbusy']
         self.timeout = res['timeout']
         self.announcement_file = res['announcement_file']
         self.announcement_play = res['announcement_play']
