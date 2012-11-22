@@ -47,6 +47,8 @@ def login_agent(agi, agent_id, extension, context):
     except AgentClientError as e:
         if e.error == error.ALREADY_LOGGED:
             agi.set_variable(AGENTSTATUS_VAR, 'already_logged')
+        elif e.error == error.ALREADY_IN_USE:
+            agi.set_variable(AGENTSTATUS_VAR, 'already_in_use')
         else:
             agi.set_variable(AGENTSTATUS_VAR, 'error')
     else:
