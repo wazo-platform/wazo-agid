@@ -50,14 +50,18 @@ def login_agent(agi, agent_id, extension, context):
         elif e.error == error.ALREADY_IN_USE:
             agi.set_variable(AGENTSTATUS_VAR, 'already_in_use')
         else:
-            agi.set_variable(AGENTSTATUS_VAR, 'error')
+            raise
     else:
         agi.set_variable(AGENTSTATUS_VAR, 'logged')
 
 
 @_setup_client
 def logoff_agent(agi, agent_id):
-    _agent_client.logoff_agent(agent_id)
+    try:
+        _agent_client.logoff_agent(agent_id)
+    except AgentClientError as e:
+        if e.error != error.NOT_LOGGED:
+            raise
 
 
 @_setup_client
