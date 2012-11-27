@@ -5,7 +5,7 @@ from distutils.core import setup
 setup(name='xivo_agid',
       version='1.0',
       description='XIVO AGI Daemon',
-      author='Proformatique',
+      author='Avencall',
       author_email='technique@proformatique.com',
       url='http://xivo.fr/',
       packages=['xivo_agid',
