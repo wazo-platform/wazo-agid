@@ -67,5 +67,5 @@ def logoff_agent(agi, agent_id):
 @_setup_client
 def get_agent_status(agi, agent_id):
     status = _agent_client.get_agent_status(agent_id)
-    login_status = 'logged_in' if status['logged'] else 'logged_out'
+    login_status = 'logged_in' if status.logged else 'logged_out'
     agi.set_variable('XIVO_AGENT_LOGIN_STATUS', login_status)
