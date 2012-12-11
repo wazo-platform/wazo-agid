@@ -30,7 +30,7 @@ from xivo_agid.directory import directory
 
 logger = logging.getLogger(__name__)
 
-CTI_CONFIG_URL = 'http://localhost/service/ipbx/json.php/private/ctiserver/configuration'
+CTI_CONFIG_URL = 'http://localhost/cti/json.php/private/configuration'
 PHONEBOOK_URL = 'http://localhost/service/ipbx/json.php/private/pbx_services/phonebook'
 UPDATE_ADDRESS = 'localhost'
 UPDATE_PORT = 5042
