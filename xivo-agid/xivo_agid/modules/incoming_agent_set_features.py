@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 __license__ = """
-    Copyright (C) 2012  Avencall
+    Copyright (C) 2013  Avencall
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ def incoming_agent_set_features(agi, cursor, args):
         agi.dp_break('Missing feature agent_id argument')
     try:
         device = agent.get_agent_device(agi, agent_id, cursor)
-    except LookupError, e:
+    except LookupError as e:
         agi.dp_break(str(e))
     agi.set_variable('XIVO_AGENT_INTERFACE', device)
 
