@@ -73,7 +73,8 @@ def get_agent_status(agi, agent_id):
 
 @_setup_client
 def get_agent_device(agi, agent_id, cursor):
-    cursor.query("SELECT state_interface FROM agent_login_status where agent_id  = %s", "",  agent_id)
+    cursor.query('SELECT state_interface FROM agent_login_status WHERE agent_id = %s',
+                 parameters=(agent_id,))
     res = cursor.fetchone()
     if not res:
         raise LookupError("Unable to find agent (id: %s)" % (agent_id))
