@@ -1108,7 +1108,7 @@ class Agent:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'number', 'passwd', 'firstname', 'lastname', 'language')
+        columns = ('id', 'number', 'passwd', 'firstname', 'lastname', 'language', 'preprocess_subroutine')
 
         if xid:
             cursor.query("SELECT ${columns} FROM agentfeatures "
@@ -1136,6 +1136,7 @@ class Agent:
         self.firstname = res['firstname']
         self.lastname = res['lastname']
         self.language = res['language']
+        self.preprocess_subroutine = res['preprocess_subroutine']
 
 
 class DialAction:

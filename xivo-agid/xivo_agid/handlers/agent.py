@@ -69,13 +69,3 @@ def get_agent_status(agi, agent_id):
     status = _agent_client.get_agent_status(agent_id)
     login_status = 'logged_in' if status.logged else 'logged_out'
     agi.set_variable('XIVO_AGENT_LOGIN_STATUS', login_status)
-    
-
-@_setup_client
-def get_agent_device(agi, agent_id, cursor):
-    cursor.query("SELECT state_interface FROM agent_login_status where agent_id  = %s", "",  agent_id)
-    res = cursor.fetchone()
-    if not res:
-        raise LookupError("Unable to find agent (id: %s)" % (agent_id))
-    device = res[0]
-    return device
