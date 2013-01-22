@@ -1,29 +1,19 @@
 # -*- coding: utf-8 -*-
 
-__license__ = """
-    Copyright (C) 2004 Karl Putland
-    Upstream Original Author: Karl Putland <kputland@users.sourceforge.net>
-
-    This was downloaded here: http://sourceforge.net/projects/pyst/
-
-    AGItb module confirmed PSF and the rest LGPL by Matthew Nicholson <mnicholson@digium.com>
-
-    Copyright (C) 2007-2010  Avencall
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-"""
+# Copyright (C) 2004-2013 Avencall
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # Modifications by Proformatique from pyst-0.2:
 #     - AGI._quote does escaping
