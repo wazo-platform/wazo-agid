@@ -34,7 +34,6 @@ class TestUserFeatures(unittest.TestCase):
                            'XIVO_DSTID': 33,
                            'XIVO_LINEID': 5,
                            'XIVO_CALLORIGIN': 'my_origin',
-                           'XIVO_CALLFILTER_BYPASS': 'my_filter',
                            'XIVO_SRCNUM': '1000',
                            'XIVO_DSTNUM': '1003', }
 
@@ -69,7 +68,6 @@ class TestUserFeatures(unittest.TestCase):
         self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
         self.assertEqual(userfeatures._lineid, self._variables['XIVO_LINEID'])
         self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
-        self.assertEqual(userfeatures._bypass_filter, self._variables['XIVO_CALLFILTER_BYPASS'])
         self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
         self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
         self.assertTrue(userfeatures._set_feature_list.called)

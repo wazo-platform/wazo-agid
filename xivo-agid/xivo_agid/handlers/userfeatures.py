@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+
+from xivo_dao import callfilter_dao, line_dao
+from xivo_agid.objects import DialAction, CallerID
 from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
 from xivo_agid import dialplan_variables
@@ -32,7 +35,6 @@ class UserFeatures(Handler):
         self._dstid = None
         self._lineid = None
         self._zone = None
-        self._bypass_filter = None
         self._srcnum = None
         self._dstnum = None
         self._feature_list = None
@@ -44,10 +46,11 @@ class UserFeatures(Handler):
     def execute(self):
         self._set_members()
         self._set_xivo_ifaces()
-        self._set_user_filter()
-        abort = self._boss_secretary_filter()
-        if abort:
+
+        filtered = self._call_filtering()
+        if filtered:
             return
+
         self._set_options()
         self._set_simultcalls()
         self._set_ringseconds()
@@ -68,7 +71,6 @@ class UserFeatures(Handler):
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
         self._lineid = self._agi.get_variable(dialplan_variables.LINE_ID)
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
-        self._bypass_filter = self._agi.get_variable(dialplan_variables.CALLFILTER_BYPASS)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
         self._set_feature_list()
@@ -146,43 +148,73 @@ class UserFeatures(Handler):
             if self._user.lastname:
                 self._agi.set_variable('XIVO_DST_LASTNAME', self._user.lastname)
 
-    def _set_user_filter(self):
-        self._user_filter = self._user.filter
-
     def _set_xivo_iface_nb(self, number):
         self._agi.set_variable('XIVO_INTERFACE_NB', 0)
 
-    def _boss_secretary_filter(self):
-        # Special case. If a boss-secretary filter is set, the code will prematurely
-        # exit because the other normally set variables are skipped.
-        if not self._bypass_filter and self._user_filter and self._user_filter.active:
-            zone_applies = self._user_filter.check_zone(self._zone)
-            if self._caller:
-                secretary = self._user_filter.get_secretary_by_id(self._caller.id)
-            else:
-                secretary = None
-            if zone_applies and not secretary:
-                if self._user_filter.mode in ("bossfirst-simult", "bossfirst-serial", "all"):
-                    self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', self._user_filter.boss.interface)
-                    self._agi.set_variable('XIVO_CALLFILTER_BOSS_TIMEOUT', self._user_filter.boss.ringseconds)
-                if self._user_filter.mode in ("bossfirst-simult", "secretary-simult", "all"):
-                    interface = '&'.join(secretary.interface for secretary in self._user_filter.secretaries if secretary.active)
-                    self._agi.set_variable('XIVO_CALLFILTER_INTERFACE', interface)
-                    self._agi.set_variable('XIVO_CALLFILTER_TIMEOUT', self._user_filter.ringseconds)
-                elif self._user_filter.mode in ("bossfirst-serial", "secretary-serial"):
-                    index = 0
-                    for secretary in self._user_filter.secretaries:
-                        if secretary.active:
-                            self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_INTERFACE' % (index,), secretary.interface)
-                            self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_TIMEOUT' % (index,), secretary.ringseconds)
-                            index += 1
+    def _call_filtering(self):
+        caller = self._caller
+        called = self._user
 
-                self._user_filter.set_dial_actions()
-                self._user_filter.rewrite_cid()
-                self._agi.set_variable('XIVO_CALLFILTER', '1')
-                self._agi.set_variable('XIVO_CALLFILTER_MODE', self._user_filter.mode)
-                return True
-        return False
+        if called.bsfilter != 'boss':
+            return False
+
+        if caller is not None and caller.bsfilter == 'secretary':
+            secretary_can_call_boss = callfilter_dao.does_secretary_filter_boss(called.id, caller.id)
+            if secretary_can_call_boss:
+                return False
+
+        boss_callfiltermember, callfilter = callfilter_dao.get_by_boss_id(called.id)
+        callfilter_active = callfilter_dao.is_activated_by_callfilter_id(boss_callfiltermember.callfilterid)
+
+        if callfilter_active == 0:
+            return False
+
+        in_zone = self._callfilter_check_in_zone(callfilter.callfrom)
+        if not in_zone == True:
+            return False
+
+        secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
+
+        boss_line = self._lines.lines[0]
+        boss_interface = '%s/%s' % (boss_line['protocol'].upper(), boss_line['name'])
+
+        if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
+            self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
+            self._agi.set_variable('XIVO_CALLFILTER_BOSS_TIMEOUT', boss_callfiltermember.ringseconds)
+
+        index = 0
+        ifaces = []
+        for secretary in secretaries:
+            secretary_callfiltermember, ringseconds = secretary
+            if secretary_callfiltermember.active:
+                iface = line_dao.get_interface_from_user_id(secretary_callfiltermember.typeval)
+                ifaces.append(iface)
+
+                if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
+                    self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_INTERFACE' % index, iface)
+                    self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_TIMEOUT' % index, ringseconds)
+                    index += 1
+
+        if callfilter.bosssecretary in ("bossfirst-simult", "secretary-simult", "all"):
+            self._agi.set_variable('XIVO_CALLFILTER_INTERFACE', '&'.join(ifaces))
+            self._agi.set_variable('XIVO_CALLFILTER_TIMEOUT', callfilter.ringseconds)
+
+        DialAction(self._agi, self._cursor, "noanswer", "callfilter", callfilter.id).set_variables()
+        CallerID(self._agi, self._cursor, "callfilter", callfilter.id).rewrite(force_rewrite=True)
+        self._agi.set_variable('XIVO_CALLFILTER', '1')
+        self._agi.set_variable('XIVO_CALLFILTER_MODE', callfilter.bosssecretary)
+
+        return True
+
+    def _callfilter_check_in_zone(self, callfilter_zone):
+        if callfilter_zone == "all":
+            return True
+        elif callfilter_zone == "internal" and self._zone == "intern":
+            return True
+        elif callfilter_zone == "external" and self._zone == "extern":
+            return True
+        else:
+            return False
 
     def _set_mailbox(self):
         self._mailbox = ""

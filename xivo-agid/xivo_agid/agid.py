@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from xivo.db_manager import DBManager
+from sqlalchemy.exc import InvalidRequestError, OperationalError
 
 # Copyright (C) 2008-2013 Avencall
 #
@@ -86,20 +88,29 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
             fagi = fastagi.FastAGI(self.rfile, self.wfile)
             except_hook = agitb.Hook(agi=fagi)
 
-            conn = _server.db_conn_pool.acquire()
+            conn = self.server.db_conn_pool.acquire()
             try:
                 cursor = conn.cursor()
 
                 handler_name = fagi.env['agi_network_script']
                 log.debug("delegating request handling %r", handler_name)
-                _handlers[handler_name].handle(fagi, cursor, fagi.args)
+
+                try:
+                    _handlers[handler_name].handle(fagi, cursor, fagi.args)
+                except (InvalidRequestError, OperationalError) as e:
+                    log.warning('Database error while processing command: %s', e)
+                    self.server._db_manager.reconnect()
+                    try:
+                        _handlers[handler_name].handle(fagi, cursor, fagi.args)
+                    except Exception:
+                        raise fastagi.FastAGIDialPlanBreak('DB DOWN')
 
                 conn.commit()
 
                 fagi.verbose('AGI handler %r successfully executed' % handler_name)
                 log.debug("request successfully handled")
             finally:
-                _server.db_conn_pool.release(conn)
+                self.server.db_conn_pool.release(conn)
 
         # Attempt to relay errors to Asterisk, but if it fails, we
         # just give up.
@@ -140,6 +151,9 @@ class AGID(SocketServer.ThreadingTCPServer):
 
         self.db_conn_pool = DBConnectionPool()
         self.setup()
+
+        self._db_manager = DBManager()
+        self._db_manager.connect()
 
         SocketServer.ThreadingTCPServer.__init__(self,
                                                  (self.listen_addr, self.listen_port),

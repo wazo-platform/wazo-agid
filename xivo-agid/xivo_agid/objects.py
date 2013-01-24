@@ -115,227 +115,6 @@ class ExtenFeatures:
         return res['exten']
 
 
-class BossSecretaryFilterMember:
-    """This class represents a boss-secretary filter member (e.g. a boss
-    or a secretary).
-
-    """
-
-    def __init__(self, agi, active, xtype, xid, number, ringseconds):
-        self.agi = agi
-        self.active = bool(active)
-        self.type = xtype
-        self.id = xid
-        self.number = number
-        self.interface = None
-
-        if ringseconds == 0:
-            self.ringseconds = ""
-        else:
-            self.ringseconds = ringseconds
-
-    def __str__(self):
-        return ("Call filter member object :\n"
-                "Type:        %s\n"
-                "User ID:     %s\n"
-                "Number:      %s\n"
-                "Interface:   %s\n"
-                "RingSeconds: %s"
-                % (self.type, self.id, self.number, self.interface, self.ringseconds))
-
-    def agi_str(self):
-        s = str(self)
-
-        for line in s.splitlines():
-            self.agi.verbose(line)
-
-
-# TODO: refactor this.
-class BossSecretaryFilter:
-    """Boss-secretary filter class. Creating a boss-secretary filter
-    automatically load everything related to the filter (its properties,
-    those of its boss, its secretaries). Creating a filter is also a way
-    to check its existence. Trying to construct a filter that doesn't
-    exist or has no secretary raises a LookupError.
-
-    """
-
-    def __init__(self, agi, cursor, line):
-        self.agi = agi
-        self.cursor = cursor
-        self.id = None
-        self.active = False
-        self.context = None
-        self.mode = None
-        self.callfrom = None
-        self.ringseconds = None
-        self.boss = None
-        self.secretaries = None
-        self.line = line
-
-        boss_number = self.line['number']
-        boss_context = self.line['context']
-
-        contextinclude = Context(agi, cursor, boss_context).include
-
-        columns = ('callfilter.id',
-                   'callfilter.bosssecretary',
-                   'callfilter.callfrom',
-                   'callfilter.ringseconds',
-                   'callfiltermember.ringseconds',
-                   'userfeatures.id',
-                   'linefeatures.protocol',
-                   'linefeatures.protocolid',
-                   'linefeatures.number',
-                   'linefeatures.context')
-
-        t = tuple([boss_number] + contextinclude)
-
-        cursor.query("SELECT ${columns} FROM callfilter "
-                     "INNER JOIN callfiltermember "
-                     "ON callfilter.id = callfiltermember.callfilterid "
-                     "INNER JOIN userfeatures "
-                     "ON " + cursor.cast('callfiltermember.typeval', 'int') + " = userfeatures.id "
-                     "INNER JOIN linefeatures "
-                     "ON linefeatures.iduserfeatures = userfeatures.id "
-                     "WHERE callfilter.type = 'bosssecretary' "
-                     "AND callfilter.commented = 0 "
-                     "AND callfiltermember.type = 'user' "
-                     "AND callfiltermember.bstype = 'boss' "
-                     "AND userfeatures.bsfilter = 'boss' "
-                     "AND linefeatures.number = %s "
-                     "AND linefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                     "AND linefeatures.internal = 0 "
-                     "AND linefeatures.commented = 0",
-                     columns,
-                     t)
-
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find call filter ID for boss (number = %r, context = %r)" % (boss_number, boss_context))
-
-        protocol = res['linefeatures.protocol']
-        protocolid = res['linefeatures.protocolid']
-
-        self.id = res['callfilter.id']
-        self.context = boss_context
-        self.mode = res['callfilter.bosssecretary']
-        self.callfrom = res['callfilter.callfrom']
-        self.ringseconds = res['callfilter.ringseconds']
-        self.boss = BossSecretaryFilterMember(self.agi, True, 'boss', res['userfeatures.id'],
-                                              boss_number, res['callfiltermember.ringseconds'])
-        self.secretaries = []
-
-        if self.ringseconds == 0:
-            self.ringseconds = ""
-
-        try:
-            self.boss.interface = protocol_intf_and_suffix(cursor, protocol, 'user', protocolid)[0]
-        except (ValueError, LookupError), e:
-            self.agi.dp_break(str(e))
-
-        columns = ('callfiltermember.active',
-                   'userfeatures.id',
-                   'linefeatures.protocol',
-                   'linefeatures.protocolid',
-                   'linefeatures.number',
-                   'userfeatures.ringseconds')
-
-        t = tuple([self.id] + contextinclude)
-
-        cursor.query("SELECT ${columns} FROM callfiltermember "
-                     "INNER JOIN userfeatures "
-                     "ON " + cursor.cast('callfiltermember.typeval', 'int') + " = userfeatures.id "
-                     "INNER JOIN linefeatures "
-                     "ON linefeatures.iduserfeatures = userfeatures.id "
-                     "WHERE callfiltermember.callfilterid = %s "
-                     "AND callfiltermember.type = 'user' "
-                     "AND callfiltermember.bstype = 'secretary' "
-                     "AND COALESCE(linefeatures.number,'') != '' "
-                     "AND linefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                     "AND linefeatures.internal = 0 "
-                     "AND userfeatures.bsfilter = 'secretary' "
-                     "AND userfeatures.commented = 0 "
-                     "ORDER BY priority ASC",
-                     columns,
-                     t)
-        res = cursor.fetchall()
-
-        if not res:
-            raise LookupError("Unable to find secretaries for call filter ID %d (context = %r)" % (self.id, boss_context))
-
-        for row in res:
-            protocol = row['linefeatures.protocol']
-            protocolid = row['linefeatures.protocolid']
-            secretary = BossSecretaryFilterMember(self.agi,
-                                                  row['callfiltermember.active'],
-                                                  'secretary',
-                                                  row['userfeatures.id'],
-                                                  row['linefeatures.number'],
-                                                  row['userfeatures.ringseconds'])
-
-            if secretary.active:
-                self.active = True
-
-            try:
-                secretary.interface = protocol_intf_and_suffix(cursor, protocol, 'user', protocolid)[0]
-            except (ValueError, LookupError), e:
-                self.agi.dp_break(str(e))
-
-            self.secretaries.append(secretary)
-
-    def __str__(self):
-        return ("Call filter object :\n"
-                "Context:       %s\n"
-                "Mode:          %s\n"
-                "Callfrom:      %s\n"
-                "RingSeconds:   %s\n"
-                "Boss:\n%s\n"
-                "Secretaries:\n%s"
-                % (self.context, self.mode, self.callfrom,
-                   self.ringseconds, self.boss, '\n'.join((str(secretary) for secretary in self.secretaries))))
-
-    def agi_str(self):
-        s = str(self)
-
-        for line in s.splitlines():
-            self.agi.verbose(line)
-
-    def check_zone(self, zone):
-        if self.callfrom == "all":
-            return True
-        elif self.callfrom == "internal" and zone == "intern":
-            return True
-        elif self.callfrom == "external" and zone == "extern":
-            return True
-        else:
-            return False
-
-    def get_secretary_by_number(self, number, context=None):
-        if context and context != self.context:
-            return None
-
-        for secretary in self.secretaries:
-            if number == secretary.number:
-                return secretary
-        else:
-            return None
-
-    def get_secretary_by_id(self, xid):
-        for secretary in self.secretaries:
-            if xid == secretary.id:
-                return secretary
-        else:
-            return None
-
-    def set_dial_actions(self):
-        DialAction(self.agi, self.cursor, "noanswer", "callfilter", self.id).set_variables()
-
-    def rewrite_cid(self):
-        CallerID(self.agi, self.cursor, "callfilter", self.id).rewrite(force_rewrite=True)
-
-
 class VMBox:
     def __init__(self, agi, cursor, xid=None, mailbox=None, context=None, commentcond=True):
         self.agi = agi
@@ -571,7 +350,8 @@ class MasterLineUser:
         }
 
 
-class User:
+class User(object):
+
     def __init__(self, agi, cursor, xid=None, exten=None, context=None):
         self.agi = agi
         self.cursor = cursor
@@ -649,19 +429,7 @@ class User:
         if self.destbusy == '':
             self.enablebusy = 0
 
-        if self.bsfilter == "boss":
-            master_line = MasterLineUser(agi, cursor, xid)
-            try:
-                self.filter = BossSecretaryFilter(agi, cursor, master_line.line)
-            except LookupError:
-                import traceback
-                traceback.print_exc()
-                self.filter = None
-        else:
-            self.filter = None
-
         self.vmbox = None
-
         if self.enablevoicemail and self.voicemailid:
             try:
                 self.vmbox = VMBox(agi, cursor, self.voicemailid)
@@ -670,16 +438,6 @@ class User:
 
         if not self.vmbox:
             self.enablevoicemail = 0
-
-        # user skills
-        cursor.query("SELECT count(*) FROM userqueueskill WHERE userid = %s", parameters=(xid,))
-        res = cursor.fetchone()
-        if not res:
-            raise LookupError("Unable to find user queueskills")
-
-        self.skills = ''
-        if res[0] > 0:
-            self.skills = xid
 
     def disable_forwards(self):
         self.cursor.query("UPDATE userfeatures "
@@ -1138,7 +896,8 @@ class Agent:
         self.preprocess_subroutine = res['preprocess_subroutine']
 
 
-class DialAction:
+class DialAction(object):
+
     @staticmethod
     def set_agi_variables(agi, event, category, action, actionarg1, actionarg2, isda=True):
         xtype = ("%s_%s" % (category, event)).upper()

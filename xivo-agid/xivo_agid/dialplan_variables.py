@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
-# Copyright (C) 2006-2013 Avencall
+#
+# # Copyright (C) 2006-2013 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-CALLFILTER_BYPASS = 'XIVO_CALLFILTER_BYPASS'
+
 CALL_OPTIONS = 'XIVO_CALLOPTIONS'
 CALL_ORIGIN = 'XIVO_CALLORIGIN'
 CALL_RECORD_FILE_NAME = 'XIVO_CALLRECORDFILE'
 # ID of the callee
+SRCNUM = 'XIVO_SRCNUM'
 DESTINATION_ID = 'XIVO_DSTID'
 DESTINATION_NUMBER = 'XIVO_DSTNUM'
 HANGUP_RING_TIME = 'XIVO_HANGUPRINGTIME'
