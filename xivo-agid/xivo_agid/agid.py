@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from xivo.db_manager import DBManager
-from sqlalchemy.exc import InvalidRequestError, OperationalError
 
 # Copyright (C) 2008-2013 Avencall
 #
@@ -26,8 +24,9 @@ from threading import Lock
 from xivo import agitb
 from xivo import anysql
 from xivo import moresynchro
-
 from xivo_agid import fastagi
+from sqlalchemy.exc import InvalidRequestError, OperationalError
+from xivo_dao.helpers.db_manager import DBManager
 
 
 AGI_CONFFILE = "/etc/pf-xivo/xivo-agid.conf"
