@@ -25,8 +25,6 @@ from xivo import agitb
 from xivo import anysql
 from xivo import moresynchro
 from xivo_agid import fastagi
-from sqlalchemy.exc import InvalidRequestError, OperationalError
-from xivo_dao.helpers.db_manager import DBManager
 
 
 AGI_CONFFILE = "/etc/pf-xivo/xivo-agid.conf"
@@ -94,15 +92,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
                 handler_name = fagi.env['agi_network_script']
                 log.debug("delegating request handling %r", handler_name)
 
-                try:
-                    _handlers[handler_name].handle(fagi, cursor, fagi.args)
-                except (InvalidRequestError, OperationalError) as e:
-                    log.warning('Database error while processing command: %s', e)
-                    self.server._db_manager.reconnect()
-                    try:
-                        _handlers[handler_name].handle(fagi, cursor, fagi.args)
-                    except Exception:
-                        raise fastagi.FastAGIDialPlanBreak('DB DOWN')
+                _handlers[handler_name].handle(fagi, cursor, fagi.args)
 
                 conn.commit()
 
@@ -150,9 +140,6 @@ class AGID(SocketServer.ThreadingTCPServer):
 
         self.db_conn_pool = DBConnectionPool()
         self.setup()
-
-        self._db_manager = DBManager()
-        self._db_manager.connect()
 
         SocketServer.ThreadingTCPServer.__init__(self,
                                                  (self.listen_addr, self.listen_port),
