@@ -38,9 +38,9 @@ def callfilter(agi, cursor, args):
     allow_ids = []
     for bs in bslist:
         callfilter, callfiltermembers = bs
-        allow_ids.append(callfiltermembers.id)
+        allow_ids.append(callfiltermembers.typeval)
 
-    if not caller_user_id or int(caller_user_id) not in allow_ids:
+    if not caller_user_id or caller_user_id not in allow_ids:
         agi.dp_break('This user is not allowed to use this callfilter.')
 
     new_state = 0 if callfiltermember.active == 1 else 1
