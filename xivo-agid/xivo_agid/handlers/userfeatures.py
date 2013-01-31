@@ -163,7 +163,11 @@ class UserFeatures(Handler):
             if secretary_can_call_boss:
                 return False
 
-        boss_callfiltermember, callfilter = callfilter_dao.get_by_boss_id(called.id)
+        try:
+            boss_callfiltermember, callfilter = callfilter_dao.get_by_boss_id(called.id)
+        except TypeError:
+            return False
+
         callfilter_active = callfilter_dao.is_activated_by_callfilter_id(boss_callfiltermember.callfilterid)
 
         if callfilter_active == 0:
