@@ -25,6 +25,7 @@ import urllib2
 from xivo.moresynchro import RWLock
 from xivo_agid import agid
 from xivo_agid.directory import directory
+from xivo.caller_id import build_caller_id
 
 logger = logging.getLogger(__name__)
 
@@ -82,24 +83,9 @@ def _get_cid_directory_lookup(original_cid, pattern):
         lookup_result = None
 
     if lookup_result:
-        return _build_caller_id(original_cid, lookup_result[0], pattern)
+        return build_caller_id(original_cid, lookup_result[0], pattern)
     else:
         return None, None, None
-
-
-_COMPLETE_CALLER_ID_PATTERN = re.compile('\"(.*)\" \<(\d+)\>')
-
-
-def _build_caller_id(caller_id, name, number):
-    if _complete_caller_id(caller_id):
-        cid_name, cid_number = _COMPLETE_CALLER_ID_PATTERN.search(caller_id).groups()
-        return caller_id, cid_name, cid_number
-    else:
-        return '"%s" <%s>' % (name, number), name, number
-
-
-def _complete_caller_id(caller_id):
-    return True if _COMPLETE_CALLER_ID_PATTERN.match(caller_id) else False
 
 
 def _build_agi_caller_id(cid_all, cid_name, cid_number):
