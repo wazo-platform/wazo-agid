@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock, patch
+from mock import Mock, call, patch
 
 from xivo_agid.handlers.outgoingfeatures import OutgoingFeatures
 from xivo_agid import objects
@@ -157,7 +157,11 @@ class Test(unittest.TestCase):
 
         self.outgoing_features._set_caller_id()
 
-        self._agi.set_variable.assert_called_once_with('CALLERPRES()', 'prohib')
+        expected_calls = [
+            call('CALLERID(name-pres)', 'prohib'),
+            call('CALLERID(num-pres)', 'prohib'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('xivo_agid.objects.CallerID.set')
@@ -175,7 +179,11 @@ class Test(unittest.TestCase):
 
         self.outgoing_features._set_caller_id()
 
-        self._agi.set_variable.assert_called_once_with('CALLERPRES()', 'prohib')
+        expected_calls = [
+            call('CALLERID(name-pres)', 'prohib'),
+            call('CALLERID(num-pres)', 'prohib'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('xivo_agid.objects.CallerID.set')

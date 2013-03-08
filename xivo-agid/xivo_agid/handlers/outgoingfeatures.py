@@ -71,7 +71,8 @@ class OutgoingFeatures(Handler):
             if self.outcall.callerid:
                 objects.CallerID.set(self._agi, self.outcall.callerid)
         elif self.user.outcallerid == 'anonymous':
-            self._agi.set_variable('CALLERPRES()', 'prohib')
+            self._agi.set_variable('CALLERID(name-pres)', 'prohib')
+            self._agi.set_variable('CALLERID(num-pres)', 'prohib')
         else:
             objects.CallerID.set(self._agi, self.user.outcallerid)
 
