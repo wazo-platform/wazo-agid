@@ -157,7 +157,7 @@ class Test(unittest.TestCase):
 
         self.outgoing_features._set_caller_id()
 
-        self._agi.appexec.assert_called_once_with('SetCallerPres', 'prohib')
+        self._agi.set_variable.assert_called_once_with('CALLERPRES()', 'prohib')
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('xivo_agid.objects.CallerID.set')
@@ -175,7 +175,7 @@ class Test(unittest.TestCase):
 
         self.outgoing_features._set_caller_id()
 
-        self._agi.appexec.assert_called_once_with('SetCallerPres', 'prohib')
+        self._agi.set_variable.assert_called_once_with('CALLERPRES()', 'prohib')
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('xivo_agid.objects.CallerID.set')
