@@ -120,9 +120,8 @@ class VMBox:
         self.agi = agi
         self.cursor = cursor
 
-        vm_columns = ('uniqueid', 'mailbox', 'context', 'password', 'email', 'commented', 'language')
-        vmf_columns = ('skipcheckpass',)
-        columns = ["voicemail." + c for c in vm_columns] + ["voicemailfeatures." + c for c in vmf_columns]
+        vm_columns = ('uniqueid', 'mailbox', 'context', 'password', 'email', 'commented', 'language', 'skipcheckpass')
+        columns = ["voicemail." + c for c in vm_columns]
 
         if commentcond:
             where_comment = "AND voicemail.commented = 0"
@@ -131,8 +130,6 @@ class VMBox:
 
         if xid:
             cursor.query("SELECT ${columns} FROM voicemail "
-                         "INNER JOIN voicemailfeatures "
-                         "ON voicemail.uniqueid = voicemailfeatures.voicemailid "
                          "WHERE voicemail.uniqueid = %s " +
                          where_comment,
                          columns,
@@ -140,8 +137,6 @@ class VMBox:
         elif mailbox and context:
             contextinclude = Context(agi, cursor, context).include
             cursor.query("SELECT ${columns} FROM voicemail "
-                         "INNER JOIN voicemailfeatures "
-                         "ON voicemail.uniqueid = voicemailfeatures.voicemailid "
                          "WHERE voicemail.mailbox = %s "
                          "AND voicemail.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") " +
                          where_comment,
@@ -162,7 +157,7 @@ class VMBox:
         self.email = res['voicemail.email']
         self.commented = res['voicemail.commented']
         self.language = res['voicemail.language']
-        self.skipcheckpass = res['voicemailfeatures.skipcheckpass']
+        self.skipcheckpass = res['voicemail.skipcheckpass']
 
     def toggle_enable(self, enabled=None):
         if enabled is None:
@@ -511,9 +506,9 @@ class MeetMe:
     FLAG_ADMIN = (1 << 0)
     FLAG_USER = (1 << 1)
 
-    OPTIONS_GLOBAL = {'talkeroptimization': '',  # Disabled
+    OPTIONS_GLOBAL = {'talkeroptimization': '', # Disabled
                       'record': 'r',
-                      'talkerdetection': '',  # Disabled
+                      'talkerdetection': '', # Disabled
                       'noplaymsgfirstenter': '1',
                       'closeconfdurationexceeded': 'L'}
 
