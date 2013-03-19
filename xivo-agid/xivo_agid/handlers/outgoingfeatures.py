@@ -52,12 +52,10 @@ class OutgoingFeatures(Handler):
     def _retrieve_user(self):
         try:
             self.user = objects.User(self._agi, self._cursor, int(self.userid))
-            self.callerid = self.user.callerid
             if self.user.enablexfer:
                 self.options += 'T'
 
             if not self.outcall.internal:
-                self.callerid = self.user.outcallerid
                 if self.user.enableautomon:
                     self.options += "W"
                 self.callrecord = self.user.callrecord
@@ -66,13 +64,17 @@ class OutgoingFeatures(Handler):
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)
 
     def _set_caller_id(self):
-        if not self.outcall.internal:
-            if self.callerid in (None, '', 'default') and self.outcall.callerid:
-                self.callerid = self.outcall.callerid
-        if self.callerid and self.callerid != 'default':
-            objects.CallerID.set(self._agi, self.callerid)
-            if self.callerid == 'anonymous':
-                self._agi.appexec('SetCallerPres', 'prohib')
+        if self.outcall.internal:
+            return
+
+        if self.user.outcallerid == 'default':
+            if self.outcall.callerid:
+                objects.CallerID.set(self._agi, self.outcall.callerid)
+        elif self.user.outcallerid == 'anonymous':
+            self._agi.set_variable('CALLERID(name-pres)', 'prohib')
+            self._agi.set_variable('CALLERID(num-pres)', 'prohib')
+        else:
+            objects.CallerID.set(self._agi, self.user.outcallerid)
 
     def _set_trunk_info(self):
         for i, trunk in enumerate(self.outcall.trunks):

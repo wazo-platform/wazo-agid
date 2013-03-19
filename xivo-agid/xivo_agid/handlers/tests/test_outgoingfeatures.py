@@ -16,13 +16,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock
+from mock import Mock, call, patch
 
 from xivo_agid.handlers.outgoingfeatures import OutgoingFeatures
 from xivo_agid import objects
 
 
-class OutCallBuilder():
+class OutCallBuilder(object):
 
     def __init__(self):
         self._internal = 0
@@ -47,8 +47,41 @@ class OutCallBuilder():
         return outcall
 
 
+class UserBuilder(object):
+
+    def __init__(self):
+        self._caller_id = '"John"'
+        self._out_caller_id = 'default'
+
+    def withCallerId(self, caller_id):
+        self._caller_id = caller_id
+        return self
+
+    def withDefaultOutCallerId(self):
+        self._out_caller_id = 'default'
+        return self
+
+    def withAnonymousOutCallerId(self):
+        self._out_caller_id = 'anonymous'
+        return self
+
+    def withCustomOutCallerId(self, caller_id):
+        self._out_caller_id = caller_id
+        return self
+
+    def build(self):
+        user = Mock(objects.User)
+        user.callerid = self._caller_id
+        user.outcallerid = self._out_caller_id
+        return user
+
+
 def an_outcall():
     return OutCallBuilder()
+
+
+def a_user():
+    return UserBuilder()
 
 
 class Test(unittest.TestCase):
@@ -62,44 +95,129 @@ class Test(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_set_caller_id(self):
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_outcall_internal(self, mock_set_caller_id):
+        user = (a_user()
+                .build())
+        outcall = (an_outcall()
+                   .internal()
+                   .build())
 
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        self.assertFalse(mock_set_caller_id.called)
+
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_user_default_and_outcall_external(self, mock_set_caller_id):
+        user = (a_user()
+                .withDefaultOutCallerId()
+                .build())
+        outcall = (an_outcall()
+                   .external()
+                   .build())
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        self.assertFalse(mock_set_caller_id.called)
+
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_user_default_and_outcall_external_caller_id(self, mock_set_caller_id):
+        user = (a_user()
+                .withDefaultOutCallerId()
+                .build())
         outcall = (an_outcall()
                    .external()
                    .withCallerId('27857218')
                    .build())
 
         self.outgoing_features.outcall = outcall
-        self.outgoing_features.callerid = None
+        self.outgoing_features.user = user
 
         self.outgoing_features._set_caller_id()
 
-        self.assertEqual(self.outgoing_features.callerid, '27857218', 'caller id should be set for external interconnexions')
+        mock_set_caller_id.assert_called_once_with(self._agi, '27857218')
 
-    def test_do_not_set_caller_id_for_internal_outcall(self):
-
-        outcall = (an_outcall()
-                   .internal()
-                   .withCallerId('23456'))
-
-        self.outgoing_features.outcall = outcall
-        self.outgoing_features.callerid = None
-
-        self.outgoing_features._set_caller_id()
-
-        self.assertEqual(None, self.outgoing_features.callerid, 'caller id should not be set for internal interconnexions')
-
-    def test_set_caller_id_no_forced_caller_id(self):
-
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_user_anonymous_and_outcall_external(self, mock_set_caller_id):
+        user = (a_user()
+                .withAnonymousOutCallerId()
+                .build())
         outcall = (an_outcall()
                    .external()
-                   .withCallerId(''))
+                   .build())
 
         self.outgoing_features.outcall = outcall
-        self.outgoing_features.callerid = None
+        self.outgoing_features.user = user
 
         self.outgoing_features._set_caller_id()
-        self.assertEqual(self.outgoing_features.callerid, None)
+
+        expected_calls = [
+            call('CALLERID(name-pres)', 'prohib'),
+            call('CALLERID(num-pres)', 'prohib'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+        self.assertFalse(mock_set_caller_id.called)
+
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_user_anonymous_and_outcall_external_caller_id(self, mock_set_caller_id):
+        user = (a_user()
+                .withAnonymousOutCallerId()
+                .build())
+        outcall = (an_outcall()
+                   .external()
+                   .withCallerId('27857218')
+                   .build())
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        expected_calls = [
+            call('CALLERID(name-pres)', 'prohib'),
+            call('CALLERID(num-pres)', 'prohib'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+        self.assertFalse(mock_set_caller_id.called)
+
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_user_custom_and_outcall_external(self, mock_set_caller_id):
+        user = (a_user()
+                .withCustomOutCallerId('"Custom1"')
+                .build())
+        outcall = (an_outcall()
+                   .external()
+                   .build())
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        mock_set_caller_id.assert_called_once_with(self._agi, '"Custom1"')
+
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_user_custom_and_outcall_external_caller_id(self, mock_set_caller_id):
+        user = (a_user()
+                .withCustomOutCallerId('"Custom1"')
+                .build())
+        outcall = (an_outcall()
+                   .external()
+                   .withCallerId('27857218')
+                   .build())
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        mock_set_caller_id.assert_called_once_with(self._agi, '"Custom1"')
 
     def test_retreive_outcall(self):
         outcall = Mock(objects.Outcall)
@@ -109,7 +227,3 @@ class Test(unittest.TestCase):
         self.outgoing_features._retrieve_outcall()
 
         outcall.retrieve_values.assert_called_once_with(23)
-
-
-if __name__ == "__main__":
-    unittest.main()
