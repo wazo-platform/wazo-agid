@@ -31,6 +31,7 @@ class OutgoingFeatures(Handler):
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
+        self.user = None
         self.userid = None
         self.callerid = None
         self.callrecord = False
@@ -67,7 +68,7 @@ class OutgoingFeatures(Handler):
         if self.outcall.internal:
             return
 
-        if self.user.outcallerid == 'default':
+        if self.user is None or self.user.outcallerid == 'default':
             if self.outcall.callerid:
                 objects.CallerID.set(self._agi, self.outcall.callerid)
         elif self.user.outcallerid == 'anonymous':
