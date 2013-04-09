@@ -111,6 +111,35 @@ class Test(unittest.TestCase):
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_no_user_and_outcall_external(self, mock_set_caller_id):
+        user = None
+        outcall = (an_outcall()
+                   .external()
+                   .build())
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        self.assertFalse(mock_set_caller_id.called)
+
+    @patch('xivo_agid.objects.CallerID.set')
+    def test_set_caller_id_no_user_and_outcall_external_caller_id(self, mock_set_caller_id):
+        user = None
+        outcall = (an_outcall()
+                   .external()
+                   .withCallerId('27857218')
+                   .build())
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        mock_set_caller_id.assert_called_once_with(self._agi, '27857218')
+
+    @patch('xivo_agid.objects.CallerID.set')
     def test_set_caller_id_user_default_and_outcall_external(self, mock_set_caller_id):
         user = (a_user()
                 .withDefaultOutCallerId()
