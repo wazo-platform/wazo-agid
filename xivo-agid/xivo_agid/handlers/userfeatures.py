@@ -132,7 +132,7 @@ class UserFeatures(Handler):
         if len(curlines) > 0:
             self._agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
             num += 1
-        self._agi.set_variable('XIVO_INTERFACE_NB', num)
+        self._set_xivo_iface_nb(num)
 
     def _set_xivo_ifaces(self):
         self._set_xivo_iface_nb(0)
@@ -149,7 +149,7 @@ class UserFeatures(Handler):
                 self._agi.set_variable('XIVO_DST_LASTNAME', self._user.lastname)
 
     def _set_xivo_iface_nb(self, number):
-        self._agi.set_variable('XIVO_INTERFACE_NB', 0)
+        self._agi.set_variable('XIVO_INTERFACE_NB', number)
 
     def _call_filtering(self):
         caller = self._caller

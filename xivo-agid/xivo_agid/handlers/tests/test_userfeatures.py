@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock, patch
+from mock import Mock, patch, sentinel
 
 from xivo_agid.handlers.userfeatures import UserFeatures
 from xivo_agid import objects
@@ -171,9 +171,9 @@ class TestUserFeatures(unittest.TestCase):
     def test_xivo_set_iface_nb(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
-        userfeatures._set_xivo_iface_nb(0)
+        userfeatures._set_xivo_iface_nb(sentinel.number)
 
-        self._agi.set_variable.assert_called_once_with('XIVO_INTERFACE_NB', 0)
+        self._agi.set_variable.assert_called_once_with('XIVO_INTERFACE_NB', sentinel.number)
 
     def test_is_main_line(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
