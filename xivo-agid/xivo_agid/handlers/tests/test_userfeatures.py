@@ -186,6 +186,28 @@ class TestUserFeatures(unittest.TestCase):
 
         self.assertTrue(userfeatures._is_main_line())
 
+    def test_build_interface_from_custom_line(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        line = {
+            'protocol': 'CUSTOM',
+            'name': 'sip/abcd'
+        }
+
+        interface = userfeatures._build_interface_from_line(line)
+
+        self.assertEqual(interface, 'sip/abcd')
+
+    def test_build_interface_from_sip_line(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        line = {
+            'protocol': 'SIP',
+            'name': 'abcd'
+        }
+
+        interface = userfeatures._build_interface_from_line(line)
+
+        self.assertEqual(interface, 'SIP/abcd')
+
     def test_set_xivo_user_name(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 

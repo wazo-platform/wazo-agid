@@ -113,10 +113,8 @@ class UserFeatures(Handler):
         try:
             curline = [line for line in self._lines.lines if str(line['id']) == self._lineid][0]
             self._set_xivo_iface_nb(1)
-            if curline['protocol'].lower() == 'custom':
-                self._agi.set_variable('XIVO_INTERFACE_0', "%s" % (curline['name']))
-            else:
-                self._agi.set_variable('XIVO_INTERFACE_0', "%s/%s" % (curline['protocol'], curline['name']))
+            interface = self._build_interface_from_line(curline)
+            self._agi.set_variable('XIVO_INTERFACE_0', interface)
         except Exception:
             pass
 
@@ -128,11 +126,20 @@ class UserFeatures(Handler):
                 self._agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
                 num += 1
                 del curlines[:]
-            curlines.append('%s/%s' % (line['protocol'], line['name']))
+            interface = self._build_interface_from_line(line)
+            curlines.append(interface)
         if len(curlines) > 0:
             self._agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
             num += 1
         self._set_xivo_iface_nb(num)
+
+    def _build_interface_from_line(self, line):
+        protocol = line['protocol']
+        if protocol.lower() == 'custom':
+            interface = line['name']
+        else:
+            interface = '%s/%s' % (protocol, line['name'])
+        return interface
 
     def _set_xivo_ifaces(self):
         self._set_xivo_iface_nb(0)
