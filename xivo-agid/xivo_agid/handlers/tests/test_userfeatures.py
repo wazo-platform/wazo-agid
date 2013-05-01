@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock, patch, sentinel
+from mock import Mock, call, patch, sentinel
 
 from xivo_agid.handlers.userfeatures import UserFeatures
 from xivo_agid import objects
@@ -139,6 +139,7 @@ class TestUserFeatures(unittest.TestCase):
     def test_set_user(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._set_xivo_user_name = Mock()
+        userfeatures._set_xivo_redirecting_info = Mock()
 
         userfeatures._set_user()
 
@@ -153,6 +154,7 @@ class TestUserFeatures(unittest.TestCase):
             userfeatures._set_user()
 
             self.assertEqual(userfeatures._set_xivo_user_name.call_count, 1)
+            self.assertEqual(userfeatures._set_xivo_redirecting_info.call_count, 1)
             self.assertTrue(userfeatures._user is not None)
             self.assertTrue(isinstance(userfeatures._user, objects.User))
 
@@ -224,3 +226,54 @@ class TestUserFeatures(unittest.TestCase):
         userfeatures._set_xivo_user_name()
 
         self.assertEqual(self._agi.set_variable.call_count, 2)
+
+    def test_set_xivo_redirecting_info(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.firstname = 'First'
+        userfeatures._user.lastname = 'Last'
+        userfeatures._user.callerid = '"Foobar"'
+        userfeatures._dstnum = '42'
+
+        userfeatures._set_xivo_redirecting_info()
+
+        expected_calls = [
+            call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+            call('XIVO_DST_REDIRECTING_NUM', '42'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+
+    def test_set_xivo_redirecting_info_full_callerid(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.firstname = 'First'
+        userfeatures._user.lastname = 'Last'
+        userfeatures._user.callerid = '"Foobar" <123>'
+        userfeatures._dstnum = '42'
+
+        userfeatures._set_xivo_redirecting_info()
+
+        expected_calls = [
+            call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+            call('XIVO_DST_REDIRECTING_NUM', '123'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+
+    def test_set_xivo_redirecting_info_no_callerid(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.firstname = 'First'
+        userfeatures._user.lastname = 'Last'
+        userfeatures._user.callerid = ''
+        userfeatures._dstnum = '42'
+
+        userfeatures._set_xivo_redirecting_info()
+
+        expected_calls = [
+            call('XIVO_DST_REDIRECTING_NAME', 'First Last'),
+            call('XIVO_DST_REDIRECTING_NUM', '42'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)

@@ -105,6 +105,7 @@ class UserFeatures(Handler):
             except (ValueError, LookupError), e:
                 self._agi.dp_break(str(e))
             self._set_xivo_user_name()
+            self._set_xivo_redirecting_info()
 
     def _is_main_line(self):
         return self._lineid and str(self._master_line['id']) == self._lineid
@@ -154,6 +155,22 @@ class UserFeatures(Handler):
                 self._agi.set_variable('XIVO_DST_FIRSTNAME', self._user.firstname)
             if self._user.lastname:
                 self._agi.set_variable('XIVO_DST_LASTNAME', self._user.lastname)
+
+    def _set_xivo_redirecting_info(self):
+        callerid_parsed = CallerID.parse(self._user.callerid)
+        if callerid_parsed:
+            callerid_name, callerid_num = callerid_parsed
+        else:
+            callerid_name = None
+            callerid_num = None
+
+        if not callerid_name:
+            callerid_name = "%s %s" % (self._user.firstname, self._user.lastname)
+        self._agi.set_variable('XIVO_DST_REDIRECTING_NAME', callerid_name)
+
+        if not callerid_num:
+            callerid_num = self._dstnum
+        self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
 
     def _set_xivo_iface_nb(self, number):
         self._agi.set_variable('XIVO_INTERFACE_NB', number)
