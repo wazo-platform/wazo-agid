@@ -41,6 +41,7 @@ class UserFeatures(Handler):
         self._caller = None
         self._lines = None
         self._master_line = None
+        self._called_line = None
         self._user = None
 
     def execute(self):
@@ -70,6 +71,8 @@ class UserFeatures(Handler):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
         self._lineid = self._agi.get_variable(dialplan_variables.LINE_ID)
+        if self._lineid:
+            self._lineid = int(self._lineid)
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
@@ -97,6 +100,14 @@ class UserFeatures(Handler):
             else:
                 self._master_line = self._lines.lines[0]
                 self._agi.set_variable('XIVO_DST_USERNUM', self._master_line['number'])
+                self._set_called_line()
+
+    def _set_called_line(self):
+        if self._lineid:
+            for line in self._lines.lines:
+                if line['id'] == self._lineid:
+                    self._called_line = line
+                    break
 
     def _set_user(self):
         if self._dstid:
@@ -108,13 +119,12 @@ class UserFeatures(Handler):
             self._set_xivo_redirecting_info()
 
     def _is_main_line(self):
-        return self._lineid and str(self._master_line['id']) == self._lineid
+        return self._lineid and self._master_line['id'] == self._lineid
 
     def _ring_main_line_only(self):
         try:
-            curline = [line for line in self._lines.lines if str(line['id']) == self._lineid][0]
             self._set_xivo_iface_nb(1)
-            interface = self._build_interface_from_line(curline)
+            interface = self._build_interface_from_line(self._called_line)
             self._agi.set_variable('XIVO_INTERFACE_0', interface)
         except Exception:
             pass
@@ -169,7 +179,12 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_DST_REDIRECTING_NAME', callerid_name)
 
         if not callerid_num:
-            callerid_num = self._dstnum
+            if self._called_line:
+                callerid_num = self._called_line['number']
+            elif self._master_line:
+                callerid_num = self._master_line['number']
+            else:
+                callerid_num = self._dstnum
         self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
 
     def _set_xivo_iface_nb(self, number):

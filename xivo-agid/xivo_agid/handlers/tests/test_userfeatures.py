@@ -30,9 +30,9 @@ class NotEmptyStringMatcher(object):
 class TestUserFeatures(unittest.TestCase):
 
     def setUp(self):
-        self._variables = {'XIVO_USERID': 42,
-                           'XIVO_DSTID': 33,
-                           'XIVO_LINEID': 5,
+        self._variables = {'XIVO_USERID': '42',
+                           'XIVO_DSTID': '33',
+                           'XIVO_LINEID': '5',
                            'XIVO_CALLORIGIN': 'my_origin',
                            'XIVO_SRCNUM': '1000',
                            'XIVO_DSTNUM': '1003', }
@@ -66,7 +66,7 @@ class TestUserFeatures(unittest.TestCase):
 
         self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
         self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
-        self.assertEqual(userfeatures._lineid, self._variables['XIVO_LINEID'])
+        self.assertEqual(userfeatures._lineid, int(self._variables['XIVO_LINEID']))
         self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
         self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
         self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
@@ -101,7 +101,7 @@ class TestUserFeatures(unittest.TestCase):
 
             userfeatures._set_caller()
 
-            user_init.assert_called_with(self._agi, self._cursor, self._variables['XIVO_USERID'])
+            user_init.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_USERID']))
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
 
@@ -135,6 +135,25 @@ class TestUserFeatures(unittest.TestCase):
             lines_cls.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_DSTID']))
         self.assertEqual(mocked_line, userfeatures._lines)
         self.assertEqual(mocked_line.lines[0], userfeatures._master_line)
+
+    def test_set_called_line_no_lineid(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._set_called_line()
+
+        self.assertTrue(userfeatures._called_line is None)
+
+    def test_set_called_line_with_matching_line(self):
+        line_id = 32
+        line = {'id': line_id}
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        userfeatures._lineid = line_id
+        userfeatures._lines = Mock()
+        userfeatures._lines.lines = [{'id': line_id + 1}, line]
+
+        userfeatures._set_called_line()
+
+        self.assertEqual(userfeatures._called_line, line)
 
     def test_set_user(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -227,29 +246,10 @@ class TestUserFeatures(unittest.TestCase):
 
         self.assertEqual(self._agi.set_variable.call_count, 2)
 
-    def test_set_xivo_redirecting_info(self):
-        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-
-        userfeatures._user = Mock()
-        userfeatures._user.firstname = 'First'
-        userfeatures._user.lastname = 'Last'
-        userfeatures._user.callerid = '"Foobar"'
-        userfeatures._dstnum = '42'
-
-        userfeatures._set_xivo_redirecting_info()
-
-        expected_calls = [
-            call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-            call('XIVO_DST_REDIRECTING_NUM', '42'),
-        ]
-        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
-
     def test_set_xivo_redirecting_info_full_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
         userfeatures._user = Mock()
-        userfeatures._user.firstname = 'First'
-        userfeatures._user.lastname = 'Last'
         userfeatures._user.callerid = '"Foobar" <123>'
         userfeatures._dstnum = '42'
 
@@ -275,5 +275,38 @@ class TestUserFeatures(unittest.TestCase):
         expected_calls = [
             call('XIVO_DST_REDIRECTING_NAME', 'First Last'),
             call('XIVO_DST_REDIRECTING_NUM', '42'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+
+    def test_set_xivo_redirecting_info_called_line(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.callerid = '"Foobar"'
+        userfeatures._called_line = {'number': '64'}
+        userfeatures._master_line = {'number': '32'}
+        userfeatures._dstnum = '42'
+
+        userfeatures._set_xivo_redirecting_info()
+
+        expected_calls = [
+            call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+            call('XIVO_DST_REDIRECTING_NUM', '64'),
+        ]
+        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+
+    def test_set_xivo_redirecting_info_master_line(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.callerid = '"Foobar"'
+        userfeatures._master_line = {'number': '32'}
+        userfeatures._dstnum = '42'
+
+        userfeatures._set_xivo_redirecting_info()
+
+        expected_calls = [
+            call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+            call('XIVO_DST_REDIRECTING_NUM', '32'),
         ]
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
