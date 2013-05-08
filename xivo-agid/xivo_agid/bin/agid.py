@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-
-import sys
+import argparse
 import logging
 from logging.handlers import SysLogHandler
 
@@ -29,23 +28,35 @@ SYSLOG_NAME = 'xivo-agid'
 
 
 def main():
+    parsed_args = _parse_args()
+
     logging.basicConfig(level=logging.DEBUG)
     sysloghandler = SysLogHandler("/dev/log", SysLogHandler.LOG_DAEMON)
     sysloghandler.setFormatter(logging.Formatter("%s[%%(process)d]: %%(message)s" % SYSLOG_NAME))
     logging.getLogger('').addHandler(sysloghandler)
 
-    if '-f' not in sys.argv:
+    if not parsed_args.foreground:
         daemonize.daemonize()
 
     daemonize.lock_pidfile_or_die(PIDFILE)
     try:
-        if '-d' not in sys.argv:
+        if not parsed_args.debug:
             logging.getLogger('').setLevel(logging.INFO)
 
         agid.init()
         agid.run()
     finally:
         daemonize.unlock_pidfile(PIDFILE)
+
+
+def _parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', action='store_true', dest='foreground',
+                        help='run in foreground')
+    parser.add_argument('-d', action='store_true', dest='debug',
+                        help='increase verbosity')
+
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
