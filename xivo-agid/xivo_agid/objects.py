@@ -864,14 +864,12 @@ class Agent:
 
         if xid:
             cursor.query("SELECT ${columns} FROM agentfeatures "
-                         "WHERE id = %s "
-                         "AND commented = 0",
+                         "WHERE id = %s ",
                          columns,
                          (xid,))
         elif number:
             cursor.query("SELECT ${columns} FROM agentfeatures "
-                         "WHERE number = %s "
-                         "AND commented = 0",
+                         "WHERE number = %s ",
                          columns,
                          (number,))
         else:

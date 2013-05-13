@@ -41,21 +41,10 @@ def phone_progfunckey_devstate(agi, cursor, args):
                         'UNKNOWN'):
         agi.dp_break("Invalid device state: %r" % devstate)
 
-    if xlen > 3 and args[3] != '':
-        try:
-            if xlen == 4:
-                context = objects.MasterLineUser(agi, cursor, xid=int(userid)).line['context']
-            else:
-                context = args[4]
-
-            user = objects.User(agi, cursor, exten=args[3], context=context)
-        except (ValueError, LookupError), e:
-            agi.dp_break(str(e))
-    else:
-        try:
-            user = objects.User(agi, cursor, int(userid))
-        except (ValueError, LookupError), e:
-            agi.dp_break(str(e))
+    try:
+        user = objects.User(agi, cursor, int(userid))
+    except (ValueError, LookupError) as e:
+        agi.dp_break(str(e))
 
     feature = args[0]
 
