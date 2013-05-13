@@ -17,7 +17,6 @@
 
 import json
 import logging
-import re
 import socket
 import time
 import threading
@@ -26,11 +25,10 @@ from xivo.moresynchro import RWLock
 from xivo_agid import agid
 from xivo_agid.directory import directory
 from xivo.caller_id import build_caller_id
-from xivo_dao import cti_displays_dao, cti_context_dao
+from xivo_dao import cti_displays_dao, cti_context_dao, cti_directories_dao
 
 logger = logging.getLogger(__name__)
 
-CTI_CONFIG_URL = 'http://localhost/cti/json.php/private/configuration'
 PHONEBOOK_URL = 'http://localhost/service/ipbx/json.php/private/pbx_services/phonebook'
 UPDATE_ADDRESS = 'localhost'
 UPDATE_PORT = 5042
@@ -168,13 +166,13 @@ def _update_thread_loop(update_socket):
 
 
 def _update_cti_config():
-    cti_config = _fetch_from_ws(CTI_CONFIG_URL)
     if _rw_lock.acquire_write():
         try:
             displays = cti_displays_dao.get_config()
             contexts = cti_context_dao.get_config()
+            directories = cti_directories_dao.get_config()
             _displays_mgr.update(displays)
-            _directories_mgr.update(cti_config['directories'])
+            _directories_mgr.update(directories)
             _contexts_mgr.update(_displays_mgr.displays,
                                  _directories_mgr.directories,
                                  contexts)
