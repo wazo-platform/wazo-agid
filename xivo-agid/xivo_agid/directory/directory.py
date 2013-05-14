@@ -20,11 +20,11 @@ import re
 from itertools import chain, imap
 from operator import itemgetter
 
-from data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
-from data_sources.http import HTTPDirectoryDataSource
-from data_sources.internal import InternalDirectoryDataSource
-from data_sources.ldap import LDAPDirectoryDataSource
-from data_sources.phonebook import PhonebookDirectoryDataSource
+from xivo_agid.directory.data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
+from xivo_agid.directory.data_sources.http import HTTPDirectoryDataSource
+from xivo_agid.directory.data_sources.internal import InternalDirectoryDataSource
+from xivo_agid.directory.data_sources.ldap import LDAPDirectoryDataSource
+from xivo_agid.directory.data_sources.phonebook import PhonebookDirectoryDataSource
 
 logger = logging.getLogger('directories')
 

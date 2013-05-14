@@ -1317,6 +1317,10 @@ class CallerID:
 
 
 class CTIPresence:
+
+    def __init__(self):
+        pass
+
     @staticmethod
     def status(agi, cursor, status_ids=None):
         """
@@ -1334,6 +1338,10 @@ class CTIPresence:
 
 
 class ChanSIP:
+
+    def __init__(self):
+        pass
+
     @staticmethod
     def get_intf_and_suffix(cursor, category, xid):
 
@@ -1352,6 +1360,10 @@ class ChanSIP:
 
 
 class ChanIAX2:
+
+    def __init__(self):
+        pass
+
     @staticmethod
     def get_intf_and_suffix(cursor, category, xid):
 
@@ -1370,6 +1382,10 @@ class ChanIAX2:
 
 
 class ChanSCCP:
+
+    def __init__(self):
+        pass
+
     @staticmethod
     def get_intf_and_suffix(cursor, category, xid):
         """NOTE: category is ignored as for now, sccp channel can only be a user
@@ -1389,6 +1405,10 @@ class ChanSCCP:
 
 
 class ChanCustom:
+
+    def __init__(self):
+        pass
+
     @staticmethod
     def get_intf_and_suffix(cursor, category, xid):
 

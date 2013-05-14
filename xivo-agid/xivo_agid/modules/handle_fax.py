@@ -32,8 +32,8 @@ LP_PATH = "/usr/bin/lp"
 DESTINATIONS = {}
 
 
-def _pdffile_from_file(file):
-    return file.rsplit(".", 1)[0] + ".pdf"
+def _pdffile_from_file(fileobj):
+    return fileobj.rsplit(".", 1)[0] + ".pdf"
 
 
 def _convert_tiff_to_pdf(tifffile, pdffile=None):
@@ -147,12 +147,12 @@ def _new_ftp_backend(host, username, password, directory=None):
     return aux
 
 
-def _new_log_backend(file, msg):
+def _new_log_backend(fileobj, msg):
     # Return a backend taking no argument, which logs a message in a
     # file when called.
     # This is not efficient, and I've wrote it for testing purpose only.
     def aux(faxfile, dstnum, args):
-        fobj = open(file, "a")
+        fobj = open(fileobj, "a")
         try:
             print >> fobj, time.strftime("%Y-%m-%d %H:%M:%S"), msg % {"dstnum": dstnum}
         finally:

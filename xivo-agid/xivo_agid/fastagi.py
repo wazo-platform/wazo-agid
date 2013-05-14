@@ -382,7 +382,7 @@ class FastAGI:
         Stream the given file and receive dialed digits
         """
         result = self.execute('GET DATA', filename, timeout, max_digits)
-        res, value = result['result']
+        res, _ = result['result']
         return res
 
     def get_option(self, filename, escape_digits='', timeout=0):
@@ -520,7 +520,7 @@ class FastAGI:
         except FastAGIResultHangup:
             result = {'result': ('1', 'hangup')}
 
-        res, value = result['result']
+        _, value = result['result']
         return value
 
     def get_full_variable(self, name, channel=None):
@@ -538,7 +538,7 @@ class FastAGI:
         except FastAGIResultHangup:
             result = {'result': ('1', 'hangup')}
 
-        res, value = result['result']
+        _, value = result['result']
         return value
 
     def verbose(self, message, level=1):
@@ -580,7 +580,7 @@ class FastAGI:
         given family and key.
         """
         result = self.execute('DATABASE DEL', self._quote(family), self._quote(key))
-        res, value = result['result']
+        res, _ = result['result']
         if res == '0':
             raise FastAGIDBError('Unable to delete from database: family=%s, key=%s' % (family, key))
 
@@ -590,7 +590,7 @@ class FastAGI:
         in the Asterisk database.
         """
         result = self.execute('DATABASE DELTREE', self._quote(family), self._quote(key))
-        res, value = result['result']
+        res, _ = result['result']
         if res == '0':
             raise FastAGIDBError('Unable to delete tree from database: family=%s, key=%s' % (family, key))
 

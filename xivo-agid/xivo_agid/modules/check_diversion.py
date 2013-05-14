@@ -20,42 +20,42 @@ from xivo_agid import objects
 
 
 def check_diversion(agi, cursor, args):
-        queueid = agi.get_variable('XIVO_DSTID')
-        try:
-            queue = objects.Queue(agi, cursor, xid=int(queueid))
-        except (ValueError, LookupError), e:
-            agi.dp_break(str(e))
+    queueid = agi.get_variable('XIVO_DSTID')
+    try:
+        queue = objects.Queue(agi, cursor, xid=int(queueid))
+    except (ValueError, LookupError), e:
+        agi.dp_break(str(e))
 
-        event = 'none'
-        dialaction = ''
+    event = 'none'
+    dialaction = ''
 
-        # . holdtime
-        # set by QUEUE_VARIABLES(${XIVO_QUEUENAME})
-        # NOTE: why testing waitingcalls ?
-        #       once there are no more calls in queue, QUEUEHOLDTIME will NEVER be
-        #       updated.
-        #       Thus if we are over threshold, we can never go over.
-        #       So, once queue is empty, we accept new incoming call event if holdtime
-        #       is over threshold
-        waitingcalls = agi.get_variable('XIVO_QUEUE_CALLS_COUNT')
-        if waitingcalls == '':
-            waitingcalls = 0
-        if event == 'none' and int(waitingcalls) > 0 and queue.waittime is not None:
-            holdtime = agi.get_variable('QUEUEHOLDTIME')
-            if int(holdtime) > queue.waittime:
-                event = 'DIVERT_HOLDTIME'
-                dialaction = 'qwaittime'
+    # . holdtime
+    # set by QUEUE_VARIABLES(${XIVO_QUEUENAME})
+    # NOTE: why testing waitingcalls ?
+    #       once there are no more calls in queue, QUEUEHOLDTIME will NEVER be
+    #       updated.
+    #       Thus if we are over threshold, we can never go over.
+    #       So, once queue is empty, we accept new incoming call event if holdtime
+    #       is over threshold
+    waitingcalls = agi.get_variable('XIVO_QUEUE_CALLS_COUNT')
+    if waitingcalls == '':
+        waitingcalls = 0
+    if event == 'none' and int(waitingcalls) > 0 and queue.waittime is not None:
+        holdtime = agi.get_variable('QUEUEHOLDTIME')
+        if int(holdtime) > queue.waittime:
+            event = 'DIVERT_HOLDTIME'
+            dialaction = 'qwaittime'
 
-        # . calls/agents ratio
-        if event == 'none' and queue.waitratio is not None:
-            agents = agi.get_variable('XIVO_QUEUE_MEMBERS_COUNT')
+    # . calls/agents ratio
+    if event == 'none' and queue.waitratio is not None:
+        agents = agi.get_variable('XIVO_QUEUE_MEMBERS_COUNT')
 
-            if int(agents) == 0 or \
-                    int(waitingcalls) + 1 / int(agents) > (queue.waitratio / 100):
-                event = 'DIVERT_CA_RATIO'
-                dialaction = 'qwaitratio'
+        if int(agents) == 0 or \
+                int(waitingcalls) + 1 / int(agents) > (queue.waitratio / 100):
+            event = 'DIVERT_CA_RATIO'
+            dialaction = 'qwaitratio'
 
-        agi.set_variable('XIVO_DIVERT_EVENT', event)
-        agi.set_variable('XIVO_FWD_TYPE', 'queue_' + dialaction)
+    agi.set_variable('XIVO_DIVERT_EVENT', event)
+    agi.set_variable('XIVO_FWD_TYPE', 'queue_' + dialaction)
 
 agid.register(check_diversion)
