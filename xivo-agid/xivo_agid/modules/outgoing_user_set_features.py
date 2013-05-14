@@ -16,9 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from xivo_agid.handlers.outgoingfeatures import OutgoingFeatures
-
-
-
 from xivo_agid import agid
 
 

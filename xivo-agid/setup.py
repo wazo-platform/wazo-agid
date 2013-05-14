@@ -15,6 +15,6 @@ setup(name='xivo_agid',
                 'xivo_agid.directory.data_sources',
                 'xivo_agid.handlers'],
       data_files=[
-                  ('/usr/sbin', ['sbin/xivo-agid']),
-                 ],
-     )
+          ('/usr/sbin', ['sbin/xivo-agid'])
+      ]
+      )

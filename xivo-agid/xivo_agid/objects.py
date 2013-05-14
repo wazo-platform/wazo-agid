@@ -506,9 +506,9 @@ class MeetMe:
     FLAG_ADMIN = (1 << 0)
     FLAG_USER = (1 << 1)
 
-    OPTIONS_GLOBAL = {'talkeroptimization': '', # Disabled
+    OPTIONS_GLOBAL = {'talkeroptimization': '',  # Disabled
                       'record': 'r',
-                      'talkerdetection': '', # Disabled
+                      'talkerdetection': '',  # Disabled
                       'noplaymsgfirstenter': '1',
                       'closeconfdurationexceeded': 'L'}
 

@@ -213,7 +213,7 @@ class UserFeatures(Handler):
             return False
 
         in_zone = self._callfilter_check_in_zone(callfilter.callfrom)
-        if not in_zone == True:
+        if not in_zone is True:
             return False
 
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
