@@ -247,14 +247,14 @@ class Lines:
 
         columns = ('id', 'number', 'context', 'protocol', 'protocolid',
                    'iduserfeatures', 'name', 'line_num',
-                   'rules_order', 'rules_group')
+                   'rules_group')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
                          "WHERE iduserfeatures = %s "
                          "AND internal = 0 "
                          "AND commented = 0 "
-                         "ORDER BY line_num ASC, rules_order ASC",
+                         "ORDER BY line_num ASC",
                          columns,
                          (xid,))
         elif exten and context:
@@ -297,7 +297,6 @@ class Lines:
                 'iduserfeatures': l['iduserfeatures'],
                 'name': l['name'],
                 'num': l['line_num'],
-                'rules_order': l['rules_order'],
                 'rules_group': l['rules_group']
             }
 
@@ -311,15 +310,14 @@ class MasterLineUser:
         self.line = {}
 
         columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num',
-                   'rules_order', 'rules_group')
+                   'rules_group')
 
         cursor.query("SELECT ${columns} FROM linefeatures "
                      "WHERE iduserfeatures = %s "
                      "AND internal = 0 "
                      "AND commented = 0 "
                      "AND line_num = 0 "
-                     "AND rules_order = 1 "
-                     "ORDER BY line_num ASC, rules_order ASC",
+                     "ORDER BY line_num ASC",
                      columns,
                      (xid,))
 
@@ -336,7 +334,6 @@ class MasterLineUser:
             'protocolid': res['protocolid'],
             'name': res['name'],
             'num': res['line_num'],
-            'rules_order': res['rules_order'],
             'rules_group': res['rules_group']
         }
 
