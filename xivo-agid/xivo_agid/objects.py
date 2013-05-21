@@ -247,7 +247,7 @@ class Lines:
 
         columns = ('id', 'number', 'context', 'protocol', 'protocolid',
                    'iduserfeatures', 'name', 'line_num',
-                   'rules_time', 'rules_order', 'rules_group')
+                   'rules_order', 'rules_group')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
@@ -297,7 +297,6 @@ class Lines:
                 'iduserfeatures': l['iduserfeatures'],
                 'name': l['name'],
                 'num': l['line_num'],
-                'rules_time': l['rules_time'],
                 'rules_order': l['rules_order'],
                 'rules_group': l['rules_group']
             }
@@ -312,7 +311,7 @@ class MasterLineUser:
         self.line = {}
 
         columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num',
-                   'rules_time', 'rules_order', 'rules_group')
+                   'rules_order', 'rules_group')
 
         cursor.query("SELECT ${columns} FROM linefeatures "
                      "WHERE iduserfeatures = %s "
@@ -337,7 +336,6 @@ class MasterLineUser:
             'protocolid': res['protocolid'],
             'name': res['name'],
             'num': res['line_num'],
-            'rules_time': res['rules_time'],
             'rules_order': res['rules_order'],
             'rules_group': res['rules_group']
         }
