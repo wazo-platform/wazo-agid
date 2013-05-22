@@ -246,15 +246,13 @@ class Lines:
         self.lines = []
 
         columns = ('id', 'number', 'context', 'protocol', 'protocolid',
-                   'iduserfeatures', 'name', 'line_num', 'rules_type',
-                   'rules_time', 'rules_order', 'rules_group')
+                   'iduserfeatures', 'name')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
                          "WHERE iduserfeatures = %s "
                          "AND internal = 0 "
-                         "AND commented = 0 "
-                         "ORDER BY line_num ASC, rules_order ASC",
+                         "AND commented = 0",
                          columns,
                          (xid,))
         elif exten and context:
@@ -296,11 +294,6 @@ class Lines:
                 'protocolid': l['protocolid'],
                 'iduserfeatures': l['iduserfeatures'],
                 'name': l['name'],
-                'num': l['line_num'],
-                'rules_type': l['rules_type'],
-                'rules_time': l['rules_time'],
-                'rules_order': l['rules_order'],
-                'rules_group': l['rules_group']
             }
 
             self.lines.append(line)
@@ -312,16 +305,12 @@ class MasterLineUser:
         self.cursor = cursor
         self.line = {}
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num',
-                   'rules_type', 'rules_time', 'rules_order', 'rules_group')
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name')
 
         cursor.query("SELECT ${columns} FROM linefeatures "
                      "WHERE iduserfeatures = %s "
                      "AND internal = 0 "
-                     "AND commented = 0 "
-                     "AND line_num = 0 "
-                     "AND rules_order = 1 "
-                     "ORDER BY line_num ASC, rules_order ASC",
+                     "AND commented = 0",
                      columns,
                      (xid,))
 
@@ -337,11 +326,6 @@ class MasterLineUser:
             'protocol': res['protocol'].upper(),
             'protocolid': res['protocolid'],
             'name': res['name'],
-            'num': res['line_num'],
-            'rules_type': res['rules_type'],
-            'rules_time': res['rules_time'],
-            'rules_order': res['rules_order'],
-            'rules_group': res['rules_group']
         }
 
 
