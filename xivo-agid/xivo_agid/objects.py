@@ -246,13 +246,14 @@ class Lines:
         self.lines = []
 
         columns = ('id', 'number', 'context', 'protocol', 'protocolid',
-                   'iduserfeatures', 'name')
+                   'iduserfeatures', 'name', 'line_num')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
                          "WHERE iduserfeatures = %s "
                          "AND internal = 0 "
-                         "AND commented = 0",
+                         "AND commented = 0 "
+                         "ORDER BY line_num ASC",
                          columns,
                          (xid,))
         elif exten and context:
@@ -294,6 +295,7 @@ class Lines:
                 'protocolid': l['protocolid'],
                 'iduserfeatures': l['iduserfeatures'],
                 'name': l['name'],
+                'num': l['line_num'],
             }
 
             self.lines.append(line)
@@ -305,12 +307,14 @@ class MasterLineUser:
         self.cursor = cursor
         self.line = {}
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name')
+        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num')
 
         cursor.query("SELECT ${columns} FROM linefeatures "
                      "WHERE iduserfeatures = %s "
                      "AND internal = 0 "
-                     "AND commented = 0",
+                     "AND commented = 0 "
+                     "AND line_num = 0 "
+                     "ORDER BY line_num ASC",
                      columns,
                      (xid,))
 
@@ -326,6 +330,7 @@ class MasterLineUser:
             'protocol': res['protocol'].upper(),
             'protocolid': res['protocolid'],
             'name': res['name'],
+            'num': res['line_num'],
         }
 
 
