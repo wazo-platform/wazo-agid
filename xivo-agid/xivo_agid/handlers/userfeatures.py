@@ -33,20 +33,18 @@ class UserFeatures(Handler):
         Handler.__init__(self, agi, cursor, args)
         self._userid = None
         self._dstid = None
-        self._lineid = None
         self._zone = None
         self._srcnum = None
         self._dstnum = None
         self._feature_list = None
         self._caller = None
+        self._line = None
         self._lines = None
-        self._master_line = None
-        self._called_line = None
         self._user = None
 
     def execute(self):
         self._set_members()
-        self._set_xivo_ifaces()
+        self._set_xivo_iface()
 
         filtered = self._call_filtering()
         if filtered:
@@ -70,9 +68,6 @@ class UserFeatures(Handler):
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
-        self._lineid = self._agi.get_variable(dialplan_variables.LINE_ID)
-        if self._lineid:
-            self._lineid = int(self._lineid)
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
@@ -98,16 +93,8 @@ class UserFeatures(Handler):
             except (ValueError, LookupError), e:
                 self._agi.dp_break(str(e))
             else:
-                self._master_line = self._lines.lines[0]
-                self._agi.set_variable('XIVO_DST_USERNUM', self._master_line['number'])
-                self._set_called_line()
-
-    def _set_called_line(self):
-        if self._lineid:
-            for line in self._lines.lines:
-                if line['id'] == self._lineid:
-                    self._called_line = line
-                    break
+                self._line = self._lines.lines[0]
+                self._agi.set_variable('XIVO_DST_USERNUM', self._line['number'])
 
     def _set_user(self):
         if self._dstid:
@@ -118,31 +105,9 @@ class UserFeatures(Handler):
             self._set_xivo_user_name()
             self._set_xivo_redirecting_info()
 
-    def _is_main_line(self):
-        return self._lineid and self._master_line['id'] == self._lineid
-
-    def _ring_main_line_only(self):
-        try:
-            self._set_xivo_iface_nb(1)
-            interface = self._build_interface_from_line(self._called_line)
-            self._agi.set_variable('XIVO_INTERFACE_0', interface)
-        except Exception:
-            pass
-
-    def _ring_line_sequence(self):
-        num = 0
-        curlines = []
-        for line in self._lines.lines:
-            if num < line['num']:
-                self._agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
-                num += 1
-                del curlines[:]
-            interface = self._build_interface_from_line(line)
-            curlines.append(interface)
-        if len(curlines) > 0:
-            self._agi.set_variable('XIVO_INTERFACE_%d' % num, '&'.join(curlines))
-            num += 1
-        self._set_xivo_iface_nb(num)
+    def _set_xivo_iface(self):
+        interface = self._build_interface_from_line(self._line)
+        self._agi.set_variable('XIVO_INTERFACE', interface)
 
     def _build_interface_from_line(self, line):
         protocol = line['protocol']
@@ -151,13 +116,6 @@ class UserFeatures(Handler):
         else:
             interface = '%s/%s' % (protocol, line['name'])
         return interface
-
-    def _set_xivo_ifaces(self):
-        self._set_xivo_iface_nb(0)
-        if self._is_main_line():
-            self._ring_main_line_only()
-        else:
-            self._ring_line_sequence()
 
     def _set_xivo_user_name(self):
         if self._user:
@@ -179,16 +137,11 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_DST_REDIRECTING_NAME', callerid_name)
 
         if not callerid_num:
-            if self._called_line:
-                callerid_num = self._called_line['number']
-            elif self._master_line:
-                callerid_num = self._master_line['number']
+            if self._line:
+                callerid_num = self._line['number']
             else:
                 callerid_num = self._dstnum
         self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
-
-    def _set_xivo_iface_nb(self, number):
-        self._agi.set_variable('XIVO_INTERFACE_NB', number)
 
     def _call_filtering(self):
         caller = self._caller
@@ -402,7 +355,7 @@ class UserFeatures(Handler):
         objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
 
     def _set_call_forwards(self):
-        called_line = self._master_line
+        called_line = self._line
         self._set_enableunc(called_line)
         self._setbusy(called_line)
         self._setrna(called_line)
