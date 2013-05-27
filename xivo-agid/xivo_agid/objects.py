@@ -1431,15 +1431,3 @@ def protocol_intf_and_suffix(cursor, protocol, category, xid):
         return CHAN_PROTOCOL[protocol].get_intf_and_suffix(cursor, category, xid)
     else:
         raise ValueError("Unknown protocol %r" % protocol)
-
-
-class Static:
-    def __init__(self, cursor, protocol):
-        if protocol not in ('sip', 'iax', 'sccp'):
-            raise ValueError("invalid type")
-
-        cursor.query("SELECT ${columns} FROM static" + protocol + " WHERE commented = 0",
-                     ('var_name', 'var_val'))
-
-        for r in cursor.fetchall():
-            setattr(self, r['var_name'], r['var_val'])

@@ -41,29 +41,8 @@ def agent_get_options(agi, cursor, args):
     agi.set_variable('XIVO_AGENTID', agent.id)
     agi.set_variable('XIVO_AGENTNUM', agent.number)
 
-    # get agent lang
-    lang = agent.language
-    if not lang:
-        userid = agi.get_variable('XIVO_USERID')
-        if userid:
-            try:
-                caller = objects.User(agi, cursor, int(userid))
-                masterline = objects.MasterLineUser(agi, cursor, int(userid))
-                lang = caller.language
-
-                # get channel default lang
-                if not lang:
-                    static = objects.Static(cursor, masterline.line['protocol'])
-                    lang = static.language
-
-            except (ValueError, LookupError) as e:
-                pass
-
-    if not lang:
-        # setting default value
-        lang = 'fr_FR'
-
-    agi.set_variable('XIVO_AGENTLANGUAGE', lang)
+    if agent.language:
+        agi.set_variable('CHANNEL(language)', agent.language)
 
 
 agid.register(agent_get_options)
