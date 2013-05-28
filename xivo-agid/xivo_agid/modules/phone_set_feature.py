@@ -87,14 +87,16 @@ def _phone_set_vm(agi, cursor, args):
 
 
 def _get_user_from_exten(agi, cursor, exten):
-    context = _get_context_of_calling_user(agi, cursor)
+    context = _get_context_of_calling_user(agi)
 
     return objects.User(agi, cursor, exten=exten, context=context)
 
 
-def _get_context_of_calling_user(agi, cursor):
-    master_line = objects.MasterLineUser(agi, cursor, _get_id_of_calling_user(agi))
-    return master_line.line['context']
+def _get_context_of_calling_user(agi):
+    context = agi.get_variable('XIVO_BASE_CONTEXT')
+    if not context:
+        agi.dp_break('Could not get the context of the caller')
+    return context
 
 
 def _phone_set_unc(agi, cursor, args):
