@@ -55,7 +55,7 @@ class TestUserFeatures(unittest.TestCase):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._set_feature_list = Mock()
         userfeatures._set_caller = Mock()
-        userfeatures._set_lines = Mock()
+        userfeatures._set_line = Mock()
         userfeatures._set_user = Mock()
 
         userfeatures._set_members()
@@ -70,7 +70,7 @@ class TestUserFeatures(unittest.TestCase):
         self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
         self.assertTrue(userfeatures._set_feature_list.called)
         self.assertTrue(userfeatures._set_caller.called)
-        self.assertTrue(userfeatures._set_lines.called)
+        self.assertTrue(userfeatures._set_line.called)
         self.assertTrue(userfeatures._set_user.called)
 
         objects.User, old_user = old_user, None
@@ -115,24 +115,23 @@ class TestUserFeatures(unittest.TestCase):
         self._agi.set_variable.assert_called_once_with('XIVO_CALLRECORDFILE',
                                                        NotEmptyStringMatcher())
 
-    def test_set_lines(self):
+    def test_set_line(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         mocked_line = Mock()
-        mocked_line.lines = [{'number': '1001'}]
+        mocked_line.number = '1001'
 
-        userfeatures._set_lines()
+        userfeatures._set_line()
 
-        self.assertEqual(userfeatures._lines, None)
+        self.assertEqual(userfeatures._line, None)
 
         userfeatures._dstid = self._variables['XIVO_DSTID']
-        with patch('xivo_agid.objects.Lines') as lines_cls:
+        with patch('xivo_agid.objects.Line') as lines_cls:
             lines_cls.return_value = mocked_line
 
-            userfeatures._set_lines()
+            userfeatures._set_line()
 
             lines_cls.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_DSTID']))
-        self.assertEqual(mocked_line, userfeatures._lines)
-        self.assertEqual(mocked_line.lines[0], userfeatures._line)
+        self.assertEqual(mocked_line, userfeatures._line)
 
     def test_set_user(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -170,10 +169,9 @@ class TestUserFeatures(unittest.TestCase):
 
     def test_build_interface_from_custom_line(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        line = {
-            'protocol': 'CUSTOM',
-            'name': 'sip/abcd'
-        }
+        line = Mock()
+        line.protocol = 'CUSTOM'
+        line.name = 'sip/abcd'
 
         interface = userfeatures._build_interface_from_line(line)
 
@@ -181,10 +179,9 @@ class TestUserFeatures(unittest.TestCase):
 
     def test_build_interface_from_sip_line(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        line = {
-            'protocol': 'SIP',
-            'name': 'abcd'
-        }
+        line = Mock()
+        line.protocol = 'SIP'
+        line.name = 'abcd'
 
         interface = userfeatures._build_interface_from_line(line)
 
@@ -244,7 +241,8 @@ class TestUserFeatures(unittest.TestCase):
 
         userfeatures._user = Mock()
         userfeatures._user.callerid = '"Foobar"'
-        userfeatures._line = {'number': '32'}
+        userfeatures._line = Mock()
+        userfeatures._line.number = '32'
         userfeatures._dstnum = '42'
 
         userfeatures._set_xivo_redirecting_info()

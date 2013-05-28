@@ -39,7 +39,6 @@ class UserFeatures(Handler):
         self._feature_list = None
         self._caller = None
         self._line = None
-        self._lines = None
         self._user = None
 
     def execute(self):
@@ -73,7 +72,7 @@ class UserFeatures(Handler):
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
         self._set_feature_list()
         self._set_caller()
-        self._set_lines()
+        self._set_line()
         self._set_user()
 
     def _set_feature_list(self):
@@ -86,15 +85,14 @@ class UserFeatures(Handler):
             except (ValueError, LookupError):
                 self._caller = None
 
-    def _set_lines(self):
+    def _set_line(self):
         if self._dstid:
             try:
-                self._lines = objects.Lines(self._agi, self._cursor, int(self._dstid))
+                self._line = objects.Line(self._agi, self._cursor, int(self._dstid))
             except (ValueError, LookupError), e:
                 self._agi.dp_break(str(e))
             else:
-                self._line = self._lines.lines[0]
-                self._agi.set_variable('XIVO_DST_USERNUM', self._line['number'])
+                self._agi.set_variable('XIVO_DST_USERNUM', self._line.number)
 
     def _set_user(self):
         if self._dstid:
@@ -110,11 +108,11 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_INTERFACE', interface)
 
     def _build_interface_from_line(self, line):
-        protocol = line['protocol']
+        protocol = line.protocol
         if protocol.lower() == 'custom':
-            interface = line['name']
+            interface = line.name
         else:
-            interface = '%s/%s' % (protocol, line['name'])
+            interface = '%s/%s' % (protocol, line.name)
         return interface
 
     def _set_xivo_user_name(self):
@@ -138,7 +136,7 @@ class UserFeatures(Handler):
 
         if not callerid_num:
             if self._line:
-                callerid_num = self._line['number']
+                callerid_num = self._line.number
             else:
                 callerid_num = self._dstnum
         self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
@@ -171,8 +169,8 @@ class UserFeatures(Handler):
 
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
 
-        boss_line = self._lines.lines[0]
-        boss_interface = '%s/%s' % (boss_line['protocol'].upper(), boss_line['name'])
+        boss_line = self._line
+        boss_interface = '%s/%s' % (boss_line.protocol.upper(), boss_line.name)
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
@@ -310,10 +308,10 @@ class UserFeatures(Handler):
         rna_actionarg2 = ""
         if self._feature_list.fwdrna:
             enablerna = self._user.enablerna
-            if enablerna and 'context' in called_line:
+            if enablerna:
                 rna_action = 'extension'
                 rna_actionarg1 = self._user.destrna
-                rna_actionarg2 = called_line['context']
+                rna_actionarg2 = called_line.context
             else:
                 setrna = True
                 objects.DialAction(self._agi, self._cursor, 'noanswer', 'user', self._user.id).set_variables()
@@ -329,10 +327,10 @@ class UserFeatures(Handler):
         busy_actionarg2 = ""
         if self._feature_list.fwdbusy:
             enablebusy = self._user.enablebusy
-            if enablebusy and 'context' in called_line:
+            if enablebusy:
                 busy_action = 'extension'
                 busy_actionarg1 = self._user.destbusy
-                busy_actionarg2 = called_line['context']
+                busy_actionarg2 = called_line.context
             else:
                 setbusy = True
                 objects.DialAction(self._agi, self._cursor, 'busy', 'user', self._user.id).set_variables()
@@ -347,10 +345,10 @@ class UserFeatures(Handler):
         unc_actionarg2 = ""
         if self._feature_list.fwdunc:
             enableunc = self._user.enableunc
-            if enableunc and 'context' in called_line:
+            if enableunc:
                 unc_action = 'extension'
                 unc_actionarg1 = self._user.destunc
-                unc_actionarg2 = called_line['context']
+                unc_actionarg2 = called_line.context
         self._agi.set_variable('XIVO_ENABLEUNC', enableunc)
         objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
 
