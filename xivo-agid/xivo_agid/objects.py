@@ -1250,27 +1250,6 @@ class CallerID:
                 self.agi.set_variable('XIVO_CID_REWRITTEN', 1)
 
 
-class CTIPresence:
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def status(agi, cursor, status_ids=None):
-        """
-                    we get a list of status ids, and want in return the presence+status names
-                    in the form:
-                        "pname:sname"
-        """
-        columns = ('s.id', 's.name', 'p.name')
-        cursor.query("SELECT ${columns} FROM ctistatus s"
-                     "WHERE s.id IN (" + ','.join([str(id) for id in status_ids]) + ") "
-                     "AND s.presence_id = p.id",
-                     columns)
-
-        return dict([(r['s.id'], "%s:%s" % (r['p.name'], r['s.name'])) for r in cursor.fetchall()])
-
-
 class ChanSIP:
 
     def __init__(self):
