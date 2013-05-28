@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock, call, patch, sentinel
+from mock import Mock, call, patch
 
 from xivo_agid.handlers.userfeatures import UserFeatures
 from xivo_agid import objects

@@ -211,32 +211,30 @@ class UserFeatures(Handler):
             return False
 
     def _set_mailbox(self):
-        self._mailbox = ""
-        self._mailbox_context = ""
+        mailbox = ""
+        mailbox_context = ""
         useremail = ""
         if self._user.vmbox:
-            self._mailbox = self._user.vmbox.mailbox
-            self._mailbox_context = self._user.vmbox.context
+            mailbox = self._user.vmbox.mailbox
+            mailbox_context = self._user.vmbox.context
             if self._user.vmbox.email:
                 useremail = self._user.vmbox.email
         self._agi.set_variable('XIVO_ENABLEVOICEMAIL', self._user.enablevoicemail)
-        self._agi.set_variable('XIVO_MAILBOX', self._mailbox)
-        self._agi.set_variable('XIVO_MAILBOX_CONTEXT', self._mailbox_context)
+        self._agi.set_variable('XIVO_MAILBOX', mailbox)
+        self._agi.set_variable('XIVO_MAILBOX_CONTEXT', mailbox_context)
         self._agi.set_variable('XIVO_USEREMAIL', useremail)
 
     def _set_vmbox_lang(self):
-        vmbox = None
-        if len(self._mailbox) > 0:
-            try:
-                vmbox = objects.VMBox(self._agi, self._cursor, mailbox=self._mailbox, context=self._mailbox_context)
-            except (ValueError, LookupError) as e:
-                self._agi.dp_break(str(e))
+        vmbox = self._user.vmbox
+        if not vmbox:
+            return
+
         mbox_lang = ''
         if self._zone == 'intern' and self._caller and self._caller.language:
             mbox_lang = self._caller.language
-        elif vmbox and vmbox.language:
+        elif vmbox.language:
             mbox_lang = vmbox.language
-        elif self._user and self._user.language:
+        elif self._user.language:
             mbox_lang = self._user.language
         self._agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
 
