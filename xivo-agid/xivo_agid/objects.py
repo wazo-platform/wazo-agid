@@ -281,36 +281,6 @@ class Line(object):
         self.name = res['name']
 
 
-class MasterLineUser:
-    def __init__(self, agi, cursor, xid):
-        self.agi = agi
-        self.cursor = cursor
-        self.line = {}
-
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name')
-
-        cursor.query("SELECT ${columns} FROM linefeatures "
-                     "WHERE iduserfeatures = %s "
-                     "AND internal = 0 "
-                     "AND commented = 0",
-                     columns,
-                     (xid,))
-
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find master line entry (id: %s)" % (xid))
-
-        self.line = {
-            'id': res['id'],
-            'number': res['number'],
-            'context': res['context'],
-            'protocol': res['protocol'].upper(),
-            'protocolid': res['protocolid'],
-            'name': res['name'],
-        }
-
-
 class User(object):
 
     def __init__(self, agi, cursor, xid=None, exten=None, context=None):
