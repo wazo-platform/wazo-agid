@@ -26,11 +26,9 @@ def user_get_vmbox(agi, cursor, args):
 
     if xlen > 0 and args[0] != '':
         try:
-            if xlen == 1:
-                masterline = objects.MasterLineUser(agi, cursor, int(userid))
-                context = masterline.line['context']
-            else:
-                context = args[1]
+            context = agi.get_variable('XIVO_BASE_CONTEXT')
+            if not context:
+                agi.dp_break('Could not get the context of the caller')
 
             user = objects.User(agi, cursor, exten=args[0], context=context)
         except (ValueError, LookupError), e:

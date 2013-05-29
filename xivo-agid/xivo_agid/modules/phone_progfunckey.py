@@ -25,23 +25,8 @@ def phone_progfunckey(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
     xlen = len(args)
 
-    if xlen < 1:
+    if xlen != 1:
         agi.dp_break("Invalid number of arguments (args: %r)" % args)
-
-    if xlen > 1 and args[1] != '':
-        try:
-            if xlen == 2:
-                context = objects.MasterLineUser(agi, cursor, xid=int(userid)).line['context']
-            else:
-                context = args[2]
-
-        except (ValueError, LookupError), e:
-            agi.dp_break(str(e))
-    else:
-        try:
-            context = objects.MasterLineUser(agi, cursor, xid=int(userid)).line['context']
-        except (ValueError, LookupError), e:
-            agi.dp_break(str(e))
 
     try:
         fklist = split_extension(args[0])
@@ -60,7 +45,6 @@ def phone_progfunckey(agi, cursor, args):
         feature = ""
         agi.verbose(str(e))
 
-    agi.set_variable('XIVO_PHONE_CONTEXT', context)
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY', ''.join(fklist[1:]))
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY_FEATURE', feature)
 

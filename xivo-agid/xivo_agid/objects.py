@@ -239,21 +239,20 @@ class Paging:
             self.lines.append(line)
 
 
-class Lines:
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None, name=None, protocol=None):
+class Line(object):
+
+    def __init__(self, agi, cursor, xid=None, exten=None, context=None):
         self.agi = agi
         self.cursor = cursor
-        self.lines = []
 
         columns = ('id', 'number', 'context', 'protocol', 'protocolid',
-                   'iduserfeatures', 'name', 'line_num')
+                   'iduserfeatures', 'name')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
                          "WHERE iduserfeatures = %s "
                          "AND internal = 0 "
-                         "AND commented = 0 "
-                         "ORDER BY line_num ASC",
+                         "AND commented = 0",
                          columns,
                          (xid,))
         elif exten and context:
@@ -265,73 +264,21 @@ class Lines:
                          "AND commented = 0",
                          columns,
                          [exten] + contextinclude)
-        elif name and protocol:
-            protocol = protocol.lower()
-
-            if protocol == 'iax2':
-                protocol = 'iax'
-
-            cursor.query("SELECT ${columns} FROM linefeatures "
-                         "WHERE name = %s "
-                         "AND protocol = %s "
-                         "AND internal = 0 "
-                         "AND commented = 0",
-                         columns,
-                         (name, protocol))
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
-
-        res = cursor.fetchall()
-
-        if not res:
-            raise LookupError("Unable to find line entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
-
-        for l in res:
-            line = {
-                'id': l['id'],
-                'number': l['number'],
-                'context': l['context'],
-                'protocol': l['protocol'].upper(),
-                'protocolid': l['protocolid'],
-                'iduserfeatures': l['iduserfeatures'],
-                'name': l['name'],
-                'num': l['line_num'],
-            }
-
-            self.lines.append(line)
-
-
-class MasterLineUser:
-    def __init__(self, agi, cursor, xid):
-        self.agi = agi
-        self.cursor = cursor
-        self.line = {}
-
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid', 'name', 'line_num')
-
-        cursor.query("SELECT ${columns} FROM linefeatures "
-                     "WHERE iduserfeatures = %s "
-                     "AND internal = 0 "
-                     "AND commented = 0 "
-                     "AND line_num = 0 "
-                     "ORDER BY line_num ASC",
-                     columns,
-                     (xid,))
 
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find master line entry (id: %s)" % (xid))
+            raise LookupError("Unable to find line entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
 
-        self.line = {
-            'id': res['id'],
-            'number': res['number'],
-            'context': res['context'],
-            'protocol': res['protocol'].upper(),
-            'protocolid': res['protocolid'],
-            'name': res['name'],
-            'num': res['line_num'],
-        }
+        self.id = res['id']
+        self.number = res['number']
+        self.context = res['context']
+        self.protocol = res['protocol'].upper()
+        self.protocolid = res['protocolid']
+        self.iduserfeatures = res['iduserfeatures']
+        self.name = res['name']
 
 
 class User(object):
@@ -357,15 +304,13 @@ class User(object):
                          columns,
                          (xid,))
         elif exten and context:
-            line = Lines(agi, cursor, exten=exten, context=context)
-            for line_dict in line.lines:
-                if line_dict['iduserfeatures']:
-                    cursor.query("SELECT ${columns} FROM userfeatures "
-                                 "WHERE id = %s "
-                                 "AND commented = 0",
-                                 columns,
-                                 (line_dict['iduserfeatures'],))
-                    break
+            line = Line(agi, cursor, exten=exten, context=context)
+            if line.iduserfeatures:
+                cursor.query("SELECT ${columns} FROM userfeatures "
+                             "WHERE id = %s "
+                             "AND commented = 0",
+                             columns,
+                             (line.iduserfeatures,))
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
@@ -1305,27 +1250,6 @@ class CallerID:
                 self.agi.set_variable('XIVO_CID_REWRITTEN', 1)
 
 
-class CTIPresence:
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def status(agi, cursor, status_ids=None):
-        """
-                    we get a list of status ids, and want in return the presence+status names
-                    in the form:
-                        "pname:sname"
-        """
-        columns = ('s.id', 's.name', 'p.name')
-        cursor.query("SELECT ${columns} FROM ctistatus s"
-                     "WHERE s.id IN (" + ','.join([str(id) for id in status_ids]) + ") "
-                     "AND s.presence_id = p.id",
-                     columns)
-
-        return dict([(r['s.id'], "%s:%s" % (r['p.name'], r['s.name'])) for r in cursor.fetchall()])
-
-
 class ChanSIP:
 
     def __init__(self):
@@ -1436,15 +1360,3 @@ def protocol_intf_and_suffix(cursor, protocol, category, xid):
         return CHAN_PROTOCOL[protocol].get_intf_and_suffix(cursor, category, xid)
     else:
         raise ValueError("Unknown protocol %r" % protocol)
-
-
-class Static:
-    def __init__(self, cursor, protocol):
-        if protocol not in ('sip', 'iax', 'sccp'):
-            raise ValueError("invalid type")
-
-        cursor.query("SELECT ${columns} FROM static" + protocol + " WHERE commented = 0",
-                     ('var_name', 'var_val'))
-
-        for r in cursor.fetchall():
-            setattr(self, r['var_name'], r['var_val'])

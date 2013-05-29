@@ -28,21 +28,16 @@ def vmbox_get_info(agi, cursor, args):
     xlen = len(args)
     if xlen > 0 and args[0] != '':
         try:
-            if xlen == 1:
-                xivo_userid = agi.get_variable('XIVO_USERID')
-                if xivo_userid:
-                    userid = int(agi.get_variable('XIVO_USERID'))
-                    caller = objects.User(agi, cursor, xid=userid)
-                    caller_masterline = objects.MasterLineUser(agi, cursor, userid)
-                    context = caller_masterline.line['context']
-                else:
-                    context = agi.get_variable('XIVO_BASE_CONTEXT')
-            else:
-                context = args[1]
+            xivo_userid = agi.get_variable('XIVO_USERID')
+            if xivo_userid:
+                caller = objects.User(agi, cursor, xid=int(xivo_userid))
+            context = agi.get_variable('XIVO_BASE_CONTEXT')
+            if not context:
+                agi.dp_break('Could not get the context of the caller')
 
             vmbox = objects.VMBox(agi, cursor, mailbox=args[0], context=context)
         except (ValueError, LookupError), e:
-            logger.error('Error while retrieving vmbox from userid',
+            logger.error('Error while retrieving vmbox from number and context',
                          exc_info=True)
             agi.dp_break(str(e))
     else:
@@ -50,18 +45,18 @@ def vmbox_get_info(agi, cursor, args):
             vmboxid = int(agi.get_variable('XIVO_VMBOXID'))
             vmbox = objects.VMBox(agi, cursor, vmboxid)
         except (ValueError, LookupError), e:
-            logger.error('Error while retrieving vmbox from vmboxid',
+            logger.error('Error while retrieving vmbox from id',
                          exc_info=True)
             agi.dp_break(str(e))
 
-    if vmbox and vmbox.skipcheckpass:
+    if vmbox.skipcheckpass:
         vmmain_options = "s"
     else:
         vmmain_options = ""
 
     if caller and caller.language:
         mbox_lang = caller.language
-    elif vmbox and vmbox.language:
+    elif vmbox.language:
         mbox_lang = vmbox.language
     else:
         mbox_lang = ''
