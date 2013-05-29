@@ -245,8 +245,7 @@ class Line(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid',
-                   'iduserfeatures', 'name')
+        columns = ('number', 'context', 'protocol', 'iduserfeatures', 'name')
 
         if xid:
             cursor.query("SELECT ${columns} FROM linefeatures "
@@ -272,11 +271,9 @@ class Line(object):
         if not res:
             raise LookupError("Unable to find line entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
 
-        self.id = res['id']
         self.number = res['number']
         self.context = res['context']
         self.protocol = res['protocol'].upper()
-        self.protocolid = res['protocolid']
         self.iduserfeatures = res['iduserfeatures']
         self.name = res['name']
 
@@ -293,7 +290,6 @@ class User(object):
                    'callrecord', 'incallfilter', 'enablednd',
                    'enableunc', 'destunc', 'enablerna', 'destrna',
                    'enablebusy', 'destbusy', 'musiconhold', 'language',
-                   'ringintern', 'ringextern', 'ringforward', 'ringgroup',
                    'outcallerid', 'bsfilter', 'preprocess_subroutine',
                    'mobilephonenumber')
 
@@ -344,10 +340,6 @@ class User(object):
         self.mobilephonenumber = res['mobilephonenumber']
         self.bsfilter = res['bsfilter']
         self.language = res['language']
-        self.ringintern = res['ringintern']
-        self.ringextern = res['ringextern']
-        self.ringforward = res['ringforward']
-        self.ringgroup = res['ringgroup']
 
         if self.destunc == '':
             self.enableunc = 0
