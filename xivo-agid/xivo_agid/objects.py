@@ -15,16 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-"""Object classes for XIVO AGI
-
-Copyright (C) 2007-2012  Avencall
-
-This module provides a set of objects that are used by several AGI scripts
-in XIVO.
-
-"""
-
-
 import logging
 import re
 import time
