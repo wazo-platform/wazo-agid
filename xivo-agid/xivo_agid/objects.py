@@ -21,6 +21,7 @@ import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
 from xivo_dao.dao import line_dao
+from xivo_dao.dao import user_dao
 
 logger = logging.getLogger(__name__)
 
@@ -253,62 +254,38 @@ class User(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'firstname', 'lastname', 'callerid',
-                   'ringseconds', 'simultcalls', 'enablevoicemail',
-                   'voicemailid', 'enablexfer', 'enableautomon',
-                   'callrecord', 'incallfilter', 'enablednd',
-                   'enableunc', 'destunc', 'enablerna', 'destrna',
-                   'enablebusy', 'destbusy', 'musiconhold', 'language',
-                   'outcallerid', 'bsfilter', 'preprocess_subroutine',
-                   'mobilephonenumber')
-
         if xid:
-            cursor.query("SELECT ${columns} FROM userfeatures "
-                         "WHERE id = %s "
-                         "AND commented = 0",
-                         columns,
-                         (xid,))
+            res = user_dao.get_user_by_id(xid)
         elif exten and context:
-            line = Line(exten=exten, context=context)
-            if line.iduserfeatures:
-                cursor.query("SELECT ${columns} FROM userfeatures "
-                             "WHERE id = %s "
-                             "AND commented = 0",
-                             columns,
-                             (line.iduserfeatures,))
+            res = user_dao.get_user_by_number_context(exten, context)
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find user entry (id: %s)" % xid)
-
-        self.id = res['id']
-        self.firstname = res['firstname']
-        self.lastname = res['lastname']
-        self.callerid = res['callerid']
-        self.ringseconds = int(res['ringseconds'])
-        self.simultcalls = res['simultcalls']
-        self.enablevoicemail = res['enablevoicemail']
-        self.voicemailid = res['voicemailid']
-        self.enablexfer = res['enablexfer']
-        self.enableautomon = res['enableautomon']
-        self.callrecord = res['callrecord']
-        self.incallfilter = res['incallfilter']
-        self.enablednd = res['enablednd']
-        self.enableunc = res['enableunc']
-        self.destunc = res['destunc']
-        self.enablerna = res['enablerna']
-        self.destrna = res['destrna']
-        self.enablebusy = res['enablebusy']
-        self.destbusy = res['destbusy']
-        self.musiconhold = res['musiconhold']
-        self.outcallerid = res['outcallerid']
-        self.preprocess_subroutine = res['preprocess_subroutine']
-        self.mobilephonenumber = res['mobilephonenumber']
-        self.bsfilter = res['bsfilter']
-        self.language = res['language']
+        self.id = res.id
+        self.firstname = res.firstname
+        self.lastname = res.lastname
+        self.callerid = res.callerid
+        self.ringseconds = int(res.ringseconds)
+        self.simultcalls = res.simultcalls
+        self.enablevoicemail = res.enablevoicemail
+        self.voicemailid = res.voicemailid
+        self.enablexfer = res.enablexfer
+        self.enableautomon = res.enableautomon
+        self.callrecord = res.callrecord
+        self.incallfilter = res.incallfilter
+        self.enablednd = res.enablednd
+        self.enableunc = res.enableunc
+        self.destunc = res.destunc
+        self.enablerna = res.enablerna
+        self.destrna = res.destrna
+        self.enablebusy = res.enablebusy
+        self.destbusy = res.destbusy
+        self.musiconhold = res.musiconhold
+        self.outcallerid = res.outcallerid
+        self.preprocess_subroutine = res.preprocess_subroutine
+        self.mobilephonenumber = res.mobilephonenumber
+        self.bsfilter = res.bsfilter
+        self.language = res.language
 
         if self.destunc == '':
             self.enableunc = 0
