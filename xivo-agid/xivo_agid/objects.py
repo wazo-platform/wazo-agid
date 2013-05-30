@@ -20,6 +20,7 @@ import re
 import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
+from xivo_dao.dao import line_dao
 
 logger = logging.getLogger(__name__)
 
@@ -232,40 +233,18 @@ class Paging:
 class Line(object):
 
     def __init__(self, agi, cursor, xid=None, exten=None, context=None):
-        self.agi = agi
-        self.cursor = cursor
-
-        columns = ('number', 'context', 'protocol', 'iduserfeatures', 'name')
-
         if xid:
-            cursor.query("SELECT ${columns} FROM linefeatures "
-                         "WHERE iduserfeatures = %s "
-                         "AND internal = 0 "
-                         "AND commented = 0",
-                         columns,
-                         (xid,))
+            res = line_dao.get_line_by_user_id(xid)
         elif exten and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM linefeatures "
-                         "WHERE number = %s "
-                         "AND context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND internal = 0 "
-                         "AND commented = 0",
-                         columns,
-                         [exten] + contextinclude)
+            res = line_dao.get_line_by_number_context(exten, context)
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find line entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
-
-        self.number = res['number']
-        self.context = res['context']
-        self.protocol = res['protocol'].upper()
-        self.iduserfeatures = res['iduserfeatures']
-        self.name = res['name']
+        self.number = res.number
+        self.context = res.context
+        self.protocol = res.protocol.upper()
+        self.iduserfeatures = res.iduserfeatures
+        self.name = res.name
 
 
 class User(object):
