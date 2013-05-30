@@ -88,7 +88,7 @@ class UserFeatures(Handler):
     def _set_line(self):
         if self._dstid:
             try:
-                self._line = objects.Line(self._agi, self._cursor, int(self._dstid))
+                self._line = objects.Line(int(self._dstid))
             except (ValueError, LookupError), e:
                 self._agi.dp_break(str(e))
             else:

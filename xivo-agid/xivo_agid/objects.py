@@ -232,7 +232,7 @@ class Paging:
 
 class Line(object):
 
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None):
+    def __init__(self, xid=None, exten=None, context=None):
         if xid:
             res = line_dao.get_line_by_user_id(xid)
         elif exten and context:
@@ -269,7 +269,7 @@ class User(object):
                          columns,
                          (xid,))
         elif exten and context:
-            line = Line(agi, cursor, exten=exten, context=context)
+            line = Line(exten=exten, context=context)
             if line.iduserfeatures:
                 cursor.query("SELECT ${columns} FROM userfeatures "
                              "WHERE id = %s "

@@ -130,7 +130,7 @@ class TestUserFeatures(unittest.TestCase):
 
             userfeatures._set_line()
 
-            lines_cls.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_DSTID']))
+            lines_cls.assert_called_with(int(self._variables['XIVO_DSTID']))
         self.assertEqual(mocked_line, userfeatures._line)
 
     def test_set_user(self):
