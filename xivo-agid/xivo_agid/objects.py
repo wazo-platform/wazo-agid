@@ -286,6 +286,7 @@ class User(object):
         self.mobilephonenumber = res.mobilephonenumber
         self.bsfilter = res.bsfilter
         self.language = res.language
+        self.userfield = res.userfield
 
         if self.destunc == '':
             self.enableunc = 0

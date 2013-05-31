@@ -64,6 +64,10 @@ class OutgoingFeatures(Handler):
             logger.debug('Could not retrieve user %s', self.userid)
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)
 
+    def _set_userfield(self):
+        if self.user.userfield:
+            self._agi.set_variable('CHANNEL(userfield)', self.user.userfield)
+
     def _set_caller_id(self):
         if self.outcall.internal:
             return
@@ -120,6 +124,7 @@ class OutgoingFeatures(Handler):
         self._retrieve_outcall()
         self._set_destination_number()
         self._retrieve_user()
+        self._set_userfield()
         self._set_caller_id()
         self._set_trunk_info()
         self._set_record_file_name()
