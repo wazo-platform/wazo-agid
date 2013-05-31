@@ -56,8 +56,9 @@ def callerid_forphones(agi, cursor, args):
     finally:
         _cursor = None
 
-    for var_name, var_value in vars_to_set:
-        agi.set_variable(var_name, var_value)
+    caller_id_all = dict(vars_to_set).get('CALLERID(all)')
+    if caller_id_all:
+        agi.set_callerid(caller_id_all)
 
 
 def _resolve_incoming_caller_id(channel, cid_name, cid_number):
