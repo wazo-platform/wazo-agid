@@ -123,6 +123,13 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         assert_that(self._agi.set_variable.call_count, equal_to(0), 'Set variable call count')
 
+    def test_set_userfield_no_user_no_error(self):
+        outcall = an_outcall().build()
+
+        self.outgoing_features.outcall = outcall
+
+        self.outgoing_features._set_userfield()
+
     @patch('xivo_agid.objects.CallerID.set')
     def test_set_caller_id_outcall_internal(self, mock_set_caller_id):
         user = (a_user()

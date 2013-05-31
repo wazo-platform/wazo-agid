@@ -65,7 +65,7 @@ class OutgoingFeatures(Handler):
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)
 
     def _set_userfield(self):
-        if self.user.userfield:
+        if self.user and self.user.userfield:
             self._agi.set_variable('CHANNEL(userfield)', self.user.userfield)
 
     def _set_caller_id(self):
