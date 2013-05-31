@@ -478,7 +478,7 @@ class FastAGI:
         """agi.set_callerid(number) --> None
         Changes the callerid of the current channel.
         """
-        self.execute('SET CALLERID', number)
+        self.execute('SET CALLERID', self._quote(number))
 
     def channel_status(self, channel=''):
         """agi.channel_status(channel='') --> int
