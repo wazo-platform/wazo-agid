@@ -16,8 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock, call, patch
 
+from hamcrest import assert_that
+from hamcrest.core import equal_to
+from mock import Mock, call, patch
 from xivo_agid.handlers.outgoingfeatures import OutgoingFeatures
 from xivo_agid import objects
 
@@ -52,6 +54,7 @@ class UserBuilder(object):
     def __init__(self):
         self._caller_id = '"John"'
         self._out_caller_id = 'default'
+        self._userfield = None
 
     def withCallerId(self, caller_id):
         self._caller_id = caller_id
@@ -69,10 +72,15 @@ class UserBuilder(object):
         self._out_caller_id = caller_id
         return self
 
+    def withUserField(self, userfield):
+        self._userfield = userfield
+        return self
+
     def build(self):
         user = Mock(objects.User)
         user.callerid = self._caller_id
         user.outcallerid = self._out_caller_id
+        user.userfield = self._userfield
         return user
 
 
@@ -84,7 +92,7 @@ def a_user():
     return UserBuilder()
 
 
-class Test(unittest.TestCase):
+class TestOutgoingFeatures(unittest.TestCase):
 
     def setUp(self):
         self._agi = Mock()
@@ -92,8 +100,28 @@ class Test(unittest.TestCase):
         self._args = Mock()
         self.outgoing_features = OutgoingFeatures(self._agi, self._cursor, self._args)
 
-    def tearDown(self):
-        pass
+    def test_set_userfield(self):
+        userfield = 'CP1234'
+        user = a_user().withUserField(userfield).build()
+        outcall = an_outcall().build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_userfield()
+
+        self._agi.set_variable.assert_called_once_with('CHANNEL(userfield)', userfield)
+
+    def test_set_userfield_empty(self):
+        user = a_user().build()
+        outcall = an_outcall().build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_userfield()
+
+        assert_that(self._agi.set_variable.call_count, equal_to(0), 'Set variable call count')
 
     @patch('xivo_agid.objects.CallerID.set')
     def test_set_caller_id_outcall_internal(self, mock_set_caller_id):

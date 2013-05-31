@@ -15,21 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-"""Object classes for XIVO AGI
-
-Copyright (C) 2007-2012  Avencall
-
-This module provides a set of objects that are used by several AGI scripts
-in XIVO.
-
-"""
-
-
 import logging
 import re
 import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
+from xivo_dao.dao import line_dao
+from xivo_dao.dao import user_dao
 
 logger = logging.getLogger(__name__)
 
@@ -241,44 +233,19 @@ class Paging:
 
 class Line(object):
 
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None):
-        self.agi = agi
-        self.cursor = cursor
-
-        columns = ('id', 'number', 'context', 'protocol', 'protocolid',
-                   'iduserfeatures', 'name')
-
+    def __init__(self, xid=None, exten=None, context=None):
         if xid:
-            cursor.query("SELECT ${columns} FROM linefeatures "
-                         "WHERE iduserfeatures = %s "
-                         "AND internal = 0 "
-                         "AND commented = 0",
-                         columns,
-                         (xid,))
+            res = line_dao.get_line_by_user_id(xid)
         elif exten and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM linefeatures "
-                         "WHERE number = %s "
-                         "AND context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND internal = 0 "
-                         "AND commented = 0",
-                         columns,
-                         [exten] + contextinclude)
+            res = line_dao.get_line_by_number_context(exten, context)
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find line entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
-
-        self.id = res['id']
-        self.number = res['number']
-        self.context = res['context']
-        self.protocol = res['protocol'].upper()
-        self.protocolid = res['protocolid']
-        self.iduserfeatures = res['iduserfeatures']
-        self.name = res['name']
+        self.number = res.number
+        self.context = res.context
+        self.protocol = res.protocol.upper()
+        self.iduserfeatures = res.iduserfeatures
+        self.name = res.name
 
 
 class User(object):
@@ -287,67 +254,39 @@ class User(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'firstname', 'lastname', 'callerid',
-                   'ringseconds', 'simultcalls', 'enablevoicemail',
-                   'voicemailid', 'enablexfer', 'enableautomon',
-                   'callrecord', 'incallfilter', 'enablednd',
-                   'enableunc', 'destunc', 'enablerna', 'destrna',
-                   'enablebusy', 'destbusy', 'musiconhold', 'language',
-                   'ringintern', 'ringextern', 'ringforward', 'ringgroup',
-                   'outcallerid', 'bsfilter', 'preprocess_subroutine',
-                   'mobilephonenumber')
-
         if xid:
-            cursor.query("SELECT ${columns} FROM userfeatures "
-                         "WHERE id = %s "
-                         "AND commented = 0",
-                         columns,
-                         (xid,))
+            res = user_dao.get_user_by_id(xid)
         elif exten and context:
-            line = Line(agi, cursor, exten=exten, context=context)
-            if line.iduserfeatures:
-                cursor.query("SELECT ${columns} FROM userfeatures "
-                             "WHERE id = %s "
-                             "AND commented = 0",
-                             columns,
-                             (line.iduserfeatures,))
+            res = user_dao.get_user_by_number_context(exten, context)
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find user entry (id: %s)" % xid)
-
-        self.id = res['id']
-        self.firstname = res['firstname']
-        self.lastname = res['lastname']
-        self.callerid = res['callerid']
-        self.ringseconds = int(res['ringseconds'])
-        self.simultcalls = res['simultcalls']
-        self.enablevoicemail = res['enablevoicemail']
-        self.voicemailid = res['voicemailid']
-        self.enablexfer = res['enablexfer']
-        self.enableautomon = res['enableautomon']
-        self.callrecord = res['callrecord']
-        self.incallfilter = res['incallfilter']
-        self.enablednd = res['enablednd']
-        self.enableunc = res['enableunc']
-        self.destunc = res['destunc']
-        self.enablerna = res['enablerna']
-        self.destrna = res['destrna']
-        self.enablebusy = res['enablebusy']
-        self.destbusy = res['destbusy']
-        self.musiconhold = res['musiconhold']
-        self.outcallerid = res['outcallerid']
-        self.preprocess_subroutine = res['preprocess_subroutine']
-        self.mobilephonenumber = res['mobilephonenumber']
-        self.bsfilter = res['bsfilter']
-        self.language = res['language']
-        self.ringintern = res['ringintern']
-        self.ringextern = res['ringextern']
-        self.ringforward = res['ringforward']
-        self.ringgroup = res['ringgroup']
+        self.id = res.id
+        self.firstname = res.firstname
+        self.lastname = res.lastname
+        self.callerid = res.callerid
+        self.ringseconds = int(res.ringseconds)
+        self.simultcalls = res.simultcalls
+        self.enablevoicemail = res.enablevoicemail
+        self.voicemailid = res.voicemailid
+        self.enablexfer = res.enablexfer
+        self.enableautomon = res.enableautomon
+        self.callrecord = res.callrecord
+        self.incallfilter = res.incallfilter
+        self.enablednd = res.enablednd
+        self.enableunc = res.enableunc
+        self.destunc = res.destunc
+        self.enablerna = res.enablerna
+        self.destrna = res.destrna
+        self.enablebusy = res.enablebusy
+        self.destbusy = res.destbusy
+        self.musiconhold = res.musiconhold
+        self.outcallerid = res.outcallerid
+        self.preprocess_subroutine = res.preprocess_subroutine
+        self.mobilephonenumber = res.mobilephonenumber
+        self.bsfilter = res.bsfilter
+        self.language = res.language
+        self.userfield = res.userfield
 
         if self.destunc == '':
             self.enableunc = 0
