@@ -24,7 +24,6 @@ import urllib2
 from xivo.moresynchro import RWLock
 from xivo_agid import agid
 from xivo_agid.directory import directory
-from xivo.caller_id import build_caller_id
 from xivo_dao import cti_displays_dao, cti_context_dao, cti_directories_dao
 
 logger = logging.getLogger(__name__)
@@ -45,36 +44,35 @@ _cursor = None
 
 
 def callerid_forphones(agi, cursor, args):
-    channel = agi.env['agi_channel']
     cid_name = agi.env['agi_calleridname']
     cid_number = agi.env['agi_callerid']
 
     global _cursor
     _cursor = cursor
     try:
-        vars_to_set = _resolve_incoming_caller_id(channel, cid_name, cid_number)
+        caller_id_all = _resolve_incoming_caller_id(cid_name, cid_number)
     finally:
         _cursor = None
 
-    for var_name, var_value in vars_to_set:
-        agi.set_variable(var_name, var_value)
+    if caller_id_all:
+        agi.set_callerid(caller_id_all)
 
 
-def _resolve_incoming_caller_id(channel, cid_name, cid_number):
-    logger.debug('Resolving caller ID: channel=%s incoming caller ID=%s %s',
-                 channel, cid_name, cid_number)
+def _resolve_incoming_caller_id(cid_name, cid_number):
+    logger.debug('Resolving caller ID: incoming caller ID=%s %s',
+                 cid_name, cid_number)
 
     if cid_name == cid_number or cid_name == 'unknown':
-        return _build_agi_caller_id(*_get_cid_directory_lookup(cid_number, cid_number))
+        return _get_cid_directory_lookup(cid_number)
     else:
-        return []
+        return None
 
 
-def _get_cid_directory_lookup(original_cid, pattern):
+def _get_cid_directory_lookup(cid_number):
     if _rw_lock.acquire_read(5):
         try:
             context_obj = _contexts_mgr.contexts['*']
-            lookup_result = context_obj.lookup_reverse(None, pattern)
+            lookup_result = context_obj.lookup_reverse(None, cid_number)
         finally:
             _rw_lock.release()
     else:
@@ -82,20 +80,9 @@ def _get_cid_directory_lookup(original_cid, pattern):
         lookup_result = None
 
     if lookup_result:
-        return build_caller_id(original_cid, lookup_result[0], pattern)
+        return '"%s" <%s>' % (lookup_result[0], cid_number)
     else:
-        return None, None, None
-
-
-def _build_agi_caller_id(cid_all, cid_name, cid_number):
-    vars_to_set = []
-    if cid_all:
-        vars_to_set.append(('CALLERID(all)', cid_all))
-    if cid_name:
-        vars_to_set.append(('CALLERID(name)', cid_name))
-    if cid_number:
-        vars_to_set.append(('CALLERID(number)', cid_number))
-    return vars_to_set
+        return None
 
 
 def setup_callerid_forphones(cursor):
