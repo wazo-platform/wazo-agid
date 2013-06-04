@@ -25,8 +25,6 @@ MEETME_RECORDINGDIR = '/var/lib/asterisk/sounds/meetme/'
 
 
 def conf_authentication(agi, meetme):
-    global MEETME_RECORDINGDIR
-
     agi.appexec('Answer')
     calleridnum = agi.get_variable('CALLERID(num)')
 

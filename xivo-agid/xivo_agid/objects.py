@@ -246,7 +246,6 @@ class Line(object):
         self.number = res.number
         self.context = res.context
         self.protocol = res.protocol.upper()
-        self.iduserfeatures = res.iduserfeatures
         self.name = res.name
 
 
