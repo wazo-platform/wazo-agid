@@ -168,11 +168,12 @@ class VMBox:
             self.commented = enabled
 
 
-class Paging:
+class Paging(object):
+
     def __init__(self, agi, cursor, number, userid):
         self.agi = agi
         self.cursor = cursor
-        self.lines = []
+        self.lines = set()
 
         columns = ('id', 'number', 'duplex', 'ignore', 'record', 'quiet', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented')
 
@@ -184,7 +185,7 @@ class Paging:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find paging entry (id: %s)" % (number,))
+            raise LookupError("Unable to find paging entry (number: %s)" % (number,))
 
         id = res['id']
         self.number = res['number']
@@ -211,9 +212,10 @@ class Paging:
 
         columns = ('protocol', 'name')
 
-        cursor.query("SELECT ${columns} FROM linefeatures "
-                     "INNER JOIN paginguser on paginguser.pagingid = %s "
-                     "WHERE linefeatures.iduserfeatures = paginguser.userfeaturesid "
+        cursor.query("SELECT ${columns} FROM paginguser "
+                     "JOIN user_line ON paginguser.userfeaturesid = user_line.user_id "
+                     "JOIN linefeatures ON user_line.line_id = linefeatures.id "
+                     "WHERE paginguser.pagingid = %s "
                      "AND paginguser.caller = 0",
                      columns,
                      (id,))
@@ -228,7 +230,7 @@ class Paging:
                 line = '%s/%s/%s' % (proto_upper, l['name'], 'autoanswer')
             else:
                 line = '%s/%s' % (proto_upper, l['name'])
-            self.lines.append(line)
+            self.lines.add(line)
 
 
 class Line(object):
