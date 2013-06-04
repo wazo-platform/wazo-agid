@@ -376,7 +376,8 @@ class User(object):
             setattr(self, feature, enabled)
 
 
-class MeetMe:
+class MeetMe(object):
+
     FLAG_ADMIN = (1 << 0)
     FLAG_USER = (1 << 1)
 
@@ -405,7 +406,7 @@ class MeetMe:
 
     OPTIONS_USER = {'hiddencalls': 'h'}
 
-    def __init__(self, agi, cursor, xid=None, name=None, number=None, context=None):
+    def __init__(self, agi, cursor, xid):
         self.agi = agi
         self.cursor = cursor
 
@@ -424,58 +425,27 @@ class MeetMe:
 
         columns = ["meetmefeatures." + c for c in meetmefeatures_columns] + \
                   ['staticmeetme.var_val'] + \
-                  ['linefeatures.number']
+                  ['extenumbers.exten']
 
-        if xid:
-            cursor.query("SELECT ${columns} FROM meetmefeatures "
-                         "INNER JOIN staticmeetme "
-                         "ON meetmefeatures.meetmeid = staticmeetme.id "
-                         "LEFT JOIN userfeatures "
-                         "ON meetmefeatures.admin_internalid = userfeatures.id "
-                         "LEFT JOIN linefeatures "
-                         "ON userfeatures.id = linefeatures.iduserfeatures "
-                         "WHERE meetmefeatures.id = %s "
-                         "AND staticmeetme.commented = 0",
-                         columns,
-                         (xid,))
-        elif name:
-            cursor.query("SELECT ${columns} FROM meetmefeatures "
-                         "INNER JOIN staticmeetme "
-                         "ON meetmefeatures.meetmeid = staticmeetme.id "
-                         "LEFT JOIN userfeatures "
-                         "ON meetmefeatures.admin_internalid = userfeatures.id "
-                         "LEFT JOIN linefeatures "
-                         "ON userfeatures.id = linefeatures.iduserfeatures "
-                         "WHERE meetmefeatures.name = %s "
-                         "AND staticmeetme.commented = 0",
-                         columns,
-                         (name,))
-        elif number and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM meetmefeatures "
-                         "INNER JOIN staticmeetme "
-                         "ON meetmefeatures.meetmeid = staticmeetme.id "
-                         "LEFT JOIN userfeatures "
-                         "ON meetmefeatures.admin_internalid = userfeatures.id "
-                         "LEFT JOIN linefeatures "
-                         "ON userfeatures.id = linefeatures.iduserfeatures "
-                         "WHERE meetmefeatures.confno = %s "
-                         "AND meetmefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND staticmeetme.commented = 0",
-                         columns,
-                         [number] + contextinclude)
-        else:
-            raise LookupError("id or name or number@context must be provided to look up a conference room")
+        cursor.query("SELECT ${columns} FROM meetmefeatures "
+                     "INNER JOIN staticmeetme "
+                     "ON meetmefeatures.meetmeid = staticmeetme.id "
+                     "LEFT JOIN user_line "
+                     "ON meetmefeatures.admin_internalid = user_line.user_id "
+                     "LEFT JOIN extenumbers "
+                     "ON extenumbers.type = 'user' AND user_line.line_id = CAST(extenumbers.typeval AS integer)"
+                     "WHERE meetmefeatures.id = %s "
+                     "AND staticmeetme.commented = 0",
+                     columns,
+                     (xid,))
 
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find conference room "
-                              "(id: %s, name: %s, number: %s, context: %s)"
-                              % (xid, name, number, context))
+            raise LookupError("Unable to find conference room (id: %s)" % xid)
 
         (self.confno, self.pin, self.pinadmin) = (res['staticmeetme.var_val'] + ",,").split(',', 3)[:3]
-        self.admin_number = res['linefeatures.number']
+        self.admin_number = res['extenumbers.exten']
 
         if res['meetmefeatures.startdate']:
             self.starttime = time.mktime(
@@ -485,7 +455,7 @@ class MeetMe:
             self.starttime = None
 
         for name, value in res.iteritems():
-            if name not in('staticmeetme.var_val', 'linefeatures.number'):
+            if name not in('staticmeetme.var_val', 'extenumbers.exten'):
                 setattr(self, name.split('.', 1)[1], value)
 
         self.options = ()
