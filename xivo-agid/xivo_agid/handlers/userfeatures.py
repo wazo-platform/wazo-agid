@@ -174,7 +174,7 @@ class UserFeatures(Handler):
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
-            self._agi.set_variable('XIVO_CALLFILTER_BOSS_TIMEOUT', boss_callfiltermember.ringseconds)
+            self._set_callfilter_ringseconds('BOSS_TIMEOUT', boss_callfiltermember.ringseconds)
 
         index = 0
         ifaces = []
@@ -186,12 +186,12 @@ class UserFeatures(Handler):
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
                     self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_INTERFACE' % index, iface)
-                    self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_TIMEOUT' % index, ringseconds)
+                    self._set_callfilter_ringseconds('SECRETARY%d_TIMEOUT' % index, ringseconds)
                     index += 1
 
         if callfilter.bosssecretary in ("bossfirst-simult", "secretary-simult", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_INTERFACE', '&'.join(ifaces))
-            self._agi.set_variable('XIVO_CALLFILTER_TIMEOUT', callfilter.ringseconds)
+            self._set_callfilter_ringseconds('TIMEOUT', callfilter.ringseconds)
 
         DialAction(self._agi, self._cursor, "noanswer", "callfilter", callfilter.id).set_variables()
         CallerID(self._agi, self._cursor, "callfilter", callfilter.id).rewrite(force_rewrite=True)
@@ -282,11 +282,16 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_CALLOPTIONS', options)
 
     def _set_ringseconds(self):
-        if self._user.ringseconds > 0:
-            ringseconds = self._user.ringseconds
+        self._set_not_zero_or_empty('XIVO_RINGSECONDS', self._user.ringseconds)
+
+    def _set_callfilter_ringseconds(self, name, value):
+        self._set_not_zero_or_empty('XIVO_CALLFILTER_%s' % name, value)
+
+    def _set_not_zero_or_empty(self, name, value):
+        if value and value > 0:
+            self._agi.set_variable(name, value)
         else:
-            ringseconds = ""
-        self._agi.set_variable('XIVO_RINGSECONDS', ringseconds)
+            self._agi.set_variable(name, '')
 
     def _set_simultcalls(self):
         return self._agi.set_variable('XIVO_SIMULTCALLS', self._user.simultcalls)
