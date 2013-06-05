@@ -235,13 +235,8 @@ class Paging(object):
 
 class Line(object):
 
-    def __init__(self, xid=None, exten=None, context=None):
-        if xid:
-            res = line_dao.get_line_by_user_id(xid)
-        elif exten and context:
-            res = line_dao.get_line_by_number_context(exten, context)
-        else:
-            raise LookupError("id or exten@context must be provided to look up an user entry")
+    def __init__(self, line_id):
+        res = line_dao.get_line_by_user_id(line_id)
 
         self.number = res.number
         self.context = res.context
