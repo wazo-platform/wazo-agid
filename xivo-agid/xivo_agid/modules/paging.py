@@ -36,7 +36,7 @@ def paging(agi, cursor, args):
         agi.stream_file('vm-incorrect')
         agi.dp_break('Sorry you are not authorize to page this group : %s' % str(e))
 
-    paging_line = '&'.join(paging_entry.lines) if len(paging_entry.lines) else ''
+    paging_line = '&'.join(paging_entry.lines)
 
     agi.set_variable('XIVO_PAGING_LINES', paging_line)
     agi.set_variable('XIVO_PAGING_TIMEOUT', paging_entry.timeout)

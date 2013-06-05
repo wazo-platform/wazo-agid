@@ -168,11 +168,12 @@ class VMBox:
             self.commented = enabled
 
 
-class Paging:
+class Paging(object):
+
     def __init__(self, agi, cursor, number, userid):
         self.agi = agi
         self.cursor = cursor
-        self.lines = []
+        self.lines = set()
 
         columns = ('id', 'number', 'duplex', 'ignore', 'record', 'quiet', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented')
 
@@ -184,7 +185,7 @@ class Paging:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find paging entry (id: %s)" % (number,))
+            raise LookupError("Unable to find paging entry (number: %s)" % (number,))
 
         id = res['id']
         self.number = res['number']
@@ -211,9 +212,10 @@ class Paging:
 
         columns = ('protocol', 'name')
 
-        cursor.query("SELECT ${columns} FROM linefeatures "
-                     "INNER JOIN paginguser on paginguser.pagingid = %s "
-                     "WHERE linefeatures.iduserfeatures = paginguser.userfeaturesid "
+        cursor.query("SELECT ${columns} FROM paginguser "
+                     "JOIN user_line ON paginguser.userfeaturesid = user_line.user_id "
+                     "JOIN linefeatures ON user_line.line_id = linefeatures.id "
+                     "WHERE paginguser.pagingid = %s "
                      "AND paginguser.caller = 0",
                      columns,
                      (id,))
@@ -228,23 +230,17 @@ class Paging:
                 line = '%s/%s/%s' % (proto_upper, l['name'], 'autoanswer')
             else:
                 line = '%s/%s' % (proto_upper, l['name'])
-            self.lines.append(line)
+            self.lines.add(line)
 
 
 class Line(object):
 
-    def __init__(self, xid=None, exten=None, context=None):
-        if xid:
-            res = line_dao.get_line_by_user_id(xid)
-        elif exten and context:
-            res = line_dao.get_line_by_number_context(exten, context)
-        else:
-            raise LookupError("id or exten@context must be provided to look up an user entry")
+    def __init__(self, line_id):
+        res = line_dao.get_line_by_user_id(line_id)
 
         self.number = res.number
         self.context = res.context
         self.protocol = res.protocol.upper()
-        self.iduserfeatures = res.iduserfeatures
         self.name = res.name
 
 
@@ -375,7 +371,8 @@ class User(object):
             setattr(self, feature, enabled)
 
 
-class MeetMe:
+class MeetMe(object):
+
     FLAG_ADMIN = (1 << 0)
     FLAG_USER = (1 << 1)
 
@@ -404,7 +401,7 @@ class MeetMe:
 
     OPTIONS_USER = {'hiddencalls': 'h'}
 
-    def __init__(self, agi, cursor, xid=None, name=None, number=None, context=None):
+    def __init__(self, agi, cursor, xid):
         self.agi = agi
         self.cursor = cursor
 
@@ -423,58 +420,27 @@ class MeetMe:
 
         columns = ["meetmefeatures." + c for c in meetmefeatures_columns] + \
                   ['staticmeetme.var_val'] + \
-                  ['linefeatures.number']
+                  ['extenumbers.exten']
 
-        if xid:
-            cursor.query("SELECT ${columns} FROM meetmefeatures "
-                         "INNER JOIN staticmeetme "
-                         "ON meetmefeatures.meetmeid = staticmeetme.id "
-                         "LEFT JOIN userfeatures "
-                         "ON meetmefeatures.admin_internalid = userfeatures.id "
-                         "LEFT JOIN linefeatures "
-                         "ON userfeatures.id = linefeatures.iduserfeatures "
-                         "WHERE meetmefeatures.id = %s "
-                         "AND staticmeetme.commented = 0",
-                         columns,
-                         (xid,))
-        elif name:
-            cursor.query("SELECT ${columns} FROM meetmefeatures "
-                         "INNER JOIN staticmeetme "
-                         "ON meetmefeatures.meetmeid = staticmeetme.id "
-                         "LEFT JOIN userfeatures "
-                         "ON meetmefeatures.admin_internalid = userfeatures.id "
-                         "LEFT JOIN linefeatures "
-                         "ON userfeatures.id = linefeatures.iduserfeatures "
-                         "WHERE meetmefeatures.name = %s "
-                         "AND staticmeetme.commented = 0",
-                         columns,
-                         (name,))
-        elif number and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM meetmefeatures "
-                         "INNER JOIN staticmeetme "
-                         "ON meetmefeatures.meetmeid = staticmeetme.id "
-                         "LEFT JOIN userfeatures "
-                         "ON meetmefeatures.admin_internalid = userfeatures.id "
-                         "LEFT JOIN linefeatures "
-                         "ON userfeatures.id = linefeatures.iduserfeatures "
-                         "WHERE meetmefeatures.confno = %s "
-                         "AND meetmefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND staticmeetme.commented = 0",
-                         columns,
-                         [number] + contextinclude)
-        else:
-            raise LookupError("id or name or number@context must be provided to look up a conference room")
+        cursor.query("SELECT ${columns} FROM meetmefeatures "
+                     "INNER JOIN staticmeetme "
+                     "ON meetmefeatures.meetmeid = staticmeetme.id "
+                     "LEFT JOIN user_line "
+                     "ON meetmefeatures.admin_internalid = user_line.user_id "
+                     "LEFT JOIN extenumbers "
+                     "ON extenumbers.type = 'user' AND user_line.line_id = CAST(extenumbers.typeval AS integer)"
+                     "WHERE meetmefeatures.id = %s "
+                     "AND staticmeetme.commented = 0",
+                     columns,
+                     (xid,))
 
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find conference room "
-                              "(id: %s, name: %s, number: %s, context: %s)"
-                              % (xid, name, number, context))
+            raise LookupError("Unable to find conference room (id: %s)" % xid)
 
         (self.confno, self.pin, self.pinadmin) = (res['staticmeetme.var_val'] + ",,").split(',', 3)[:3]
-        self.admin_number = res['linefeatures.number']
+        self.admin_number = res['extenumbers.exten']
 
         if res['meetmefeatures.startdate']:
             self.starttime = time.mktime(
@@ -484,7 +450,7 @@ class MeetMe:
             self.starttime = None
 
         for name, value in res.iteritems():
-            if name not in('staticmeetme.var_val', 'linefeatures.number'):
+            if name not in('staticmeetme.var_val', 'extenumbers.exten'):
                 setattr(self, name.split('.', 1)[1], value)
 
         self.options = ()
