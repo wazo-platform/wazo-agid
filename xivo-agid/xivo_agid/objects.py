@@ -20,8 +20,8 @@ import re
 import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
-from xivo_dao.dao import line_dao
-from xivo_dao.dao import user_dao
+from xivo_dao.data_handler.line import services as line_services
+from xivo_dao.data_handler.user import services as user_services
 
 logger = logging.getLogger(__name__)
 
@@ -236,7 +236,7 @@ class Paging(object):
 class Line(object):
 
     def __init__(self, line_id):
-        res = line_dao.get_line_by_user_id(line_id)
+        res = line_services.get_by_user_id(line_id)
 
         self.number = res.number
         self.context = res.context
@@ -251,9 +251,9 @@ class User(object):
         self.cursor = cursor
 
         if xid:
-            res = user_dao.get_user_by_id(xid)
+            res = user_services.get(xid)
         elif exten and context:
-            res = user_dao.get_user_by_number_context(exten, context)
+            res = user_services.get_by_number_context(exten, context)
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
