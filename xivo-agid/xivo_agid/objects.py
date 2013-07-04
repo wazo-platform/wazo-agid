@@ -23,7 +23,7 @@ from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, 
 from xivo_dao.data_handler.line import services as line_services
 from xivo_dao.data_handler.user import services as user_services
 
-from xivo_dao import user_dao
+from xivo_dao import user_dao, line_dao
 
 logger = logging.getLogger(__name__)
 
@@ -240,10 +240,11 @@ class Line(object):
     def __init__(self, line_id):
         line = line_services.get_by_user_id(line_id)
 
-        self.number = line.num
         self.context = line.context
         self.protocol = line.protocol.upper()
         self.name = line.name
+
+        self.number = line_dao.get_number_by_user_id(line_id)
 
 
 class User(object):
