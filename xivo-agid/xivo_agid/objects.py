@@ -23,6 +23,8 @@ from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, 
 from xivo_dao.data_handler.line import services as line_services
 from xivo_dao.data_handler.user import services as user_services
 
+from xivo_dao import user_dao
+
 logger = logging.getLogger(__name__)
 
 
@@ -236,12 +238,12 @@ class Paging(object):
 class Line(object):
 
     def __init__(self, line_id):
-        res = line_services.get_by_user_id(line_id)
+        line = line_services.get_by_user_id(line_id)
 
-        self.number = res.number
-        self.context = res.context
-        self.protocol = res.protocol.upper()
-        self.name = res.name
+        self.number = line.num
+        self.context = line.context
+        self.protocol = line.protocol.upper()
+        self.name = line.name
 
 
 class User(object):
@@ -251,38 +253,41 @@ class User(object):
         self.cursor = cursor
 
         if xid:
-            res = user_services.get(xid)
+            user = user_services.get(xid)
+            user_row = user_dao.get(xid)
         elif exten and context:
-            res = user_services.get_by_number_context(exten, context)
+            user = user_services.get_by_number_context(exten, context)
+            user_row = user_dao.get_user_by_number_context(exten, context)
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
-        self.id = res.id
-        self.firstname = res.firstname
-        self.lastname = res.lastname
-        self.callerid = res.callerid
-        self.ringseconds = int(res.ringseconds)
-        self.simultcalls = res.simultcalls
-        self.enablevoicemail = res.enablevoicemail
-        self.voicemailid = res.voicemailid
-        self.enablexfer = res.enablexfer
-        self.enableautomon = res.enableautomon
-        self.callrecord = res.callrecord
-        self.incallfilter = res.incallfilter
-        self.enablednd = res.enablednd
-        self.enableunc = res.enableunc
-        self.destunc = res.destunc
-        self.enablerna = res.enablerna
-        self.destrna = res.destrna
-        self.enablebusy = res.enablebusy
-        self.destbusy = res.destbusy
-        self.musiconhold = res.musiconhold
-        self.outcallerid = res.outcallerid
-        self.preprocess_subroutine = res.preprocess_subroutine
-        self.mobilephonenumber = res.mobilephonenumber
-        self.bsfilter = res.bsfilter
-        self.language = res.language
-        self.userfield = res.userfield
+        self.id = user.id
+        self.firstname = user.firstname
+        self.lastname = user.lastname
+        self.language = user.language
+        self.userfield = user.userfield
+        self.callerid = user.callerid
+        self.mobilephonenumber = user.mobilephonenumber
+        self.musiconhold = user.musiconhold
+        self.outcallerid = user.outcallerid
+
+        self.ringseconds = int(user_row.ringseconds)
+        self.simultcalls = user_row.simultcalls
+        self.enablevoicemail = user_row.enablevoicemail
+        self.voicemailid = user.voicemail_id
+        self.enablexfer = user_row.enablexfer
+        self.enableautomon = user_row.enableautomon
+        self.callrecord = user_row.callrecord
+        self.incallfilter = user_row.incallfilter
+        self.enablednd = user_row.enablednd
+        self.enableunc = user_row.enableunc
+        self.destunc = user_row.destunc
+        self.enablerna = user_row.enablerna
+        self.destrna = user_row.destrna
+        self.enablebusy = user_row.enablebusy
+        self.destbusy = user_row.destbusy
+        self.preprocess_subroutine = user_row.preprocess_subroutine
+        self.bsfilter = user_row.bsfilter
 
         if self.destunc == '':
             self.enableunc = 0
