@@ -60,28 +60,28 @@ class ExtenFeatures:
         self.featureslist = tuple(featureslist)
 
         self.cursor.query("SELECT ${columns} FROM extensions "
-                          "WHERE name IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
+                          "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
                           "AND commented = 0",
-                          ('name',),
+                          ('typeval',),
                           self.featureslist)
         res = self.cursor.fetchall()
 
         if not res:
             enabled_features = []
         else:
-            enabled_features = [row['name'] for row in res]
+            enabled_features = [row['typeval'] for row in res]
 
         for feature in self.featureslist:
             setattr(self, feature, (feature in enabled_features))
 
     def get_name_by_exten(self, exten):
         self.cursor.query("SELECT ${columns} FROM extensions "
-                          "WHERE name IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
+                          "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
                           "AND (exten = %s "
                           "OR (SUBSTR(exten,1,1) = '_' "
                           "    AND SUBSTR(exten, 2, %s) LIKE %s)) "
                           "AND commented = 0",
-                          ('name',),
+                          ('typeval',),
                           self.featureslist + (exten, len(exten), "%s%%" % exten))
 
         res = self.cursor.fetchone()
@@ -89,10 +89,10 @@ class ExtenFeatures:
         if not res:
             raise LookupError("Unable to find feature by exten (exten = %r)" % exten)
 
-        return res['name']
+        return res['typeval']
 
     def get_exten_by_name(self, name, commented=None):
-        query = "SELECT ${columns} FROM extensions WHERE name = %s"
+        query = "SELECT ${columns} FROM extensions WHERE typeval = %s"
         params = [name]
 
         if commented is not None:
@@ -426,15 +426,15 @@ class MeetMe(object):
 
         columns = ["meetmefeatures." + c for c in meetmefeatures_columns] + \
                   ['staticmeetme.var_val'] + \
-                  ['extenumbers.exten']
+                  ['extensions.exten']
 
         cursor.query("SELECT ${columns} FROM meetmefeatures "
                      "INNER JOIN staticmeetme "
                      "ON meetmefeatures.meetmeid = staticmeetme.id "
                      "LEFT JOIN user_line "
                      "ON meetmefeatures.admin_internalid = user_line.user_id "
-                     "LEFT JOIN extenumbers "
-                     "ON extenumbers.type = 'user' AND user_line.line_id = CAST(extenumbers.typeval AS integer)"
+                     "LEFT JOIN extensions "
+                     "ON extensions.type = 'user' AND user_line.line_id = CAST(extensions.typeval AS integer)"
                      "WHERE meetmefeatures.id = %s "
                      "AND staticmeetme.commented = 0",
                      columns,
@@ -446,7 +446,7 @@ class MeetMe(object):
             raise LookupError("Unable to find conference room (id: %s)" % xid)
 
         (self.confno, self.pin, self.pinadmin) = (res['staticmeetme.var_val'] + ",,").split(',', 3)[:3]
-        self.admin_number = res['extenumbers.exten']
+        self.admin_number = res['extensions.exten']
 
         if res['meetmefeatures.startdate']:
             self.starttime = time.mktime(
@@ -456,7 +456,7 @@ class MeetMe(object):
             self.starttime = None
 
         for name, value in res.iteritems():
-            if name not in('staticmeetme.var_val', 'extenumbers.exten'):
+            if name not in('staticmeetme.var_val', 'extensions.exten'):
                 setattr(self, name.split('.', 1)[1], value)
 
         self.options = ()
