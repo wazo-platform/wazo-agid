@@ -20,23 +20,21 @@ from xivo_agid import objects
 
 
 def incoming_did_set_features(agi, cursor, args):
-    exten_pattern = agi.get_variable('XIVO_EXTENPATTERN')
-    context = agi.get_variable('XIVO_CONTEXT')
+    incall_id = agi.get_variable('XIVO_INCALL_ID')
 
-    did = objects.DID(agi, cursor, exten=exten_pattern, context=context)
+    did = objects.DID(agi, cursor, xid=incall_id)
 
     if did.preprocess_subroutine:
         preprocess_subroutine = did.preprocess_subroutine
     else:
         preprocess_subroutine = ""
 
-    agi.set_variable('XIVO_REAL_NUMBER', did.exten)
-    agi.set_variable('XIVO_REAL_CONTEXT', did.context)
     agi.set_variable('XIVO_DIDPREPROCESS_SUBROUTINE', preprocess_subroutine)
-
-    # schedule
+    agi.set_variable('XIVO_EXTENPATTERN', did.exten)
     agi.set_variable('XIVO_PATH', 'incall')
     agi.set_variable('XIVO_PATH_ID', did.id)
+    agi.set_variable('XIVO_REAL_CONTEXT', did.context)
+    agi.set_variable('XIVO_REAL_NUMBER', did.exten)
 
     did.set_dial_actions()
     did.rewrite_cid()
