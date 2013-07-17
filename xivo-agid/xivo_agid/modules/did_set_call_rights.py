@@ -16,14 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from xivo_agid import agid
-from xivo_agid import objects
 from xivo_agid import call_rights
 
 
 def _did_set_call_rights(agi, cursor, args):
     srcnum = agi.get_variable('XIVO_SRCNUM')
-    context = agi.get_variable('XIVO_CONTEXT')
-    exten_pattern = agi.get_variable('XIVO_EXTENPATTERN')
+    incall_id = agi.get_variable('XIVO_INCALL_ID')
 
     cursor.query("SELECT ${columns} FROM rightcallexten",
                  ('rightcallid', 'exten'))
@@ -38,7 +36,6 @@ def _did_set_call_rights(agi, cursor, args):
         call_rights.allow(agi)
 
     rightcallids = '(' + ','.join((str(el) for el in rightcallidset)) + ')'
-    contextinclude = objects.Context(agi, cursor, context).include
     cursor.query("SELECT ${columns} FROM rightcall "
                  "INNER JOIN rightcallmember "
                  "ON rightcall.id = rightcallmember.rightcallid "
@@ -46,11 +43,10 @@ def _did_set_call_rights(agi, cursor, args):
                  "ON CAST(rightcallmember.typeval AS integer) = incall.id "
                  "WHERE rightcall.id IN " + rightcallids + " "
                  "AND rightcallmember.type = 'incall' "
-                 "AND incall.exten = %s "
-                 "AND incall.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
+                 "AND incall.id = %s "
                  "AND rightcall.commented = 0",
                  (call_rights.RIGHTCALL_AUTHORIZATION_COLNAME, call_rights.RIGHTCALL_PASSWD_COLNAME),
-                 [exten_pattern] + contextinclude)
+                 [incall_id])
     res = cursor.fetchall()
     call_rights.apply_rules(agi, res)
     call_rights.allow(agi)
