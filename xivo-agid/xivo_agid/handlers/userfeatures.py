@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
-from xivo_dao import callfilter_dao, line_dao
+from xivo_dao import callfilter_dao, user_line_dao
 from xivo_agid.objects import DialAction, CallerID
 from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
@@ -181,7 +181,7 @@ class UserFeatures(Handler):
         for secretary in secretaries:
             secretary_callfiltermember, ringseconds = secretary
             if secretary_callfiltermember.active:
-                iface = line_dao.get_interface_from_user_id(secretary_callfiltermember.typeval)
+                iface = user_line_dao.get_line_identity_by_user_id(secretary_callfiltermember.typeval)
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
