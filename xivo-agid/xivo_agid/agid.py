@@ -132,6 +132,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
 class AGID(SocketServer.ThreadingTCPServer):
     allow_reuse_address = True
     initialized = False
+    request_queue_size = 20
 
     def __init__(self):
         log.info('xivo-agid starting...')
