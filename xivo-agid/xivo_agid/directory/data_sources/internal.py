@@ -35,11 +35,11 @@ class InternalDirectoryDataSource(DirectoryDataSource):
 
         test_columns = fields
         request_beg = ('SELECT ${columns} FROM userfeatures '
-            'LEFT JOIN user_line '
-            'ON userfeatures.id = user_line.user_id '
-            'LEFT JOIN extensions '
-            "ON extensions.type = 'user' AND user_line.line_id = CAST(extensions.typeval as integer) "
-            'WHERE ')
+                       'LEFT JOIN user_line '
+                       'ON userfeatures.id = user_line.user_id '
+                       'LEFT JOIN extensions '
+                       "ON extensions.type = 'user' AND user_line.line_id = CAST(extensions.typeval as integer) "
+                       'WHERE ')
         request_end = ' OR '.join('%s ILIKE %%s' % column for column in test_columns)
         request = request_beg + request_end
         params = ('%' + string + '%',) * len(test_columns)
