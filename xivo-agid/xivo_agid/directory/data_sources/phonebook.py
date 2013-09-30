@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from itertools import ifilter, imap
-from xivo_agid.directory.data_sources.directory_data_source import DirectoryDataSource
+from xivo_dird.directory.data_sources.directory_data_source import DirectoryDataSource
 
 
 class PhonebookDirectoryDataSource(DirectoryDataSource):

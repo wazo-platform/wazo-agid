@@ -17,7 +17,7 @@
 
 import logging
 from itertools import izip
-from xivo_agid.directory.data_sources.directory_data_source import DirectoryDataSource
+from xivo_dird.directory.data_sources.directory_data_source import DirectoryDataSource
 
 logger = logging.getLogger('internal directory')
 

@@ -18,7 +18,7 @@
 import urllib
 import urllib2
 from itertools import imap
-from xivo_agid.directory.data_sources.directory_data_source import DirectoryDataSource
+from xivo_dird.directory.data_sources.directory_data_source import DirectoryDataSource
 
 
 class HTTPDirectoryDataSource(DirectoryDataSource):
