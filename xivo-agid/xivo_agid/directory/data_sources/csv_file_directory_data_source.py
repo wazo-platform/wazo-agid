@@ -32,7 +32,7 @@ class CSVFileDirectoryDataSource(DirectoryDataSource):
         key_mapping -- a dictionary mapping std key to list of CSV field name
         """
         self._csv_file = csv_file
-        self._delimiter = delimiter
+        self._delimiter = delimiter.encode('UTF-8')
         self._key_mapping = key_mapping
 
     def lookup(self, string, fields, contexts=None):
