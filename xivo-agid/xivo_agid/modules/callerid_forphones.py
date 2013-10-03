@@ -50,7 +50,7 @@ def callerid_forphones(agi, cursor, args):
     global _cursor
     _cursor = cursor
     try:
-        caller_id_all = _resolve_incoming_caller_id(cid_name, cid_number)
+        caller_id_all = _resolve_incoming_caller_id(cid_name, cid_number, agi)
     finally:
         _cursor = None
 
@@ -58,17 +58,17 @@ def callerid_forphones(agi, cursor, args):
         agi.set_callerid(caller_id_all)
 
 
-def _resolve_incoming_caller_id(cid_name, cid_number):
+def _resolve_incoming_caller_id(cid_name, cid_number, agi):
     logger.debug('Resolving caller ID: incoming caller ID=%s %s',
                  cid_name, cid_number)
 
     if cid_name == cid_number or cid_name == 'unknown':
-        return _get_cid_directory_lookup(cid_number)
+        return _get_cid_directory_lookup(cid_number, agi)
     else:
         return None
 
 
-def _get_cid_directory_lookup(cid_number):
+def _get_cid_directory_lookup(cid_number, agi):
     if _rw_lock.acquire_read(5):
         try:
             context_obj = _contexts_mgr.contexts['*']
@@ -80,8 +80,16 @@ def _get_cid_directory_lookup(cid_number):
         lookup_result = None
 
     if lookup_result:
-        return '"%s" <%s>' % (lookup_result[0], cid_number)
+        result = []
+        for key, value in lookup_result.iteritems():
+            result.append("%s: %s" % (key, value))
+
+        result = ",".join(result)
+
+        agi.set_variable("XIVO_REVERSE_LOOKUP", result)
+        return '"%s" <%s>' % (lookup_result['db-reverse'], cid_number)
     else:
+        agi.set_variable("XIVO_REVERSE_LOOKUP", '')
         return None
 
 

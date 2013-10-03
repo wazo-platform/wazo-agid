@@ -66,20 +66,18 @@ class Context(object):
             directories = self._didextens['*']
         else:
             logger.warning('No directories for DID %s', did_number)
-            return []
 
-        directory_results = []
         for directory in directories:
             try:
-                directory_result = directory.lookup_reverse(number)
-                for res in directory_result:
-                    if 'db-reverse' in res and number in res.itervalues():
-                        directory_results.append(res['db-reverse'])
+                results = directory.lookup_reverse(number)
+                for result in results:
+                    logger.info("lookup_reverse result : %s", result)
+                    return result
             except Exception:
                 logger.error('Error while looking up in directory %s for %s',
                              directory.name, number, exc_info=True)
 
-        return list(set(directory_results))
+        return {}
 
     @classmethod
     def new_from_contents(cls, avail_displays, avail_directories, contents):
