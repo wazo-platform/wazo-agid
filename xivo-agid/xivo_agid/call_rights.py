@@ -15,13 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 RIGHTCALL_AUTHORIZATION_COLNAME = "rightcall.authorization"
 RIGHTCALL_PASSWD_COLNAME = "rightcall.passwd"
 
 rep = (('_', ''),
        ('*', '\*'),
+       ('+', '\+'),
        ('X', '[0-9]'),
        ('Z', '[1-9]'),
        ('N', '[2-9]'),

@@ -15,9 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+import logging
+
 from xivo_agid import agid
 from xivo_agid import objects
 from xivo_agid import call_rights
+
+logger = logging.getLogger(__name__)
 
 
 def _user_set_call_rights(agi, cursor, args):
