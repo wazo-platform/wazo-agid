@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from xivo_agent.ctl import error
-from xivo_agent.ctl.client import AgentClient
-from xivo_agent.exception import AgentClientError
+from xivo_bus.resources.agent import error
+from xivo_bus.resources.agent.client import AgentClient
+from xivo_bus.resources.agent.exception import AgentClientError
 
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
