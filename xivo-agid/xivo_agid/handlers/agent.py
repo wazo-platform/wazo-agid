@@ -27,7 +27,7 @@ _agent_client = None
 def _init_agent_client():
     global _agent_client
     _agent_client = AgentClient()
-    _agent_client.connect('localhost')
+    _agent_client.connect()
 
 
 def _setup_client(fun):
