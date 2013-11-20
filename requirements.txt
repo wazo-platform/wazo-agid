@@ -1,0 +1,9 @@
+-e svn+https://github.com/xivo-pbx/xivo-bus/trunk/xivo-bus#egg=xivo-bus
+nose
+mock
+pyhamcrest
+python-ldap
+sqlalchemy
+psycopg2
+pytz
+pika
