@@ -270,7 +270,7 @@ class User(object):
         self.ringseconds = int(user_row.ringseconds)
         self.simultcalls = user_row.simultcalls
         self.enablevoicemail = user_row.enablevoicemail
-        self.voicemailid = user_row.voicemail_id
+        self.voicemailid = user_row.voicemailid
         self.enablexfer = user_row.enablexfer
         self.enableautomon = user_row.enableautomon
         self.callrecord = user_row.callrecord
