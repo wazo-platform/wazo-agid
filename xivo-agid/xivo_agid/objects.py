@@ -21,7 +21,6 @@ import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
 from xivo_dao.data_handler.line import services as line_services
-from xivo_dao.data_handler.user import services as user_services
 
 from xivo_dao import user_dao, user_line_dao
 
@@ -253,28 +252,25 @@ class User(object):
         self.cursor = cursor
 
         if xid:
-            user = user_services.get(xid)
             user_row = user_dao.get(xid)
         elif exten and context:
-            user = user_services.get_by_number_context(exten, context)
             user_row = user_dao.get_user_by_number_context(exten, context)
         else:
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
-        self.id = user.id
-        self.firstname = user.firstname
-        self.lastname = user.lastname
-        self.language = user.language
-        self.userfield = user.userfield
-        self.callerid = user.callerid
-        self.mobilephonenumber = user.mobilephonenumber
-        self.musiconhold = user.musiconhold
-        self.outcallerid = user.outcallerid
-
+        self.id = user_row.id
+        self.firstname = user_row.firstname
+        self.lastname = user_row.lastname
+        self.language = user_row.language
+        self.userfield = user_row.userfield
+        self.callerid = user_row.callerid
+        self.mobilephonenumber = user_row.mobilephonenumber
+        self.musiconhold = user_row.musiconhold
+        self.outcallerid = user_row.outcallerid
         self.ringseconds = int(user_row.ringseconds)
         self.simultcalls = user_row.simultcalls
         self.enablevoicemail = user_row.enablevoicemail
-        self.voicemailid = user.voicemail_id
+        self.voicemailid = user_row.voicemail_id
         self.enablexfer = user_row.enablexfer
         self.enableautomon = user_row.enableautomon
         self.callrecord = user_row.callrecord
