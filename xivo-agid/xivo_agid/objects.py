@@ -31,7 +31,7 @@ class DBUpdateException(Exception):
     pass
 
 
-class ExtenFeatures:
+class ExtenFeatures(object):
     FEATURES = {
         'agents': (('agentstaticlogin',),
                    ('agentstaticlogoff',),
@@ -108,7 +108,7 @@ class ExtenFeatures:
         return res['exten']
 
 
-class VMBox:
+class VMBox(object):
     def __init__(self, agi, cursor, xid=None, mailbox=None, context=None, commentcond=True):
         self.agi = agi
         self.cursor = cursor
@@ -598,7 +598,7 @@ class MeetMe(object):
         return xlen
 
 
-class Queue:
+class Queue(object):
     def __init__(self, agi, cursor, xid=None, number=None, context=None):
         self.agi = agi
         self.cursor = cursor
@@ -695,7 +695,7 @@ class Queue:
         return [str(row[0]) for row in res]
 
 
-class Agent:
+class Agent(object):
     def __init__(self, agi, cursor, xid=None, number=None):
         self.agi = agi
         self.cursor = cursor
@@ -795,7 +795,7 @@ class DialAction(object):
                                      (self.category not in category_no_isda))
 
 
-class Trunk:
+class Trunk(object):
     def __init__(self, agi, cursor, xid):
         self.agi = agi
         self.cursor = cursor
@@ -821,7 +821,7 @@ class Trunk:
                                                                      self.protocolid)
 
 
-class DID:
+class DID(object):
     def __init__(self, agi, cursor, xid=None, exten=None, context=None):
         self.agi = agi
         self.cursor = cursor
@@ -862,7 +862,7 @@ class DID:
         CallerID(self.agi, self.cursor, "incall", self.id).rewrite(force_rewrite=True)
 
 
-class Outcall:
+class Outcall(object):
     def __init__(self, agi, cursor):
         self.agi = agi
         self.cursor = cursor
@@ -974,7 +974,7 @@ class ScheduleDataMapper(object):
         return Schedule(opened_periods, closed_periods, default_action, timezone)
 
 
-class VoiceMenu:
+class VoiceMenu(object):
     def __init__(self, agi, cursor, xid):
         self.agi = agi
         self.cursor = cursor
@@ -996,7 +996,7 @@ class VoiceMenu:
         self.context = res['context']
 
 
-class Context:
+class Context(object):
     # TODO: Recursive inclusion
     def __init__(self, agi, cursor, context):
         self.agi = agi
@@ -1037,7 +1037,7 @@ CALLERID_MATCHER = re.compile('^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<
 CALLERIDNUM_MATCHER = re.compile('^[0-9\*#]+$').match
 
 
-class CallerID:
+class CallerID(object):
     @staticmethod
     def parse(callerid):
         m = CALLERID_MATCHER(callerid)
@@ -1156,7 +1156,7 @@ class CallerID:
                 self.agi.set_variable('XIVO_CID_REWRITTEN', 1)
 
 
-class ChanSIP:
+class ChanSIP(object):
 
     def __init__(self):
         pass
@@ -1178,7 +1178,7 @@ class ChanSIP:
         return ("SIP/%s" % res['name'], None)
 
 
-class ChanIAX2:
+class ChanIAX2(object):
 
     def __init__(self):
         pass
@@ -1200,7 +1200,7 @@ class ChanIAX2:
         return ("IAX2/%s" % res['name'], None)
 
 
-class ChanSCCP:
+class ChanSCCP(object):
 
     def __init__(self):
         pass
@@ -1223,7 +1223,7 @@ class ChanSCCP:
         return ("SCCP/%s" % res['l.name'], None)
 
 
-class ChanCustom:
+class ChanCustom(object):
 
     def __init__(self):
         pass
