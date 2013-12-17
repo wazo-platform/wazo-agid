@@ -57,7 +57,7 @@ def paging(agi, cursor, args):
         paging_opts = paging_opts + 'i'
 
     if paging_entry.announcement_play:
-        paging_dir_sound = '/var/lib/pf-xivo/sounds/playback'
+        paging_dir_sound = '/var/lib/xivo/sounds/playback'
         paging_opts = paging_opts + 'A(%s/%s)' % (paging_dir_sound, paging_entry.announcement_file)
 
     if paging_entry.announcement_caller:

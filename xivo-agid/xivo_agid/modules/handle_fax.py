@@ -25,7 +25,7 @@ from xivo_agid import agid
 
 logger = logging.getLogger(__name__)
 
-CONFIG_FILE = "/etc/pf-xivo/asterisk/xivo_fax.conf"
+CONFIG_FILE = "/etc/xivo/asterisk/xivo_fax.conf"
 TIFF2PDF_PATH = "/usr/bin/tiff2pdf"
 MUTT_PATH = "/usr/bin/mutt"
 LP_PATH = "/usr/bin/lp"

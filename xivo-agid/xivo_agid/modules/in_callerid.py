@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-RULES_FILE = '/etc/pf-xivo/asterisk/xivo_in_callerid.conf'
+RULES_FILE = '/etc/xivo/asterisk/xivo_in_callerid.conf'
 
 import re
 import sys
