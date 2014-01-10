@@ -19,7 +19,7 @@ import ConfigParser
 
 from xivo_agid import agid
 
-CONFIG_FILE = "/etc/pf-xivo/asterisk/xivo_ring.conf"
+CONFIG_FILE = "/etc/xivo/asterisk/xivo_ring.conf"
 CONFIG_PARSER = None
 
 

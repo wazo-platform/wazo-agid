@@ -27,7 +27,7 @@ from xivo import moresynchro
 from xivo_agid import fastagi
 
 
-AGI_CONFFILE = "/etc/pf-xivo/xivo-agid.conf"
+AGI_CONFFILE = "/etc/xivo/xivo-agid.conf"
 LISTEN_ADDR_DEFAULT = "127.0.0.1"
 LISTEN_PORT_DEFAULT = 4573
 CONN_POOL_SIZE_DEFAULT = 10
