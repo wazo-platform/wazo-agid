@@ -1,0 +1,3 @@
+# see: dh_installdeb(1)
+
+mv_conffile /etc/pf-xivo/xivo-agid.conf /etc/xivo/xivo-agid.conf 14.02

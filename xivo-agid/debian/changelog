@@ -1,0 +1,269 @@
+xivo-agid (14.01~20140110.152707.e7c13a2-wheezy-2) xivo-dev; urgency=low
+
+  * use maintscript instead of renaming conffile manually
+
+ -- Sebastien Duthil <sduthil@avencall.com>  Mon, 13 Jan 2014 14:18:24 -0500
+
+xivo-agid (14.01~20140108.133759.08a5e1f-wheezy-3) xivo-dev; urgency=low
+
+  * revert removing dh-python dependency from xivo-agid
+
+ -- Pascal Cadotte Michaud <pcadottemichaud@avencall.com>  Fri, 10 Jan 2014 14:36:56 -0500
+
+xivo-agid (14.01~20140108.133759.08a5e1f-wheezy-2) xivo-dev; urgency=low
+
+  * remove dh-python dependency
+
+ -- Pascal Cadotte Michaud <pcadottemichaud@avencall.com>  Fri, 10 Jan 2014 14:12:26 -0500
+
+xivo-agid (13.24~20131203.144436.11bfca3-2.1) squeeze-xivo-skaro-dev; urgency=low
+
+  * fix xivo-libdao dependency
+
+ -- Cedric Abunar <cabunar@avencall.com>  Tue, 03 Dec 2013 23:22:31 -0500
+
+xivo-agid (13.24~20131203.144436.11bfca3-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * add xivo-dao dependency
+
+ -- Pascal Cadotte Michaud <pcadottemichaud@avencall.com>  Tue, 03 Dec 2013 13:51:51 -0500
+
+xivo-agid (13.22~20131016.190308.dd252fb-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * replace dependency from xivo-agent to xivo-bus
+
+ -- Sebastien Duthil <sduthil@avencall.com>  Fri, 01 Nov 2013 14:43:04 -0400
+
+xivo-agid (13.09~20130508.171443.10a2b83-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * add python-argparse dependency
+
+ -- Etienne Lessard <elessard@avencall.com>  Wed, 08 May 2013 13:43:12 -0400
+
+xivo-agid (13.04~20130221.181709.8f1a7e6-5) squeeze-xivo-skaro-dev; urgency=low
+
+  * revert init script 
+
+ -- Nicolas HICHER <nhicher@avencall.com>  Sat, 23 Feb 2013 08:51:58 -0500
+
+xivo-agid (13.04~20130221.181709.8f1a7e6-3) squeeze-xivo-skaro-dev; urgency=low
+
+  * add depends on asterisk11 
+
+ -- Nicolas HICHER <nhicher@avencall.com>  Fri, 22 Feb 2013 13:00:27 -0500
+
+xivo-agid (13.04~20130221.181709.8f1a7e6-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * fix init script (status on stopped service must return 3)
+
+ -- Nicolas HICHER <nhicher@avencall.com>  Fri, 22 Feb 2013 12:35:18 -0500
+
+xivo-agid (13.03~20130131.124039.1365a8a-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * add default file for xivo
+
+ -- Cedric Abunar <cabunar@avencall.com>  Tue, 05 Feb 2013 10:03:14 -0500
+
+xivo-agid (12.23~20121127.191742.4d582b0-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * fix dependencies
+
+ -- Etienne Lessard <elessard@avencall.com>  Thu, 29 Nov 2012 09:40:02 -0500
+
+xivo-agid (12.23~20121122.203802.f10f53d-3) squeeze-xivo-skaro-dev; urgency=low
+
+  * break cyclic dependency
+
+ -- Etienne Lessard <elessard@avencall.com>  Tue, 27 Nov 2012 14:07:45 -0500
+
+xivo-agid (12.23~20121122.203802.f10f53d-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * add xivo-agentd in should-{start,stop}
+
+ -- Etienne Lessard <elessard@avencall.com>  Tue, 27 Nov 2012 13:32:04 -0500
+
+xivo-agid (12.23~20121120.185326.374d41c-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * add xivo-agent dependency
+
+ -- Etienne Lessard <elessard@avencall.com>  Tue, 20 Nov 2012 16:09:59 -0500
+
+xivo-agid (12.22~20121106.183540.4b0a57f-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * fix depends, now on xivo-lib-python
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Wed, 07 Nov 2012 11:16:14 -0500
+
+xivo-agid (12.18~20120913.171254.9dd735f-4) squeeze-xivo-skaro-dev; urgency=low
+
+  * move config file delete to xivo-upgrade 
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 13:49:33 -0400
+
+xivo-agid (12.18~20120913.171254.9dd735f-3) squeeze-xivo-skaro-dev; urgency=low
+
+  * fix test to remove symlink insteat regular file 
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 13:38:25 -0400
+
+xivo-agid (12.18~20120913.171254.9dd735f-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * remove /etc/init.d/pf-xivo-agid and /etc/pf-xivo-agid.conf 
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 13:16:13 -0400
+
+xivo-agid (12.18~20120913.135446.44cc02d-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * add postinst script to remove /etc/monit/conf.d/pf-xivo-agid 
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 12:48:36 -0400
+
+xivo-agid (12.17~20120912.194029.c30dcef-1) squeeze-xivo-skaro-dev; urgency=low
+
+  * rename package xivo-agid
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Wed, 12 Sep 2012 15:03:18 -0400
+
+pf-xivo-agid (7:1.2.11~20120620.194029.c30dcef-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * move python depends in pre-depends 
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Wed, 20 Jun 2012 16:04:58 -0400
+
+pf-xivo-agid (7:1.2.10~20120604.184903.8a94fb0-1) squeeze-xivo-skaro-dev; urgency=low
+
+  * fix path in init file 
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Tue, 12 Jun 2012 12:20:00 -0400
+
+pf-xivo-agid (7:1.2~alpha-1.4-1) squeeze-xivo-skaro-dev; urgency=low
+
+
+  * Fix version for packaging-farm
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Wed, 28 Sep 2011 14:58:01 -0400
+
+pf-xivo-agid (7:1.2~20110819.160331.530a224-1) squeeze-xivo-skaro-dev; urgency=low
+
+  * Update package version (svn to git).
+
+ -- Etienne Lessard <edesrocherslessard@avencall.com>  Mon, 22 Aug 2011 08:02:52 -0400
+
+pf-xivo-agid (6:1.2~svn10175-2) squeeze-xivo-skaro-dev; urgency=low
+
+  * fix version
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Wed, 16 Mar 2011 08:36:24 +0100
+
+pf-xivo-agid (6:1.2~svn10175-0) squeeze-xivo-skaro-dev; urgency=low
+
+  * Added python-tz dependances
+
+ -- Sylvain Boily <sboily@proformatique.com>  Fri, 11 Feb 2011 17:19:46 -0500
+
+pf-xivo-agid (6:1.2~svn10168-2) squeeze-xivo-gallifrey-dev; urgency=low
+
+  * Non-maintainer upload.
+
+ -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Fri, 11 Feb 2011 18:21:16 +0100
+
+pf-xivo-agid (6:1.1.0~rc4~svn8430-4) lenny-xivo-gallifrey-dev; urgency=low
+
+  * Removed obsolete preinst (needed to migrate the config file to a new
+    location), and removed the nasty Pre-Depends.
+
+ -- Marc Dequènes (Duck) <mdequenes@proformatique.com>  Fri, 09 Jul 2010 11:46:36 +0200
+
+pf-xivo-agid (5:1.1~svn7535-2) lenny-xivo-gallifrey-dev; urgency=low
+
+  * Reviewed init script.
+
+ -- Adrien DELLE CAVE (Decryptus) <decryptus@proformatique.com>  Tue,  9 Feb 2010 08:38:40 +0100
+
+pf-xivo-agid (5:1.1~svn7384-2) lenny-xivo-gallifrey-dev; urgency=low
+
+  * Updated for Python 2.5.
+
+ -- Marc Dequènes (Duck) <mdequenes@proformatique.com>  Wed, 03 Feb 2010 11:29:12 +0100
+
+pf-xivo-agid (5:1.1~svn6889-2) etch-xivo-gallifrey-dev; urgency=low
+
+  * Added action status to init script.
+
+ -- Adrien DELLE CAVE (Decryptus) <decryptus@proformatique.com>  Sat, 19 Sep 2009 16:10:45 +0200
+
+pf-xivo-agid (3:0.4~svn4386-2) etch-xivo-k-9-dev; urgency=low
+
+  * Fixed rights for /etc/pf-xivo/agid.conf in preinst file.
+
+ -- Adrien DELLE CAVE (Decryptus) <decryptus@proformatique.com>  Tue, 21 Oct 2008 03:23:46 +0200
+
+pf-xivo-agid (3:0.4~svn4386-0) etch-xivo-k-9-dev; urgency=low
+
+  * New preinst script that migrates /etc/asterisk/xivo_agi.conf to
+    /etc/pf-xivo/agid.conf
+
+ -- Adrien DELLE CAVE (Decryptus) <decryptus@proformatique.com>  Mon, 20 Oct 2008 21:30:38 +0200
+
+pf-xivo-agid (3:0.4~svn4374-0) etch-xivo-k-9-dev; urgency=low
+
+  * Added config file from obsolete 'pf-xivo-base-agi'.
+
+ -- Marc Dequènes (Duck) <mdequenes@proformatique.com>  Fri, 17 Oct 2008 18:29:38 +0200
+
+pf-xivo-agid (3:0.4~svn4283-2) etch-xivo-k-9-dev; urgency=low
+
+  * Added python-cjson in depends.
+
+ -- Adrien DELLE CAVE (Decryptus) <decryptus@proformatique.com>  Tue, 14 Oct 2008 00:04:20 +0200
+
+pf-xivo-agid (3:0.4~svn4152-0) etch-xivo-k-9-dev; urgency=low
+
+  * Fixed license for fastagi.py in debian/copyright file.
+
+ -- Guillaume Knispel <gknispel@proformatique.com>  Tue, 23 Sep 2008 20:12:07 +0200
+
+pf-xivo-agid (3:0.4~svn3758-2) etch-xivo-k-9-dev; urgency=low
+
+  * Added asterisk-config | asterisk-config-custom in pre-depends.
+
+ -- Adrien DELLE CAVE (Decryptus) <decryptus@proformatique.com>  Mon, 11 Aug 2008 17:59:28 +0200
+
+pf-xivo-agid (0.4~svn3638-2) etch-xivo-k-9-dev; urgency=low
+
+  * Replaced all occurrences to Xivo by XIVO in copyright file.
+
+ -- Adrien DELLE CAVE (Decryptus) <decryptus@proformatique.com>  Wed, 23 Jul 2008 00:35:41 +0200
+
+pf-xivo-agid (0.4~svn3542-0) etch-xivo-k-9-dev; urgency=low
+
+  * Added ${python:Versions} ${python:Depends} and ${python:Provides} 
+
+ -- Guillaume Knispel <gknispel@proformatique.com>  Thu, 10 Jul 2008 15:26:27 +0200
+
+pf-xivo-agid (0.4~svn3419-0) etch-xivo-k-9-dev; urgency=low
+
+  * Removed prerm that was used to work around a bug where
+    update-python-modules was called to soon, because we now have a cleaner 
+    work around that lets debhelpers generate the buggy file which is fixed 
+    just after.
+
+ -- Guillaume Knispel <gknispel@proformatique.com>  Fri, 27 Jun 2008 12:47:29 +0200
+
+pf-xivo-agid (0.4~svn3190-0) etch-xivo-k-9-dev; urgency=low
+
+  * Removed local modified copy of debhelper.mk
+
+ -- Guillaume Knispel <gknispel@proformatique.com>  Fri,  6 Jun 2008 15:37:58 +0200
+
+pf-xivo-agid (0.4~svn3116-0) etch-xivo-k-9-dev; urgency=low
+
+  * simple-patchsys.mk not used, removed. 
+
+ -- Guillaume Knispel <gknispel@proformatique.com>  Tue, 27 May 2008 19:03:30 +0200
+
+pf-xivo-agid (0.4~svn3089-0) etch-xivo-k-9-dev; urgency=low
+
+  * Initial Release.
+
+ -- Guillaume Knispel <gknispel@proformatique.com>  Fri, 23 May 2008 18:18:55 +0200
