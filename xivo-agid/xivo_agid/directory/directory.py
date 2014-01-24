@@ -23,7 +23,7 @@ from operator import itemgetter
 from xivo_dird.directory.data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
 from xivo_dird.directory.data_sources.http import HTTPDirectoryDataSource
 from xivo_agid.directory.data_sources.internal import InternalDirectoryDataSource
-from xivo_agid.directory.data_sources.ldap import LDAPDirectoryDataSource
+from xivo_dird.directory.data_sources.ldap import LDAPDirectoryDataSource
 from xivo_agid.directory.data_sources.phonebook import PhonebookDirectoryDataSource
 
 logger = logging.getLogger('directories')
@@ -247,8 +247,7 @@ class DirectoriesMgr(object):
         'file': CSVFileDirectoryDataSource,
         'http': HTTPDirectoryDataSource,
         'internal': InternalDirectoryDataSource,
-        'ldap': LDAPDirectoryDataSource,
-        'ldaps': LDAPDirectoryDataSource,
+        'ldapfilter': LDAPDirectoryDataSource,
         'phonebook': PhonebookDirectoryDataSource,
     }
 
