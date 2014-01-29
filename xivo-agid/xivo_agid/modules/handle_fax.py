@@ -49,7 +49,7 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
 #   faxfile -- the path to the fax file (in TIFF format)
 #   dstnum -- the content of the the XIVO_DSTNUM dialplan variable
 #   args -- args specific to the backend
-def _new_mail_backend(subject, content_file):
+def _new_mail_backend(subject, content_file, email_from):
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
     # called.
@@ -70,7 +70,7 @@ def _new_mail_backend(subject, content_file):
             fmt_dict = {"dstnum": dstnum}
             p = subprocess.Popen([MUTT_PATH,
                                  "-e", "set copy=no",
-                                 "-e", "set from=no-reply+fax@xivo.fr",
+                                 "-e", "set from=", email_from,
                                  "-e", "set realname='XiVO Fax'",
                                  "-e", "set use_from=yes",
                                  "-s", subject % fmt_dict,
