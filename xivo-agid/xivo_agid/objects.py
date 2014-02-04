@@ -374,9 +374,6 @@ class User(object):
 
 class MeetMe(object):
 
-    FLAG_ADMIN = (1 << 0)
-    FLAG_USER = (1 << 1)
-
     OPTIONS_GLOBAL = {'talkeroptimization': '',  # Disabled
                       'record': 'r',
                       'talkerdetection': '',  # Disabled
@@ -497,20 +494,6 @@ class MeetMe(object):
 
         return set(options)
 
-    def get_admin_options(self):
-        admin_options = self.OPTIONS_COMMON.copy()
-        admin_options.update(self.OPTIONS_ADMIN)
-        options = self._get_options(admin_options, "admin_")
-
-        if self.OPTIONS_COMMON['enableexitcontext'] in options \
-                and not self.admin_exitcontext:
-            options.remove(self.OPTIONS_COMMON['enableexitcontext'])
-
-        options.add('a')  # Admin mode
-        options.add('A')  # Marked mode
-
-        return set(options)
-
     def get_user_options(self):
         user_options = self.OPTIONS_COMMON.copy()
         user_options.update(self.OPTIONS_USER)
@@ -525,77 +508,8 @@ class MeetMe(object):
 
         return set(options)
 
-    def get_option_by_flag(self, option, flag):
-        if flag & self.FLAG_USER:
-            return getattr(self, "user_%s" % option)
-        elif flag & self.FLAG_ADMIN:
-            return getattr(self, "admin_%s" % option)
-        else:
-            raise ValueError("Unable to find option %r, unknown MeetMe FLAG (flag: %r)"
-                             % (option, flag))
-
-    def get_admin_identifiers(self):
-        if self.admin_typefrom in (None, 'none'):
-            return None
-
-        r = {'calleridnum': None,
-             'pin': None}
-
-        if self.admin_identification in ('calleridnum', 'all'):
-            if self.admin_typefrom == 'internal':
-                if self.admin_number:
-                    r['calleridnum'] = self.admin_number
-                else:
-                    raise ValueError("Missing internal number to identify the administrator")
-            elif self.admin_typefrom == 'external':
-                if self.admin_externalid:
-                    r['calleridnum'] = self.admin_externalid
-                else:
-                    raise ValueError("Missing external number to identify the administrator")
-
-        if self.admin_identification in ('pin', 'all'):
-            if self.pinadmin:
-                r['pin'] = self.pinadmin
-            else:
-                raise ValueError("Missing administrator PIN to identify the administrator")
-
-        if not r['calleridnum'] and not r['pin']:
-            raise NotImplementedError("Identification method not implemented: %r" % self.admin_identification)
-
-        return r
-
-    def is_admin(self, pinadmin=None, calleridnum=None):
-        admin_identifiers = self.get_admin_identifiers()
-
-        if not admin_identifiers:
-            return False
-        elif admin_identifiers['calleridnum'] \
-                and admin_identifiers['calleridnum'] != calleridnum:
-            return False
-        elif admin_identifiers['pin'] \
-                and admin_identifiers['pin'] != pinadmin:
-            return False
-
-        return True
-
-    def authenticate(self, pin=None, calleridnum=None):
-        if self.is_admin(pin, calleridnum):
-            return self.FLAG_ADMIN
-        elif not self.pin or self.pin == pin:
-            return self.FLAG_USER
-
-        return False
-
-    def pin_len_max(self):
-        xlen = 0
-
-        if self.pin:
-            xlen = len(self.pin)
-
-        if self.pinadmin and len(self.pinadmin) > xlen:
-            xlen = len(self.pinadmin)
-
-        return xlen
+    def get_user_option(self, option):
+        return getattr(self, "user_%s" % option)
 
 
 class Queue(object):
