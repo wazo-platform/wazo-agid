@@ -947,8 +947,8 @@ class Context(object):
                 self.include.append(row['contextinclude.include'])
 
 
-CALLERID_MATCHER = re.compile('^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<([0-9\*#]+)>)?$').match
-CALLERIDNUM_MATCHER = re.compile('^[0-9\*#]+$').match
+CALLERID_MATCHER = re.compile('^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<(\+?[0-9\*#]+)>)?$').match
+CALLERIDNUM_MATCHER = re.compile('^\+?[0-9\*#]+$').match
 
 
 class CallerID(object):
