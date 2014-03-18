@@ -1,8 +1,8 @@
-svn+https://github.com/xivo-pbx/xivo-dao/trunk/xivo-dao
-svn+https://github.com/xivo-pbx/xivo-lib-python/trunk/xivo-lib-python
-svn+https://github.com/xivo-pbx/xivo-dird/trunk/xivo-dird
--e svn+https://github.com/xivo-pbx/xivo-provisioning/trunk/xivo-provisioning#egg=provd
--e svn+https://github.com/xivo-pbx/xivo-bus/trunk/xivo-bus#egg=xivo-bus
+git+https://github.com/xivo-pbx/xivo-dao.git
+git+https://github.com/xivo-pbx/xivo-lib-python.git
+git+https://github.com/xivo-pbx/xivo-dird.git
+git+https://github.com/xivo-pbx/xivo-provisioning.git
+git+https://github.com/xivo-pbx/xivo-bus.git
 nose
 mock
 pyhamcrest
