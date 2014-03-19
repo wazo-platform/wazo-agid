@@ -121,6 +121,8 @@ class GroupFeatures(Handler):
     def _set_timeout(self):
         if self._timeout:
             self._agi.set_variable('XIVO_GROUPTIMEOUT', self._timeout)
+        else:
+            self._agi.set_variable('XIVO_GROUPTIMEOUT', "")
 
     def _set_dial_action(self):
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
