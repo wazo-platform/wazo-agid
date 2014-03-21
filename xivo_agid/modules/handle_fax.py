@@ -70,7 +70,7 @@ def _new_mail_backend(subject, content_file, email_from):
             fmt_dict = {"dstnum": dstnum}
             p = subprocess.Popen([MUTT_PATH,
                                  "-e", "set copy=no",
-                                 "-e", "set from=", email_from,
+                                 "-e", "set from=%s" % email_from,
                                  "-e", "set realname='XiVO Fax'",
                                  "-e", "set use_from=yes",
                                  "-s", subject % fmt_dict,
