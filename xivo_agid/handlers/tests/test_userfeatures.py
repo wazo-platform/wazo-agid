@@ -365,3 +365,79 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         user_features._set_rna_from_dialaction.assert_called_once_with()
 
         assert_that(self._agi.set_variable.call_count, equal_to(0))
+
+
+class TestSetForwardBusy(_BaseTestCase):
+
+    def test_forward_busy_to_a_user_dialaction(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._user = Mock(objects.User, id=sentinel.userid)
+        self._cursor.fetchone = Mock(return_value={
+            'action': 'user',
+            'actionarg1': '5',
+            'actionarg2': '',
+        })
+
+        enabled = user_features._set_rbusy_from_dialaction()
+
+        assert_that(enabled, equal_to(True))
+        assert_that(self._agi.set_variable.call_args_list, contains(
+            call('XIVO_FWD_USER_BUSY_ACTION', 'user'),
+            call('XIVO_FWD_USER_BUSY_ISDA', '1'),
+            call('XIVO_FWD_USER_BUSY_ACTIONARG1', '5'),
+            call('XIVO_FWD_USER_BUSY_ACTIONARG2', ''),
+        ))
+
+    def test_forward_busy_to_a_user_from_exten_with_the_exten_disabled(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=False)
+
+        enabled = user_features._set_rbusy_from_exten(Mock())
+
+        assert_that(enabled, equal_to(False))
+
+    def test_forward_busy_to_a_user_from_exten_fwdbusy_disabled_on_user(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=True)
+        user_features._user = Mock(objects.User, enablebusy=False)
+
+        enabled = user_features._set_rbusy_from_exten(Mock())
+
+        assert_that(enabled, equal_to(False))
+
+    def test_forward_busy_to_a_user_from_exten(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=True)
+        user_features._user = Mock(objects.User, destbusy='666', enablebusy=True)
+        called_line = Mock(objects.Line, context=sentinel.context)
+
+        enabled = user_features._set_rbusy_from_exten(called_line)
+
+        assert_that(enabled, equal_to(True))
+        assert_that(self._agi.set_variable.call_args_list, contains(
+            call('XIVO_FWD_USER_BUSY_ACTION', 'extension'),
+            call('XIVO_FWD_USER_BUSY_ACTIONARG1', '666'),
+            call('XIVO_FWD_USER_BUSY_ACTIONARG2', sentinel.context),
+        ))
+
+    def test_set_rbusy_exten_disabled_noanswer_enabled(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._set_rbusy_from_exten = Mock(return_value=False)
+        user_features._set_rbusy_from_dialaction = Mock(return_value=True)
+
+        user_features._setbusy(sentinel.called_line)
+
+        user_features._set_rbusy_from_exten.assert_called_once_with(sentinel.called_line)
+        assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLEBUSY', True))
+
+    def test_set_busy_exten_disabled_noanswer_disabled(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._set_rbusy_from_exten = Mock(return_value=False)
+        user_features._set_rbusy_from_dialaction = Mock(return_value=False)
+
+        user_features._setbusy(sentinel.called_line)
+
+        user_features._set_rbusy_from_exten.assert_called_once_with(sentinel.called_line)
+        user_features._set_rbusy_from_dialaction.assert_called_once_with()
+
+        assert_that(self._agi.set_variable.call_count, equal_to(0))
