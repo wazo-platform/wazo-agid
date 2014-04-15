@@ -16,7 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock, call, patch
+from hamcrest import assert_that
+from hamcrest import contains
+from hamcrest import equal_to
+
+from mock import Mock, call, patch, sentinel
 
 from xivo_agid.handlers.userfeatures import UserFeatures
 from xivo_agid import objects
@@ -27,9 +31,18 @@ class NotEmptyStringMatcher(object):
         return isinstance(other, basestring) and bool(other)
 
 
-class TestUserFeatures(unittest.TestCase):
+class _BaseTestCase(unittest.TestCase):
 
     def setUp(self):
+        self._agi = Mock()
+        self._cursor = Mock(cast=lambda x, y: '')
+        self._args = Mock()
+
+
+class TestUserFeatures(_BaseTestCase):
+
+    def setUp(self):
+        super(TestUserFeatures, self).setUp()
         self._variables = {'XIVO_USERID': '42',
                            'XIVO_DSTID': '33',
                            'XIVO_CALLORIGIN': 'my_origin',
@@ -39,10 +52,7 @@ class TestUserFeatures(unittest.TestCase):
         def get_variable(key):
             return self._variables[key]
 
-        self._agi = Mock()
         self._agi.get_variable = get_variable
-        self._cursor = Mock()
-        self._args = Mock()
 
     def test_userfeatures(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -279,3 +289,79 @@ class TestUserFeatures(unittest.TestCase):
         userfeatures._set_callfilter_ringseconds('TIMEOUT', value)
 
         self._agi.set_variable.assert_called_once_with(name, value)
+
+
+class TestSetForwardNoAnswer(_BaseTestCase):
+
+    def test_forward_no_answer_to_a_user_dialaction(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._user = Mock(objects.User, id=sentinel.userid)
+        self._cursor.fetchone = Mock(return_value={
+            'action': 'user',
+            'actionarg1': '5',
+            'actionarg2': '',
+        })
+
+        enabled = user_features._set_rna_from_dialaction()
+
+        assert_that(enabled, equal_to(True))
+        assert_that(self._agi.set_variable.call_args_list, contains(
+            call('XIVO_FWD_USER_NOANSWER_ACTION', 'user'),
+            call('XIVO_FWD_USER_NOANSWER_ISDA', '1'),
+            call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '5'),
+            call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', ''),
+        ))
+
+    def test_forward_no_answer_to_a_user_from_exten_with_the_exten_disabled(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=False)
+
+        enabled = user_features._set_rna_from_exten(Mock())
+
+        assert_that(enabled, equal_to(False))
+
+    def test_forward_no_answer_to_a_user_from_exten_fwdrna_disabled_on_user(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=True)
+        user_features._user = Mock(objects.User, enablerna=False)
+
+        enabled = user_features._set_rna_from_exten(Mock())
+
+        assert_that(enabled, equal_to(False))
+
+    def test_forward_no_answer_to_a_user_from_exten(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=True)
+        user_features._user = Mock(objects.User, destrna='555', enablerna=True)
+        called_line = Mock(objects.Line, context=sentinel.context)
+
+        enabled = user_features._set_rna_from_exten(called_line)
+
+        assert_that(enabled, equal_to(True))
+        assert_that(self._agi.set_variable.call_args_list, contains(
+            call('XIVO_FWD_USER_NOANSWER_ACTION', 'extension'),
+            call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '555'),
+            call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', sentinel.context),
+        ))
+
+    def test_setrna_exten_disabled_noanswer_enabled(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._set_rna_from_exten = Mock(return_value=False)
+        user_features._set_rna_from_dialaction = Mock(return_value=True)
+
+        user_features._setrna(sentinel.called_line)
+
+        user_features._set_rna_from_exten.assert_called_once_with(sentinel.called_line)
+        assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLERNA', True))
+
+    def test_setrna_exten_disabled_noanswer_disabled(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        user_features._set_rna_from_exten = Mock(return_value=False)
+        user_features._set_rna_from_dialaction = Mock(return_value=False)
+
+        user_features._setrna(sentinel.called_line)
+
+        user_features._set_rna_from_exten.assert_called_once_with(sentinel.called_line)
+        user_features._set_rna_from_dialaction.assert_called_once_with()
+
+        assert_that(self._agi.set_variable.call_count, equal_to(0))

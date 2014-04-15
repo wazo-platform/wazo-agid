@@ -302,24 +302,37 @@ class UserFeatures(Handler):
             enablednd = 0
         self._agi.set_variable('XIVO_ENABLEDND', enablednd)
 
+    def _set_rna_from_dialaction(self):
+        dial_action = objects.DialAction(
+            self._agi,
+            self._cursor,
+            'noanswer',
+            'user',
+            self._user.id,
+        )
+        dial_action.set_variables()
+
+        return dial_action.action != 'none'
+
+    def _set_rna_from_exten(self, called_line):
+        if not self._feature_list.fwdrna or not self._user.enablerna:
+            return False
+
+        objects.DialAction.set_agi_variables(
+            self._agi,
+            'noanswer',
+            'user',
+            'extension',
+            self._user.destrna,
+            called_line.context,
+            False,
+        )
+
+        return True
+
     def _setrna(self, called_line):
-        setrna = False
-        enablerna = 0
-        rna_action = 'none'
-        rna_actionarg1 = ""
-        rna_actionarg2 = ""
-        if self._feature_list.fwdrna:
-            enablerna = self._user.enablerna
-            if enablerna:
-                rna_action = 'extension'
-                rna_actionarg1 = self._user.destrna
-                rna_actionarg2 = called_line.context
-            else:
-                setrna = True
-                objects.DialAction(self._agi, self._cursor, 'noanswer', 'user', self._user.id).set_variables()
-        self._agi.set_variable('XIVO_ENABLERNA', enablerna)
-        if not setrna:
-            objects.DialAction.set_agi_variables(self._agi, 'noanswer', 'user', rna_action, rna_actionarg1, rna_actionarg2, False)
+        if self._set_rna_from_exten(called_line) or self._set_rna_from_dialaction():
+            self._agi.set_variable('XIVO_ENABLERNA', True)
 
     def _setbusy(self, called_line):
         setbusy = False
