@@ -66,6 +66,7 @@ def incoming_queue_set_features(agi, cursor, args):
     agi.set_variable('XIVO_QUEUENEEDANSWER', needanswer)
     agi.set_variable('XIVO_QUEUEURL', queue.url)
     agi.set_variable('XIVO_QUEUEANNOUNCEOVERRIDE', queue.announceoverride)
+    agi.set_variable('CHANNEL(musicclass)', queue.musiconhold)
 
     _set_wrapup_time(agi, queue)
 

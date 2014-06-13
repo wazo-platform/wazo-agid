@@ -526,7 +526,7 @@ class Queue(object):
             'waitratio'
         ]
         queuefeatures_columns = ["queuefeatures." + c for c in queuefeatures_columns]
-        queue_columns = ['queue.wrapuptime']
+        queue_columns = ['queue.wrapuptime', 'queue.musicclass']
 
         columns = queuefeatures_columns + queue_columns
 
@@ -579,6 +579,7 @@ class Queue(object):
         self.waittime = res['queuefeatures.waittime']
         self.waitratio = res['queuefeatures.waitratio']
         self.wrapuptime = res['queue.wrapuptime']
+        self.musiconhold = res['queue.musicclass']
 
     def set_dial_actions(self):
         for event in ['congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio']:
