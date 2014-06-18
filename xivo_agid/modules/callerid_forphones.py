@@ -44,14 +44,17 @@ _cursor = None
 
 
 def callerid_forphones(agi, cursor, args):
-    cid_name = agi.env['agi_calleridname']
-    cid_number = agi.env['agi_callerid']
+    try:
+        cid_name = agi.env['agi_calleridname']
+        cid_number = agi.env['agi_callerid']
 
-    logger.debug('Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number)
-    if _should_reverse_lookup(cid_name, cid_number):
-        lookup_result = _reverse_lookup(cursor, cid_number)
-        _set_new_caller_id(agi, lookup_result, cid_number)
-        _set_reverse_lookup_variable(agi, lookup_result)
+        logger.debug('Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number)
+        if _should_reverse_lookup(cid_name, cid_number):
+            lookup_result = _reverse_lookup(cursor, cid_number)
+            _set_new_caller_id(agi, lookup_result, cid_number)
+            _set_reverse_lookup_variable(agi, lookup_result)
+    except Exception:
+        logger.exception('Reverse lookup failed')
 
 
 def _should_reverse_lookup(cid_name, cid_number):

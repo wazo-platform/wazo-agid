@@ -79,3 +79,14 @@ class TestCallerIdForPhone(unittest.TestCase):
         for key, value in lookup_result.iteritems():
             s = '%s: %s' % (key, value)
             assert_that(set_var_result, contains_string(s))
+
+    @patch('xivo_agid.modules.callerid_forphones._reverse_lookup',
+           Mock(side_effect=AssertionError('Should not raise')))
+    def test_that_callerid_forphones_never_raises(self):
+        mock_agi = Mock(FastAGI)
+        mock_agi.env = {
+            'agi_calleridname': '5555551234',
+            'agi_callerid': '5555551234',
+        }
+
+        callerid_forphones(mock_agi, Mock(), Mock())
