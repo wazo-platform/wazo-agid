@@ -16,33 +16,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import argparse
-import logging
-from logging.handlers import SysLogHandler
 
 from xivo_agid import agid
 from xivo_agid.modules import *
 from xivo import daemonize
+from xivo.xivo_logging import setup_logging
 
-PIDFILE = "/var/run/xivo-agid.pid"
-SYSLOG_NAME = 'xivo-agid'
+PIDFILE = '/var/run/xivo-agid.pid'
+LOG_FILE_NAME = '/var/log/xivo-agid.log'
 
 
 def main():
     parsed_args = _parse_args()
 
-    logging.basicConfig(level=logging.DEBUG)
-    sysloghandler = SysLogHandler("/dev/log", SysLogHandler.LOG_DAEMON)
-    sysloghandler.setFormatter(logging.Formatter("%s[%%(process)d]: %%(message)s" % SYSLOG_NAME))
-    logging.getLogger('').addHandler(sysloghandler)
+    setup_logging(LOG_FILE_NAME, parsed_args.foreground, parsed_args.debug)
 
     if not parsed_args.foreground:
         daemonize.daemonize()
 
     daemonize.lock_pidfile_or_die(PIDFILE)
     try:
-        if not parsed_args.debug:
-            logging.getLogger('').setLevel(logging.INFO)
-
         agid.init()
         agid.run()
     finally:
