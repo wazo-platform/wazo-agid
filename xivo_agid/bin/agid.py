@@ -19,7 +19,7 @@ import argparse
 
 from xivo_agid import agid
 from xivo_agid.modules import *
-from xivo import daemonize
+from xivo.daemonize import pidfile_context
 from xivo.xivo_logging import setup_logging
 
 PIDFILE = '/var/run/xivo-agid.pid'
@@ -31,15 +31,9 @@ def main():
 
     setup_logging(LOG_FILE_NAME, parsed_args.foreground, parsed_args.debug)
 
-    if not parsed_args.foreground:
-        daemonize.daemonize()
-
-    daemonize.lock_pidfile_or_die(PIDFILE)
-    try:
+    with pidfile_context(PIDFILE, parsed_args.foreground):
         agid.init()
         agid.run()
-    finally:
-        daemonize.unlock_pidfile(PIDFILE)
 
 
 def _parse_args():
