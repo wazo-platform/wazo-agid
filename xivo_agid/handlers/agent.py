@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+from xivo import moresynchro
 from xivo_bus.resources.agent import error
 from xivo_bus.resources.agent.client import AgentClient
 from xivo_bus.resources.agent.exception import AgentClientError
@@ -22,18 +23,15 @@ from xivo_bus.resources.agent.exception import AgentClientError
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
 _agent_client = AgentClient()
+_once = moresynchro.Once()
 
 
-def _setup_client(fun):
-    def aux(*args, **kwargs):
-        if not _agent_client.connected:
-            _agent_client.connect()
-        return fun(*args, **kwargs)
-    return aux
+def _init_client():
+    _agent_client.connect()
 
 
-@_setup_client
 def login_agent(agi, agent_id, extension, context):
+    _once.once(_init_client)
     try:
         _agent_client.login_agent(agent_id, extension, context)
     except AgentClientError as e:
@@ -47,8 +45,8 @@ def login_agent(agi, agent_id, extension, context):
         agi.set_variable(AGENTSTATUS_VAR, 'logged')
 
 
-@_setup_client
 def logoff_agent(agi, agent_id):
+    _once.once(_init_client)
     try:
         _agent_client.logoff_agent(agent_id)
     except AgentClientError as e:
@@ -56,8 +54,8 @@ def logoff_agent(agi, agent_id):
             raise
 
 
-@_setup_client
 def get_agent_status(agi, agent_id):
+    _once.once(_init_client)
     status = _agent_client.get_agent_status(agent_id)
     login_status = 'logged_in' if status.logged else 'logged_out'
     agi.set_variable('XIVO_AGENT_LOGIN_STATUS', login_status)
