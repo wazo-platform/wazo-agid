@@ -21,19 +21,13 @@ from xivo_bus.resources.agent.exception import AgentClientError
 
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
-_agent_client = None
-
-
-def _init_agent_client():
-    global _agent_client
-    _agent_client = AgentClient()
-    _agent_client.connect()
+_agent_client = AgentClient()
 
 
 def _setup_client(fun):
     def aux(*args, **kwargs):
-        if _agent_client is None:
-            _init_agent_client()
+        if not _agent_client.connected:
+            _agent_client.connect()
         return fun(*args, **kwargs)
     return aux
 
