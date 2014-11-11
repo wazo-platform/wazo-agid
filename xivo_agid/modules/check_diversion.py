@@ -26,13 +26,11 @@ def check_diversion(agi, cursor, args):
     except (ValueError, LookupError), e:
         agi.dp_break(str(e))
 
-    waiting_calls = int(agi.get_variable('XIVO_QUEUE_CALLS_COUNT'))
+    waiting_calls = int(agi.get_variable('QUEUE_WAITING_COUNT({})'.format(queue.name)))
     if _is_hold_time_overrun(agi, queue, waiting_calls):
         _set_diversion(agi, 'DIVERT_HOLDTIME', 'qwaittime')
     elif _is_agent_ratio_overrun(agi, queue, waiting_calls):
         _set_diversion(agi, 'DIVERT_CA_RATIO', 'qwaitratio')
-    else:
-        _set_diversion(agi, 'none', '')
 
 
 def _is_hold_time_overrun(agi, queue, waiting_calls):
@@ -47,7 +45,7 @@ def _is_agent_ratio_overrun(agi, queue, waiting_calls):
     if queue.waitratio is None:
         return False
 
-    agents = int(agi.get_variable('XIVO_QUEUE_MEMBERS_COUNT'))
+    agents = int(agi.get_variable('QUEUE_MEMBER({},logged)'.format(queue.name)))
     if agents == 0:
         return True
 
