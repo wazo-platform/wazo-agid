@@ -26,36 +26,37 @@ def check_diversion(agi, cursor, args):
     except (ValueError, LookupError), e:
         agi.dp_break(str(e))
 
-    event = 'none'
-    dialaction = ''
+    waiting_calls = int(agi.get_variable('XIVO_QUEUE_CALLS_COUNT'))
+    if _is_hold_time_overrun(agi, queue, waiting_calls):
+        _set_diversion(agi, 'DIVERT_HOLDTIME', 'qwaittime')
+    elif _is_agent_ratio_overrun(agi, queue, waiting_calls):
+        _set_diversion(agi, 'DIVERT_CA_RATIO', 'qwaitratio')
+    else:
+        _set_diversion(agi, 'none', '')
 
-    # . holdtime
-    # set by QUEUE_VARIABLES(${XIVO_QUEUENAME})
-    # NOTE: why testing waitingcalls ?
-    #       once there are no more calls in queue, QUEUEHOLDTIME will NEVER be
-    #       updated.
-    #       Thus if we are over threshold, we can never go over.
-    #       So, once queue is empty, we accept new incoming call event if holdtime
-    #       is over threshold
-    waitingcalls = agi.get_variable('XIVO_QUEUE_CALLS_COUNT')
-    if waitingcalls == '':
-        waitingcalls = 0
-    if event == 'none' and int(waitingcalls) > 0 and queue.waittime is not None:
-        holdtime = agi.get_variable('QUEUEHOLDTIME')
-        if int(holdtime) > queue.waittime:
-            event = 'DIVERT_HOLDTIME'
-            dialaction = 'qwaittime'
 
-    # . calls/agents ratio
-    if event == 'none' and queue.waitratio is not None:
-        agents = agi.get_variable('XIVO_QUEUE_MEMBERS_COUNT')
+def _is_hold_time_overrun(agi, queue, waiting_calls):
+    if queue.waittime is None or waiting_calls == 0:
+        return False
 
-        if int(agents) == 0 or \
-                int(waitingcalls) + 1 / int(agents) > (queue.waitratio / 100):
-            event = 'DIVERT_CA_RATIO'
-            dialaction = 'qwaitratio'
+    holdtime = int(agi.get_variable('QUEUEHOLDTIME'))
+    return holdtime > queue.waittime
 
+
+def _is_agent_ratio_overrun(agi, queue, waiting_calls):
+    if queue.waitratio is None:
+        return False
+
+    agents = int(agi.get_variable('XIVO_QUEUE_MEMBERS_COUNT'))
+    if agents == 0:
+        return True
+
+    return waiting_calls + 1 / agents > queue.waitratio / 100
+
+
+def _set_diversion(agi, event, dialaction):
     agi.set_variable('XIVO_DIVERT_EVENT', event)
     agi.set_variable('XIVO_FWD_TYPE', 'queue_' + dialaction)
+
 
 agid.register(check_diversion)
