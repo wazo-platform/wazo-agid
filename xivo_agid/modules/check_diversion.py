@@ -42,7 +42,7 @@ def _is_hold_time_overrun(agi, queue, waiting_calls):
 
 
 def _is_agent_ratio_overrun(agi, queue, waiting_calls):
-    if queue.waitratio is None:
+    if queue.waitratio is None or waiting_calls == 0:
         return False
 
     agents = int(agi.get_variable('QUEUE_MEMBER({},logged)'.format(queue.name)))
