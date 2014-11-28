@@ -27,7 +27,7 @@ class TestCheckDiversion(unittest.TestCase):
         self.queue = Mock(name='foo')
 
     def test_is_agent_ratio_overrun_0_members(self):
-        self.queue.waitratio = 70
+        self.queue.waitratio = 0.70
         self.agi.get_variable.return_value = '0'
         waiting_calls = 2
 
@@ -35,14 +35,14 @@ class TestCheckDiversion(unittest.TestCase):
         self.agi.get_variable.assert_called_once_with('QUEUE_MEMBER({},logged)'.format(self.queue.name))
 
     def test_is_agent_ratio_overrun_over(self):
-        self.queue.waitratio = 70
+        self.queue.waitratio = 0.70
         self.agi.get_variable.return_value = '4'
         waiting_calls = 2
 
         self.assertTrue(check_diversion._is_agent_ratio_overrun(self.agi, self.queue, waiting_calls))
 
     def test_is_agent_ratio_overrun_under(self):
-        self.queue.waitratio = 80
+        self.queue.waitratio = 0.80
         self.agi.get_variable.return_value = '4'
         waiting_calls = 2
 

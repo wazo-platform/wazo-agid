@@ -49,7 +49,7 @@ def _is_agent_ratio_overrun(agi, queue, waiting_calls):
     if agents == 0:
         return True
 
-    return (waiting_calls + 1.0) / agents > queue.waitratio / 100.0
+    return (waiting_calls + 1.0) / agents > queue.waitratio
 
 
 def _set_diversion(agi, event, dialaction):
