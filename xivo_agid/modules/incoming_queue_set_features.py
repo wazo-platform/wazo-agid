@@ -124,8 +124,9 @@ def holdtime_announce(agi, cursor, args):
     agi.answer()
     agi.stream_file('queue-holdtime')
     agi.stream_file('queue-less-than')
-    agi.stream_file('digits/%s' % holdtime)
+    agi.say_number(str(holdtime))
     agi.stream_file('queue-minutes')
+
 
 agid.register(incoming_queue_set_features)
 agid.register(holdtime_announce)
