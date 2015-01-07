@@ -8,9 +8,13 @@ case "$1" in
         if [ -h /etc/monit/conf.d/pf-xivo-agid ]; then
             rm /etc/monit/conf.d/pf-xivo-agid
         fi
+
+        if [ -f /etc/xivo/xivo-agid.conf ]; then
+            rm -rf /etc/xivo/xivo-agid.conf
+        fi
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
-    
+
     ;;
 
     *)

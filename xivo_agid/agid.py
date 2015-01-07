@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2008-2014 Avencall
+# Copyright (C) 2008-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 import signal
 import logging
 import SocketServer
-import ConfigParser
 from threading import Lock
 
 from xivo import agitb
@@ -26,11 +25,6 @@ from xivo import anysql
 from xivo import moresynchro
 from xivo_agid import fastagi
 
-
-AGI_CONFFILE = "/etc/xivo/xivo-agid.conf"
-LISTEN_ADDR_DEFAULT = "127.0.0.1"
-LISTEN_PORT_DEFAULT = 4573
-CONN_POOL_SIZE_DEFAULT = 10
 
 log = logging.getLogger('xivo_agid.agid')
 
@@ -134,9 +128,10 @@ class AGID(SocketServer.ThreadingTCPServer):
     initialized = False
     request_queue_size = 20
 
-    def __init__(self):
+    def __init__(self, config):
         log.info('xivo-agid starting...')
 
+        self.config = config
         signal.signal(signal.SIGHUP, sighup_handle)
 
         self.db_conn_pool = DBConnectionPool()
@@ -149,30 +144,16 @@ class AGID(SocketServer.ThreadingTCPServer):
         self.initialized = True
 
     def setup(self):
-        config = ConfigParser.RawConfigParser()
-        config.readfp(open(AGI_CONFFILE))
-
         if not self.initialized:
-            try:
-                self.listen_addr = config.get("general", "listen_addr")
-            except ConfigParser.NoOptionError:
-                self.listen_addr = LISTEN_ADDR_DEFAULT
-
+            self.listen_addr = self.config["listen_address"]
             log.debug("listen_addr: %s", self.listen_addr)
 
-            try:
-                self.listen_port = config.getint("general", "listen_port")
-            except ConfigParser.NoOptionError:
-                self.listen_port = LISTEN_PORT_DEFAULT
-
+            self.listen_port = int(self.config["listen_port"])
             log.debug("listen_port: %d", self.listen_port)
 
-        try:
-            conn_pool_size = config.getint("general", "conn_pool_size")
-        except ConfigParser.NoOptionError:
-            conn_pool_size = CONN_POOL_SIZE_DEFAULT
+        conn_pool_size = int(self.config["connection_pool_size"])
 
-        db_uri = config.get("db", "db_uri")
+        db_uri = self.config["db_uri"]
         self.db_conn_pool.reload(conn_pool_size, db_uri)
 
 
@@ -251,6 +232,6 @@ def run():
     _server.serve_forever()
 
 
-def init():
+def init(config):
     global _server
-    _server = AGID()
+    _server = AGID(config)
