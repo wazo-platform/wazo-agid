@@ -17,3 +17,13 @@ pidfile: /var/run/xivo-agid.pid
 
 # Database connection informations.
 db_uri: postgresql://asterisk:proformatique@localhost/asterisk
+
+# Event bus (AMQP) connection informations
+bus:
+  username: guest
+  password: guest
+  host: localhost
+  port: 5672
+  exchange_name: xivo
+  exchange_type: topic
+  exchange_durable: True

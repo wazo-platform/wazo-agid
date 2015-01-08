@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2004-2014 Avencall
+# Copyright (C) 2004-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ class FastAGIDialPlanBreak(FastAGIException):
     pass
 
 
-class FastAGI:
+class FastAGI(object):
     """
     This class encapsulates communication between Asterisk and a python
     program (typically a daemon).
@@ -96,9 +96,10 @@ class FastAGI:
     Asterisk.
     """
 
-    def __init__(self, inf, outf):
+    def __init__(self, inf, outf, config):
         self.inf = inf
         self.outf = outf
+        self.config = config
 
         self._got_sighup = False
         self.env = {}

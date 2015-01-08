@@ -72,11 +72,12 @@ class DBConnectionPool(object):
 
 
 class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
+
     def handle(self):
         try:
             log.debug("handling request")
 
-            fagi = fastagi.FastAGI(self.rfile, self.wfile)
+            fagi = fastagi.FastAGI(self.rfile, self.wfile, self.config)
             except_hook = agitb.Hook(agi=fagi)
 
             conn = self.server.db_conn_pool.acquire()
@@ -137,6 +138,7 @@ class AGID(SocketServer.ThreadingTCPServer):
         self.db_conn_pool = DBConnectionPool()
         self.setup()
 
+        FastAGIRequestHandler.config = config
         SocketServer.ThreadingTCPServer.__init__(self,
                                                  (self.listen_addr, self.listen_port),
                                                  FastAGIRequestHandler)
