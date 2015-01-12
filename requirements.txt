@@ -3,8 +3,6 @@ git+https://github.com/xivo-pbx/xivo-lib-python.git
 git+https://github.com/xivo-pbx/xivo-dird.git
 git+https://github.com/xivo-pbx/xivo-provisioning.git
 git+https://github.com/xivo-pbx/xivo-bus.git
-mock
-pyhamcrest
 python-ldap
 sqlalchemy==0.9.4
 psycopg2
