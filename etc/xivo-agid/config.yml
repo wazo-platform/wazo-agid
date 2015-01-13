@@ -18,6 +18,10 @@ pidfile: /var/run/xivo-agid.pid
 # Database connection informations.
 db_uri: postgresql://asterisk:proformatique@localhost/asterisk
 
+# AGI server listening informations.
+listen_address: 127.0.0.1
+listen_port: 4573
+
 # Event bus (AMQP) connection informations
 bus:
   username: guest
