@@ -12,7 +12,7 @@ Package: xivo-agid
 Architecture: all
 Section: python
 Pre-Depends: xivo-bus, xivo-libdird, xivo-lib-python
-Depends: ${python:Depends}, ${misc:Depends}, asterisk, python-tz
+Depends: ${python:Depends}, ${misc:Depends}, asterisk, python-tz, xivo-agent
 Provides: pf-xivo-agid
 Replaces: pf-xivo-agid
 Conflicts: pf-xivo-agid
