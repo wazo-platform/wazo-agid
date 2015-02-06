@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import argparse
+import xivo_dao
 
 from xivo.chain_map import ChainMap
 from xivo.config_helper import read_config_file_hierarchy
@@ -45,6 +46,8 @@ def main():
     config = ChainMap(cli_config, file_config, _DEFAULT_CONFIG)
 
     setup_logging(config['logfile'], config['foreground'], config['debug'])
+
+    xivo_dao.init_db_from_config(config)
 
     with pidfile_context(config['pidfile'], config['foreground']):
         agid.init(config)
