@@ -18,10 +18,10 @@
 from functools import partial
 
 from xivo import moresynchro
-from xivo_bus.ctl.config import BusConfig
-from xivo_bus.resources.agent import error
-from xivo_bus.resources.agent.client import AgentClient
-from xivo_bus.resources.agent.exception import AgentClientError
+from xivo_agent.ctl.config import BusConfig
+from xivo_agent.ctl.client import AgentClient
+from xivo_agent.resources.agent import error
+from xivo_agent.exception import AgentClientError
 
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
