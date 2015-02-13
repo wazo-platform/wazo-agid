@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2007-2014 Avencall
+# Copyright (C) 2007-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import re
 import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
-from xivo_dao.data_handler.line import services as line_services
+from xivo_dao.data_handler.line import dao as line_dao
 
 from xivo_dao import user_dao, user_line_dao
 
@@ -237,7 +237,7 @@ class Paging(object):
 class Line(object):
 
     def __init__(self, user_id):
-        line = line_services.get_by_user_id(user_id)
+        line = line_dao.get_by_user_id(user_id)
 
         self.context = line.context
         self.protocol = line.protocol.upper()
