@@ -14,7 +14,9 @@ RUN apt-get -qq -y install \
     python-pip \
     python-dev \
     libpq-dev \
-    libyaml-dev
+    libyaml-dev \
+    libldap2-dev \
+    libsasl2-dev
 
 # Install xivo-agid
 WORKDIR /usr/src
