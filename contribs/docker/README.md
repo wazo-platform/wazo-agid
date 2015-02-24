@@ -24,11 +24,11 @@ Or directly in the sources in contribs/docker
 
 To run the container, do the following:
 
-    docker run -d -v /conf/agid:/etc/xivo/agid/conf.d -p 4573:4573 xivo-agid
+    docker run -d -v /conf/agid:/etc/xivo-agid/conf.d -p 4573:4573 xivo-agid
 
 On interactive mode :
 
-    docker run -v /conf/agid:/etc/xivo/agid/conf.d -p 4573:4573 -it xivo-agid bash
+    docker run -v /conf/agid:/etc/xivo-agid/conf.d -p 4573:4573 -it xivo-agid bash
 
 After launch xivo-agid.
 
