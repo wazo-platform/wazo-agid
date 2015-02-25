@@ -29,7 +29,7 @@ RUN python setup.py install
 RUN touch /var/log/xivo-agid.log
 RUN mkdir -p /etc/xivo-agid
 RUN mkdir /var/lib/xivo-agid
-RUN cp -a etc/* /etc/xivo-agid/
+RUN cp -a etc/xivo-agid/* /etc/xivo-agid/
 WORKDIR /root
 
 # Clean
