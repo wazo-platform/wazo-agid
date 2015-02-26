@@ -22,6 +22,10 @@ db_uri: postgresql://asterisk:proformatique@localhost/asterisk
 listen_address: 127.0.0.1
 listen_port: 4573
 
+# xivo-agentd connection informations.
+agentd:
+  host: localhost
+
 # Event bus (AMQP) connection informations
 bus:
   username: guest

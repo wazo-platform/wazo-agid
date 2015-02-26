@@ -18,32 +18,27 @@
 from functools import partial
 
 from xivo import moresynchro
-from xivo_agent.ctl.config import BusConfig
-from xivo_agent.ctl.client import AgentClient
-from xivo_agent.resources.agent import error
-from xivo_agent.exception import AgentClientError
+from xivo_agentd_client import Client as AgentdClient, error
+from xivo_agentd_client.error import AgentdClientError
 
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
-_agent_client = None
+_agentd_client = None
 _once = moresynchro.Once()
 
 
 def _init_client(config):
-    global _agent_client
+    global _agentd_client
 
-    bus_cfg_dict = dict(config['bus'])
-    bus_cfg_dict.pop('routing_keys', None)
-    cfg = BusConfig(**bus_cfg_dict)
-    _agent_client = AgentClient(config=cfg)
-    _agent_client.connect()
+    agentd_cfg_dict = config['agentd']
+    _agentd_client = AgentdClient(**agentd_cfg_dict)
 
 
 def login_agent(agi, agent_id, extension, context):
     _once.once(partial(_init_client, agi.config))
     try:
-        _agent_client.login_agent(agent_id, extension, context)
-    except AgentClientError as e:
+        _agentd_client.agents.login_agent(agent_id, extension, context)
+    except AgentdClientError as e:
         if e.error == error.ALREADY_LOGGED:
             agi.set_variable(AGENTSTATUS_VAR, 'already_logged')
         elif e.error == error.ALREADY_IN_USE:
@@ -57,14 +52,14 @@ def login_agent(agi, agent_id, extension, context):
 def logoff_agent(agi, agent_id):
     _once.once(partial(_init_client, agi.config))
     try:
-        _agent_client.logoff_agent(agent_id)
-    except AgentClientError as e:
+        _agentd_client.agents.logoff_agent(agent_id)
+    except AgentdClientError as e:
         if e.error != error.NOT_LOGGED:
             raise
 
 
 def get_agent_status(agi, agent_id):
     _once.once(partial(_init_client, agi.config))
-    status = _agent_client.get_agent_status(agent_id)
+    status = _agentd_client.agents.get_agent_status(agent_id)
     login_status = 'logged_in' if status.logged else 'logged_out'
     agi.set_variable('XIVO_AGENT_LOGIN_STATUS', login_status)
