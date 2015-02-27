@@ -26,6 +26,7 @@ RUN pip install -r requirements.txt
 RUN python setup.py install
 
 # Configure environment
+RUN adduser --disabled-password --gecos '' asterisk
 RUN touch /var/log/xivo-agid.log
 RUN mkdir -p /etc/xivo-agid
 RUN mkdir /var/lib/xivo-agid
