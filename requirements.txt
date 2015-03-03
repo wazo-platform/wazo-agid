@@ -1,12 +1,14 @@
-git+https://github.com/xivo-pbx/xivo-agent.git
+git+https://github.com/xivo-pbx/xivo-agentd-client.git
 git+https://github.com/xivo-pbx/xivo-bus.git
 git+https://github.com/xivo-pbx/xivo-dao.git
 git+https://github.com/xivo-pbx/xivo-dird.git
 git+https://github.com/xivo-pbx/xivo-lib-python.git
+git+https://github.com/xivo-pbx/xivo-lib-rest-client.git
 git+https://github.com/xivo-pbx/xivo-provisioning.git
-pika
 psycopg2
 pyaml
 python-ldap
 pytz
+requests==2.0.0
 sqlalchemy==0.9.4
+stevedore
