@@ -16,7 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from mock import Mock
+from hamcrest import assert_that, equal_to
+from mock import ANY, Mock, call, patch
 from xivo_agid.modules import check_diversion
 
 
@@ -24,6 +25,7 @@ class TestCheckDiversion(unittest.TestCase):
 
     def setUp(self):
         self.agi = Mock()
+        self.cursor = Mock()
         self.queue = Mock(name='foo')
 
     def test_is_agent_ratio_overrun_no_waiting_calls(self):
@@ -53,3 +55,17 @@ class TestCheckDiversion(unittest.TestCase):
         waiting_calls = 2
 
         self.assertFalse(check_diversion._is_agent_ratio_overrun(self.agi, self.queue, waiting_calls))
+
+    @patch('xivo_agid.modules.check_diversion.objects')
+    def test_check_diversion_xivo_divert_event_is_cleared(self, mock_objects):
+        self.queue.waittime = None
+        self.queue.waitratio = None
+        self.agi.get_variable.return_value = 42
+
+        check_diversion.check_diversion(self.agi, self.cursor, None)
+
+        expected = [
+            call('XIVO_DIVERT_EVENT', ''),
+            call('XIVO_FWD_TYPE', ANY)
+        ]
+        assert_that(self.agi.set_variable.call_args_list, equal_to(expected))
