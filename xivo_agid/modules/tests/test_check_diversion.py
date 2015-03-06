@@ -60,6 +60,7 @@ class TestCheckDiversion(unittest.TestCase):
     def test_check_diversion_xivo_divert_event_is_cleared(self, mock_objects):
         self.queue.waittime = None
         self.queue.waitratio = None
+        mock_objects.Queue.return_value = self.queue
         self.agi.get_variable.return_value = 42
 
         check_diversion.check_diversion(self.agi, self.cursor, None)
