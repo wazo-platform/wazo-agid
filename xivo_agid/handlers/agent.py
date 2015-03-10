@@ -15,29 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from functools import partial
-
-from xivo import moresynchro
 from xivo_agentd_client import Client as AgentdClient, error
 from xivo_agentd_client.error import AgentdClientError
 
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
-_agentd_client = None
-_once = moresynchro.Once()
-
-
-def _init_client(config):
-    global _agentd_client
-
-    agentd_cfg_dict = config['agentd']
-    _agentd_client = AgentdClient(**agentd_cfg_dict)
-
 
 def login_agent(agi, agent_id, extension, context):
-    _once.once(partial(_init_client, agi.config))
+    agentd_client = _new_agentd_client(agi.config)
     try:
-        _agentd_client.agents.login_agent(agent_id, extension, context)
+        agentd_client.agents.login_agent(agent_id, extension, context)
     except AgentdClientError as e:
         if e.error == error.ALREADY_LOGGED:
             agi.set_variable(AGENTSTATUS_VAR, 'already_logged')
@@ -50,16 +37,21 @@ def login_agent(agi, agent_id, extension, context):
 
 
 def logoff_agent(agi, agent_id):
-    _once.once(partial(_init_client, agi.config))
+    agentd_client = _new_agentd_client(agi.config)
     try:
-        _agentd_client.agents.logoff_agent(agent_id)
+        agentd_client.agents.logoff_agent(agent_id)
     except AgentdClientError as e:
         if e.error != error.NOT_LOGGED:
             raise
 
 
 def get_agent_status(agi, agent_id):
-    _once.once(partial(_init_client, agi.config))
-    status = _agentd_client.agents.get_agent_status(agent_id)
+    agentd_client = _new_agentd_client(agi.config)
+    status = agentd_client.agents.get_agent_status(agent_id)
     login_status = 'logged_in' if status.logged else 'logged_out'
     agi.set_variable('XIVO_AGENT_LOGIN_STATUS', login_status)
+
+
+def _new_agentd_client(config):
+    agentd_cfg_dict = config['agentd']
+    return AgentdClient(**agentd_cfg_dict)
