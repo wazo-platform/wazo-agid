@@ -31,6 +31,8 @@ def check_diversion(agi, cursor, args):
         _set_diversion(agi, 'DIVERT_HOLDTIME', 'qwaittime')
     elif _is_agent_ratio_overrun(agi, queue, waiting_calls):
         _set_diversion(agi, 'DIVERT_CA_RATIO', 'qwaitratio')
+    else:
+        _set_diversion(agi, '', '')
 
 
 def _is_hold_time_overrun(agi, queue, waiting_calls):
