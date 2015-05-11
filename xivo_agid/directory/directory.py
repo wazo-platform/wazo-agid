@@ -71,9 +71,10 @@ class Context(object):
             try:
                 results = directory.lookup_reverse(number)
                 for result in results:
-                    if number in result.itervalues():
-                        logger.info("lookup_reverse result : %s", result)
-                        return result
+                    for res in result.itervalues():
+                        if re.match('^[0-9 -]+$', res) and re.sub('[ -]', '', res) == number:
+                            logger.info("lookup_reverse result : %s", result)
+                            return result
             except Exception:
                 logger.error('Error while looking up in directory %s for %s',
                              directory.name, number, exc_info=True)
