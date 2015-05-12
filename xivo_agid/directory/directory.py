@@ -28,6 +28,9 @@ from xivo_agid.directory.data_sources.phonebook import PhonebookDirectoryDataSou
 
 logger = logging.getLogger('directories')
 
+SPACE_DASH = re.compile('[ -]')
+ALLOWED_CHARACTERS = re.compile('^[0-9 -]+$')
+
 
 class Context(object):
     def __init__(self, directories, display, didextens):
@@ -72,7 +75,7 @@ class Context(object):
                 results = directory.lookup_reverse(number)
                 for result in results:
                     for res in result.itervalues():
-                        if re.match('^[0-9 -]+$', res) and re.sub('[ -]', '', res) == number:
+                        if ALLOWED_CHARACTERS.match(res) and SPACE_DASH.sub('', res) == number:
                             logger.info("lookup_reverse result : %s", result)
                             return result
             except Exception:
