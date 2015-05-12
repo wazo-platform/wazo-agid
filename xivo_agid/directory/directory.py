@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2014 Avencall
+# Copyright (C) 2009-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ from xivo_dird.directory.data_sources.ldap import LDAPDirectoryDataSource
 from xivo_agid.directory.data_sources.phonebook import PhonebookDirectoryDataSource
 
 logger = logging.getLogger('directories')
+
+SPACE_DASH = re.compile('[ -]')
 
 
 class Context(object):
@@ -71,9 +73,10 @@ class Context(object):
             try:
                 results = directory.lookup_reverse(number)
                 for result in results:
-                    if number in result.itervalues():
-                        logger.info("lookup_reverse result : %s", result)
-                        return result
+                    for res in result.itervalues():
+                        if SPACE_DASH.sub('', res) == number:
+                            logger.info("lookup_reverse result : %s", result)
+                            return result
             except Exception:
                 logger.error('Error while looking up in directory %s for %s',
                              directory.name, number, exc_info=True)
