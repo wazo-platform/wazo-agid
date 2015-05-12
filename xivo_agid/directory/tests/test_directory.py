@@ -37,3 +37,16 @@ class TestReverseLookup(unittest.TestCase):
         result = context.lookup_reverse('lol', '18005551000')
 
         assert_that(result, equal_to(expected_result))
+
+    def test_that_formated_numbers_are_matched(self):
+        expected_result = {'number': '1 800 555-1000',
+                           'name': 'Alice'}
+        directory_one = Mock(lookup_reverse=Mock(return_value=[{'number': '1000', 'name': 'bob'}]))
+        directory_two = Mock(lookup_reverse=Mock(return_value=[expected_result]))
+        directories = {'*': [directory_one, directory_two]}
+
+        context = Context(None, None, directories)
+
+        result = context.lookup_reverse('lol', '18005551000')
+
+        assert_that(result, equal_to(expected_result))
