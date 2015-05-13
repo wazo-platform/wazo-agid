@@ -20,7 +20,7 @@ import re
 import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
-from xivo_dao.data_handler.line import dao as line_dao
+from xivo_dao.resources.line import dao as line_dao
 
 from xivo_dao import user_dao, user_line_dao
 
