@@ -28,9 +28,9 @@ def check_diversion(agi, cursor, args):
 
     waiting_calls = int(agi.get_variable('QUEUE_WAITING_COUNT({})'.format(queue.name)))
     if _is_hold_time_overrun(agi, queue, waiting_calls):
-        _set_diversion(agi, 'DIVERT_HOLDTIME', 'qwaittime')
+        _set_diversion(agi, 'DIVERT_HOLDTIME', 'QWAITTIME')
     elif _is_agent_ratio_overrun(agi, queue, waiting_calls):
-        _set_diversion(agi, 'DIVERT_CA_RATIO', 'qwaitratio')
+        _set_diversion(agi, 'DIVERT_CA_RATIO', 'QWAITRATIO')
     else:
         _set_diversion(agi, '', '')
 
@@ -56,7 +56,7 @@ def _is_agent_ratio_overrun(agi, queue, waiting_calls):
 
 def _set_diversion(agi, event, dialaction):
     agi.set_variable('XIVO_DIVERT_EVENT', event)
-    agi.set_variable('XIVO_FWD_TYPE', 'queue_' + dialaction)
+    agi.set_variable('XIVO_FWD_TYPE', 'QUEUE_' + dialaction)
 
 
 agid.register(check_diversion)
