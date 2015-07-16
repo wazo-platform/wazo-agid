@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013-2014 Avencall
+# Copyright (C) 2013-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+import re
 
 from xivo_agid import objects
 from xivo_agid.handlers.handler import Handler
@@ -31,6 +33,7 @@ class AgentFeatures(Handler):
         self._set_agent_interface()
         self._set_agent()
         self._set_preprocess_subroutine()
+        self._set_queue_call_options()
 
     def _extract_agent_id(self):
         try:
@@ -66,3 +69,17 @@ class AgentFeatures(Handler):
         else:
             preprocess_subroutine = ''
         self._agi.set_variable('XIVO_AGENTPREPROCESS_SUBROUTINE', preprocess_subroutine)
+
+    def _set_queue_call_options(self):
+        queue_options = self._agi.get_variable('XIVO_QUEUEOPTIONS')
+        queue_call_options = self._extract_queue_call_options(queue_options)
+        self._agi.set_variable('XIVO_QUEUECALLOPTIONS', queue_call_options)
+
+    def _extract_queue_call_options(self, queue_options):
+        queue_options = re.sub(r'\(.*?\)', '', queue_options)
+        authorized_options = ['h', 't', 'w', 'x', 'k']
+        queue_call_options = ''
+        for option in queue_options:
+            if option in authorized_options:
+                queue_call_options += option
+        return queue_call_options
