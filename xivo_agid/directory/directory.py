@@ -249,8 +249,8 @@ class DirectoriesMgr(object):
     _DIRECTORY_SRC_CLASSES = {
         'file': CSVFileDirectoryDataSource,
         'http': HTTPDirectoryDataSource,
-        'internal': InternalDirectoryDataSource,
-        'ldapfilter': LDAPDirectoryDataSource,
+        'xivo': InternalDirectoryDataSource,
+        'ldap': LDAPDirectoryDataSource,
         'phonebook': PhonebookDirectoryDataSource,
     }
 
@@ -278,6 +278,5 @@ class DirectoriesMgr(object):
         self._old_contents = contents
 
     def _get_directory_class(self, directory_contents):
-        uri = directory_contents['uri']
-        kind = uri.split(':', 1)[0]
+        kind = directory_contents['type']
         return self._DIRECTORY_SRC_CLASSES[kind]
