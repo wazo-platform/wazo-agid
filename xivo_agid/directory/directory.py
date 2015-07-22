@@ -247,8 +247,8 @@ class DisplaysMgr(object):
 
 class DirectoriesMgr(object):
     _DIRECTORY_SRC_CLASSES = {
-        'file': CSVFileDirectoryDataSource,
-        'http': HTTPDirectoryDataSource,
+        'csv': CSVFileDirectoryDataSource,
+        'webservices': HTTPDirectoryDataSource,
         'xivo': InternalDirectoryDataSource,
         'ldap': LDAPDirectoryDataSource,
         'phonebook': PhonebookDirectoryDataSource,
