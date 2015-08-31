@@ -20,7 +20,6 @@ import re
 
 from xivo_dird.directory.data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
 from xivo_dird.directory.data_sources.http import HTTPDirectoryDataSource
-from xivo_agid.directory.data_sources.internal import InternalDirectoryDataSource
 from xivo_dird.directory.data_sources.ldap import LDAPDirectoryDataSource
 from xivo_agid.directory.data_sources.phonebook import PhonebookDirectoryDataSource
 
@@ -141,7 +140,6 @@ class DirectoriesMgr(object):
     _DIRECTORY_SRC_CLASSES = {
         'csv': CSVFileDirectoryDataSource,
         'csv_ws': HTTPDirectoryDataSource,
-        'xivo': InternalDirectoryDataSource,
         'ldap': LDAPDirectoryDataSource,
         'phonebook': PhonebookDirectoryDataSource,
     }
@@ -159,8 +157,10 @@ class DirectoriesMgr(object):
         # add/update directories
         for directory_id, directory_contents in contents.iteritems():
             if directory_contents != self._old_contents.get(directory_id):
+                class_ = self._DIRECTORY_SRC_CLASSES.get(directory_contents['type'])
+                if not class_:
+                    continue
                 try:
-                    class_ = self._get_directory_class(directory_contents)
                     directory_src = class_.new_from_contents(directory_contents)
                     directory = DirectoryAdapter.new_from_contents(directory_src, directory_contents)
                     self.directories[directory_id] = directory
@@ -168,7 +168,3 @@ class DirectoriesMgr(object):
                     logger.error('Error while creating directory %s from %s',
                                  directory_id, directory_contents, exc_info=True)
         self._old_contents = contents
-
-    def _get_directory_class(self, directory_contents):
-        kind = directory_contents['type']
-        return self._DIRECTORY_SRC_CLASSES[kind]
