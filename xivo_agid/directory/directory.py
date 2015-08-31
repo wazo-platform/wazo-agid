@@ -17,7 +17,7 @@
 
 import logging
 import re
-from itertools import chain, imap
+from itertools import imap
 from operator import itemgetter
 
 from xivo_dird.directory.data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
@@ -32,6 +32,7 @@ SPACE_DASH = re.compile('[ -]')
 
 
 class Context(object):
+
     def __init__(self, directories, display, didextens):
         """
         directories -- a list of directory objects to use for direct lookup
@@ -42,23 +43,6 @@ class Context(object):
         self._directories = directories
         self._display = display
         self._didextens = didextens
-
-    def lookup_direct(self, string, contexts=None):
-        """Return a tuple (<headers>, <resultlist>)."""
-        if self._display is None:
-            raise Exception('No display defined for this context')
-        directory_results = []
-        for directory in self._directories:
-            try:
-                directory_result = directory.lookup_direct(string, contexts)
-            except Exception:
-                logger.error('Error while looking up in directory %s for %s',
-                             directory.name, string, exc_info=True)
-            else:
-                directory_results.append(directory_result)
-        combined_results = chain.from_iterable(directory_results)
-        resultlist = list(self._display.format(combined_results))
-        return self._display.display_header, resultlist
 
     def lookup_reverse(self, did_number, number):
         """Return a list of directory entries."""
@@ -178,13 +162,11 @@ class Display(object):
 
 class DirectoryAdapter(object):
     """Adapt a DirectoryDataSource instance to the Directory interface,
-    i.e. to something with a name attribute, a lookup_direct and
-    lookup_reverse method, etc...
+    i.e. to something with a name attribute, a lookup_reverse method, etc...
     """
-    def __init__(self, directory_src, name, match_direct, match_reverse):
+    def __init__(self, directory_src, name, match_reverse):
         self._directory_src = directory_src
         self.name = name
-        self._match_direct = match_direct
         self._match_reverse = match_reverse
         self._map_fun = self._new_map_function()
 
@@ -194,18 +176,14 @@ class DirectoryAdapter(object):
             return result
         return aux
 
-    def lookup_direct(self, string, contexts=None):
-        return imap(self._map_fun, self._directory_src.lookup(string, self._match_direct, contexts))
-
     def lookup_reverse(self, string):
         return self._directory_src.lookup(string, self._match_reverse)
 
     @classmethod
     def new_from_contents(cls, directory, contents):
         name = contents['name']
-        match_direct = contents['match_direct']
         match_reverse = contents['match_reverse']
-        return cls(directory, name, match_direct, match_reverse)
+        return cls(directory, name, match_reverse)
 
 
 class ContextsMgr(object):
