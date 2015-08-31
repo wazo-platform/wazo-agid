@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2014 Avencall
+# Copyright (C) 2009-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from itertools import ifilter, imap
-from xivo_dird.directory.data_sources.directory_data_source import DirectoryDataSource
+from xivo_agid.directory.data_sources.directory_data_source import DirectoryDataSource
 
 
 class PhonebookDirectoryDataSource(DirectoryDataSource):

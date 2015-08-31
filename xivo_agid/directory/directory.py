@@ -18,9 +18,9 @@
 import logging
 import re
 
-from xivo_dird.directory.data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
-from xivo_dird.directory.data_sources.http import HTTPDirectoryDataSource
-from xivo_dird.directory.data_sources.ldap import LDAPDirectoryDataSource
+from xivo_agid.directory.data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
+from xivo_agid.directory.data_sources.http import HTTPDirectoryDataSource
+from xivo_agid.directory.data_sources.ldap import LDAPDirectoryDataSource
 from xivo_agid.directory.data_sources.phonebook import PhonebookDirectoryDataSource
 
 logger = logging.getLogger('directories')
