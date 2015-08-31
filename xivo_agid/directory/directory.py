@@ -103,13 +103,6 @@ class DirectoryAdapter(object):
         self._directory_src = directory_src
         self.name = name
         self._match_reverse = match_reverse
-        self._map_fun = self._new_map_function()
-
-    def _new_map_function(self):
-        def aux(result):
-            result['xivo-directory'] = self.name
-            return result
-        return aux
 
     def lookup_reverse(self, string):
         return self._directory_src.lookup(string, self._match_reverse)
