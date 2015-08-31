@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2014 Avencall
+# Copyright (C) 2012-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import urllib2
 from xivo.moresynchro import RWLock
 from xivo_agid import agid
 from xivo_agid.directory import directory
-from xivo_dao import cti_displays_dao, cti_context_dao, cti_directories_dao
+from xivo_dao import cti_context_dao, cti_directories_dao
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,6 @@ UPDATE_PORT = 5042
 FETCH_WS_RETRY_INTERVAL = 10
 
 _update_thread = None
-_displays_mgr = directory.DisplaysMgr()
 _contexts_mgr = directory.ContextsMgr()
 _directories_mgr = directory.DirectoriesMgr()
 _rw_lock = RWLock()
@@ -171,13 +170,10 @@ def _update_thread_loop(update_socket):
 def _update_cti_config():
     if _rw_lock.acquire_write():
         try:
-            displays = cti_displays_dao.get_config()
             contexts = cti_context_dao.get_config()
             directories = cti_directories_dao.get_config()
-            _displays_mgr.update(displays)
             _directories_mgr.update(directories)
-            _contexts_mgr.update(_displays_mgr.displays,
-                                 _directories_mgr.directories,
+            _contexts_mgr.update(_directories_mgr.directories,
                                  contexts)
         finally:
             _rw_lock.release()

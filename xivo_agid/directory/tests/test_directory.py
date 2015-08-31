@@ -32,7 +32,7 @@ class TestReverseLookup(unittest.TestCase):
         directory_two = Mock(lookup_reverse=Mock(return_value=[expected_result]))
         directories = {'*': [directory_one, directory_two]}
 
-        context = Context(None, None, directories)
+        context = Context(None, directories)
 
         result = context.lookup_reverse('lol', '18005551000')
 
@@ -45,7 +45,7 @@ class TestReverseLookup(unittest.TestCase):
         directory_two = Mock(lookup_reverse=Mock(return_value=[expected_result]))
         directories = {'*': [directory_one, directory_two]}
 
-        context = Context(None, None, directories)
+        context = Context(None, directories)
 
         result = context.lookup_reverse('lol', '18005551000')
 

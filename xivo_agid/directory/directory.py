@@ -17,8 +17,6 @@
 
 import logging
 import re
-from itertools import imap
-from operator import itemgetter
 
 from xivo_dird.directory.data_sources.csv_file_directory_data_source import CSVFileDirectoryDataSource
 from xivo_dird.directory.data_sources.http import HTTPDirectoryDataSource
@@ -33,15 +31,13 @@ SPACE_DASH = re.compile('[ -]')
 
 class Context(object):
 
-    def __init__(self, directories, display, didextens):
+    def __init__(self, directories, didextens):
         """
         directories -- a list of directory objects to use for direct lookup
-        display -- a display object to format the results of direct lookup
         didextens -- a dictionary mapping extension number to list of
           directory objects for reverse lookup
         """
         self._directories = directories
-        self._display = display
         self._didextens = didextens
 
     def lookup_reverse(self, did_number, number):
@@ -68,24 +64,18 @@ class Context(object):
         return {}
 
     @classmethod
-    def new_from_contents(cls, avail_displays, avail_directories, contents):
+    def new_from_contents(cls, avail_directories, contents):
         """Return a new instance of this class from "configuration contents"
         and dictionaries of displays and directories object.
         """
         directories = cls._directories_from_contents(avail_directories, contents)
-        display = cls._display_from_contents(avail_displays, contents)
         didextens = cls._didextens_from_contents(avail_directories, contents)
-        return cls(directories, display, didextens)
+        return cls(directories, didextens)
 
     @classmethod
     def _directories_from_contents(cls, avail_directories, contents):
         directory_ids = contents.get('directories', [])
         return cls._new_directory_list(directory_ids, avail_directories)
-
-    @staticmethod
-    def _display_from_contents(avail_displays, contents):
-        display_id = contents.get('display')
-        return avail_displays.get(display_id)
 
     @classmethod
     def _didextens_from_contents(cls, avail_directories, contents):
@@ -104,60 +94,6 @@ class Context(object):
             except KeyError:
                 logger.error('not using directory %r because not available', directory_id)
         return directories
-
-
-_APPLY_SUBS_REGEX = re.compile(r'\{([^}]+)\}')
-
-
-def _apply_subs(display_elem, result):
-    fmt_string = display_elem['fmt']
-    # use of 1-element list since we can't rebind local variables in inner scope
-    # in python2
-    nb_subs = [0]
-    nb_succesfull_subs = [0]
-
-    def aux(m):
-        nb_subs[0] += 1
-        var_name = m.group(1)
-        if var_name in result:
-            nb_succesfull_subs[0] += 1
-            return result[var_name]
-        else:
-            return m.group()
-    fmted_string = _APPLY_SUBS_REGEX.sub(aux, fmt_string)
-    # use default value if there was at least one substitution tried
-    # but none were successful
-    if nb_subs[0] > 0 and nb_succesfull_subs[0] == 0:
-        fmted_string = display_elem.get('default', '')
-    return fmted_string
-
-
-class Display(object):
-    def __init__(self, display_elems):
-        """
-        display_elems -- a list of dictionaries with the followings keys:
-          'title', 'default' and 'fmt'.
-        """
-        self._display_elems = display_elems
-        self.display_header = [e['title'] for e in display_elems]
-        self._map_fun = self._new_map_function()
-
-    def format(self, results):
-        """Return an iterator over the formated results."""
-        return imap(self._map_fun, results)
-
-    def _new_map_function(self):
-        def aux(result):
-            return ';'.join(_apply_subs(display_elem, result) for
-                            display_elem in self._display_elems)
-        return aux
-
-    @classmethod
-    def new_from_contents(cls, contents):
-        contents = list({'title': v[0], 'default': v[2], 'fmt': v[3]} for
-                        (_, v) in
-                        sorted(contents.iteritems(), key=itemgetter(0)))
-        return cls(contents)
 
 
 class DirectoryAdapter(object):
@@ -190,37 +126,15 @@ class ContextsMgr(object):
     def __init__(self):
         self.contexts = {}
 
-    def update(self, avail_displays, avail_directories, contents):
+    def update(self, avail_directories, contents):
         self.contexts = {}
         for context_id, context_contents in contents.iteritems():
             try:
                 self.contexts[context_id] = Context.new_from_contents(
-                    avail_displays, avail_directories, context_contents)
+                    avail_directories, context_contents)
             except Exception:
                 logger.error('Error while creating context %s from %s',
                              context_id, context_contents, exc_info=True)
-
-
-class DisplaysMgr(object):
-    def __init__(self):
-        self.displays = {}
-        self._old_contents = {}
-
-    def update(self, contents):
-        # remove old displays
-        # deleting a key will raise a RuntimeError if you do not use .keys() here
-        for display_id in self.displays.keys():
-            if display_id not in contents:
-                del self.displays[display_id]
-        # add/update displays
-        for display_id, display_contents in contents.iteritems():
-            if display_contents != self._old_contents.get(display_id):
-                try:
-                    self.displays[display_id] = Display.new_from_contents(display_contents)
-                except Exception:
-                    logger.error('Error while creating display %s from %s',
-                                 display_id, display_contents, exc_info=True)
-        self._old_contents = contents
 
 
 class DirectoriesMgr(object):
