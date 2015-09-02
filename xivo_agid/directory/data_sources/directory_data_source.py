@@ -33,7 +33,7 @@ class DirectoryDataSource(object):
 
             value = v[0][1:-1]
 
-            if '}' in value or '}' in value:
+            if '{' in value or '}' in value:
                 logger.warning('Ignoring %s, format columns are not supported by reverse lookup', k)
                 continue
 
