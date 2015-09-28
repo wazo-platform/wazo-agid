@@ -54,10 +54,10 @@ def incoming_queue_set_features(agi, cursor, args):
         options += "T"
 
     if queue.write_caller:
-        options += "w"
+        options += "x"
 
     if queue.write_calling:
-        options += "W"
+        options += "X"
 
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
