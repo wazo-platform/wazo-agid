@@ -272,9 +272,9 @@ class UserFeatures(Handler):
             options += "t"
         if self._caller and self._caller.enablexfer:
             options += "T"
-        if self._user.enableautomon:
+        if self._user.enableonlinerec:
             options += "w"
-        if self._caller and self._caller.enableautomon:
+        if self._caller and self._caller.enableonlinerec:
             options += "W"
         if self._feature_list.incallfilter and self._user.incallfilter:
             options += "p"

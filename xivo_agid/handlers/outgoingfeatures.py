@@ -57,7 +57,7 @@ class OutgoingFeatures(Handler):
                 self.options += 'T'
 
             if not self.outcall.internal:
-                if self.user.enableautomon:
+                if self.user.enableonlinerec:
                     self.options += "W"
                 self.callrecord = self.user.callrecord
         except (ValueError, LookupError):
