@@ -272,7 +272,7 @@ class User(object):
         self.enablevoicemail = user_row.enablevoicemail
         self.voicemailid = user_row.voicemailid
         self.enablexfer = user_row.enablexfer
-        self.enableautomon = user_row.enableautomon
+        self.enableonlinerec = user_row.enableonlinerec
         self.callrecord = user_row.callrecord
         self.incallfilter = user_row.incallfilter
         self.enablednd = user_row.enablednd

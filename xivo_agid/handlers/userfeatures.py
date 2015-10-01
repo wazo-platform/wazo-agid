@@ -272,10 +272,10 @@ class UserFeatures(Handler):
             options += "t"
         if self._caller and self._caller.enablexfer:
             options += "T"
-        if self._user.enableautomon:
-            options += "w"
-        if self._caller and self._caller.enableautomon:
-            options += "W"
+        if self._user.enableonlinerec:
+            options += "x"
+        if self._caller and self._caller.enableonlinerec:
+            options += "X"
         if self._feature_list.incallfilter and self._user.incallfilter:
             options += "p"
         self._agi.set_variable('XIVO_CALLOPTIONS', options)

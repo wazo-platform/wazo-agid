@@ -104,10 +104,10 @@ class GroupFeatures(Handler):
             options += "T"
 
         if self._write_caller:
-            options += "w"
+            options += "x"
 
         if self._write_calling:
-            options += "W"
+            options += "X"
 
         if not self._musicclass:
             options += "r"

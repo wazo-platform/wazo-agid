@@ -57,8 +57,8 @@ class OutgoingFeatures(Handler):
                 self.options += 'T'
 
             if not self.outcall.internal:
-                if self.user.enableautomon:
-                    self.options += "W"
+                if self.user.enableonlinerec:
+                    self.options += "X"
                 self.callrecord = self.user.callrecord
         except (ValueError, LookupError):
             logger.debug('Could not retrieve user %s', self.userid)
