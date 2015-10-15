@@ -1,10 +1,10 @@
+babel==1.3
 git+https://github.com/xivo-pbx/xivo-agentd-client.git
 git+https://github.com/xivo-pbx/xivo-dao.git
 git+https://github.com/xivo-pbx/xivo-dird.git
 git+https://github.com/xivo-pbx/xivo-lib-python.git
 git+https://github.com/xivo-pbx/xivo-lib-rest-client.git
 git+https://github.com/xivo-pbx/xivo-provd-client.git
-babel==1.3
 psycopg2
 pyyaml==3.10
 python-ldap
