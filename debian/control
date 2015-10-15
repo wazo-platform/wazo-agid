@@ -11,8 +11,8 @@ Homepage: http://wiki.xivo.io
 Package: xivo-agid
 Architecture: all
 Section: python
-Pre-Depends: xivo-libdird, xivo-lib-python
-Depends: ${python:Depends}, ${misc:Depends}, asterisk, python-tz, xivo-agentd-client
+Pre-Depends: xivo-lib-python
+Depends: ${python:Depends}, ${misc:Depends}, asterisk, python-ldap, python-tz, xivo-agentd-client
 Provides: pf-xivo-agid
 Replaces: pf-xivo-agid
 Conflicts: pf-xivo-agid
