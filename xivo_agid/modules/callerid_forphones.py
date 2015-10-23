@@ -25,6 +25,7 @@ from xivo.moresynchro import RWLock
 from xivo_agid import agid
 from xivo_agid.directory import directory
 from xivo_dao import cti_context_dao, cti_directories_dao
+from xivo_dao.helpers.db_utils import session_scope
 
 logger = logging.getLogger(__name__)
 
@@ -170,11 +171,12 @@ def _update_thread_loop(update_socket):
 def _update_cti_config():
     if _rw_lock.acquire_write():
         try:
-            contexts = cti_context_dao.get_config()
-            directories = cti_directories_dao.get_config()
-            _directories_mgr.update(directories)
-            _contexts_mgr.update(_directories_mgr.directories,
-                                 contexts)
+            with session_scope():
+                contexts = cti_context_dao.get_config()
+                directories = cti_directories_dao.get_config()
+                _directories_mgr.update(directories)
+                _contexts_mgr.update(_directories_mgr.directories,
+                                     contexts)
         finally:
             _rw_lock.release()
     else:
