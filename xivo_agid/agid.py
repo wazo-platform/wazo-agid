@@ -24,6 +24,7 @@ from xivo import agitb
 from xivo import anysql
 from xivo import moresynchro
 from xivo_agid import fastagi
+from xivo_dao.helpers.db_utils import session_scope
 
 
 log = logging.getLogger('xivo_agid.agid')
@@ -185,7 +186,8 @@ class Handler(object):
     def handle(self, agi, cursor, args):
         self.lock.acquire_read()
         try:
-            self.handle_fn(agi, cursor, args)
+            with session_scope():
+                self.handle_fn(agi, cursor, args)
         finally:
             self.lock.release()
 
