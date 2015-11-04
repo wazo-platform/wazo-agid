@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import argparse
+import logging
 import xivo_dao
 
 from xivo.chain_map import ChainMap
@@ -24,7 +25,7 @@ from xivo.config_helper import read_config_file_hierarchy
 from xivo_agid import agid
 from xivo_agid.modules import *
 from xivo.daemonize import pidfile_context
-from xivo.xivo_logging import setup_logging
+from xivo.xivo_logging import setup_logging, silence_loggers
 
 _DEFAULT_CONFIG = {
     'debug': False,
@@ -46,6 +47,7 @@ def main():
     config = ChainMap(cli_config, file_config, _DEFAULT_CONFIG)
 
     setup_logging(config['logfile'], config['foreground'], config['debug'])
+    silence_loggers(['urllib3'], logging.WARNING)
 
     xivo_dao.init_db_from_config(config)
 
