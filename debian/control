@@ -12,7 +12,13 @@ Package: xivo-agid
 Architecture: all
 Section: python
 Pre-Depends: xivo-lib-python
-Depends: ${python:Depends}, ${misc:Depends}, asterisk, python-ldap, python-tz, xivo-agentd-client
+Depends: ${python:Depends},
+         ${misc:Depends},
+         asterisk,
+         python-ldap,
+         python-tz,
+         xivo-agentd-client,
+         xivo-dird-client
 Provides: pf-xivo-agid
 Replaces: pf-xivo-agid
 Conflicts: pf-xivo-agid

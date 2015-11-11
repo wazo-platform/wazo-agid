@@ -28,6 +28,11 @@ from xivo.daemonize import pidfile_context
 from xivo.xivo_logging import setup_logging, silence_loggers
 
 _DEFAULT_CONFIG = {
+    'dird': {
+        'host': 'localhost',
+        'port': 9489,
+        'timeout': 1,
+        },
     'debug': False,
     'foreground': False,
     'pidfile': '/var/run/xivo-agid.pid',
