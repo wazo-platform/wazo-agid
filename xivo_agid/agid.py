@@ -18,6 +18,7 @@
 import signal
 import logging
 import SocketServer
+from xivo.BackSQL import backpostgresql  # noqa
 from threading import Lock
 
 from xivo import agitb
