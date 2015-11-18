@@ -33,6 +33,10 @@ _DEFAULT_CONFIG = {
         'port': 9489,
         'timeout': 1,
         },
+    'auth': {
+        'host': 'localhost',
+        'port': 9497,
+        },
     'debug': False,
     'foreground': False,
     'pidfile': '/var/run/xivo-agid.pid',

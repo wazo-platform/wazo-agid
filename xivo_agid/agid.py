@@ -18,17 +18,21 @@
 import signal
 import logging
 import SocketServer
-from xivo.BackSQL import backpostgresql  # noqa
+
+from requests.exceptions import RequestException
 from threading import Lock
+from threading import Timer
 
 from xivo import agitb
 from xivo import anysql
 from xivo import moresynchro
+from xivo.BackSQL import backpostgresql  # noqa
 from xivo_agid import fastagi
+from xivo_auth_client import Client as AuthClient
 from xivo_dao.helpers.db_utils import session_scope
 
 
-log = logging.getLogger('xivo_agid.agid')
+logger = logging.getLogger(__name__)
 
 _server = None
 _handlers = {}
@@ -50,16 +54,16 @@ class DBConnectionPool(object):
 
             self.size = size
             self.db_uri = db_uri
-        log.debug("reloaded db conn pool")
+        logger.debug("reloaded db conn pool")
 
     def acquire(self):
         with self.lock:
             try:
                 conn = self.conns.pop()
-                log.debug("acquiring connection: got connection from pool")
+                logger.debug("acquiring connection: got connection from pool")
             except IndexError:
                 conn = anysql.connect_by_uri(self.db_uri)
-                log.debug("acquiring connection: pool empty, created new connection")
+                logger.debug("acquiring connection: pool empty, created new connection")
 
         return conn
 
@@ -67,17 +71,17 @@ class DBConnectionPool(object):
         with self.lock:
             if len(self.conns) < self.size:
                 self.conns.append(conn)
-                log.debug("releasing connection: pool not full, refilled with connection")
+                logger.debug("releasing connection: pool not full, refilled with connection")
             else:
                 conn.close()
-                log.debug("releasing connection: pool full, connection closed")
+                logger.debug("releasing connection: pool full, connection closed")
 
 
 class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
         try:
-            log.debug("handling request")
+            logger.debug("handling request")
 
             fagi = fastagi.FastAGI(self.rfile, self.wfile, self.config)
             except_hook = agitb.Hook(agi=fagi)
@@ -87,14 +91,14 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
                 cursor = conn.cursor()
 
                 handler_name = fagi.env['agi_network_script']
-                log.debug("delegating request handling %r", handler_name)
+                logger.debug("delegating request handling %r", handler_name)
 
                 _handlers[handler_name].handle(fagi, cursor, fagi.args)
 
                 conn.commit()
 
                 fagi.verbose('AGI handler %r successfully executed' % handler_name)
-                log.debug("request successfully handled")
+                logger.debug("request successfully handled")
             finally:
                 self.server.db_conn_pool.release(conn)
 
@@ -103,7 +107,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
         # XXX It may be here that dropping database connection
         # exceptions could be catched.
         except fastagi.FastAGIDialPlanBreak, message:
-            log.info("invalid request, dial plan broken")
+            logger.info("invalid request, dial plan broken")
 
             try:
                 fagi.verbose(message)
@@ -113,7 +117,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
             except Exception:
                 pass
         except:
-            log.exception("unexpected exception")
+            logger.exception("unexpected exception")
 
             try:
                 except_hook.handle()
@@ -130,11 +134,20 @@ class AGID(SocketServer.ThreadingTCPServer):
     allow_reuse_address = True
     initialized = False
     request_queue_size = 20
+    token_expiration = 6*60*60
+    renew_time = int(0.8*token_expiration)
+    renew_time_failed = 20
+    token = None
 
     def __init__(self, config):
-        log.info('xivo-agid starting...')
+        logger.info('xivo-agid starting...')
 
         self.config = config
+        auth_config = config['auth']
+        self.auth_client = AuthClient(auth_config['host'],
+                                      port=auth_config['port'],
+                                      username=auth_config['service_id'],
+                                      password=auth_config['service_key'])
         signal.signal(signal.SIGHUP, sighup_handle)
 
         self.db_conn_pool = DBConnectionPool()
@@ -150,15 +163,31 @@ class AGID(SocketServer.ThreadingTCPServer):
     def setup(self):
         if not self.initialized:
             self.listen_addr = self.config["listen_address"]
-            log.debug("listen_addr: %s", self.listen_addr)
+            logger.debug("listen_addr: %s", self.listen_addr)
 
             self.listen_port = int(self.config["listen_port"])
-            log.debug("listen_port: %d", self.listen_port)
+            logger.debug("listen_port: %d", self.listen_port)
+
+            self._renew_token()
 
         conn_pool_size = int(self.config["connection_pool_size"])
 
         db_uri = self.config["db_uri"]
         self.db_conn_pool.reload(conn_pool_size, db_uri)
+
+    def _renew_token(self):
+        logger.info('Renew service token')
+        try:
+            self.config['auth']['token'] = self.auth_client.token.new('xivo_service',
+                                                                      expiration=self.token_expiration)['token']
+        except RequestException as e:
+            logger.exception(e)
+            logger.warning('Create token with XiVO Auth failed. Reattempt in %d seconds', self.renew_time_failed)
+            next_renew_time = self.renew_time_failed
+        else:
+            next_renew_time = self.renew_time
+        finally:
+            Timer(next_renew_time, self._renew_token).start()
 
 
 class Handler(object):
@@ -175,12 +204,12 @@ class Handler(object):
     def reload(self, cursor):
         if self.setup_fn:
             if not self.lock.acquire_write():
-                log.error("deadlock detected and avoided for %r", self.handler_name)
-                log.error("%r has not be reloaded", self.handler_name)
+                logger.error("deadlock detected and avoided for %r", self.handler_name)
+                logger.error("%r has not be reloaded", self.handler_name)
                 return
             try:
                 self.setup_fn(cursor)
-                log.debug('handler %r reloaded', self.handler_name)
+                logger.debug('handler %r reloaded', self.handler_name)
             finally:
                 self.lock.release()
 
@@ -203,19 +232,19 @@ def register(handle_fn, setup_fn=None):
 
 
 def sighup_handle(signum, frame):
-    log.debug("reloading core engine")
+    logger.debug("reloading core engine")
     _server.setup()
 
     conn = _server.db_conn_pool.acquire()
     try:
         cursor = conn.cursor()
 
-        log.debug("reloading handlers")
+        logger.debug("reloading handlers")
         for handler in _handlers.itervalues():
             handler.reload(cursor)
 
         conn.commit()
-        log.debug("finished reload")
+        logger.debug("finished reload")
     finally:
         _server.db_conn_pool.release(conn)
 
@@ -225,7 +254,7 @@ def run():
     try:
         cursor = conn.cursor()
 
-        log.debug("list of handlers: %s", ', '.join(sorted(_handlers.iterkeys())))
+        logger.debug("list of handlers: %s", ', '.join(sorted(_handlers.iterkeys())))
 
         for handler in _handlers.itervalues():
             handler.setup(cursor)

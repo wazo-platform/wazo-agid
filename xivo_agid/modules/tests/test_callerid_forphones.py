@@ -26,62 +26,53 @@ from xivo_agid.fastagi import FastAGI
 from xivo_agid.modules.callerid_forphones import callerid_forphones
 
 
+@patch('xivo_agid.modules.callerid_forphones.DirdClient')
 class TestCallerIdForPhone(unittest.TestCase):
 
-    @patch('xivo_agid.modules.callerid_forphones.DirdClient')
+    def setUp(self):
+        self.agi = Mock(FastAGI)
+        self.agi.config = {
+            'dird': {'host': 'localhost',
+                     'port': 9489,
+                     'timeout': 1},
+            'auth': {'token': 'valid-token'}
+        }
+
     def test_callerid_forphones_no_lookup(self, mock_DirdClient):
-        mock_agi = Mock(FastAGI)
-        mock_agi.env = {
-            'agi_calleridname': '5555551234',
+        self.agi.env = {
+            'agi_calleridname': 'Alice',
             'agi_callerid': '5555551234',
         }
-        mock_agi.config = {'dird': {'host': 'localhost',
-                                    'port': 9489,
-                                    'timeout': 1},
-                           'token': 'valid-token'}
+        dird_client = Mock()
+        mock_DirdClient.return_value = dird_client
+        dird_client.directories.reverse.return_value = {'display': None}
 
-        callerid_forphones(mock_agi, Mock(), Mock())
+        callerid_forphones(self.agi, Mock(), Mock())
 
-        mock_dird_client = Mock()
-        mock_DirdClient.return_value = mock_dird_client
-        assert_that(mock_dird_client.directories.reverse.call_count, equal_to(0))
+        assert_that(dird_client.directories.reverse.call_count, equal_to(0))
 
-    @patch('xivo_agid.modules.callerid_forphones.DirdClient')
     @patch('xivo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_no_result(self, mock_dao, mock_DirdClient):
-        mock_agi = Mock(FastAGI)
-        mock_agi.env = {
+        self.agi.env = {
             'agi_calleridname': '5555551234',
             'agi_callerid': '5555551234',
         }
-        mock_agi.config = {'dird': {'host': 'localhost',
-                                    'port': 9489,
-                                    'timeout': 1},
-                           'token': 'valid-token'}
-
-        mock_dird_client = Mock()
-        mock_DirdClient.return_value = mock_dird_client
-        mock_dird_client.directories.reverse.return_value = {'display': None}
+        dird_client = Mock()
+        mock_DirdClient.return_value = dird_client
+        dird_client.directories.reverse.return_value = {'display': None}
         mock_dao.find_by_incall_id.return_value = ['xivo_user_uuid', 'profile']
 
-        callerid_forphones(mock_agi, Mock(), Mock())
+        callerid_forphones(self.agi, Mock(), Mock())
 
-        assert_that(mock_dird_client.directories.reverse.call_count, equal_to(1))
+        assert_that(dird_client.directories.reverse.call_count, equal_to(1))
+        assert_that(self.agi.set_callerid.call_count, equal_to(0))
 
-        assert_that(mock_agi.set_callerid.call_count, equal_to(0))
-
-    @patch('xivo_agid.modules.callerid_forphones.DirdClient')
     @patch('xivo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_with_result(self, mock_dao, mock_DirdClient):
-        mock_agi = Mock(FastAGI)
-        mock_agi.env = {
+        self.agi.env = {
             'agi_calleridname': '5555551234',
             'agi_callerid': '5555551234',
         }
-        mock_agi.config = {'dird': {'host': 'localhost',
-                                    'port': 9489,
-                                    'timeout': 1},
-                           'token': 'valid-token'}
 
         mock_dird_client = Mock()
         mock_DirdClient.return_value = mock_dird_client
@@ -90,28 +81,22 @@ class TestCallerIdForPhone(unittest.TestCase):
                                                              'fields': lookup_result}
         mock_dao.find_by_incall_id.return_value = ['xivo_user_uuid', 'profile']
 
-        callerid_forphones(mock_agi, Mock(), Mock())
+        callerid_forphones(self.agi, Mock(), Mock())
 
         expected_callerid = '"Bob" <5555551234>'
-        mock_agi.set_callerid.assert_called_once_with(expected_callerid)
-        _, set_var_result = mock_agi.set_variable.call_args[0]
+        self.agi.set_callerid.assert_called_once_with(expected_callerid)
+        _, set_var_result = self.agi.set_variable.call_args[0]
         for key, value in lookup_result.iteritems():
             s = '%s: %s' % (key, value)
             assert_that(set_var_result, contains_string(s))
 
-    @patch('xivo_agid.modules.callerid_forphones.DirdClient')
     def test_that_callerid_forphones_never_raises(self, mock_DirdClient):
-        mock_agi = Mock(FastAGI)
-        mock_agi.env = {
+        self.agi.env = {
             'agi_calleridname': '5555551234',
             'agi_callerid': '5555551234',
         }
-        mock_agi.config = {'dird': {'host': 'localhost',
-                                    'port': 9489,
-                                    'timeout': 1},
-                           'token': 'valid-token'}
         mock_dird_client = Mock()
         mock_DirdClient.return_value = mock_dird_client
         mock_dird_client.directories.reverse.side_effect = AssertionError('Should not raise')
 
-        callerid_forphones(mock_agi, Mock(), Mock())
+        callerid_forphones(self.agi, Mock(), Mock())

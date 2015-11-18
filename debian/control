@@ -18,6 +18,7 @@ Depends: ${python:Depends},
          python-ldap,
          python-tz,
          xivo-agentd-client,
+         xivo-auth-client,
          xivo-dird-client
 Provides: pf-xivo-agid
 Replaces: pf-xivo-agid

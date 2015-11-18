@@ -33,6 +33,11 @@ dird:
   port: 9489
   timeout: 1
 
+# xivo-auth connection informations.
+auth:
+  host: localhost
+  port: 9497
+
 # Event bus (AMQP) connection informations
 bus:
   username: guest
