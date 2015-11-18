@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2014 Avencall
+# Copyright (C) 2006-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -121,10 +121,12 @@ def holdtime_announce(agi, cursor, args):
     holdtime = agi.get_variable('QUEUEHOLDTIME')
     holdtime = max(1, (int(holdtime) + 59) / 60)
 
+    gender = 'f' if holdtime == 1 else ''
+
     agi.answer()
     agi.stream_file('queue-holdtime')
     agi.stream_file('queue-less-than')
-    agi.say_number(str(holdtime))
+    agi.say_number(str(holdtime), gender=gender)
     agi.stream_file('queue-minutes')
 
 

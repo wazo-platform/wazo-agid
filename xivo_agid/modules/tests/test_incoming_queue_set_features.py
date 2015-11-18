@@ -38,4 +38,15 @@ class TestHoldtimeAnnounce(unittest.TestCase):
 
         incoming_queue_set_features.holdtime_announce(self.agi, self.cursor, self.args)
 
-        self.agi.say_number.assert_called_once_with(str(holdtime_minute))
+        self.agi.say_number.assert_called_once_with(str(holdtime_minute), gender='')
+
+    @patch('xivo_agid.objects.Queue')
+    def test_holdtime_use_gender_number(self, mock_Queue):
+        holdtime_minute = 1
+        holdtime_second = holdtime_minute * 60
+        self.agi.get_variable.return_value = holdtime_second
+        mock_Queue.return_value = self.queue
+
+        incoming_queue_set_features.holdtime_announce(self.agi, self.cursor, self.args)
+
+        self.agi.say_number.assert_called_once_with(str(holdtime_minute), gender='f')

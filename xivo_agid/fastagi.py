@@ -315,7 +315,7 @@ class FastAGI(object):
         res = self.execute('SAY DIGITS', digits, escape_digits)['result'][0]
         return self.code_to_char(res)
 
-    def say_number(self, number, escape_digits=''):
+    def say_number(self, number, escape_digits='', gender=''):
         """agi.say_number(number, escape_digits='') --> digit
         Say a given digit string, returning early if any of the given DTMF digits
         are received on the channel.
@@ -323,7 +323,7 @@ class FastAGI(object):
         """
         number = self._process_digit_list(number)
         escape_digits = self._process_digit_list(escape_digits)
-        res = self.execute('SAY NUMBER', number, escape_digits)['result'][0]
+        res = self.execute('SAY NUMBER', number, escape_digits, gender)['result'][0]
         return self.code_to_char(res)
 
     def say_alpha(self, characters, escape_digits=''):
