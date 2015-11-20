@@ -37,6 +37,7 @@ dird:
 auth:
   host: localhost
   port: 9497
+  key_file: 'var/lib/xivo-auth-keys/xivo-agid-key.yml'
 
 # Event bus (AMQP) connection informations
 bus:
