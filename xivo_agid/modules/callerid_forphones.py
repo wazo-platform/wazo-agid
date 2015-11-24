@@ -31,7 +31,7 @@ def callerid_forphones(agi, cursor, args):
                              port=dird_config['port'],
                              timeout=dird_config['timeout'],
                              token=agi.config['auth']['token'],
-                             verify_certificate=False)
+                             verify_certificate=dird_config['verify_certificate'])
     try:
         cid_name = agi.env['agi_calleridname']
         cid_number = agi.env['agi_callerid']

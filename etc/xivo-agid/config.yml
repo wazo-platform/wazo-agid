@@ -32,12 +32,14 @@ dird:
   host: localhost
   port: 9489
   timeout: 1
+  verify_certificate: '/usr/share/xivo-certs/server.crt'
 
 # xivo-auth connection informations.
 auth:
   host: localhost
   port: 9497
   key_file: 'var/lib/xivo-auth-keys/xivo-agid-key.yml'
+  verify_certificate: '/usr/share/xivo-certs/server.crt'
 
 # Event bus (AMQP) connection informations
 bus:

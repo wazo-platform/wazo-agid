@@ -147,7 +147,8 @@ class AGID(SocketServer.ThreadingTCPServer):
         self.auth_client = AuthClient(auth_config['host'],
                                       port=auth_config['port'],
                                       username=auth_config['service_id'],
-                                      password=auth_config['service_key'])
+                                      password=auth_config['service_key'],
+                                      verify_certificate=auth_config['verify_certificate'])
         signal.signal(signal.SIGHUP, sighup_handle)
 
         self.db_conn_pool = DBConnectionPool()

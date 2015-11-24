@@ -34,7 +34,8 @@ class TestCallerIdForPhone(unittest.TestCase):
         self.agi.config = {
             'dird': {'host': 'localhost',
                      'port': 9489,
-                     'timeout': 1},
+                     'timeout': 1,
+                     'verify_certificate': False},
             'auth': {'token': 'valid-token'}
         }
 

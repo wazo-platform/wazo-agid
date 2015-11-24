@@ -33,11 +33,13 @@ _DEFAULT_CONFIG = {
         'host': 'localhost',
         'port': 9489,
         'timeout': 1,
+        'verify_certificate': '/usr/share/xivo-certs/server.crt'
         },
     'auth': {
         'host': 'localhost',
         'port': 9497,
-        'key_file': '/var/lib/xivo-auth-keys/xivo-agid-key.yml'
+        'key_file': '/var/lib/xivo-auth-keys/xivo-agid-key.yml',
+        'verify_certificate': '/usr/share/xivo-certs/server.crt'
         },
     'debug': False,
     'foreground': False,
