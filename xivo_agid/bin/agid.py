@@ -34,13 +34,13 @@ _DEFAULT_CONFIG = {
         'port': 9489,
         'timeout': 1,
         'verify_certificate': '/usr/share/xivo-certs/server.crt'
-        },
+    },
     'auth': {
         'host': 'localhost',
         'port': 9497,
         'key_file': '/var/lib/xivo-auth-keys/xivo-agid-key.yml',
         'verify_certificate': '/usr/share/xivo-certs/server.crt'
-        },
+    },
     'debug': False,
     'foreground': False,
     'pidfile': '/var/run/xivo-agid.pid',
@@ -89,7 +89,7 @@ def _parse_args():
 
 
 def _load_key_file(config):
-    key_file = parse_config_file(config['auth'].get('key_file', ''))
+    key_file = parse_config_file(config['auth']['key_file'])
     return {'auth': {'service_id': key_file['service_id'],
                      'service_key': key_file['service_key']}}
 
