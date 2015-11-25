@@ -182,14 +182,16 @@ class AGID(SocketServer.ThreadingTCPServer):
         try:
             self.config['auth']['token'] = self.auth_client.token.new('xivo_service',
                                                                       expiration=self.token_expiration)['token']
-        except RequestException as e:
-            logger.exception(e)
-            logger.warning('Create token with XiVO Auth failed. Reattempt in %d seconds', self.renew_time_failed)
+        except RequestException:
+            logger.warning('Create token with XiVO Auth failed. Reattempt in %d seconds', self.renew_time_failed,
+                           exc_info=True)
             next_renew_time = self.renew_time_failed
         else:
             next_renew_time = self.renew_time
         finally:
-            Timer(next_renew_time, self._renew_token).start()
+            new_thread = Timer(next_renew_time, self._renew_token)
+            new_thread.daemon = True
+            new_thread.start()
 
 
 class Handler(object):
