@@ -15,7 +15,6 @@ RUN apt-get -qq -y install \
     python-dev \
     libpq-dev \
     libyaml-dev \
-    libldap2-dev \
     libsasl2-dev
 
 # Install xivo-agid

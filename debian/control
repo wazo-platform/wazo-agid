@@ -15,7 +15,6 @@ Pre-Depends: xivo-lib-python
 Depends: ${python:Depends},
          ${misc:Depends},
          asterisk,
-         python-ldap,
          python-tz,
          xivo-agentd-client,
          xivo-auth-client,
