@@ -72,7 +72,7 @@ def _set_reverse_lookup_variable(agi, fields):
 def _create_reverse_lookup_variable(fields):
     variable_content = []
     for key, value in fields.iteritems():
-        variable_content.append(u'{}: {}'.format(key, value))
+        variable_content.append(u'db-{}: {}'.format(key, value))
 
     return u','.join(variable_content).encode('utf8')
 
