@@ -39,8 +39,9 @@ def callerid_forphones(agi, cursor, args):
         logger.debug('Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number)
         if _should_reverse_lookup(cid_name, cid_number):
             incall_id = int(agi.get_variable('XIVO_INCALL_ID'))
-            xivo_user_uuid, profile = directory_profile_dao.find_by_incall_id(incall_id)
+            xivo_user_uuid, _ = directory_profile_dao.find_by_incall_id(incall_id)
             try:
+                # It is not possible to associate a profile to a reverse configuration in the webi
                 lookup_result = dird_client.directories.reverse(profile='default',
                                                                 xivo_user_uuid=xivo_user_uuid,
                                                                 exten=cid_number)
