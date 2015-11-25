@@ -38,6 +38,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                      'verify_certificate': False},
             'auth': {'token': 'valid-token'}
         }
+        self.agi.get_variable.return_value = '42'
 
     def test_callerid_forphones_no_lookup(self, mock_DirdClient):
         self.agi.env = {

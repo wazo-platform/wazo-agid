@@ -38,7 +38,7 @@ def callerid_forphones(agi, cursor, args):
 
         logger.debug('Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number)
         if _should_reverse_lookup(cid_name, cid_number):
-            incall_id = agi.get_variable('XIVO_INCALL_ID')
+            incall_id = int(agi.get_variable('XIVO_INCALL_ID'))
             xivo_user_uuid, profile = directory_profile_dao.find_by_incall_id(incall_id)
             try:
                 lookup_result = dird_client.directories.reverse(profile='default',
