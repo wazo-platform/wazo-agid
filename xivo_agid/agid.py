@@ -169,6 +169,7 @@ class AGID(SocketServer.ThreadingTCPServer):
             self.listen_port = int(self.config["listen_port"])
             logger.debug("listen_port: %d", self.listen_port)
 
+            self.config['auth']['token'] = None
             self._renew_token()
 
         conn_pool_size = int(self.config["connection_pool_size"])
