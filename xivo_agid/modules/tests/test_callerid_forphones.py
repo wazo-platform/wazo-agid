@@ -62,7 +62,9 @@ class TestCallerIdForPhone(unittest.TestCase):
         dird_client = Mock()
         mock_DirdClient.return_value = dird_client
         dird_client.directories.reverse.return_value = {'display': None}
-        mock_dao.find_by_incall_id.return_value = ['xivo_user_uuid', 'profile']
+        dao_result = Mock()
+        mock_dao.find_by_incall_id.return_value = dao_result
+        dao_result.xivo_user_uuid = 'xivo_user_uuid'
 
         callerid_forphones(self.agi, Mock(), Mock())
 
@@ -81,7 +83,9 @@ class TestCallerIdForPhone(unittest.TestCase):
         lookup_result = {'number': '415', 'firstname': 'Bob', 'lastname': 'wonderland'}
         mock_dird_client.directories.reverse.return_value = {'display': 'Bob',
                                                              'fields': lookup_result}
-        mock_dao.find_by_incall_id.return_value = ['xivo_user_uuid', 'profile']
+        dao_result = Mock()
+        mock_dao.find_by_incall_id.return_value = dao_result
+        dao_result.xivo_user_uuid = 'xivo_user_uuid'
 
         callerid_forphones(self.agi, Mock(), Mock())
 
@@ -91,6 +95,22 @@ class TestCallerIdForPhone(unittest.TestCase):
         for key, value in lookup_result.iteritems():
             s = '%s: %s' % (key, value)
             assert_that(set_var_result, contains_string(s))
+
+    @patch('xivo_agid.modules.callerid_forphones.directory_profile_dao')
+    def test_callerid_forphones_when_dao_return_none(self, mock_dao, mock_DirdClient):
+        self.agi.env = {
+            'agi_calleridname': '5555551234',
+            'agi_callerid': '5555551234',
+        }
+        dird_client = Mock()
+        mock_DirdClient.return_value = dird_client
+        dird_client.directories.reverse.return_value = {'display': None}
+        mock_dao.find_by_incall_id.return_value = None
+
+        callerid_forphones(self.agi, Mock(), Mock())
+
+        assert_that(dird_client.directories.reverse.call_count, equal_to(1))
+        assert_that(self.agi.set_callerid.call_count, equal_to(0))
 
     def test_that_callerid_forphones_never_raises(self, mock_DirdClient):
         self.agi.env = {
