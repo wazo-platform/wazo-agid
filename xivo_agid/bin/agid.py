@@ -21,6 +21,7 @@ import xivo_dao
 
 from xivo.chain_map import ChainMap
 from xivo.config_helper import read_config_file_hierarchy
+from xivo.config_helper import parse_config_file
 
 from xivo_agid import agid
 from xivo_agid.modules import *
@@ -28,6 +29,18 @@ from xivo.daemonize import pidfile_context
 from xivo.xivo_logging import setup_logging, silence_loggers
 
 _DEFAULT_CONFIG = {
+    'dird': {
+        'host': 'localhost',
+        'port': 9489,
+        'timeout': 1,
+        'verify_certificate': '/usr/share/xivo-certs/server.crt'
+    },
+    'auth': {
+        'host': 'localhost',
+        'port': 9497,
+        'key_file': '/var/lib/xivo-auth-keys/xivo-agid-key.yml',
+        'verify_certificate': '/usr/share/xivo-certs/server.crt'
+    },
     'debug': False,
     'foreground': False,
     'pidfile': '/var/run/xivo-agid.pid',
@@ -44,7 +57,8 @@ _DEFAULT_CONFIG = {
 def main():
     cli_config = _parse_args()
     file_config = read_config_file_hierarchy(ChainMap(cli_config, _DEFAULT_CONFIG))
-    config = ChainMap(cli_config, file_config, _DEFAULT_CONFIG)
+    key_config = _load_key_file(ChainMap(cli_config, file_config, _DEFAULT_CONFIG))
+    config = ChainMap(cli_config, key_config, file_config, _DEFAULT_CONFIG)
 
     setup_logging(config['logfile'], config['foreground'], config['debug'])
     silence_loggers(['urllib3'], logging.WARNING)
@@ -72,6 +86,12 @@ def _parse_args():
         config['foreground'] = parsed_args.foreground
 
     return config
+
+
+def _load_key_file(config):
+    key_file = parse_config_file(config['auth']['key_file'])
+    return {'auth': {'service_id': key_file['service_id'],
+                     'service_key': key_file['service_key']}}
 
 
 if __name__ == '__main__':
