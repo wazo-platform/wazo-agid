@@ -19,12 +19,14 @@ import argparse
 import logging
 import xivo_dao
 
+from xivo.auth_helpers import TokenRenewer
 from xivo.chain_map import ChainMap
 from xivo.config_helper import read_config_file_hierarchy
 from xivo.config_helper import parse_config_file
 
 from xivo_agid import agid
 from xivo_agid.modules import *
+from xivo_auth_client import Client as AuthClient
 from xivo.daemonize import pidfile_context
 from xivo.xivo_logging import setup_logging, silence_loggers
 
@@ -65,9 +67,15 @@ def main():
 
     xivo_dao.init_db_from_config(config)
 
+    token_renewer = TokenRenewer(_new_auth_client(config))
+    def on_token_change(token_id):
+        config['auth']['token'] = token_id
+    token_renewer.subscribe_to_token_change(on_token_change)
+
     with pidfile_context(config['pidfile'], config['foreground']):
         agid.init(config)
-        agid.run()
+        with token_renewer:
+            agid.run()
 
 
 def _parse_args():
@@ -92,6 +100,15 @@ def _load_key_file(config):
     key_file = parse_config_file(config['auth']['key_file'])
     return {'auth': {'service_id': key_file['service_id'],
                      'service_key': key_file['service_key']}}
+
+
+def _new_auth_client(config):
+    auth_config = config['auth']
+    return AuthClient(auth_config['host'],
+                      port=auth_config['port'],
+                      username=auth_config['service_id'],
+                      password=auth_config['service_key'],
+                      verify_certificate=auth_config['verify_certificate'])
 
 
 if __name__ == '__main__':

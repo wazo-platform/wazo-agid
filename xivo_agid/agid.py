@@ -19,16 +19,13 @@ import signal
 import logging
 import SocketServer
 
-from requests.exceptions import RequestException
 from threading import Lock
-from threading import Timer
 
 from xivo import agitb
 from xivo import anysql
 from xivo import moresynchro
 from xivo.BackSQL import backpostgresql  # noqa
 from xivo_agid import fastagi
-from xivo_auth_client import Client as AuthClient
 from xivo_dao.helpers.db_utils import session_scope
 
 
@@ -134,21 +131,11 @@ class AGID(SocketServer.ThreadingTCPServer):
     allow_reuse_address = True
     initialized = False
     request_queue_size = 20
-    token_expiration = 6*60*60
-    renew_time = int(0.8*token_expiration)
-    renew_time_failed = 20
-    token = None
 
     def __init__(self, config):
         logger.info('xivo-agid starting...')
 
         self.config = config
-        auth_config = config['auth']
-        self.auth_client = AuthClient(auth_config['host'],
-                                      port=auth_config['port'],
-                                      username=auth_config['service_id'],
-                                      password=auth_config['service_key'],
-                                      verify_certificate=auth_config['verify_certificate'])
         signal.signal(signal.SIGHUP, sighup_handle)
 
         self.db_conn_pool = DBConnectionPool()
@@ -169,29 +156,10 @@ class AGID(SocketServer.ThreadingTCPServer):
             self.listen_port = int(self.config["listen_port"])
             logger.debug("listen_port: %d", self.listen_port)
 
-            self.config['auth']['token'] = None
-            self._renew_token()
-
         conn_pool_size = int(self.config["connection_pool_size"])
 
         db_uri = self.config["db_uri"]
         self.db_conn_pool.reload(conn_pool_size, db_uri)
-
-    def _renew_token(self):
-        logger.info('Renew service token')
-        try:
-            self.config['auth']['token'] = self.auth_client.token.new('xivo_service',
-                                                                      expiration=self.token_expiration)['token']
-        except RequestException:
-            logger.warning('Create token with XiVO Auth failed. Reattempt in %d seconds', self.renew_time_failed,
-                           exc_info=True)
-            next_renew_time = self.renew_time_failed
-        else:
-            next_renew_time = self.renew_time
-        finally:
-            new_thread = Timer(next_renew_time, self._renew_token)
-            new_thread.daemon = True
-            new_thread.start()
 
 
 class Handler(object):
