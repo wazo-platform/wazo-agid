@@ -29,8 +29,12 @@ class TestAgent(unittest.TestCase):
 
     def setUp(self):
         self.agentd_config = {'foo': 'bar'}
+        self.token_id = 'some-token-id'
         self.agi = Mock(FastAGI)
-        self.agi.config = {'agentd': self.agentd_config}
+        self.agi.config = {
+            'agentd': self.agentd_config,
+            'auth': {'token': self.token_id},
+        }
         self.agentd_client = Mock()
         self.agent_id = 11
         self.extension = '1234'
@@ -41,7 +45,7 @@ class TestAgent(unittest.TestCase):
 
         agent.login_agent(self.agi, self.agent_id, self.extension, self.context)
 
-        AgentdClient.assert_called_once_with(**self.agentd_config)
+        AgentdClient.assert_called_once_with(token=self.token_id, **self.agentd_config)
         self.agentd_client.agents.login_agent.assert_called_once_with(self.agent_id,
                                                                       self.extension,
                                                                       self.context)
@@ -74,7 +78,7 @@ class TestAgent(unittest.TestCase):
 
         agent.logoff_agent(self.agi, self.agent_id)
 
-        AgentdClient.assert_called_once_with(**self.agentd_config)
+        AgentdClient.assert_called_once_with(token=self.token_id, **self.agentd_config)
         self.agentd_client.agents.logoff_agent.assert_called_once_with(self.agent_id)
 
     def test_logoff_agent_on_not_logged(self, AgentdClient):
@@ -94,6 +98,6 @@ class TestAgent(unittest.TestCase):
 
         agent.get_agent_status(self.agi, self.agent_id)
 
-        AgentdClient.assert_called_once_with(**self.agentd_config)
+        AgentdClient.assert_called_once_with(token=self.token_id, **self.agentd_config)
         self.agentd_client.agents.get_agent_status.assert_called_once_with(self.agent_id)
         self.agi.set_variable.assert_called_once_with('XIVO_AGENT_LOGIN_STATUS', ANY)

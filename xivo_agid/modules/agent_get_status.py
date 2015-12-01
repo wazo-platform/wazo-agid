@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2014 Avencall
+# Copyright (C) 2012-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ def agent_get_status(agi, cursor, args):
 
         agent.get_agent_status(agi, agent_id)
     except Exception as e:
-        logger.exception("Error while logging off agent")
+        logger.exception("Error while getting agent status")
         agi.dp_break(e)
 
 
