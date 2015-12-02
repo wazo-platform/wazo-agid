@@ -53,5 +53,6 @@ def get_agent_status(agi, agent_id):
 
 
 def _new_agentd_client(config):
-    agentd_cfg_dict = config['agentd']
-    return AgentdClient(**agentd_cfg_dict)
+    agentd_config = config['agentd']
+    token_id = config['auth']['token']
+    return AgentdClient(token=token_id, **agentd_config)
