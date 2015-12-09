@@ -5,9 +5,9 @@ git+https://github.com/xivo-pbx/xivo-dird-client.git
 git+https://github.com/xivo-pbx/xivo-lib-python.git
 git+https://github.com/xivo-pbx/xivo-lib-rest-client.git
 git+https://github.com/xivo-pbx/xivo-provd-client.git
-psycopg2
+psycopg2==2.5.4
 pytz
-pyyaml==3.10
-requests==2.0.0
-sqlalchemy==0.9.4
-stevedore
+pyyaml==3.11
+requests==2.4.3
+sqlalchemy==0.9.8
+stevedore==0.14.1
