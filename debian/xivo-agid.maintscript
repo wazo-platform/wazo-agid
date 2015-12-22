@@ -2,3 +2,4 @@
 
 rm_conffile /etc/pf-xivo/xivo-agid.conf 14.02
 rm_conffile /etc/xivo/xivo-agid.conf 15.01
+rm_conffile /etc/init.d/xivo-agid 15.20
