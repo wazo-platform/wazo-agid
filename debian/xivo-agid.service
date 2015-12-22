@@ -1,0 +1,12 @@
+[Unit]
+Description=xivo-agid server
+ConditionPathExists=!/tmp/xivo-disabled
+After=network.target postgresql.service
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/xivo-agid
+PIDFile=/var/run/xivo-agid.pid
+
+[Install]
+WantedBy=multi-user.target
