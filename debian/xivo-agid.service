@@ -1,6 +1,6 @@
 [Unit]
 Description=xivo-agid server
-ConditionPathExists=!/tmp/xivo-disabled
+ConditionPathExists=!/var/lib/xivo/disabled
 After=network.target postgresql.service
 
 [Service]
