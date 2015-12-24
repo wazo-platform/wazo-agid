@@ -2,6 +2,7 @@
 Description=xivo-agid server
 ConditionPathExists=!/var/lib/xivo/disabled
 After=network.target postgresql.service
+Wants=postgresql.service
 
 [Service]
 Type=forking
