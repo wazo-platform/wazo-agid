@@ -18,7 +18,8 @@ Depends: ${python:Depends},
          xivo-agentd-client,
          xivo-auth-client,
          xivo-dird-client,
-         xivo-lib-python (>> 15.18)
+         xivo-lib-python (>> 15.18),
+         xivo-libdao
 Provides: pf-xivo-agid
 Replaces: pf-xivo-agid
 Conflicts: pf-xivo-agid
