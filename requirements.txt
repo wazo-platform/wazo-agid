@@ -1,3 +1,4 @@
+flask==0.10.1  # from xivo-lib-python
 git+https://github.com/xivo-pbx/xivo-agentd-client.git
 git+https://github.com/xivo-pbx/xivo-auth-client.git
 git+https://github.com/xivo-pbx/xivo-dao.git
