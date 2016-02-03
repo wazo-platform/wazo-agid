@@ -8,5 +8,8 @@ xivo-agid is a server used by [XiVO](http://xivo.io) to serve [AGI](https://wiki
 Running unit tests
 ------------------
 
-1. Install requirements with ```pip install -r requirements.txt -r test-requirements.txt```
-2. Run tests with ```nosetests```
+```
+apt-get install libpq-dev python-dev libffi-dev libyaml-dev
+pip install tox
+tox --recreate -e py27
+```
