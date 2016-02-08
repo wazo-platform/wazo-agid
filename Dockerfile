@@ -38,4 +38,4 @@ RUN rm -rf /usr/src/agid
 
 EXPOSE 4573
 
-CMD xivo-agid -f -d
+CMD ["xivo-agid", "-fd"]
