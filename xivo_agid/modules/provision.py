@@ -24,8 +24,7 @@ logger = logging.getLogger(__name__)
 TIMEOUT = 10
 
 
-def _do_provision(provcode, ip):
-    client = Client('localhost', https=False, port=9487)
+def _do_provision(client, provcode, ip):
     device = _get_device(client, ip)
     line = _get_line(client, provcode)
     client.lines(line).add_device(device)
@@ -48,9 +47,11 @@ def _get_line(client, provcode):
 
 def provision(agi, cursor, args):
     try:
+        confd_config = dict(agi.config['confd'])
+        client = Client(token=agi.config['auth']['token'], **confd_config)
         provcode = args[0]
         ip = args[1]
-        _do_provision(provcode, ip)
+        _do_provision(client, provcode, ip)
     except Exception, e:
         logger.error('Error during provisioning: %s', e)
     else:

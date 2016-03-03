@@ -18,41 +18,46 @@
 
 import unittest
 
-from mock import patch
+from mock import Mock
 
 from xivo_agid.modules import provision
 
 
-@patch('xivo_agid.modules.provision.Client')
 class TestDoProvision(unittest.TestCase):
 
     EMPTY_LIST = {'total': 0, 'items': []}
 
-    def test_given_device_does_not_exist_when_provisioning_then_raises_error(self, client):
-        client.return_value.devices.list.return_value = self.EMPTY_LIST
+    def setUp(self):
+        self.client = Mock()
 
-        self.assertRaises(Exception, provision._do_provision, "123456", "127.0.0.1")
+    def provision(self, code, ip):
+        provision._do_provision(self.client, code, ip)
 
-    def test_given_line_does_not_exist_when_provisioning_then_raises_error(self, client):
+    def test_given_device_does_not_exist_when_provisioning_then_raises_error(self):
+        self.client.devices.list.return_value = self.EMPTY_LIST
+
+        self.assertRaises(Exception, self.provision, "123456", "127.0.0.1")
+
+    def test_given_line_does_not_exist_when_provisioning_then_raises_error(self):
         device = {'id': '1234abcd', 'ip': '127.0.0.1'}
-        client.return_value.devices.list.return_value = {'total': 1, 'items': [device]}
-        client.return_value.lines.list.return_value = self.EMPTY_LIST
+        self.client.devices.list.return_value = {'total': 1, 'items': [device]}
+        self.client.lines.list.return_value = self.EMPTY_LIST
 
-        self.assertRaises(Exception, provision._do_provision, "123456", "127.0.0.1")
+        self.assertRaises(Exception, self.provision, "123456", "127.0.0.1")
 
-    def test_given_line_and_device_exist_when_provisioning_then_line_and_device_associated(self, client):
+    def test_given_line_and_device_exist_when_provisioning_then_line_and_device_associated(self):
         device = {'id': '1234abcd', 'ip': '127.0.0.1'}
         line = {'id': 1234, 'provisioning_code': "123456"}
-        client.return_value.devices.list.return_value = {'total': 1, 'items': [device]}
-        client.return_value.lines.list.return_value = {'total': 1, 'items': [line]}
+        self.client.devices.list.return_value = {'total': 1, 'items': [device]}
+        self.client.lines.list.return_value = {'total': 1, 'items': [line]}
 
-        provision._do_provision("123456", "127.0.0.1")
+        self.provision("123456", "127.0.0.1")
 
-        client.return_value.devices.list.assert_called_once_with(ip="127.0.0.1")
-        client.return_value.lines.list.assert_called_once_with(provisioning_code="123456")
-        client.return_value.devices.synchronize.assert_called_once_with(device['id'])
+        self.client.devices.list.assert_called_once_with(ip="127.0.0.1")
+        self.client.lines.list.assert_called_once_with(provisioning_code="123456")
+        self.client.devices.synchronize.assert_called_once_with(device['id'])
 
-        association = client.return_value.lines
+        association = self.client.lines
         associator = association.return_value
 
         association.assert_called_once_with(line)
