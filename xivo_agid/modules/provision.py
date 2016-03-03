@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2014 Avencall
+# Copyright (C) 2011-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,26 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-import json
 import logging
-import urllib2
 from xivo_agid import agid
+from xivo_confd_client import Client
 
 logger = logging.getLogger(__name__)
 
-AUTOPROV_URL = 'http://localhost/xivo/configuration/json.php/private/provisioning/autoprov?act=configure'
-HEADERS = {'Content-Type': 'application/json'}
 TIMEOUT = 10
 
 
 def _do_provision(provcode, ip):
-    data = json.dumps({'code': provcode, 'ip': ip})
-    request = urllib2.Request(AUTOPROV_URL, data, HEADERS)
-    f = urllib2.urlopen(request, timeout=TIMEOUT)
-    try:
-        f.read()
-    finally:
-        f.close()
+    client = Client('localhost', https=False, port=9487)
+    device = _get_device(client, ip)
+    line = _get_line(client, provcode)
+    client.lines(line).add_device(device)
+    client.devices.synchronize(device['id'])
+
+
+def _get_device(client, ip):
+    response = client.devices.list(ip=ip)
+    if response['total'] != 1:
+        raise Exception("Device with ip {} not found".format(ip))
+    return response['items'][0]
+
+
+def _get_line(client, provcode):
+    response = client.lines.list(provisioning_code=provcode)
+    if response['total'] != 1:
+        raise Exception("Line with provisioning code {} not found".format(provcode))
+    return response['items'][0]
 
 
 def provision(agi, cursor, args):
