@@ -70,3 +70,4 @@ class TestDoProvision(unittest.TestCase):
         self.provision("autoprov", "127.0.0.1")
 
         self.client.devices.autoprov.assert_called_once_with(device['id'])
+        self.client.devices.synchronize.assert_called_once_with(device['id'])

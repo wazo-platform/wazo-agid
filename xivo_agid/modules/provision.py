@@ -31,7 +31,7 @@ def _do_provision(client, provcode, ip):
     else:
         line = _get_line(client, provcode)
         client.lines(line).add_device(device)
-        client.devices.synchronize(device['id'])
+    client.devices.synchronize(device['id'])
 
 
 def _get_device(client, ip):
