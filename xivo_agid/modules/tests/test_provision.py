@@ -62,3 +62,11 @@ class TestDoProvision(unittest.TestCase):
 
         association.assert_called_once_with(line)
         associator.add_device.assert_called_once_with(device)
+
+    def test_given_prov_code_is_autoprov_then_device_is_reset_to_autoprov(self):
+        device = {'id': '1234abcd', 'ip': '127.0.0.1'}
+        self.client.devices.list.return_value = {'total': 1, 'items': [device]}
+
+        self.provision("autoprov", "127.0.0.1")
+
+        self.client.devices.autoprov.assert_called_once_with(device['id'])

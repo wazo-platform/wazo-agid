@@ -26,9 +26,12 @@ TIMEOUT = 10
 
 def _do_provision(client, provcode, ip):
     device = _get_device(client, ip)
-    line = _get_line(client, provcode)
-    client.lines(line).add_device(device)
-    client.devices.synchronize(device['id'])
+    if provcode == "autoprov":
+        client.devices.autoprov(device['id'])
+    else:
+        line = _get_line(client, provcode)
+        client.lines(line).add_device(device)
+        client.devices.synchronize(device['id'])
 
 
 def _get_device(client, ip):
