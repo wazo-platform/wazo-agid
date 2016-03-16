@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2014 Avencall
+# Copyright (C) 2006-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,6 +60,14 @@ def _user_set_call_rights(agi, cursor, args):
                       call_rights.RIGHTCALL_PASSWD_COLNAME),
                      (user.id,))
         res = cursor.fetchall()
+
+        cursor.query("SELECT rightcallcode FROM userfeatures "
+                     "WHERE userfeatures.id = {}".format(user.id))
+        user_rightcallcode = cursor.fetchone()
+        if user_rightcallcode and user_rightcallcode[0]:
+            for i in range(len(res)):
+                res[i][1] = user_rightcallcode[0]
+
         call_rights.apply_rules(agi, res)
 
         cursor.query("SELECT ${columns} FROM groupfeatures "
