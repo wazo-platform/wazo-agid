@@ -61,13 +61,10 @@ def _user_set_call_rights(agi, cursor, args):
                      (user.id,))
         res = cursor.fetchall()
 
-        cursor.query("SELECT rightcallcode FROM userfeatures "
-                     "WHERE userfeatures.id = {}".format(user.id))
-        user_rightcallcode = cursor.fetchone()
-        if user_rightcallcode and user_rightcallcode[0]:
+        if user.rightcallcode:
             for i, value in enumerate(res):
                 if value[1]:
-                    res[i][1] = user_rightcallcode[0]
+                    res[i][1] = user.rightcallcode
 
         call_rights.apply_rules(agi, res)
 

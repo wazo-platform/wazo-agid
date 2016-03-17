@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2007-2015 Avencall
+# Copyright (C) 2007-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -292,6 +292,7 @@ class User(object):
         self.destbusy = user_row.destbusy
         self.preprocess_subroutine = user_row.preprocess_subroutine
         self.bsfilter = user_row.bsfilter
+        self.rightcallcode = user_row.rightcallcode
 
         if self.destunc == '':
             self.enableunc = 0
