@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2015 Avencall
+# Copyright (C) 2012-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import logging
 from requests.exceptions import RequestException
 from xivo_agid import agid
 from xivo_dao.resources.directory_profile import dao as directory_profile_dao
-from xivo_dird_client import Client as DirdClient
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +27,7 @@ FAKE_XIVO_USER_UUID = '00000000-0000-0000-0000-000000000000'
 
 
 def callerid_forphones(agi, cursor, args):
-    dird_config = agi.config['dird']
-    dird_client = DirdClient(dird_config['host'],
-                             port=dird_config['port'],
-                             timeout=dird_config['timeout'],
-                             token=agi.config['auth']['token'],
-                             verify_certificate=dird_config['verify_certificate'])
+    dird_client = agi.config['dird']['client']
     try:
         cid_name = agi.env['agi_calleridname']
         cid_number = agi.env['agi_callerid']
