@@ -28,6 +28,7 @@ from xivo_agid import agid
 from xivo_agid.modules import *
 from xivo_auth_client import Client as AuthClient
 from xivo_dird_client import Client as DirdClient
+from xivo_confd_client import Client as ConfdClient
 from xivo.daemonize import pidfile_context
 from xivo.xivo_logging import setup_logging, silence_loggers
 
@@ -70,10 +71,12 @@ def main():
 
     token_renewer = TokenRenewer(_new_auth_client(config))
     config['dird']['client'] = DirdClient(**config['dird'])
+    config['confd']['client'] = ConfdClient(**config['confd'])
 
     def on_token_change(token_id):
         config['auth']['token'] = token_id
         config['dird']['client'].set_token(token_id)
+        config['confd']['client'].set_token(token_id)
     token_renewer.subscribe_to_token_change(on_token_change)
 
     with pidfile_context(config['pidfile'], config['foreground']):
