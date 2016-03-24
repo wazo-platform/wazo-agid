@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2014 Avencall
+# Copyright (C) 2006-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-RULES_FILE = '/etc/xivo/asterisk/xivo_in_callerid.conf'
-
 import re
 import sys
 import logging
@@ -26,8 +24,9 @@ from xivo import OrderedConf
 
 from xivo_agid import agid
 
-log = logging.getLogger('xivo_agid.modules.in_callerid')
+RULES_FILE = '/etc/xivo/asterisk/xivo_in_callerid.conf'
 
+log = logging.getLogger('xivo_agid.modules.in_callerid')
 config = None
 re_objs = {}
 
@@ -37,14 +36,17 @@ def in_callerid(agi, cursor, args):
 
     for section in config:
         section_name = section.get_name()
+        log.debug('section `%s`', section_name)
         re_obj = re_objs[section_name]
 
         if not re_obj.match(callerid_num):
+            log.debug('pattern `%s` does not match `%s`', re_obj.pattern, callerid_num)
             continue
 
-        # We got a match.
+        log.debug('pattern `%s` matches `%s`', re_obj.pattern, callerid_num)
         if section.has_option('strip'):
             str_strip = section.get('strip')
+            log.debug('stripping `%s` digits from `%s`', str_strip, callerid_num)
 
             if str_strip.isdigit():
                 strip = int(str_strip)
@@ -54,6 +56,7 @@ def in_callerid(agi, cursor, args):
 
         if section.has_option('add'):
             add = section.get('add')
+            log.debug('prefixing `%s` with `%s`', callerid_num, add)
 
             if add:
                 callerid_num = add + callerid_num
