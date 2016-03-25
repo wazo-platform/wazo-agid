@@ -17,7 +17,6 @@
 
 import logging
 from xivo_agid import agid
-from xivo_confd_client import Client
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +49,7 @@ def _get_line(client, provcode):
 
 def provision(agi, cursor, args):
     try:
-        confd_config = dict(agi.config['confd'])
-        client = Client(token=agi.config['auth']['token'], **confd_config)
+        client = agi.config['confd']['client']
         provcode = args[0]
         ip = args[1]
         _do_provision(client, provcode, ip)
