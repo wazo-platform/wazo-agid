@@ -48,7 +48,7 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
 #   faxfile -- the path to the fax file (in TIFF format)
 #   dstnum -- the content of the the XIVO_DSTNUM dialplan variable
 #   args -- args specific to the backend
-def _new_mail_backend(subject, content_file, email_from, email_realname):
+def _new_mail_backend(subject, content_file, email_from, email_realname='XiVO Fax'):
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
     # called.
