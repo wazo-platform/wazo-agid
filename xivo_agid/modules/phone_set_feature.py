@@ -118,27 +118,43 @@ def _get_context_of_calling_user(agi):
 
 
 def _phone_set_unc(agi, cursor, args):
-    _do_phone_set_forward(agi, cursor, args, 'unc')
+    enabled = _phone_set_forward(agi, 'unconditional', args)
+    if enabled is not None:
+        agi.set_variable('XIVO_UNCENABLED', int(enabled))
 
 
 def _phone_set_rna(agi, cursor, args):
-    _do_phone_set_forward(agi, cursor, args, 'rna')
+    enabled = _phone_set_forward(agi, 'noanswer', args)
+    if enabled is not None:
+        agi.set_variable('XIVO_RNAENABLED', int(enabled))
 
 
 def _phone_set_busy(agi, cursor, args):
-    _do_phone_set_forward(agi, cursor, args, 'busy')
+    enabled = _phone_set_forward(agi, 'busy', args)
+    if enabled is not None:
+        agi.set_variable('XIVO_BUSYENABLED', int(enabled))
 
 
-def _do_phone_set_forward(agi, cursor, args, forward_name):
-    enable = int(args[1])
+def _phone_set_forward(agi, forward_name, args):
+    try:
+        user_id = _get_id_of_calling_user(agi)
+        result = _user_set_forward(agi, user_id, forward_name, args)
+    except Exception, e:
+        logger.error('Error during setting %s: %s', forward_name, e)
+        return None
+    else:
+        agi.set_variable('XIVO_USERID_OWNER', user_id)
+        return result['enabled']
+
+
+def _user_set_forward(agi, user_id, forward_name, args):
+    enabled = args[1] == '1'
     destination = args[2]
-
-    calling_user = _get_calling_user(agi, cursor)
-    calling_user.set_feature(forward_name, enable, destination)
-
-    agi.set_variable('XIVO_%sENABLED' % forward_name.upper(),
-                     getattr(calling_user, 'enable%s' % forward_name))
-    agi.set_variable('XIVO_USERID_OWNER', calling_user.id)
+    confd_client = agi.config['confd']['client']
+    body = {'enabled': enabled,
+            'destination': destination}
+    confd_client.users(user_id).update_forward(forward_name, body)
+    return body
 
 
 agid.register(phone_set_feature)
