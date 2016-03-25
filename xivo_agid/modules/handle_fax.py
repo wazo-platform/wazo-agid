@@ -30,7 +30,6 @@ TIFF2PDF_PATH = "/usr/bin/tiff2pdf"
 MUTT_PATH = "/usr/bin/mutt"
 LP_PATH = "/usr/bin/lp"
 DESTINATIONS = {}
-FTP2PDF = False
 
 def _pdffile_from_file(fileobj):
     return fileobj.rsplit(".", 1)[0] + ".pdf"
@@ -49,7 +48,7 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
 #   faxfile -- the path to the fax file (in TIFF format)
 #   dstnum -- the content of the the XIVO_DSTNUM dialplan variable
 #   args -- args specific to the backend
-def _new_mail_backend(subject, content_file, email_from):
+def _new_mail_backend(subject, content_file, email_from, email_realname):
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
     # called.
@@ -127,20 +126,24 @@ def _convert_config_value_to_bool(config_value, default, param_name):
         return default
 
 
-def _new_ftp_backend(host, username, password, directory=None):
+def _new_ftp_backend(host, username, password, directory=None, convert_to_pdf=None):
     # Return a backend taking no argument, which transfers the fax,
     # in its original format, to the given FTP server when called.
     # Note that a connection is made every time the backend is called.
     def aux(faxfile, dstnum, args):
-        if FTP2PDF:
+        convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
+        if convert_to_pdf:
             pdffile = _convert_tiff_to_pdf(faxfile)
-        fobj = open(faxfile, "rb")
+        if convert_to_pdf:
+            fobj = open(pdffile, "rb")
+        else:
+            fobj = open(faxfile, "rb")
         try:
             ftp_serv = ftplib.FTP(host, username, password)
             try:
                 if directory:
                     ftp_serv.cwd(directory)
-                if FTP2PDF:
+                if convert_to_pdf:
                     stor_command = "STOR %s" % os.path.basename(pdffile)
                 else:
                     stor_command = "STOR %s" % os.path.basename(faxfile)
@@ -150,11 +153,11 @@ def _new_ftp_backend(host, username, password, directory=None):
         finally:
             fobj.close()
         
-        try:
-            if FTP2PDF:
+        if convert_to_pdf:
+            try:
                 os.remove(pdffile)
-        except OSError, e:
-            logger.info('Could not remove pdffile %s: %s', pdffile, e)
+            except OSError, e:
+                logger.info('Could not remove pdffile %s: %s', pdffile, e)
             
     return aux
 
@@ -230,15 +233,12 @@ def setup_handle_fax(cursor):
     global TIFF2PDF_PATH
     global MUTT_PATH
     global LP_PATH
-    global FTP2PDF
     if config.has_option("general", "tiff2pdf"):
         TIFF2PDF_PATH = config.get("general", "tiff2pdf")
     if config.has_option("general", "mutt"):
         MUTT_PATH = config.get("general", "mutt")
     if config.has_option("general", "lp"):
         LP_PATH = config.get("general", "lp")
-    if config.has_option("general", "ftp2pdf"):
-        FTP2PDF = config.get("general", "ftp2pdf")
 
     # 3. create backends
     backends = {}
