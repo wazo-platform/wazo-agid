@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2014 Avencall
+# Copyright (C) 2009-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -73,15 +73,7 @@ def phone_progfunckey_devstate(agi, cursor, args):
     xset = set()
     forwards = dict(extenfeatures.FEATURES['forwards'])
 
-    if feature in forwards:
-        try:
-            xset.add(fkey_extension(ppfkexten,
-                                    (user.id,
-                                     featureexten,
-                                     getattr(user, "dest%s" % forwards[feature], ""))))
-        except ValueError, e:
-            agi.verbose(str(e))
-    else:
+    if feature not in forwards:
         xset.add(fkey_extension(ppfkexten,
                                 (user.id,
                                  featureexten,
