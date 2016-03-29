@@ -64,6 +64,11 @@ def phone_progfunckey_devstate(agi, cursor, args):
         agi.verbose("Invalid feature: %r" % feature)
         return
 
+    forwards = dict(extenfeatures.FEATURES['forwards'])
+    services_api = ['incallfilter', 'enablednd']
+    if feature in forwards or feature in services_api:
+        return
+
     try:
         featureexten = extenfeatures.get_exten_by_name(feature)
     except LookupError, e:
@@ -71,13 +76,10 @@ def phone_progfunckey_devstate(agi, cursor, args):
         return
 
     xset = set()
-    forwards = dict(extenfeatures.FEATURES['forwards'])
-
-    if feature not in forwards:
-        xset.add(fkey_extension(ppfkexten,
-                                (user.id,
-                                 featureexten,
-                                 dest)))
+    xset.add(fkey_extension(ppfkexten,
+                            (user.id,
+                             featureexten,
+                             dest)))
 
     for x in xset:
         agi.set_variable("DEVICE_STATE(Custom:%s)" % x, devstate)
