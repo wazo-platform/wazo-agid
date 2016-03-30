@@ -31,7 +31,6 @@ MUTT_PATH = "/usr/bin/mutt"
 LP_PATH = "/usr/bin/lp"
 DESTINATIONS = {}
 
-
 def _pdffile_from_file(fileobj):
     return fileobj.rsplit(".", 1)[0] + ".pdf"
 
@@ -49,7 +48,7 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
 #   faxfile -- the path to the fax file (in TIFF format)
 #   dstnum -- the content of the the XIVO_DSTNUM dialplan variable
 #   args -- args specific to the backend
-def _new_mail_backend(subject, content_file, email_from):
+def _new_mail_backend(subject, content_file, email_from, email_realname='XiVO Fax'):
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
     # called.
@@ -71,7 +70,7 @@ def _new_mail_backend(subject, content_file, email_from):
             p = subprocess.Popen([MUTT_PATH,
                                  "-e", "set copy=no",
                                  "-e", "set from=%s" % email_from,
-                                 "-e", "set realname='XiVO Fax'",
+                                 "-e", "set realname=%s" % email_realname,
                                  "-e", "set use_from=yes",
                                  "-s", subject % fmt_dict,
                                  "-a", pdffile, "--",
@@ -127,23 +126,39 @@ def _convert_config_value_to_bool(config_value, default, param_name):
         return default
 
 
-def _new_ftp_backend(host, username, password, directory=None):
+def _new_ftp_backend(host, username, password, directory=None, convert_to_pdf=None):
     # Return a backend taking no argument, which transfers the fax,
     # in its original format, to the given FTP server when called.
     # Note that a connection is made every time the backend is called.
     def aux(faxfile, dstnum, args):
-        fobj = open(faxfile, "rb")
+        convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
+        if convert_to_pdf:
+            pdffile = _convert_tiff_to_pdf(faxfile)
+        if convert_to_pdf:
+            fobj = open(pdffile, "rb")
+        else:
+            fobj = open(faxfile, "rb")
         try:
             ftp_serv = ftplib.FTP(host, username, password)
             try:
                 if directory:
                     ftp_serv.cwd(directory)
-                stor_command = "STOR %s" % os.path.basename(faxfile)
+                if convert_to_pdf:
+                    stor_command = "STOR %s" % os.path.basename(pdffile)
+                else:
+                    stor_command = "STOR %s" % os.path.basename(faxfile)
                 ftp_serv.storbinary(stor_command, fobj)
             finally:
                 ftp_serv.close()
         finally:
             fobj.close()
+        
+        if convert_to_pdf:
+            try:
+                os.remove(pdffile)
+            except OSError, e:
+                logger.info('Could not remove pdffile %s: %s', pdffile, e)
+            
     return aux
 
 
