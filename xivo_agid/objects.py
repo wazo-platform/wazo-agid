@@ -313,52 +313,6 @@ class User(object):
         if not self.vmbox:
             self.enablevoicemail = 0
 
-    def disable_forwards(self):
-        self.cursor.query("UPDATE userfeatures "
-                          "SET enablebusy = 0, "
-                          "    enablerna = 0, "
-                          "    enableunc = 0 "
-                          "WHERE id = %s",
-                          parameters=(self.id,))
-
-        if self.cursor.rowcount != 1:
-            raise DBUpdateException("Unable to perform the requested update")
-        else:
-            self.enablebusy = 0
-            self.enablerna = 0
-            self.enableunc = 0
-
-    def set_feature(self, feature, enabled, arg):
-        enabled = int(bool(enabled))
-
-        if enabled and arg is not "":
-            dest = arg
-        else:
-            dest = None
-
-        if feature not in ("unc", "rna", "busy"):
-            raise ValueError("invalid feature")
-
-        if dest is not None:
-            self.cursor.query("UPDATE userfeatures "
-                              "SET enable%s = %%s, "
-                              "    dest%s = %%s "
-                              "WHERE id = %%s" % (feature, feature),
-                              parameters=(enabled, dest, self.id))
-        else:
-            self.cursor.query("UPDATE userfeatures "
-                              "SET enable%s = %%s "
-                              "WHERE id = %%s" % feature,
-                              parameters=(enabled, self.id))
-
-        if self.cursor.rowcount != 1:
-            raise DBUpdateException("Unable to perform the requested update")
-        else:
-            setattr(self, "enable%s" % feature, enabled)
-
-            if dest is not None:
-                setattr(self, "dest%s" % feature, dest)
-
     def toggle_feature(self, feature):
         if feature == "vm":
             feature = "enablevoicemail"
