@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2014 Avencall
+# Copyright (C) 2006-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='XiVO Fa
             p = subprocess.Popen([MUTT_PATH,
                                  "-e", "set copy=no",
                                  "-e", "set from=%s" % email_from,
-                                 "-e", "set realname=%s" % email_realname,
+                                 "-e", "set realname='%s'" % email_realname,
                                  "-e", "set use_from=yes",
                                  "-s", subject % fmt_dict,
                                  "-a", pdffile, "--",
