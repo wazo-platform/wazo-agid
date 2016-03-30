@@ -313,21 +313,6 @@ class User(object):
         if not self.vmbox:
             self.enablevoicemail = 0
 
-    def disable_forwards(self):
-        self.cursor.query("UPDATE userfeatures "
-                          "SET enablebusy = 0, "
-                          "    enablerna = 0, "
-                          "    enableunc = 0 "
-                          "WHERE id = %s",
-                          parameters=(self.id,))
-
-        if self.cursor.rowcount != 1:
-            raise DBUpdateException("Unable to perform the requested update")
-        else:
-            self.enablebusy = 0
-            self.enablerna = 0
-            self.enableunc = 0
-
     def toggle_feature(self, feature):
         if feature == "vm":
             feature = "enablevoicemail"
