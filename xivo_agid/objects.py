@@ -314,12 +314,7 @@ class User(object):
             self.enablevoicemail = 0
 
     def toggle_feature(self, feature):
-        if feature == "vm":
-            feature = "enablevoicemail"
-        elif feature == "dnd":
-            feature = "enablednd"
-
-        if feature not in ("enablevoicemail", "enablednd", "callrecord", "incallfilter"):
+        if feature not in ("enablevoicemail", "callrecord"):
             raise ValueError("invalid feature")
 
         enabled = int(not getattr(self, feature))
