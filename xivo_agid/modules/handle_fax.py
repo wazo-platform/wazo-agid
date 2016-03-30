@@ -127,11 +127,12 @@ def _convert_config_value_to_bool(config_value, default, param_name):
         return default
 
 
-def _new_ftp_backend(host, username, password, directory=None, convert_to_pdf=None):
+def _new_ftp_backend(host, username, password, port=21, directory=None, convert_to_pdf=None):
     # Return a backend taking no argument, which transfers the fax,
     # in its original format, to the given FTP server when called.
     # Note that a connection is made every time the backend is called.
     convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
+    port = int(port)
 
     def aux(faxfile, dstnum, args):
         if convert_to_pdf:
@@ -140,7 +141,9 @@ def _new_ftp_backend(host, username, password, directory=None, convert_to_pdf=No
             filename = faxfile
         try:
             with open(filename, "rb") as fobj:
-                ftp_serv = ftplib.FTP(host, username, password)
+                ftp_serv = ftplib.FTP()
+                ftp_serv.connect(host, port)
+                ftp_serv.login(username, password)
                 try:
                     if directory:
                         ftp_serv.cwd(directory)
