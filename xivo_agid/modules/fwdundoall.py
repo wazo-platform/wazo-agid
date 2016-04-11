@@ -23,23 +23,24 @@ logger = logging.getLogger(__name__)
 
 
 def fwdundoall(agi, cursor, args):
-    forwards = ['busy', 'noanswer', 'unconditional']
     user_id = _get_id_of_calling_user(agi)
-    for forward in forwards:
-        _user_set_forward(agi, user_id, forward)
+    _user_disable_all_forwards(agi, user_id)
 
 
 def _get_id_of_calling_user(agi):
     return int(agi.get_variable('XIVO_USERID'))
 
 
-def _user_set_forward(agi, user_id, forward_name):
+def _user_disable_all_forwards(agi, user_id):
     try:
         confd_client = agi.config['confd']['client']
-        body = {'enabled': False,
-                'destination': None}
-        confd_client.users(user_id).update_forward(forward_name, body)
+        no_forward = {'enabled': False,
+                      'destination': None}
+        body = {'busy': no_forward,
+                'noanswer': no_forward,
+                'unconditional': no_forward}
+        confd_client.users(user_id).update_forwards(body)
     except Exception, e:
-        logger.error('Error during disabling %s: %s', forward_name, e)
+        logger.error('Error during disabling all forwards: %s', e)
 
 agid.register(fwdundoall)

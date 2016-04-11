@@ -17,7 +17,7 @@
 
 import unittest
 
-from mock import call, Mock
+from mock import Mock
 from xivo_agid.modules.fwdundoall import fwdundoall
 
 
@@ -32,11 +32,10 @@ class TestFwdUndoAll(unittest.TestCase):
 
         fwdundoall(agi, None, None)
 
-        expected_body = {'enabled': False,
-                         'destination': None}
-        expected_calls = [
-            call('busy', expected_body),
-            call('noanswer', expected_body),
-            call('unconditional', expected_body),
-        ]
-        self._client.users(user_id).update_forward.assert_has_calls(expected_calls)
+        no_forward = {'enabled': False,
+                      'destination': None}
+        expected_body = {'busy': no_forward,
+                         'noanswer': no_forward,
+                         'unconditional': no_forward}
+
+        self._client.users(user_id).update_forwards.assert_called_once_with(expected_body)
