@@ -151,8 +151,9 @@ def _user_set_forward(agi, user_id, forward_name, args):
     enabled = args[1] == '1'
     destination = args[2]
     confd_client = agi.config['confd']['client']
-    body = {'enabled': enabled,
-            'destination': destination}
+    body = {'enabled': enabled}
+    if enabled:
+        body['destination'] = destination
     confd_client.users(user_id).update_forward(forward_name, body)
     return body
 
