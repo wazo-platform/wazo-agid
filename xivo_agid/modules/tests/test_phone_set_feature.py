@@ -82,12 +82,11 @@ class TestPhoneSetFeature(unittest.TestCase):
         self._agi.set_variable.assert_not_called()
 
     def test_phone_set_rna(self):
-        args = [None, '0', '123']
+        args = [None, '0', '']
 
         _phone_set_rna(self._agi, None, args)
 
-        self._client.users(self._user_id).update_forward.assert_called_once_with('noanswer', {'enabled': False,
-                                                                                              'destination': '123'})
+        self._client.users(self._user_id).update_forward.assert_called_once_with('noanswer', {'enabled': False})
         expected_calls = [
             call('XIVO_USERID_OWNER', self._user_id),
             call('XIVO_RNAENABLED', 0),
