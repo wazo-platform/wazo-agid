@@ -34,11 +34,10 @@ def _get_id_of_calling_user(agi):
 def _user_disable_all_forwards(agi, user_id):
     try:
         confd_client = agi.config['confd']['client']
-        no_forward = {'enabled': False,
-                      'destination': None}
-        body = {'busy': no_forward,
-                'noanswer': no_forward,
-                'unconditional': no_forward}
+        disabled = {'enabled': False}
+        body = {'busy': disabled,
+                'noanswer': disabled,
+                'unconditional': disabled}
         confd_client.users(user_id).update_forwards(body)
     except Exception, e:
         logger.error('Error during disabling all forwards: %s', e)

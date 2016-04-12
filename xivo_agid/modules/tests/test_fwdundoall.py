@@ -32,10 +32,9 @@ class TestFwdUndoAll(unittest.TestCase):
 
         fwdundoall(agi, None, None)
 
-        no_forward = {'enabled': False,
-                      'destination': None}
-        expected_body = {'busy': no_forward,
-                         'noanswer': no_forward,
-                         'unconditional': no_forward}
+        disabled = {'enabled': False}
+        expected_body = {'busy': disabled,
+                         'noanswer': disabled,
+                         'unconditional': disabled}
 
         self._client.users(user_id).update_forwards.assert_called_once_with(expected_body)
