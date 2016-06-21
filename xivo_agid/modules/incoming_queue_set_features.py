@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2015 Avencall
+# Copyright (C) 2006-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,6 +58,9 @@ def incoming_queue_set_features(agi, cursor, args):
 
     if queue.write_calling:
         options += "X"
+
+    if queue.ignore_forward:
+        options += "i"
 
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)

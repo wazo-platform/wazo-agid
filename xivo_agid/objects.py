@@ -479,7 +479,7 @@ class Queue(object):
             'id', 'number', 'context', 'name', 'data_quality',
             'hitting_callee', 'hitting_caller', 'retries', 'ring',
             'transfer_user', 'transfer_call', 'write_caller',
-            'write_calling', 'url', 'announceoverride', 'timeout',
+            'write_calling', 'ignore_forward', 'url', 'announceoverride', 'timeout',
             'preprocess_subroutine', 'announce_holdtime', 'waittime',
             'waitratio'
         ]
@@ -529,6 +529,7 @@ class Queue(object):
         self.transfer_call = res['queuefeatures.transfer_call']
         self.write_caller = res['queuefeatures.write_caller']
         self.write_calling = res['queuefeatures.write_calling']
+        self.ignore_forward = res['queuefeatures.ignore_forward']
         self.url = res['queuefeatures.url']
         self.announceoverride = res['queuefeatures.announceoverride']
         self.timeout = res['queuefeatures.timeout']

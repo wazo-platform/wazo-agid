@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013-2015 Avencall
+# Copyright (C) 2013-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ class AgentFeatures(Handler):
 
     def _extract_queue_call_options(self, queue_options):
         queue_options = re.sub(r'\(.*?\)', '', queue_options)
-        authorized_options = ['h', 't', 'w', 'x', 'k']
+        authorized_options = ['h', 'i', 't', 'w', 'x', 'k']
         queue_call_options = ''
         for option in queue_options:
             if option in authorized_options:
