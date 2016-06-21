@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2015 Avencall
+# Copyright (C) 2015-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,4 +40,4 @@ class TestAgentFeatures(unittest.TestCase):
     def test_that_extract_queue_call_options_does_not_keep_params_in_parentheses(self):
         queue_options = 'abcdefg(abHh)tij'
         result = self.agent_features._extract_queue_call_options(queue_options)
-        assert_that(result, equal_to('t'))
+        assert_that(result, equal_to('ti'))
