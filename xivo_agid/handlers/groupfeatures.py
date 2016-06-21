@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2014 Avencall
+# Copyright (C) 2012-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ class GroupFeatures(Handler):
         self._transfer_call = None
         self._write_caller = None
         self._write_calling = None
+        self._ignore_forward = None
         self._preprocess_subroutine = None
         self._musicclass = None
         self._pickup_member = None
@@ -57,7 +58,8 @@ class GroupFeatures(Handler):
 
         groupfeatures_columns = ('id', 'number', 'context', 'name',
                                  'timeout', 'transfer_user', 'transfer_call',
-                                 'write_caller', 'write_calling', 'preprocess_subroutine')
+                                 'write_caller', 'write_calling', 'ignore_forward',
+                                 'preprocess_subroutine')
         queue_columns = ('musicclass',)
         columns = ["groupfeatures." + c for c in groupfeatures_columns] + ["queue." + c for c in queue_columns]
 
@@ -83,6 +85,7 @@ class GroupFeatures(Handler):
         self._transfer_call = res['groupfeatures.transfer_call']
         self._write_caller = res['groupfeatures.write_caller']
         self._write_calling = res['groupfeatures.write_calling']
+        self._ignore_forward = res['groupfeatures.ignore_forward']
         self._preprocess_subroutine = res['groupfeatures.preprocess_subroutine']
         self._musicclass = res['queue.musicclass']
 
@@ -108,6 +111,9 @@ class GroupFeatures(Handler):
 
         if self._write_calling:
             options += "X"
+
+        if self._ignore_forward:
+            options += 'i'
 
         if not self._musicclass:
             options += "r"
