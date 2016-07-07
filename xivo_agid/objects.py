@@ -280,6 +280,7 @@ class User(object):
         self.enablevoicemail = user_row.enablevoicemail
         self.voicemailid = user_row.voicemailid
         self.enablexfer = user_row.enablexfer
+        self.dtmf_hangup = user_row.dtmf_hangup
         self.enableonlinerec = user_row.enableonlinerec
         self.callrecord = user_row.callrecord
         self.incallfilter = user_row.incallfilter

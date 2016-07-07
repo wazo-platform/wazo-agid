@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2014 Avencall
+# Copyright (C) 2012-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -267,7 +267,11 @@ class UserFeatures(Handler):
             self._agi.set_variable('CHANNEL(musicclass)', self._user.musiconhold)
 
     def _set_options(self):
-        options = "hH"
+        options = ''
+        if self._user.dtmf_hangup:
+            options += "h"
+        if self._caller and self._caller.dtmf_hangup:
+            options += "H"
         if self._user.enablexfer:
             options += "t"
         if self._caller and self._caller.enablexfer:
