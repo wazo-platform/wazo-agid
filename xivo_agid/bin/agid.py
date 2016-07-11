@@ -23,6 +23,9 @@ from xivo.token_renewer import TokenRenewer
 from xivo.chain_map import ChainMap
 from xivo.config_helper import read_config_file_hierarchy
 from xivo.config_helper import parse_config_file
+from xivo.daemonize import pidfile_context
+from xivo.user_rights import change_user
+from xivo.xivo_logging import setup_logging, silence_loggers
 
 from xivo_agid import agid
 from xivo_agid.modules import *
@@ -30,8 +33,6 @@ from xivo_agentd_client import Client as AgentdClient
 from xivo_auth_client import Client as AuthClient
 from xivo_dird_client import Client as DirdClient
 from xivo_confd_client import Client as ConfdClient
-from xivo.daemonize import pidfile_context
-from xivo.xivo_logging import setup_logging, silence_loggers
 
 _DEFAULT_CONFIG = {
     'dird': {
@@ -46,9 +47,10 @@ _DEFAULT_CONFIG = {
         'key_file': '/var/lib/xivo-auth-keys/xivo-agid-key.yml',
         'verify_certificate': '/usr/share/xivo-certs/server.crt'
     },
+    'user': 'xivo-agid',
     'debug': False,
     'foreground': False,
-    'pidfile': '/var/run/xivo-agid.pid',
+    'pidfile': '/var/run/xivo-agid/xivo-agid.pid',
     'logfile': '/var/log/xivo-agid.log',
     'listen_port': 4573,
     'listen_address': '127.0.0.1',
@@ -67,6 +69,10 @@ def main():
 
     setup_logging(config['logfile'], config['foreground'], config['debug'])
     silence_loggers(['urllib3'], logging.WARNING)
+
+    user = config.get('user')
+    if user:
+        change_user(user)
 
     xivo_dao.init_db_from_config(config)
 
@@ -89,18 +95,24 @@ def main():
 
 def _parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config-file', action='store', help='The path to the config file')
     parser.add_argument('-f', action='store_true', dest='foreground',
                         help='run in foreground')
     parser.add_argument('-d', action='store_true', dest='debug',
                         help='increase verbosity')
+    parser.add_argument('-u', '--user', action='store', help='User to run the daemon')
 
     parsed_args = parser.parse_args()
 
     config = {}
+    if parsed_args.config_file:
+        config['config_file'] = parsed_args.config_file
     if parsed_args.debug:
         config['debug'] = parsed_args.debug
     if parsed_args.foreground:
         config['foreground'] = parsed_args.foreground
+    if parsed_args.user:
+        config['user'] = parsed_args.user
 
     return config
 

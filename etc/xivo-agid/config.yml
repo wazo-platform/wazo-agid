@@ -6,6 +6,9 @@
 # should be.
 extra_config_files: /etc/xivo-agid/conf.d/
 
+# Owned of the process
+user: xivo-agid
+
 # Change the log level to debug level.
 debug: false
 
@@ -13,7 +16,7 @@ debug: false
 logfile: /var/log/xivo-agid.log
 
 # PID file.
-pidfile: /var/run/xivo-agid.pid
+pidfile: /var/run/xivo-agid/xivo-agid.pid
 
 # Database connection informations.
 db_uri: postgresql://asterisk:proformatique@localhost/asterisk

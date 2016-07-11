@@ -13,15 +13,22 @@
 #
 set -e
 
+USER='xivo-agid'
+GROUP=$USER
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 DAEMONNAME=xivo-agid
 DAEMON=/usr/sbin/$DAEMONNAME
-PIDFILE=/var/run/$DAEMONNAME.pid
+PIDDIR=/var/run/$DAEMONNAME
+PIDFILE=$PIDDIR/$DAEMONNAME.pid
 XIVO_DEFAULT_FILE="/etc/default/xivo"
 
 . /lib/lsb/init-functions
 
 test -x $DAEMON || exit 0
+
+for dir in "$PIDDIR" ; do
+    [ -d "$dir" ] || install -d -o "$USER" -g "$GROUP" "$dir"
+done
 
 is_enabled() {
     # Check if startup variable is set to 1, if not we exit.
