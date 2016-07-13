@@ -3,11 +3,34 @@
 #
 # see: dh_installdeb(1)
 
+DAEMONNAME='xivo-agid'
+USER='xivo-agid'
+GROUP=$USER
+LOG_FILENAME="/var/log/$DAEMONNAME.log"
+
 case "$1" in
     configure)
         if [ -h /etc/monit/conf.d/pf-xivo-agid ]; then
             rm /etc/monit/conf.d/pf-xivo-agid
         fi
+
+        # remove the old pidfile created before xivo 16.09
+        rm -f /var/run/xivo-agid.pid
+
+        # add user
+        if ! getent passwd $USER > /dev/null ; then
+            echo "Adding system user for ${USER}" 1>&2
+            adduser --system --group --quiet --no-create-home --disabled-login $USER
+            adduser $USER www-data
+            adduser $USER asterisk
+        fi
+
+        # setup permissions for the log file
+        if [ ! -e "$LOG_FILENAME" ]; then
+            touch "$LOG_FILENAME"
+        fi
+        chown $USER:$GROUP "$LOG_FILENAME"
+
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
 
