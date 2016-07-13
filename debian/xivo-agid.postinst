@@ -26,7 +26,7 @@ case "$1" in
         fi
 
         # setup permissions for the log file
-        if [ -e "$LOG_FILENAME" ]; then
+        if [ ! -e "$LOG_FILENAME" ]; then
             touch "$LOG_FILENAME"
         fi
         chown $USER:$GROUP "$LOG_FILENAME"
