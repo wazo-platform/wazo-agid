@@ -7,7 +7,6 @@ DAEMONNAME='xivo-agid'
 USER='xivo-agid'
 GROUP=$USER
 LOG_FILENAME="/var/log/$DAEMONNAME.log"
-OLD_PIDFILE="/var/run/$DEAMONNAME.pid"
 
 case "$1" in
     configure)
@@ -15,10 +14,10 @@ case "$1" in
             rm /etc/monit/conf.d/pf-xivo-agid
         fi
 
-        # remove the old pidfile created before xivo 16.08
-        rm -f "$OLD_PIDFILE"
+        # remove the old pidfile created before xivo 16.09
+        rm -f /var/run/xivo-agid.pid
 
-        #add user
+        # add user
         if ! getent passwd $USER > /dev/null ; then
             echo "Adding system user for ${USER}" 1>&2
             adduser --system --group --quiet --no-create-home --disabled-login $USER
