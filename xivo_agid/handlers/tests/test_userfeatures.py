@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013-2014 Avencall
+# Copyright (C) 2013-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -125,23 +125,30 @@ class TestUserFeatures(_BaseTestCase):
         self._agi.set_variable.assert_called_once_with('XIVO_CALLRECORDFILE',
                                                        NotEmptyStringMatcher())
 
-    def test_set_line(self):
+    @patch('xivo_agid.handlers.userfeatures.extension_dao')
+    @patch('xivo_agid.handlers.userfeatures.line_extension_dao')
+    @patch('xivo_agid.handlers.userfeatures.line_dao')
+    @patch('xivo_agid.handlers.userfeatures.user_line_dao')
+    def test_set_line(self, user_line_dao, line_dao, line_extension_dao, extension_dao):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        mocked_line = Mock()
-        mocked_line.number = '1001'
 
         userfeatures._set_line()
-
-        self.assertEqual(userfeatures._line, None)
+        self.assertEqual(userfeatures.lines, [])
 
         userfeatures._dstid = self._variables['XIVO_DSTID']
-        with patch('xivo_agid.objects.Line') as lines_cls:
-            lines_cls.return_value = mocked_line
+        user_lines = [Mock(user_id=1, line_id=10)]
+        line = Mock(main_line=True)
+        extension = Mock(exten='1234')
 
-            userfeatures._set_line()
+        user_line_dao.find_all_by.return_value = user_lines
+        line_dao.find_by.return_value = line
+        line_extension_dao.get_by.return_value = Mock(extension_id=100)
+        extension_dao.get_by.return_value = extension
 
-            lines_cls.assert_called_with(int(self._variables['XIVO_DSTID']))
-        self.assertEqual(mocked_line, userfeatures._line)
+        userfeatures._set_line()
+        self.assertEqual(user_lines, userfeatures.user_lines)
+        self.assertEqual([line], userfeatures.lines)
+        self.assertEqual(extension, userfeatures.main_extension)
 
     def test_set_user(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -251,8 +258,7 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._user = Mock()
         userfeatures._user.callerid = '"Foobar"'
-        userfeatures._line = Mock()
-        userfeatures._line.number = '32'
+        userfeatures.main_extension = Mock(exten='32')
         userfeatures._dstnum = '42'
 
         userfeatures._set_xivo_redirecting_info()
@@ -333,7 +339,7 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=True)
         user_features._user = Mock(objects.User, destrna='555', enablerna=True)
-        called_line = Mock(objects.Line, context=sentinel.context)
+        called_line = Mock(context=sentinel.context)
 
         enabled = user_features._set_rna_from_exten(called_line)
 
@@ -409,7 +415,7 @@ class TestSetForwardBusy(_BaseTestCase):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=True)
         user_features._user = Mock(objects.User, destbusy='666', enablebusy=True)
-        called_line = Mock(objects.Line, context=sentinel.context)
+        called_line = Mock(context=sentinel.context)
 
         enabled = user_features._set_rbusy_from_exten(called_line)
 
