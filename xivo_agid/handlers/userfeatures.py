@@ -15,7 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from xivo_dao import callfilter_dao, user_line_dao
+from xivo_dao import callfilter_dao, user_line_dao as old_user_line_dao
+
+from xivo_dao.resources.user_line import dao as user_line_dao
+from xivo_dao.resources.line import dao as line_dao
+from xivo_dao.resources.line_extension import dao as line_extension_dao
+from xivo_dao.resources.extension import dao as extension_dao
+
 from xivo_agid.objects import DialAction, CallerID
 from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
@@ -37,8 +43,12 @@ class UserFeatures(Handler):
         self._dstnum = None
         self._feature_list = None
         self._caller = None
-        self._line = None
         self._user = None
+
+        self.user_lines = None
+        self.lines = []
+        self.main_line = None
+        self.main_extension = None
 
     def execute(self):
         self._set_members()
@@ -87,11 +97,23 @@ class UserFeatures(Handler):
     def _set_line(self):
         if self._dstid:
             try:
-                self._line = objects.Line(int(self._dstid))
+                self.user_lines = user_line_dao.find_all_by(user_id=self._dstid)
+                if not self.user_lines:
+                    raise ValueError('Could not find any line for user id {}'.format(self._dstid))
+
+                for user_line in self.user_lines:
+                    line = line_dao.find_by(id=user_line.line_id)  # TODO Change to call get_by
+                    if user_line.main_line:
+                        self.main_line = line
+
+                    line_extension = line_extension_dao.get_by(line_id=line.id)  # main_extension=True
+                    self.main_extension = extension_dao.get_by(id=line_extension.extension_id)
+                    self.lines.append(line)
+
             except (ValueError, LookupError), e:
                 self._agi.dp_break(str(e))
             else:
-                self._agi.set_variable('XIVO_DST_USERNUM', self._line.number)
+                self._agi.set_variable('XIVO_DST_USERNUM', self.main_extension.exten)
 
     def _set_user(self):
         if self._dstid:
@@ -103,16 +125,14 @@ class UserFeatures(Handler):
             self._set_xivo_redirecting_info()
 
     def _set_xivo_iface(self):
-        interface = self._build_interface_from_line(self._line)
-        self._agi.set_variable('XIVO_INTERFACE', interface)
+        interfaces = [self._build_interface_from_line(line) for line in self.lines]
+        self._agi.set_variable('XIVO_INTERFACE', '&'.join(interfaces))
 
     def _build_interface_from_line(self, line):
-        protocol = line.protocol
-        if protocol.lower() == 'custom':
-            interface = line.name
-        else:
-            interface = '%s/%s' % (protocol, line.name)
-        return interface
+        protocol = line.protocol.upper()
+        if protocol == 'CUSTOM':
+            return line.name
+        return '{}/{}'.format(protocol, line.name)
 
     def _set_xivo_user_name(self):
         if self._user:
@@ -134,8 +154,8 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_DST_REDIRECTING_NAME', callerid_name)
 
         if not callerid_num:
-            if self._line:
-                callerid_num = self._line.number
+            if self.main_extension:
+                callerid_num = self.main_extension.exten
             else:
                 callerid_num = self._dstnum
         self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
@@ -168,8 +188,8 @@ class UserFeatures(Handler):
 
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
 
-        boss_line = self._line
-        boss_interface = '%s/%s' % (boss_line.protocol.upper(), boss_line.name)
+        boss_line = self.main_line
+        boss_interface = '{}/{}'.format(boss_line.protocol.upper(), boss_line.name)
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
@@ -180,7 +200,7 @@ class UserFeatures(Handler):
         for secretary in secretaries:
             secretary_callfiltermember, ringseconds = secretary
             if secretary_callfiltermember.active:
-                iface = user_line_dao.get_line_identity_by_user_id(secretary_callfiltermember.typeval)
+                iface = old_user_line_dao.get_line_identity_by_user_id(secretary_callfiltermember.typeval)
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
@@ -372,7 +392,7 @@ class UserFeatures(Handler):
         objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
 
     def _set_call_forwards(self):
-        called_line = self._line
+        called_line = self.main_line
         self._set_enableunc(called_line)
         self._setbusy(called_line)
         self._setrna(called_line)

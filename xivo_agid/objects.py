@@ -20,11 +20,8 @@ import re
 import time
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
-from xivo_dao.resources.line import dao as line_dao
 
 from xivo_dao import user_dao
-from xivo_dao import user_line_dao as old_user_line_dao
-from xivo_dao.resources.user_line import dao as new_user_line_dao
 
 logger = logging.getLogger(__name__)
 
@@ -234,23 +231,6 @@ class Paging(object):
             else:
                 line = '%s/%s' % (proto_upper, l['name'])
             self.lines.add(line)
-
-
-class Line(object):
-
-    def __init__(self, user_id):
-        line = self.get_line_for_user(user_id)
-
-        self.context = line.context
-        self.protocol = line.protocol.upper()
-        self.name = line.name
-        self.number = old_user_line_dao.get_main_exten_by_user_id(user_id)
-
-    def get_line_for_user(self, user_id):
-        user_line = new_user_line_dao.find_main_by_user_id(user_id)
-        if user_line:
-            return line_dao.get(user_line.line_id)
-        raise LookupError("Unable to find main user line (user_id: %s)" % user_id)
 
 
 class User(object):
