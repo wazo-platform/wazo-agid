@@ -125,9 +125,7 @@ class UserFeatures(Handler):
             self._set_xivo_redirecting_info()
 
     def _set_xivo_iface(self):
-        interfaces = []
-        for line in self.lines:
-            interfaces.append(self._build_interface_from_line(line))
+        interfaces = [self._build_interface_from_line(line) for line in self.lines]
         self._agi.set_variable('XIVO_INTERFACE', '&'.join(interfaces))
 
     def _build_interface_from_line(self, line):
