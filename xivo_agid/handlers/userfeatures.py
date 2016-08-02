@@ -99,7 +99,7 @@ class UserFeatures(Handler):
             try:
                 self.user_lines = user_line_dao.find_all_by(user_id=self._dstid)
                 if not self.user_lines:
-                    raise ValueError()
+                    raise ValueError('Could not find any line for user id {}'.format(self._dstid))
 
                 for user_line in self.user_lines:
                     line = line_dao.find_by(id=user_line.line_id)  # TODO Change to call get_by
