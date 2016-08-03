@@ -47,7 +47,8 @@ class TestUserFeatures(_BaseTestCase):
                            'XIVO_DSTID': '33',
                            'XIVO_CALLORIGIN': 'my_origin',
                            'XIVO_SRCNUM': '1000',
-                           'XIVO_DSTNUM': '1003', }
+                           'XIVO_DSTNUM': '1003',
+                           'XIVO_DST_EXTEN_ID': '983274'}
 
         def get_variable(key):
             return self._variables[key]
@@ -142,13 +143,14 @@ class TestUserFeatures(_BaseTestCase):
 
         user_line_dao.find_all_by.return_value = user_lines
         line_dao.find_by.return_value = line
-        line_extension_dao.get_by.return_value = Mock(extension_id=100)
+        line_extension_dao.find_all_by.return_value = [Mock(extension_id=100)]
         extension_dao.get_by.return_value = extension
 
         userfeatures._set_line()
-        self.assertEqual(user_lines, userfeatures.user_lines)
+
         self.assertEqual([line], userfeatures.lines)
         self.assertEqual(extension, userfeatures.main_extension)
+        self.assertEqual(line, userfeatures.main_line)
 
     def test_set_user(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -322,7 +324,7 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=False)
 
-        enabled = user_features._set_rna_from_exten(Mock())
+        enabled = user_features._set_rna_from_exten()
 
         assert_that(enabled, equal_to(False))
 
@@ -331,7 +333,7 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=True)
         user_features._user = Mock(objects.User, enablerna=False)
 
-        enabled = user_features._set_rna_from_exten(Mock())
+        enabled = user_features._set_rna_from_exten()
 
         assert_that(enabled, equal_to(False))
 
@@ -339,9 +341,9 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=True)
         user_features._user = Mock(objects.User, destrna='555', enablerna=True)
-        called_line = Mock(context=sentinel.context)
+        user_features.main_extension = Mock(context=sentinel.context)
 
-        enabled = user_features._set_rna_from_exten(called_line)
+        enabled = user_features._set_rna_from_exten()
 
         assert_that(enabled, equal_to(True))
         assert_that(self._agi.set_variable.call_args_list, contains(
@@ -355,9 +357,9 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         user_features._set_rna_from_exten = Mock(return_value=False)
         user_features._set_rna_from_dialaction = Mock(return_value=True)
 
-        user_features._setrna(sentinel.called_line)
+        user_features._setrna()
 
-        user_features._set_rna_from_exten.assert_called_once_with(sentinel.called_line)
+        user_features._set_rna_from_exten.assert_called_once_with()
         assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLERNA', True))
 
     def test_setrna_exten_disabled_noanswer_disabled(self):
@@ -365,9 +367,9 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         user_features._set_rna_from_exten = Mock(return_value=False)
         user_features._set_rna_from_dialaction = Mock(return_value=False)
 
-        user_features._setrna(sentinel.called_line)
+        user_features._setrna()
 
-        user_features._set_rna_from_exten.assert_called_once_with(sentinel.called_line)
+        user_features._set_rna_from_exten.assert_called_once_with()
         user_features._set_rna_from_dialaction.assert_called_once_with()
 
         assert_that(self._agi.set_variable.call_count, equal_to(0))
@@ -398,7 +400,7 @@ class TestSetForwardBusy(_BaseTestCase):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=False)
 
-        enabled = user_features._set_rbusy_from_exten(Mock())
+        enabled = user_features._set_rbusy_from_exten()
 
         assert_that(enabled, equal_to(False))
 
@@ -407,7 +409,7 @@ class TestSetForwardBusy(_BaseTestCase):
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=True)
         user_features._user = Mock(objects.User, enablebusy=False)
 
-        enabled = user_features._set_rbusy_from_exten(Mock())
+        enabled = user_features._set_rbusy_from_exten()
 
         assert_that(enabled, equal_to(False))
 
@@ -415,9 +417,9 @@ class TestSetForwardBusy(_BaseTestCase):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=True)
         user_features._user = Mock(objects.User, destbusy='666', enablebusy=True)
-        called_line = Mock(context=sentinel.context)
+        user_features.main_extension = Mock(context=sentinel.context)
 
-        enabled = user_features._set_rbusy_from_exten(called_line)
+        enabled = user_features._set_rbusy_from_exten()
 
         assert_that(enabled, equal_to(True))
         assert_that(self._agi.set_variable.call_args_list, contains(
@@ -431,9 +433,9 @@ class TestSetForwardBusy(_BaseTestCase):
         user_features._set_rbusy_from_exten = Mock(return_value=False)
         user_features._set_rbusy_from_dialaction = Mock(return_value=True)
 
-        user_features._setbusy(sentinel.called_line)
+        user_features._setbusy()
 
-        user_features._set_rbusy_from_exten.assert_called_once_with(sentinel.called_line)
+        user_features._set_rbusy_from_exten.assert_called_once_with()
         assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLEBUSY', True))
 
     def test_set_busy_exten_disabled_noanswer_disabled(self):
@@ -441,9 +443,9 @@ class TestSetForwardBusy(_BaseTestCase):
         user_features._set_rbusy_from_exten = Mock(return_value=False)
         user_features._set_rbusy_from_dialaction = Mock(return_value=False)
 
-        user_features._setbusy(sentinel.called_line)
+        user_features._setbusy()
 
-        user_features._set_rbusy_from_exten.assert_called_once_with(sentinel.called_line)
+        user_features._set_rbusy_from_exten.assert_called_once_with()
         user_features._set_rbusy_from_dialaction.assert_called_once_with()
 
         assert_that(self._agi.set_variable.call_count, equal_to(0))

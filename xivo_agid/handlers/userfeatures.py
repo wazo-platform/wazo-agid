@@ -46,7 +46,6 @@ class UserFeatures(Handler):
         self._caller = None
         self._user = None
 
-        self.user_lines = None
         self.lines = []
         self.main_line = None
         self.main_extension = None
@@ -361,7 +360,7 @@ class UserFeatures(Handler):
 
         return self._set_fwd_from_exten('busy', self.main_extension.context, self._user.destbusy)
 
-    def _set_fwd_from_exten(self, context, fwd_type, dest):
+    def _set_fwd_from_exten(self, fwd_type, context, dest):
         objects.DialAction.set_agi_variables(
             self._agi,
             fwd_type,
