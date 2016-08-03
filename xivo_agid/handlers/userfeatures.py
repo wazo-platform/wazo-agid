@@ -96,7 +96,6 @@ class UserFeatures(Handler):
             except (ValueError, LookupError):
                 self._caller = None
 
-
     def _set_line(self):
         if self._dstid:
             try:
@@ -104,7 +103,7 @@ class UserFeatures(Handler):
                 self.main_line = line_dao.find_by(id=user_main_line.line_id)  # XXX Should use get_by
 
                 # destination_extension_id may be unset (e.g. incoming call)
-                # In this case, only the main extension of the main line should be ring
+                # In this case, only the main extension of the main line should be rung
                 if not self._destination_extension_id:
                     line_extension = line_extension_dao.get_by(line_id=self.main_line.id)  # main_extension=True
                     self._destination_extension_id = line_extension.extension_id
