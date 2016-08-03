@@ -38,6 +38,7 @@ class UserFeatures(Handler):
         Handler.__init__(self, agi, cursor, args)
         self._userid = None
         self._dstid = None
+        self._destination_extension_id = None
         self._zone = None
         self._srcnum = None
         self._dstnum = None
@@ -76,6 +77,7 @@ class UserFeatures(Handler):
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
+        self._destination_extension_id = self._agi.get_variable(dialplan_variables.DESTINATION_EXTENSION_ID)
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
@@ -97,17 +99,20 @@ class UserFeatures(Handler):
     def _set_line(self):
         if self._dstid:
             try:
-                self.user_lines = user_line_dao.find_all_by(user_id=self._dstid)
-                if not self.user_lines:
-                    raise ValueError('Could not find any line for user id {}'.format(self._dstid))
+                user_main_line = user_line_dao.get_by(user_id=self._dstid, main_line=True)
+                self.main_line = line_dao.find_by(id=user_main_line.line_id)  # XXX Should use get_by
 
-                for user_line in self.user_lines:
-                    line = line_dao.find_by(id=user_line.line_id)  # TODO Change to call get_by
-                    if user_line.main_line:
-                        self.main_line = line
+                # destination_extension_id may be unset (e.g. incoming call)
+                # In this case, only the main extension of the main line should be rung
+                if not self._destination_extension_id:
+                    line_extension = line_extension_dao.get_by(line_id=self.main_line.id)  # main_extension=True
+                    self._destination_extension_id = line_extension.extension_id
 
-                    line_extension = line_extension_dao.get_by(line_id=line.id)  # main_extension=True
-                    self.main_extension = extension_dao.get_by(id=line_extension.extension_id)
+                self.main_extension = extension_dao.get_by(id=self._destination_extension_id)
+
+                line_extensions = line_extension_dao.find_all_by(extension_id=self.main_extension.id)
+                for line_extension in line_extensions:
+                    line = line_dao.find_by(id=line_extension.line_id)  # XXX Should use get_by
                     self.lines.append(line)
 
             except (ValueError, LookupError), e:
@@ -183,7 +188,7 @@ class UserFeatures(Handler):
             return False
 
         in_zone = self._callfilter_check_in_zone(callfilter.callfrom)
-        if not in_zone is True:
+        if in_zone is not True:
             return False
 
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
@@ -344,40 +349,40 @@ class UserFeatures(Handler):
 
         return dial_action.action != 'none'
 
-    def _set_rna_from_exten(self, called_line):
+    def _set_rna_from_exten(self):
         if not self._feature_list.fwdrna or not self._user.enablerna:
             return False
 
-        return self._set_fwd_from_exten('noanswer', called_line, self._user.destrna)
+        return self._set_fwd_from_exten('noanswer', self.main_extension.context, self._user.destrna)
 
-    def _set_rbusy_from_exten(self, called_line):
+    def _set_rbusy_from_exten(self):
         if not self._feature_list.fwdbusy or not self._user.enablebusy:
             return False
 
-        return self._set_fwd_from_exten('busy', called_line, self._user.destbusy)
+        return self._set_fwd_from_exten('busy', self.main_extension.context, self._user.destbusy)
 
-    def _set_fwd_from_exten(self, fwd_type, called_line, dest):
+    def _set_fwd_from_exten(self, context, fwd_type, dest):
         objects.DialAction.set_agi_variables(
             self._agi,
             fwd_type,
             'user',
             'extension',
             dest,
-            called_line.context,
+            context,
             False,
         )
 
         return True
 
-    def _setrna(self, called_line):
-        if self._set_rna_from_exten(called_line) or self._set_rna_from_dialaction():
+    def _setrna(self):
+        if self._set_rna_from_exten() or self._set_rna_from_dialaction():
             self._agi.set_variable('XIVO_ENABLERNA', True)
 
-    def _setbusy(self, called_line):
-        if self._set_rbusy_from_exten(called_line) or self._set_rbusy_from_dialaction():
+    def _setbusy(self):
+        if self._set_rbusy_from_exten() or self._set_rbusy_from_dialaction():
             self._agi.set_variable('XIVO_ENABLEBUSY', True)
 
-    def _set_enableunc(self, called_line):
+    def _set_enableunc(self):
         enableunc = 0
         unc_action = 'none'
         unc_actionarg1 = ""
@@ -387,15 +392,14 @@ class UserFeatures(Handler):
             if enableunc:
                 unc_action = 'extension'
                 unc_actionarg1 = self._user.destunc
-                unc_actionarg2 = called_line.context
+                unc_actionarg2 = self.main_extension.context
         self._agi.set_variable('XIVO_ENABLEUNC', enableunc)
         objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
 
     def _set_call_forwards(self):
-        called_line = self.main_line
-        self._set_enableunc(called_line)
-        self._setbusy(called_line)
-        self._setrna(called_line)
+        self._set_enableunc()
+        self._setbusy()
+        self._setrna()
 
     def _set_dial_action_congestion(self):
         objects.DialAction(self._agi, self._cursor, 'congestion', 'user', self._user.id).set_variables()
