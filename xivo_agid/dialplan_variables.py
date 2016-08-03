@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2014 Avencall
+# Copyright (C) 2006-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ SRCNUM = 'XIVO_SRCNUM'
 DESTINATION_ID = 'XIVO_DSTID'
 DESTINATION_NUMBER = 'XIVO_DSTNUM'
 HANGUP_RING_TIME = 'XIVO_HANGUPRINGTIME'
+DESTINATION_EXTENSION_ID = 'XIVO_DST_EXTEN_ID'
 INTERFACE = 'XIVO_INTERFACE'
 OUTCALL_ID = 'XIVO_OUTCALLID'
 OUTCALL_PREPROCESS_SUBROUTINE = 'XIVO_OUTCALLPREPROCESS_SUBROUTINE'
