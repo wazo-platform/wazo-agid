@@ -1,1 +1,2 @@
 etc/xivo-agid/conf.d
+var/lib/xivo-agid

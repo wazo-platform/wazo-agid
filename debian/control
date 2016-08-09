@@ -13,6 +13,7 @@ Architecture: all
 Section: python
 Depends: ${python:Depends},
          ${misc:Depends},
+         adduser,
          asterisk,
          python-tz,
          xivo-agentd-client,

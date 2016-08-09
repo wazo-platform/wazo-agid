@@ -17,19 +17,26 @@ case "$1" in
         # remove the old pidfile created before xivo 16.09
         rm -f /var/run/xivo-agid.pid
 
-        # add user
+
+        # add/update user
         if ! getent passwd $USER > /dev/null ; then
-            echo "Adding system user for ${USER}" 1>&2
-            adduser --system --group --quiet --no-create-home --disabled-login $USER
-            adduser $USER www-data
-            adduser $USER asterisk
+            echo "Adding system user $USER" 1>&2
+            adduser --quiet --system --group --no-create-home \
+                    --home /var/lib/xivo-agid \
+                    $USER
+            adduser --quiet $USER www-data
+            adduser --quiet $USER asterisk
+        else
+            if dpkg --compare-versions "$2" lt '16.12~'; then
+                usermod --home /var/lib/xivo-agid $USER
+            fi
         fi
 
         # setup permissions for the log file
         if [ ! -e "$LOG_FILENAME" ]; then
             touch "$LOG_FILENAME"
         fi
-        chown $USER:$GROUP "$LOG_FILENAME"
+        chown $USER:$GROUP "$LOG_FILENAME" /var/lib/xivo-agid
 
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
