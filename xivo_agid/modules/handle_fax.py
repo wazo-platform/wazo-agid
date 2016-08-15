@@ -19,7 +19,6 @@ import logging
 import os
 import subprocess
 import ftplib
-import time
 from ConfigParser import RawConfigParser
 from xivo_agid import agid
 
@@ -161,20 +160,8 @@ def _new_ftp_backend(host, username, password, port=21, directory=None, convert_
     return aux
 
 
-def _new_log_backend(fileobj, msg):
-    # Return a backend taking no argument, which logs a message in a
-    # file when called.
-    # This is not efficient, and I've wrote it for testing purpose only.
-    def aux(faxfile, dstnum, args):
-        fobj = open(fileobj, "a")
-        try:
-            print >> fobj, time.strftime("%Y-%m-%d %H:%M:%S"), msg % {"dstnum": dstnum}
-        finally:
-            fobj.close()
-    return aux
-
-
 def _do_handle_fax(faxfile, dstnum, args):
+    logger.info('Handling fax for destination %s', dstnum)
     if not faxfile:
         raise ValueError("Invalid faxfile value: %s" % faxfile)
     if not dstnum:
@@ -215,7 +202,7 @@ def handle_fax(agi, cursor, args):
 _BACKENDS_FACTORY = [("mail", _new_mail_backend),
                      ("printer", _new_printer_backend),
                      ("ftp", _new_ftp_backend),
-                     ("log", _new_log_backend)]
+                     ("log", None)]
 
 
 def setup_handle_fax(cursor):
@@ -244,6 +231,10 @@ def setup_handle_fax(cursor):
     for backend_prefix, backend_factory in _BACKENDS_FACTORY:
         for section in filter(lambda s: s.startswith(backend_prefix),
                               config.sections()):
+            if backend_factory is None:
+                logger.warning('Backends of type %s are not supported anymore: remove the backend %s from your xivo_fax.conf',
+                               backend_prefix, section)
+                continue
             backend_factory_args = dict(config.items(section))
             logger.debug("Creating backend, name %s, factory %s", section,
                          backend_factory)
