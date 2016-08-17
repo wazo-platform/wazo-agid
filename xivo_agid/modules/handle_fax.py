@@ -201,8 +201,7 @@ def handle_fax(agi, cursor, args):
 
 _BACKENDS_FACTORY = [("mail", _new_mail_backend),
                      ("printer", _new_printer_backend),
-                     ("ftp", _new_ftp_backend),
-                     ("log", None)]
+                     ("ftp", _new_ftp_backend)]
 
 
 def setup_handle_fax(cursor):
@@ -231,10 +230,6 @@ def setup_handle_fax(cursor):
     for backend_prefix, backend_factory in _BACKENDS_FACTORY:
         for section in filter(lambda s: s.startswith(backend_prefix),
                               config.sections()):
-            if backend_factory is None:
-                logger.warning('Backends of type %s are not supported anymore: remove the backend %s from your xivo_fax.conf',
-                               backend_prefix, section)
-                continue
             backend_factory_args = dict(config.items(section))
             logger.debug("Creating backend, name %s, factory %s", section,
                          backend_factory)
@@ -247,11 +242,22 @@ def setup_handle_fax(cursor):
     for section in filter(lambda s: s.startswith("dstnum_"), config.sections()):
         cur_destination = section[7:]  # 6 == len("dstnum_")
         cur_backend_ids = map(lambda s: s.strip(), config.get(section, "dest").split(","))
-        cur_backends = map(lambda id_: backends[id_], cur_backend_ids)
+        cur_backends = _build_backends_list(backends, cur_backend_ids, cur_destination)
         logger.debug('Creating destination, dstnum %s, backends %s', cur_destination,
                      cur_backend_ids)
         DESTINATIONS[cur_destination] = cur_backends
     logger.debug("Created %s destinations", len(DESTINATIONS))
+
+
+def _build_backends_list(available_backends, backend_ids, destination):
+    backends = []
+    for backend_id in backend_ids:
+        if backend_id in available_backends:
+            backends.append(available_backends[backend_id])
+        else:
+            logger.warning('Destination %s is referencing unknown backend "%s" in xivo_fax.conf',
+                           destination, backend_id)
+    return backends
 
 
 agid.register(handle_fax, setup_handle_fax)
