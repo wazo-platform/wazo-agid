@@ -19,7 +19,6 @@ import logging
 import os
 import subprocess
 import ftplib
-import time
 from ConfigParser import RawConfigParser
 from xivo_agid import agid
 
@@ -161,20 +160,8 @@ def _new_ftp_backend(host, username, password, port=21, directory=None, convert_
     return aux
 
 
-def _new_log_backend(fileobj, msg):
-    # Return a backend taking no argument, which logs a message in a
-    # file when called.
-    # This is not efficient, and I've wrote it for testing purpose only.
-    def aux(faxfile, dstnum, args):
-        fobj = open(fileobj, "a")
-        try:
-            print >> fobj, time.strftime("%Y-%m-%d %H:%M:%S"), msg % {"dstnum": dstnum}
-        finally:
-            fobj.close()
-    return aux
-
-
 def _do_handle_fax(faxfile, dstnum, args):
+    logger.info('Handling fax for destination %s', dstnum)
     if not faxfile:
         raise ValueError("Invalid faxfile value: %s" % faxfile)
     if not dstnum:
@@ -214,8 +201,7 @@ def handle_fax(agi, cursor, args):
 
 _BACKENDS_FACTORY = [("mail", _new_mail_backend),
                      ("printer", _new_printer_backend),
-                     ("ftp", _new_ftp_backend),
-                     ("log", _new_log_backend)]
+                     ("ftp", _new_ftp_backend)]
 
 
 def setup_handle_fax(cursor):
@@ -256,11 +242,22 @@ def setup_handle_fax(cursor):
     for section in filter(lambda s: s.startswith("dstnum_"), config.sections()):
         cur_destination = section[7:]  # 6 == len("dstnum_")
         cur_backend_ids = map(lambda s: s.strip(), config.get(section, "dest").split(","))
-        cur_backends = map(lambda id_: backends[id_], cur_backend_ids)
+        cur_backends = _build_backends_list(backends, cur_backend_ids, cur_destination)
         logger.debug('Creating destination, dstnum %s, backends %s', cur_destination,
                      cur_backend_ids)
         DESTINATIONS[cur_destination] = cur_backends
     logger.debug("Created %s destinations", len(DESTINATIONS))
+
+
+def _build_backends_list(available_backends, backend_ids, destination):
+    backends = []
+    for backend_id in backend_ids:
+        if backend_id in available_backends:
+            backends.append(available_backends[backend_id])
+        else:
+            logger.warning('Destination %s is referencing unknown backend "%s" in xivo_fax.conf',
+                           destination, backend_id)
+    return backends
 
 
 agid.register(handle_fax, setup_handle_fax)
