@@ -80,13 +80,9 @@ class UserFeatures(Handler):
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
-        self._set_feature_list()
         self._set_caller()
         self._set_line()
         self._set_user()
-
-    def _set_feature_list(self):
-        self._feature_list = objects.ExtenFeatures(self._agi, self._cursor)
 
     def _set_caller(self):
         if self._userid:
@@ -276,12 +272,8 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     def _set_call_recordfile(self):
-        callrecordfile = ""
-        if self._feature_list.callrecord:
-            if self._user.callrecord or (self._caller and self._caller.callrecord):
-                callrecordfile = "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
-            else:
-                callrecordfile = ""
+        if self._user.callrecord or (self._caller and self._caller.callrecord):
+            callrecordfile = "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
         else:
             callrecordfile = ""
         self._agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
@@ -304,7 +296,7 @@ class UserFeatures(Handler):
             options += "x"
         if self._caller and self._caller.enableonlinerec:
             options += "X"
-        if self._feature_list.incallfilter and self._user.incallfilter:
+        if self._user.incallfilter:
             options += "p"
         self._agi.set_variable('XIVO_CALLOPTIONS', options)
 
@@ -324,11 +316,7 @@ class UserFeatures(Handler):
         return self._agi.set_variable('XIVO_SIMULTCALLS', self._user.simultcalls)
 
     def _set_enablednd(self):
-        if self._feature_list.enablednd:
-            enablednd = self._user.enablednd
-        else:
-            enablednd = 0
-        self._agi.set_variable('XIVO_ENABLEDND', enablednd)
+        self._agi.set_variable('XIVO_ENABLEDND', self._user.enablednd)
 
     def _set_rna_from_dialaction(self):
         return self._set_fwd_from_dialaction('noanswer')
@@ -349,13 +337,13 @@ class UserFeatures(Handler):
         return dial_action.action != 'none'
 
     def _set_rna_from_exten(self):
-        if not self._feature_list.fwdrna or not self._user.enablerna:
+        if not self._user.enablerna:
             return False
 
         return self._set_fwd_from_exten('noanswer', self.main_extension.context, self._user.destrna)
 
     def _set_rbusy_from_exten(self):
-        if not self._feature_list.fwdbusy or not self._user.enablebusy:
+        if not self._user.enablebusy:
             return False
 
         return self._set_fwd_from_exten('busy', self.main_extension.context, self._user.destbusy)
@@ -382,17 +370,15 @@ class UserFeatures(Handler):
             self._agi.set_variable('XIVO_ENABLEBUSY', True)
 
     def _set_enableunc(self):
-        enableunc = 0
-        unc_action = 'none'
-        unc_actionarg1 = ""
-        unc_actionarg2 = ""
-        if self._feature_list.fwdunc:
-            enableunc = self._user.enableunc
-            if enableunc:
-                unc_action = 'extension'
-                unc_actionarg1 = self._user.destunc
-                unc_actionarg2 = self.main_extension.context
-        self._agi.set_variable('XIVO_ENABLEUNC', enableunc)
+        if self._user.enableunc:
+            unc_action = 'extension'
+            unc_actionarg1 = self._user.destunc
+            unc_actionarg2 = self.main_extension.context
+        else:
+            unc_action = 'none'
+            unc_actionarg1 = ""
+            unc_actionarg2 = ""
+        self._agi.set_variable('XIVO_ENABLEUNC', self._user.enableunc)
         objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
 
     def _set_call_forwards(self):

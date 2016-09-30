@@ -64,14 +64,12 @@ class TestUserFeatures(_BaseTestCase):
 
     def test_set_members(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._set_feature_list = Mock()
         userfeatures._set_caller = Mock()
         userfeatures._set_line = Mock()
         userfeatures._set_user = Mock()
 
         userfeatures._set_members()
 
-        objects.ExtenFeatures = Mock()
         old_user, objects.User = objects.User, Mock()
 
         self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
@@ -79,22 +77,11 @@ class TestUserFeatures(_BaseTestCase):
         self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
         self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
         self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
-        self.assertTrue(userfeatures._set_feature_list.called)
         self.assertTrue(userfeatures._set_caller.called)
         self.assertTrue(userfeatures._set_line.called)
         self.assertTrue(userfeatures._set_user.called)
 
         objects.User, old_user = old_user, None
-
-    def test_set_feature_list(self):
-        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-
-        with patch.object(objects.ExtenFeatures, '__init__') as extenfeatures_init:
-            extenfeatures_init.return_value = None
-            userfeatures._set_feature_list()
-            extenfeatures_init.assert_called_with(self._agi, self._cursor)
-        self.assertNotEqual(userfeatures._feature_list, None)
-        self.assertTrue(isinstance(userfeatures._feature_list, objects.ExtenFeatures))
 
     def test_set_caller(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -116,8 +103,6 @@ class TestUserFeatures(_BaseTestCase):
 
     def test_set_call_recordfile_doesnt_raise_when_caller_is_none(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._feature_list = Mock()
-        userfeatures._feature_list.callrecord = True
         userfeatures._user = Mock()
         userfeatures._user.callrecord = True
 
@@ -320,17 +305,8 @@ class TestSetForwardNoAnswer(_BaseTestCase):
             call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', ''),
         ))
 
-    def test_forward_no_answer_to_a_user_from_exten_with_the_exten_disabled(self):
-        user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=False)
-
-        enabled = user_features._set_rna_from_exten()
-
-        assert_that(enabled, equal_to(False))
-
     def test_forward_no_answer_to_a_user_from_exten_fwdrna_disabled_on_user(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=True)
         user_features._user = Mock(objects.User, enablerna=False)
 
         enabled = user_features._set_rna_from_exten()
@@ -339,7 +315,6 @@ class TestSetForwardNoAnswer(_BaseTestCase):
 
     def test_forward_no_answer_to_a_user_from_exten(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._feature_list = Mock(objects.ExtenFeatures, fwdrna=True)
         user_features._user = Mock(objects.User, destrna='555', enablerna=True)
         user_features.main_extension = Mock(context=sentinel.context)
 
@@ -396,17 +371,8 @@ class TestSetForwardBusy(_BaseTestCase):
             call('XIVO_FWD_USER_BUSY_ACTIONARG2', ''),
         ))
 
-    def test_forward_busy_to_a_user_from_exten_with_the_exten_disabled(self):
-        user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=False)
-
-        enabled = user_features._set_rbusy_from_exten()
-
-        assert_that(enabled, equal_to(False))
-
     def test_forward_busy_to_a_user_from_exten_fwdbusy_disabled_on_user(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=True)
         user_features._user = Mock(objects.User, enablebusy=False)
 
         enabled = user_features._set_rbusy_from_exten()
@@ -415,7 +381,6 @@ class TestSetForwardBusy(_BaseTestCase):
 
     def test_forward_busy_to_a_user_from_exten(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._feature_list = Mock(objects.ExtenFeatures, fwdbusy=True)
         user_features._user = Mock(objects.User, destbusy='666', enablebusy=True)
         user_features.main_extension = Mock(context=sentinel.context)
 

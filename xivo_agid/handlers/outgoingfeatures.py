@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2014 Avencall
+# Copyright (C) 2006-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ class OutgoingFeatures(Handler):
             self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_SUFFIX, i), intfsuffix)
 
     def _set_record_file_name(self):
-        if self.callrecord and objects.ExtenFeatures(self._agi, self._cursor).callrecord:  # BUGBUG the context is missing in the filename TODO use ids
+        if self.callrecord:  # BUGBUG the context is missing in the filename TODO use ids
             callrecordfile = "user-%s-%s-%s.wav" % (self.srcnum, self.orig_dstnum, int(time.time()))
         else:
             callrecordfile = ""
