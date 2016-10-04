@@ -27,8 +27,6 @@ logger = logging.getLogger(__name__)
 def phone_get_features(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
 
-    feature_list = objects.ExtenFeatures(agi, cursor)
-
     try:
         user = objects.User(agi, cursor, int(userid))
     except (ValueError, LookupError), e:
@@ -36,8 +34,8 @@ def phone_get_features(agi, cursor, args):
 
     _set_current_forwards(agi, user.id)
 
-    for service in feature_list.FEATURES['services']:
-        enable = bool(getattr(feature_list, service[0], 0) and getattr(user, service[1], 0))
+    for service in objects.ExtenFeatures.FEATURES['services']:
+        enable = bool(getattr(user, service[1], 0))
         agi.set_variable("XIVO_%s" % service[1].upper(), int(enable))
 
 
