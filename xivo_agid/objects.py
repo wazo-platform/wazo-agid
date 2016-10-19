@@ -528,7 +528,7 @@ class Queue(object):
         # case NOANSWER (timeout): we also set correct queuelog event
         action = DialAction(self.agi, self.cursor, 'noanswer', "queue", self.id)
         action.set_variables()
-        if action.action in ['voicemail', 'voicemenu', 'sound']:
+        if action.action in ['voicemail', 'sound']:
             self.agi.set_variable("XIVO_QUEUELOG_EVENT", "REROUTEGUIDE")
 
     def rewrite_cid(self):
@@ -827,28 +827,6 @@ class ScheduleDataMapper(object):
                 closed_periods.append(period_builder.build())
 
         return Schedule(opened_periods, closed_periods, default_action, timezone)
-
-
-class VoiceMenu(object):
-    def __init__(self, agi, cursor, xid):
-        self.agi = agi
-        self.cursor = cursor
-
-        columns = ('name', 'context')
-
-        cursor.query("SELECT ${columns} FROM voicemenu "
-                     "WHERE id = %s "
-                     "AND commented = 0",
-                     columns,
-                     (xid,))
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find voicemenu entry (id: %d)" % (xid,))
-
-        self.id = xid
-        self.name = res['name']
-        self.context = res['context']
 
 
 class Context(object):

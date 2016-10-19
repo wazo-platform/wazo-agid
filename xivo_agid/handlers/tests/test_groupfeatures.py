@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2012-2014 Avencall
+# Copyright (C) 2016 Proformatique Inc.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -63,11 +64,6 @@ class TestGroupFeatures(unittest.TestCase):
     def test_referer_myself_needs_rewrite_cid(self):
         self.group_features._id = 3
         self.group_features._referer = "group:3"
-
-        self.assertTrue(self.group_features._needs_rewrite_cid())
-
-    def test_referer_voicemenu_needs_rewrite_cid(self):
-        self.group_features._referer = "voicemenu:778"
 
         self.assertTrue(self.group_features._needs_rewrite_cid())
 
