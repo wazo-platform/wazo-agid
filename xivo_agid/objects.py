@@ -723,7 +723,7 @@ class Outcall(object):
         self.cursor = cursor
 
     def retrieve_values(self, dialpattern_id):
-        columns = ('outcall.name', 'outcall.context', 'outcall.useenum', 'outcall.internal',
+        columns = ('outcall.name', 'outcall.context', 'outcall.internal',
                    'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
                    'outcall.id', 'dialpattern.typeid', 'dialpattern.type', 'dialpattern.exten',
                    'dialpattern.stripnum', 'dialpattern.externprefix',
@@ -751,7 +751,6 @@ class Outcall(object):
         self.externprefix = res['dialpattern.externprefix']
         self.stripnum = res['dialpattern.stripnum']
         self.callerid = res['dialpattern.callerid']
-        self.useenum = res['outcall.useenum']
         self.internal = res['outcall.internal']
         self.preprocess_subroutine = res['outcall.preprocess_subroutine']
         self.hangupringtime = res['outcall.hangupringtime']
