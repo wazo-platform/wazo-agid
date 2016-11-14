@@ -1,4 +1,4 @@
-xivo-agid (14.01~20140110.152707.e7c13a2-wheezy-2) xivo-dev; urgency=low
+xivo-agid (14.01~20140110.152707.e7c13a2) xivo-dev; urgency=low
 
   * use maintscript instead of renaming conffile manually
 
