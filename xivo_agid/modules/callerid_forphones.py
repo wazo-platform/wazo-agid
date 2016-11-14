@@ -33,25 +33,27 @@ def callerid_forphones(agi, cursor, args):
         cid_number = agi.env['agi_callerid']
 
         logger.debug('Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number)
-        if _should_reverse_lookup(cid_name, cid_number):
-            incall_id = int(agi.get_variable('XIVO_INCALL_ID'))
-            callee_infos = directory_profile_dao.find_by_incall_id(incall_id)
-            if callee_infos is None:
-                xivo_user_uuid = FAKE_XIVO_USER_UUID
-            else:
-                xivo_user_uuid = callee_infos.xivo_user_uuid
-            try:
-                # It is not possible to associate a profile to a reverse configuration in the webi
-                lookup_result = dird_client.directories.reverse(profile='default',
-                                                                xivo_user_uuid=xivo_user_uuid,
-                                                                exten=cid_number)
-            except RequestException as e:
-                logger.exception('Reverse lookup failed: %s', e)
-            else:
-                logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
-                if lookup_result['display'] is not None:
-                    _set_new_caller_id(agi, lookup_result['display'], cid_number)
-                    _set_reverse_lookup_variable(agi, lookup_result['fields'])
+        if not _should_reverse_lookup(cid_name, cid_number):
+            return
+
+        incall_id = int(agi.get_variable('XIVO_INCALL_ID'))
+        callee_infos = directory_profile_dao.find_by_incall_id(incall_id)
+        if callee_infos is None:
+            xivo_user_uuid = FAKE_XIVO_USER_UUID
+        else:
+            xivo_user_uuid = callee_infos.xivo_user_uuid
+        try:
+            # It is not possible to associate a profile to a reverse configuration in the webi
+            lookup_result = dird_client.directories.reverse(profile='default',
+                                                            xivo_user_uuid=xivo_user_uuid,
+                                                            exten=cid_number)
+        except RequestException as e:
+            logger.exception('Reverse lookup failed: %s', e)
+        else:
+            logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
+            if lookup_result['display'] is not None:
+                _set_new_caller_id(agi, lookup_result['display'], cid_number)
+                _set_reverse_lookup_variable(agi, lookup_result['fields'])
     except Exception:
         logger.exception('Reverse lookup failed')
 
