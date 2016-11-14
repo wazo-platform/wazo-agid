@@ -1,18 +1,18 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from distutils.core import setup
+from setuptools import setup
+from setuptools import find_packages
 
-setup(name='xivo_agid',
-      version='1.0',
-      description='XIVO AGI Daemon',
-      author='Avencall',
-      author_email='technique@proformatique.com',
-      url='http://xivo.io/',
-      packages=['xivo_agid',
-                'xivo_agid.bin',
-                'xivo_agid.modules',
-                'xivo_agid.handlers'],
-      data_files=[
-          ('/usr/bin', ['bin/xivo-agid'])
-      ]
-      )
+
+setup(
+    name='xivo_agid',
+    version='1.1',
+    description='XIVO AGI Daemon',
+    author='Proformatique Inc.',
+    author_email='dev+pkg@proformatique.com',
+    url='http://xivo.io/',
+    license='GPLv3',
+    packages=find_packages(),
+    scripts=['bin/xivo-agid']
+)
