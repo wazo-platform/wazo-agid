@@ -7,7 +7,7 @@ Before=monit.service
 [Service]
 Type=forking
 ExecStartPre=/usr/bin/install -d -o xivo-agid -g xivo-agid /var/run/xivo-agid
-ExecStart=/usr/sbin/xivo-agid
+ExecStart=/usr/bin/xivo-agid
 PIDFile=/var/run/xivo-agid/xivo-agid.pid
 
 [Install]

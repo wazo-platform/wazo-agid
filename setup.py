@@ -13,6 +13,6 @@ setup(name='xivo_agid',
                 'xivo_agid.modules',
                 'xivo_agid.handlers'],
       data_files=[
-          ('/usr/sbin', ['sbin/xivo-agid'])
+          ('/usr/bin', ['bin/xivo-agid'])
       ]
       )
