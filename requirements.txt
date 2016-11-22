@@ -4,7 +4,6 @@ git+https://github.com/xivo-pbx/xivo-dao.git
 git+https://github.com/xivo-pbx/xivo-dird-client.git
 git+https://github.com/xivo-pbx/xivo-lib-python.git
 git+https://github.com/xivo-pbx/xivo-lib-rest-client.git
-git+https://github.com/xivo-pbx/xivo-provd-client.git
 git+https://github.com/xivo-pbx/xivo-confd-client.git
 psycopg2==2.5.4
 pytz
