@@ -14,7 +14,7 @@ To install docker on Linux :
 
 To build the image, simply invoke
 
-    docker build -t xivo-agid github.com/xivo-pbx/xivo-agid
+    docker build -t xivo-agid github.com/wazo-pbx/xivo-agid
 
 Or directly in the sources in contribs/docker
 

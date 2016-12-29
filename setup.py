@@ -9,9 +9,9 @@ setup(
     name='xivo_agid',
     version='1.1',
     description='XIVO AGI Daemon',
-    author='Proformatique Inc.',
-    author_email='dev+pkg@proformatique.com',
-    url='http://xivo.io/',
+    author='Wazo Authors',
+    author_email='dev.wazo@gmail.com',
+    url='http://wazo.community',
     license='GPLv3',
     packages=find_packages(),
     scripts=['bin/xivo-agid']
