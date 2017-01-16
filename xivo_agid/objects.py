@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2007-2016 Avencall
+# Copyright 2007-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -795,6 +795,12 @@ class ScheduleDataMapper(object):
 
         schedule_id = res['id']
         timezone = res['timezone']
+        if not timezone:
+            columns = ('timezone',)
+            cursor.query("SELECT ${columns} FROM general", columns)
+            general = cursor.fetchone()
+            timezone = general['timezone']
+
         default_action = ScheduleAction(res['fallback_action'],
                                         res['fallback_actionid'],
                                         res['fallback_actionargs'])
