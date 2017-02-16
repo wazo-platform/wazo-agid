@@ -33,6 +33,8 @@ re_objs = {}
 
 def in_callerid(agi, cursor, args):
     callerid_num = agi.env['agi_callerid']
+    callerid_name = agi.env['agi_calleridname']
+    same_cid = callerid_num == callerid_name
 
     for section in config:
         section_name = section.get_name()
@@ -61,7 +63,10 @@ def in_callerid(agi, cursor, args):
             if add:
                 callerid_num = add + callerid_num
 
-        agi.set_variable('CALLERID(num)', callerid_num)
+        if same_cid:
+            agi.set_callerid(callerid_num)
+        else:
+            agi.set_variable('CALLERID(num)', callerid_num)
 
         return
 
