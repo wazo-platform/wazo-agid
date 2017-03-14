@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+import time
+
+from jinja2 import Template
+
 from xivo_dao import callfilter_dao, user_line_dao as old_user_line_dao
 
 from xivo_dao.resources.user_line import dao as user_line_dao
@@ -27,7 +31,6 @@ from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
 from xivo_agid import dialplan_variables
 
-import time
 
 
 class UserFeatures(Handler):
@@ -280,7 +283,14 @@ class UserFeatures(Handler):
         if not should_record:
             return
 
-        return "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
+        args = {
+            'srcnum': self._srcnum,
+            'dstnum': self._dstnum,
+            'time': int(time.time()),
+        }
+        filename_template = 'user-{{ srcnum }}-{{ dstnum }}-{{ time }}.wav'
+        filename = Template(filename_template).render(args)
+        return filename
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:
