@@ -287,6 +287,10 @@ class UserFeatures(Handler):
             'srcnum': self._srcnum,
             'dstnum': self._dstnum,
             'time': int(time.time()),
+            'userfield': self._user.userfield,
+            'firstname': self._user.firstname,
+            'lastname': self._user.lastname,
+            'context': self.main_line.context,
         }
         filename_template = 'user-{{ srcnum }}-{{ dstnum }}-{{ time }}.wav'
         filename = Template(filename_template).render(args)
