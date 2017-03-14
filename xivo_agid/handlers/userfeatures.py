@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2016 Avencall
+# Copyright 2012-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -272,11 +272,15 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     def _set_call_recordfile(self):
-        if self._user.callrecord or (self._caller and self._caller.callrecord):
-            callrecordfile = "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
-        else:
-            callrecordfile = ""
+        callrecordfile = self._build_call_record_file_name() or ''
         self._agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
+
+    def _build_call_record_file_name(self):
+        should_record = self._user.callrecord or (self._caller and self._caller.callrecord)
+        if not should_record:
+            return
+
+        return "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:
