@@ -10,4 +10,4 @@ pytz
 pyyaml==3.11  # from xivo-lib-python
 requests==2.4.3
 sqlalchemy==0.9.8  # from xivo-dao
-stevedore==0.14.1  # from xivo-lib-rest-client
+stevedore==1.17.1  # from xivo-lib-rest-client
