@@ -33,14 +33,37 @@ from xivo_agid import objects
 from xivo_agid import dialplan_variables
 
 
+class CallRecordingNameGenerator(object):
+
+    valid_special_characters = ['/', '-', '_', ' ']
+
+    def __init__(self, filename_template, filename_extension):
+        self._template = Template(filename_template)
+        self._extension = filename_extension
+
+    def generate(self, context):
+        generated_filename = self._template.render(context)
+        ascii_filename = unidecode(generated_filename)
+        filename = ''.join(c for c in ascii_filename if self._is_valid_character(c))
+        if not filename:
+            filename = str(time.time())
+
+        return '.'.join([filename, self._extension])
+
+    def _is_valid_character(self, c):
+        return c.isalnum() or c in self.valid_special_characters
+
+
 class UserFeatures(Handler):
 
     PATH_TYPE = 'user'
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
-        self._call_record_filename_template = agi.config['call_recording']['filename_template']
-        self._call_record_filename_extension = agi.config['call_recording']['filename_extension']
+        self._call_recording_name_generator = CallRecordingNameGenerator(
+            agi.config['call_recording']['filename_template'],
+            agi.config['call_recording']['filename_extension'],
+        )
         self._userid = None
         self._dstid = None
         self._destination_extension_id = None
@@ -295,16 +318,7 @@ class UserFeatures(Handler):
             'base_context': self._context,
             'tenant_name': context_dao.get(self._context).entity,
         }
-        valid_special_characters = ['/', '-', '_', ' ']
-
-        def valid_character(c):
-            return c.isalnum() or c in valid_special_characters
-
-        generated_filename = Template(self._call_record_filename_template).render(args)
-        ascii_filename = unidecode(generated_filename)
-        filename = ''.join(c for c in ascii_filename if valid_character(c))
-
-        return '.'.join([filename, self._call_record_filename_extension])
+        return self._call_recording_name_generator.generate(args)
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:
