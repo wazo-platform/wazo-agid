@@ -18,6 +18,7 @@
 import time
 
 from jinja2 import Template
+from unidecode import unidecode
 
 from xivo_dao import callfilter_dao, context_dao, user_line_dao as old_user_line_dao
 
@@ -292,11 +293,18 @@ class UserFeatures(Handler):
             'base_context': self._context,
             'tenant_name': context_dao.get(self._context).entity,
         }
-        filename_template = '{{ tenant_name }}-{{ srcnum }}-{{ local_time }}.wav'
-        filename = Template(filename_template).render(args)
-        # XXX clean the file name... unidecode and remove all but _-. + ASCII
-        # XXX / == sous répertoire
-        return filename
+        filename_template = u'{{ tenant_name }}-pépé-{{ srcnum }}-{{ local_time }}'
+        generated_filename = Template(filename_template).render(args)
+        ascii_filename = unidecode(generated_filename)
+        extension = 'wav'
+
+        def valid_character(c):
+            valid_special_characters = ['/', '-', '_', ' ']
+            return c.isalnum() or c in valid_special_characters
+
+        filename = ''.join(c for c in ascii_filename if valid_character(c))
+
+        return '.'.join([filename, extension])
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:
