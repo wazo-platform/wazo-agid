@@ -17,9 +17,6 @@
 
 import time
 
-from jinja2 import Template
-from unidecode import unidecode
-
 from xivo_dao import callfilter_dao, context_dao, user_line_dao as old_user_line_dao
 
 from xivo_dao.resources.user_line import dao as user_line_dao
@@ -27,31 +24,11 @@ from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
 from xivo_dao.resources.extension import dao as extension_dao
 
+from xivo_agid.helpers import CallRecordingNameGenerator
 from xivo_agid.objects import DialAction, CallerID
 from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
 from xivo_agid import dialplan_variables
-
-
-class CallRecordingNameGenerator(object):
-
-    valid_special_characters = ['/', '-', '_', ' ']
-
-    def __init__(self, filename_template, filename_extension):
-        self._template = Template(filename_template)
-        self._extension = filename_extension
-
-    def generate(self, context):
-        generated_filename = self._template.render(context)
-        ascii_filename = unidecode(generated_filename)
-        filename = ''.join(c for c in ascii_filename if self._is_valid_character(c))
-        if not filename:
-            filename = str(time.time())
-
-        return '.'.join([filename, self._extension])
-
-    def _is_valid_character(self, c):
-        return c.isalnum() or c in self.valid_special_characters
 
 
 class UserFeatures(Handler):
