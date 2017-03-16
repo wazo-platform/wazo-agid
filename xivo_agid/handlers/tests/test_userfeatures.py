@@ -34,7 +34,9 @@ class NotEmptyStringMatcher(object):
 class _BaseTestCase(unittest.TestCase):
 
     def setUp(self):
-        self._agi = Mock()
+        config = {'call_recording': {'filename_template': '{{ mock }}',
+                                     'filename_extension': 'wav'}}
+        self._agi = Mock(config=config)
         self._cursor = Mock(cast=lambda x, y: '')
         self._args = Mock()
 

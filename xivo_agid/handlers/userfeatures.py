@@ -39,6 +39,8 @@ class UserFeatures(Handler):
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
+        self._call_record_filename_template = agi.config['call_recording']['filename_template']
+        self._call_record_filename_extension = agi.config['call_recording']['filename_extension']
         self._userid = None
         self._dstid = None
         self._destination_extension_id = None
@@ -293,18 +295,16 @@ class UserFeatures(Handler):
             'base_context': self._context,
             'tenant_name': context_dao.get(self._context).entity,
         }
-        filename_template = u'{{ tenant_name }}-pépé-{{ srcnum }}-{{ local_time }}'
-        generated_filename = Template(filename_template).render(args)
-        ascii_filename = unidecode(generated_filename)
-        extension = 'wav'
+        valid_special_characters = ['/', '-', '_', ' ']
 
         def valid_character(c):
-            valid_special_characters = ['/', '-', '_', ' ']
             return c.isalnum() or c in valid_special_characters
 
+        generated_filename = Template(self._call_record_filename_template).render(args)
+        ascii_filename = unidecode(generated_filename)
         filename = ''.join(c for c in ascii_filename if valid_character(c))
 
-        return '.'.join([filename, extension])
+        return '.'.join([filename, self._call_record_filename_extension])
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:
