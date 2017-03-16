@@ -19,7 +19,7 @@ import time
 
 from jinja2 import Template
 
-from xivo_dao import callfilter_dao, user_line_dao as old_user_line_dao
+from xivo_dao import callfilter_dao, context_dao, user_line_dao as old_user_line_dao
 
 from xivo_dao.resources.user_line import dao as user_line_dao
 from xivo_dao.resources.line import dao as line_dao
@@ -30,7 +30,6 @@ from xivo_agid.objects import DialAction, CallerID
 from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
 from xivo_agid import dialplan_variables
-
 
 
 class UserFeatures(Handler):
@@ -83,6 +82,7 @@ class UserFeatures(Handler):
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
+        self._context = self._agi.get_variable(dialplan_variables.BASE_CONTEXT)
         self._set_caller()
         self._set_line()
         self._set_user()
@@ -286,14 +286,16 @@ class UserFeatures(Handler):
         args = {
             'srcnum': self._srcnum,
             'dstnum': self._dstnum,
-            'time': int(time.time()),
-            'userfield': self._user.userfield,
-            'firstname': self._user.firstname,
-            'lastname': self._user.lastname,
-            'context': self.main_line.context,
+            'timestamp': int(time.time()),
+            'local_time': time.asctime(time.localtime()),
+            'utc_time': time.asctime(time.gmtime()),
+            'base_context': self._context,
+            'tenant_name': context_dao.get(self._context).entity,
         }
-        filename_template = 'user-{{ srcnum }}-{{ dstnum }}-{{ time }}.wav'
+        filename_template = '{{ tenant_name }}-{{ srcnum }}-{{ local_time }}.wav'
         filename = Template(filename_template).render(args)
+        # XXX clean the file name... unidecode and remove all but _-. + ASCII
+        # XXX / == sous répertoire
         return filename
 
     def _set_music_on_hold(self):
