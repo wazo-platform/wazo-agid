@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013-2014 Avencall
+# Copyright 2013-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -95,7 +95,9 @@ def a_user():
 class TestOutgoingFeatures(unittest.TestCase):
 
     def setUp(self):
-        self._agi = Mock()
+        config = {'call_recording': {'filename_template': '{{ mock }}',
+                                     'filename_extension': 'wav'}}
+        self._agi = Mock(config=config)
         self._cursor = Mock()
         self._args = Mock()
         self.outgoing_features = OutgoingFeatures(self._agi, self._cursor, self._args)
