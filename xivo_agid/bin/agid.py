@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2016 Avencall
+# Copyright 2012-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,6 +58,10 @@ _DEFAULT_CONFIG = {
     'extra_config_files': '/etc/xivo-agid/conf.d/',
     'connection_pool_size': 10,
     'db_uri': 'postgresql://asterisk:proformatique@localhost/asterisk?charset=utf8',
+    'call_recording': {
+        'filename_template': 'user-{{ srcnum }}-{{ dstnum }}-{{ timestamp }}',
+        'filename_extension': 'wav',
+    },
 }
 
 

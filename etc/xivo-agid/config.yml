@@ -60,3 +60,7 @@ bus:
   exchange_name: xivo
   exchange_type: topic
   exchange_durable: True
+
+call_recording:
+  filename_template: "user-{{ srcnum }}-{{ dstnum }}-{{ timestamp }}"
+  filename_extension: wav

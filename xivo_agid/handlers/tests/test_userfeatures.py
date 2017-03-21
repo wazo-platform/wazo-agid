@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013-2016 Avencall
+# Copyright 2013-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,9 @@ class NotEmptyStringMatcher(object):
 class _BaseTestCase(unittest.TestCase):
 
     def setUp(self):
-        self._agi = Mock()
+        config = {'call_recording': {'filename_template': '{{ mock }}',
+                                     'filename_extension': 'wav'}}
+        self._agi = Mock(config=config)
         self._cursor = Mock(cast=lambda x, y: '')
         self._args = Mock()
 
@@ -48,7 +50,8 @@ class TestUserFeatures(_BaseTestCase):
                            'XIVO_CALLORIGIN': 'my_origin',
                            'XIVO_SRCNUM': '1000',
                            'XIVO_DSTNUM': '1003',
-                           'XIVO_DST_EXTEN_ID': '983274'}
+                           'XIVO_DST_EXTEN_ID': '983274',
+                           'XIVO_BASE_CONTEXT': 'default'}
 
         def get_variable(key):
             return self._variables[key]
@@ -101,10 +104,12 @@ class TestUserFeatures(_BaseTestCase):
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
 
-    def test_set_call_recordfile_doesnt_raise_when_caller_is_none(self):
+    @patch('xivo_agid.handlers.userfeatures.context_dao')
+    def test_set_call_recordfile_doesnt_raise_when_caller_is_none(self, context_dao):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock()
         userfeatures._user.callrecord = True
+        userfeatures._context = 'default'
 
         userfeatures._set_call_recordfile()
 

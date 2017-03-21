@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2012-2016 Avencall
+# Copyright 2012-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,19 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from xivo_dao import callfilter_dao, user_line_dao as old_user_line_dao
+import time
+
+from xivo_dao import callfilter_dao, context_dao, user_line_dao as old_user_line_dao
 
 from xivo_dao.resources.user_line import dao as user_line_dao
 from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
 from xivo_dao.resources.extension import dao as extension_dao
 
+from xivo_agid.helpers import CallRecordingNameGenerator
 from xivo_agid.objects import DialAction, CallerID
 from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
 from xivo_agid import dialplan_variables
-
-import time
 
 
 class UserFeatures(Handler):
@@ -36,6 +37,10 @@ class UserFeatures(Handler):
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
+        self._call_recording_name_generator = CallRecordingNameGenerator(
+            agi.config['call_recording']['filename_template'],
+            agi.config['call_recording']['filename_extension'],
+        )
         self._userid = None
         self._dstid = None
         self._destination_extension_id = None
@@ -80,6 +85,7 @@ class UserFeatures(Handler):
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
+        self._context = self._agi.get_variable(dialplan_variables.BASE_CONTEXT)
         self._set_caller()
         self._set_line()
         self._set_user()
@@ -272,11 +278,24 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     def _set_call_recordfile(self):
-        if self._user.callrecord or (self._caller and self._caller.callrecord):
-            callrecordfile = "user-%s-%s-%s.wav" % (self._srcnum, self._dstnum, int(time.time()))
-        else:
-            callrecordfile = ""
+        callrecordfile = self._build_call_record_file_name() or ''
         self._agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
+
+    def _build_call_record_file_name(self):
+        should_record = self._user.callrecord or (self._caller and self._caller.callrecord)
+        if not should_record:
+            return
+
+        args = {
+            'srcnum': self._srcnum,
+            'dstnum': self._dstnum,
+            'timestamp': int(time.time()),
+            'local_time': time.asctime(time.localtime()),
+            'utc_time': time.asctime(time.gmtime()),
+            'base_context': self._context,
+            'tenant_name': context_dao.get(self._context).entity,
+        }
+        return self._call_recording_name_generator.generate(args)
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:

@@ -11,3 +11,5 @@ pyyaml==3.11  # from xivo-lib-python
 requests==2.4.3
 sqlalchemy==0.9.8  # from xivo-dao
 stevedore==1.17.1  # from xivo-lib-rest-client
+jinja2==2.7.3
+unidecode==0.04.16

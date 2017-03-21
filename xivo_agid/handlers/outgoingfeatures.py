@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2016 Avencall
+# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-from xivo_agid import dialplan_variables
-from xivo_agid.handlers.handler import Handler
-from xivo_agid import objects
-
 import time
 import logging
+
+from xivo_dao import context_dao
+
+from xivo_agid import dialplan_variables
+from xivo_agid.handlers.handler import Handler
+from xivo_agid.helpers import CallRecordingNameGenerator
+from xivo_agid import objects
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +34,16 @@ class OutgoingFeatures(Handler):
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
+        self._call_recording_name_generator = CallRecordingNameGenerator(
+            agi.config['call_recording']['filename_template'],
+            agi.config['call_recording']['filename_extension'],
+        )
         self.user = None
         self.userid = None
         self.callerid = None
         self.callrecord = False
         self.options = ""
+        self._context = None
         self.outcall = objects.Outcall(self._agi, self._cursor)
 
     def _retrieve_outcall(self):
@@ -92,11 +100,23 @@ class OutgoingFeatures(Handler):
             self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_SUFFIX, i), intfsuffix)
 
     def _set_record_file_name(self):
-        if self.callrecord:  # BUGBUG the context is missing in the filename TODO use ids
-            callrecordfile = "user-%s-%s-%s.wav" % (self.srcnum, self.orig_dstnum, int(time.time()))
-        else:
-            callrecordfile = ""
+        callrecordfile = self._build_call_record_file_name() or ''
         self._agi.set_variable(dialplan_variables.CALL_RECORD_FILE_NAME, callrecordfile)
+
+    def _build_call_record_file_name(self):
+        if not self.callrecord:
+            return
+
+        args = {
+            'srcnum': self.srcnum,
+            'dstnum': self.orig_dstnum,
+            'timestamp': int(time.time()),
+            'local_time': time.asctime(time.localtime()),
+            'utc_time': time.asctime(time.gmtime()),
+            'base_context': self._context,
+            'tenant_name': context_dao.get(self._context).entity,
+        }
+        return self._call_recording_name_generator.generate(args)
 
     def _set_preprocess_subroutine(self):
         if self.outcall.preprocess_subroutine:
@@ -118,6 +138,7 @@ class OutgoingFeatures(Handler):
         self.dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
         self.srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self.orig_dstnum = self.dstnum
+        self._context = self._agi.get_variable(dialplan_variables.BASE_CONTEXT)
 
     def execute(self):
         self._extract_dialplan_variables()
