@@ -10,13 +10,8 @@ LOG_FILENAME="/var/log/$DAEMONNAME.log"
 
 case "$1" in
     configure)
-        if [ -h /etc/monit/conf.d/pf-xivo-agid ]; then
-            rm /etc/monit/conf.d/pf-xivo-agid
-        fi
-
         # remove the old pidfile created before xivo 16.09
         rm -f /var/run/xivo-agid.pid
-
 
         # add/update user
         if ! getent passwd $USER > /dev/null ; then
