@@ -37,7 +37,7 @@ dird:
   timeout: 1
   verify_certificate: /usr/share/xivo-certs/server.crt
 
-# xivo-auth connection informations.
+# wazo-auth connection informations.
 auth:
   host: localhost
   port: 9497
