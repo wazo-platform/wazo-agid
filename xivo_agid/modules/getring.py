@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2014 Avencall
+# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,11 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import ConfigParser
+import logging
 
 from xivo_agid import agid
 
 CONFIG_FILE = "/etc/xivo/asterisk/xivo_ring.conf"
 CONFIG_PARSER = None
+
+logger = logging.getLogger(__name__)
 
 
 def getring(agi, cursor, args):
@@ -43,6 +46,10 @@ def getring(agi, cursor, args):
     if len(dstnum) > 0 and CONFIG_PARSER.has_option('number', dstnum_context):
         section = CONFIG_PARSER.get('number', dstnum_context)
 
+    logger.debug('Ring type available sections: "%s"', CONFIG_PARSER.sections())
+    logger.debug('Ring type section: "%s"', section)
+    logger.debug('Ring type context: "%s"', context)
+
     try:
         if section is None:
             section = CONFIG_PARSER.get('number', "@%s" % context)
@@ -63,6 +70,7 @@ def getring(agi, cursor, args):
 
         phonetype = CONFIG_PARSER.get(section, 'phonetype')
     except (ConfigParser.NoOptionError, ValueError):
+        logger.debug('Ring type exception', exc_info=True)
         agi.set_variable('XIVO_RINGTYPE', "")
         agi.verbose("Using the native phone ring tone")
     else:
@@ -77,5 +85,6 @@ def setup(cursor):
     # This module is often called, keep this object alive.
     CONFIG_PARSER = ConfigParser.RawConfigParser()
     CONFIG_PARSER.readfp(open(CONFIG_FILE))
+
 
 agid.register(getring, setup)
