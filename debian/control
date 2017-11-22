@@ -12,7 +12,7 @@ Section: python
 Depends: ${python:Depends},
          ${misc:Depends},
          adduser,
-         asterisk,
+         asterisk | asterisk-virtual,
          python-tz,
          python-jinja2,
          python-unidecode,
