@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2016 Avencall
+# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,9 @@ import logging
 import os
 import subprocess
 import ftplib
+
 from ConfigParser import RawConfigParser
+from subprocess import CalledProcessError
 from xivo_agid import agid
 
 logger = logging.getLogger(__name__)
@@ -39,8 +41,14 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
     # Convert tifffile to pdffile and return the name of the pdf file.
     if pdffile is None:
         pdffile = _pdffile_from_file(tifffile)
-    subprocess.check_call([TIFF2PDF_PATH, "-o", pdffile, tifffile],
-                          close_fds=True)
+    try:
+        subprocess.check_output([TIFF2PDF_PATH, "-o", pdffile, tifffile],
+                                close_fds=True,
+                                stderr=subprocess.STDOUT)
+    except CalledProcessError as e:
+        logger.error('Command: "%s"', e.cmd)
+        logger.error('Command output: "%s"', e.output)
+        raise
     return pdffile
 
 
