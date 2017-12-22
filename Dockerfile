@@ -1,7 +1,7 @@
 ## Image to build from sources
 
-FROM debian:jessie
-MAINTAINER XiVO Team "dev@avencall.com"
+FROM debian:stretch
+MAINTAINER Wazo Maintainers <dev@wazo.community>
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /root
