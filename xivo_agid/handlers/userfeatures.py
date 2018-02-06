@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2012-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2018 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -170,17 +170,17 @@ class UserFeatures(Handler):
         caller = self._caller
         called = self._user
 
-        if called.bsfilter != 'boss':
+        boss_callfiltermember = callfilter_dao.find_boss(called.id)
+        if not boss_callfiltermember:
             return False
 
-        if caller is not None and caller.bsfilter == 'secretary':
+        if caller is not None:
             secretary_can_call_boss = callfilter_dao.does_secretary_filter_boss(called.id, caller.id)
             if secretary_can_call_boss:
                 return False
 
-        try:
-            boss_callfiltermember, callfilter = callfilter_dao.get_by_boss_id(called.id)
-        except TypeError:
+        callfilter = callfilter_dao.find(boss_callfiltermember.callfilterid)
+        if not callfilter:
             return False
 
         callfilter_active = callfilter_dao.is_activated_by_callfilter_id(boss_callfiltermember.callfilterid)
