@@ -10,9 +10,6 @@ LOG_FILENAME="/var/log/$DAEMONNAME.log"
 
 case "$1" in
     configure)
-        # remove the old pidfile created before xivo 16.09
-        rm -f /var/run/xivo-agid.pid
-
         # add/update user
         if ! getent passwd $USER > /dev/null ; then
             echo "Adding system user $USER" 1>&2
@@ -21,10 +18,6 @@ case "$1" in
                     $USER
             adduser --quiet $USER www-data
             adduser --quiet $USER asterisk
-        else
-            if dpkg --compare-versions "$2" lt '16.12~'; then
-                usermod --home /var/lib/xivo-agid $USER
-            fi
         fi
 
         # setup permissions for the log file
