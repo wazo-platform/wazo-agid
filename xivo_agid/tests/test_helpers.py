@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2017-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import unittest
@@ -32,4 +32,3 @@ class TestCallRecordingNameGenerator(unittest.TestCase):
         name, extension = result.rsplit('.', 1)
         assert_that(len(name), greater_than(0), 'a name should have been generated')
         assert_that(extension, equal_to('wav'))
-

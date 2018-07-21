@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2014 Avencall
+# Copyright 2009-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-from xivo_agid import agid
-from xivo_agid import objects
-
 from xivo.xivo_helpers import split_extension
+
+from xivo_agid import agid, objects
 
 
 def phone_progfunckey(agi, cursor, args):
@@ -17,7 +16,7 @@ def phone_progfunckey(agi, cursor, args):
 
     try:
         fklist = split_extension(args[0])
-    except ValueError, e:
+    except ValueError as e:
         agi.dp_break(str(e))
 
     if userid != fklist[0]:
@@ -28,11 +27,12 @@ def phone_progfunckey(agi, cursor, args):
     try:
         extenfeatures = objects.ExtenFeatures(agi, cursor)
         feature = extenfeatures.get_name_by_exten(fklist[1])
-    except LookupError, e:
+    except LookupError as e:
         feature = ""
         agi.verbose(str(e))
 
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY', ''.join(fklist[1:]))
     agi.set_variable('XIVO_PHONE_PROGFUNCKEY_FEATURE', feature)
+
 
 agid.register(phone_progfunckey)

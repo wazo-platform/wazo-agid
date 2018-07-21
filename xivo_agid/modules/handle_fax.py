@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -8,7 +8,6 @@ import subprocess
 import ftplib
 
 from ConfigParser import RawConfigParser
-from subprocess import CalledProcessError
 from xivo_agid import agid
 
 logger = logging.getLogger(__name__)
@@ -32,7 +31,7 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
         subprocess.check_output([TIFF2PDF_PATH, "-o", pdffile, tifffile],
                                 close_fds=True,
                                 stderr=subprocess.STDOUT)
-    except CalledProcessError as e:
+    except subprocess.CalledProcessError as e:
         logger.error('Command: "%s"', e.cmd)
         logger.error('Command output: "%s"', e.output)
         raise
@@ -62,23 +61,27 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='XiVO Fa
         pdffile = _convert_tiff_to_pdf(faxfile)
         try:
             fmt_dict = {"dstnum": dstnum}
-            p = subprocess.Popen([MUTT_PATH,
-                                 "-e", "set copy=no",
-                                 "-e", "set from=%s" % email_from,
-                                 "-e", "set realname='%s'" % email_realname,
-                                 "-e", "set use_from=yes",
-                                 "-s", subject % fmt_dict,
-                                 "-a", pdffile, "--",
-                                 email],
-                                 stdin=subprocess.PIPE,
-                                 close_fds=True)
+            p = subprocess.Popen(
+                [
+                    MUTT_PATH,
+                    "-e", "set copy=no",
+                    "-e", "set from=%s" % email_from,
+                    "-e", "set realname='%s'" % email_realname,
+                    "-e", "set use_from=yes",
+                    "-s", subject % fmt_dict,
+                    "-a", pdffile, "--",
+                    email
+                ],
+                stdin=subprocess.PIPE,
+                close_fds=True
+            )
             p.communicate(content % fmt_dict)
             if p.returncode:
                 raise Exception("mutt exit code was %s" % p.returncode)
         finally:
             try:
                 os.remove(pdffile)
-            except OSError, e:
+            except OSError as e:
                 logger.info("Could not remove pdffile %s: %s", pdffile, e)
     return aux
 
@@ -104,7 +107,7 @@ def _new_printer_backend(name=None, convert_to_pdf=None):
             if convert_to_pdf:
                 try:
                     os.remove(pdffile)
-                except OSError, e:
+                except OSError as e:
                     logger.info('Could not remove pdffile %s: %s', pdffile, e)
     return aux
 
@@ -181,7 +184,7 @@ def _do_handle_fax(faxfile, dstnum, args):
 
     try:
         os.remove(faxfile)
-    except OSError, e:
+    except OSError as e:
         logger.info("Could not remove faxfile %s: %s", faxfile, e)
 
 
@@ -190,7 +193,7 @@ def handle_fax(agi, cursor, args):
         faxfile = args[0]
         dstnum = agi.get_variable("XIVO_DSTNUM")
         _do_handle_fax(faxfile, dstnum, args[1:])
-    except Exception, e:
+    except Exception as e:
         agi.dp_break(e)
 
 

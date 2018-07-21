@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2006-2014 Avencall
+# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-from xivo_agid import agid
-from xivo_agid import objects
+from xivo_agid import agid, objects
 
 
 def user_get_vmbox(agi, cursor, args):
@@ -18,12 +17,12 @@ def user_get_vmbox(agi, cursor, args):
                 agi.dp_break('Could not get the context of the caller')
 
             user = objects.User(agi, cursor, exten=args[0], context=context)
-        except (ValueError, LookupError), e:
+        except (ValueError, LookupError) as e:
             agi.dp_break(str(e))
     else:
         try:
             user = objects.User(agi, cursor, int(userid))
-        except (ValueError, LookupError), e:
+        except (ValueError, LookupError) as e:
             agi.dp_break(str(e))
 
     if not user.vmbox:
@@ -37,5 +36,6 @@ def user_get_vmbox(agi, cursor, args):
     agi.set_variable('XIVO_VMMAIN_OPTIONS', vmmain_options)
     agi.set_variable('XIVO_MAILBOX', user.vmbox.mailbox)
     agi.set_variable('XIVO_MAILBOX_CONTEXT', user.vmbox.context)
+
 
 agid.register(user_get_vmbox)

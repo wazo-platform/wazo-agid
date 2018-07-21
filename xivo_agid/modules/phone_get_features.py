@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2006-2016 Avencall
+# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
 
-from xivo_agid import agid
-from xivo_agid import objects
-
+from xivo_agid import agid, objects
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +14,7 @@ def phone_get_features(agi, cursor, args):
 
     try:
         user = objects.User(agi, cursor, int(userid))
-    except (ValueError, LookupError), e:
+    except (ValueError, LookupError) as e:
         agi.dp_break(str(e))
 
     _set_current_forwards(agi, user.id)
@@ -56,5 +54,6 @@ def _get_forwards(agi, user_id):
         return {'busy': {'enabled': False, 'destination': None},
                 'noanswer': {'enabled': False, 'destination': None},
                 'unconditional': {'enabled': False, 'destination': None}}
+
 
 agid.register(phone_get_features)

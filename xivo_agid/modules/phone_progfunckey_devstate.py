@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2016 Avencall
+# Copyright 2009-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-from xivo_agid import agid
-from xivo_agid import objects
-
 from xivo.xivo_helpers import fkey_extension
+
+from xivo_agid import agid, objects
 
 
 def phone_progfunckey_devstate(agi, cursor, args):
@@ -43,7 +42,7 @@ def phone_progfunckey_devstate(agi, cursor, args):
     try:
         extenfeatures = objects.ExtenFeatures(agi, cursor)
         ppfkexten = extenfeatures.get_exten_by_name('phoneprogfunckey')
-    except LookupError, e:
+    except LookupError as e:
         agi.verbose(str(e))
         return
 
@@ -58,7 +57,7 @@ def phone_progfunckey_devstate(agi, cursor, args):
 
     try:
         featureexten = extenfeatures.get_exten_by_name(feature)
-    except LookupError, e:
+    except LookupError as e:
         agi.verbose(str(e))
         return
 
@@ -70,5 +69,6 @@ def phone_progfunckey_devstate(agi, cursor, args):
 
     for x in xset:
         agi.set_variable("DEVICE_STATE(Custom:%s)" % x, devstate)
+
 
 agid.register(phone_progfunckey_devstate)
