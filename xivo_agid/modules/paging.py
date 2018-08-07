@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2014 Avencall
+# Copyright 2012-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -18,7 +18,7 @@ def paging(agi, cursor, args):
                                       cursor,
                                       args[0],
                                       userid)
-    except (ValueError, LookupError), e:
+    except (ValueError, LookupError) as e:
         agi.answer()
         agi.stream_file('vm-incorrect')
         agi.dp_break('Sorry you are not authorize to page this group : %s' % str(e))
@@ -51,5 +51,6 @@ def paging(agi, cursor, args):
         paging_opts = paging_opts + 'n'
 
     agi.set_variable('XIVO_PAGING_OPTS', paging_opts)
+
 
 agid.register(paging)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2014 Avencall
+# Copyright 2013-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import re as _re
@@ -30,5 +30,6 @@ def _get_module_list(path):
     return list(set([_re.sub(r"\.py[a-z]?$", "", name)
                      for name in _os.listdir(path)
                      if _is_package_child(path, name)]))
+
 
 __all__ = _get_module_list(_package_path())

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import re
@@ -78,5 +78,6 @@ def setup(cursor):
             sys.exit(1)
 
         re_objs[section.get_name()] = re_obj
+
 
 agid.register(in_callerid, setup)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2004-2015 Avencall
+# Copyright 2004-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 # Modifications by Proformatique from pyst-0.2:
@@ -98,7 +98,7 @@ class FastAGI(object):
         while 1:
             line = self.inf.readline().strip()
             if line == '':
-                #blank line signals end
+                # blank line signals end
                 break
             key_data = line.split(':', 1)
             key = key_data[0].strip()

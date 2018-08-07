@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2006-2016 Avencall
+# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -26,7 +26,8 @@ def _user_disable_all_forwards(agi, user_id):
                 'noanswer': disabled,
                 'unconditional': disabled}
         confd_client.users(user_id).update_forwards(body)
-    except Exception, e:
+    except Exception as e:
         logger.error('Error during disabling all forwards: %s', e)
+
 
 agid.register(fwdundoall)
