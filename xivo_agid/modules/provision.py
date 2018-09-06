@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2011-2016 Avencall
+# Copyright 2011-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -28,7 +28,7 @@ def _get_device(client, ip):
 
 
 def _get_line(client, provcode):
-    response = client.lines.list(provisioning_code=provcode)
+    response = client.lines.list(provisioning_code=provcode, recurse=True)
     if response['total'] != 1:
         raise Exception("Line with provisioning code {} not found".format(provcode))
     return response['items'][0]
