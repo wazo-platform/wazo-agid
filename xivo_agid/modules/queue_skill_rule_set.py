@@ -14,7 +14,7 @@ def queue_skill_rule_set(agi, cursor, args):
     options = actionarg2.split(';') if actionarg2 else []
 
     timeout = ''
-    call = ''
+    call = agi.get_variable('XIVO_QUEUESKILLRULESET')
     skill_rule_id = None
     skill_rule_variables = None
 
