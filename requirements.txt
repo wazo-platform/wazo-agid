@@ -5,7 +5,7 @@ git+https://github.com/wazo-pbx/xivo-dird-client.git
 git+https://github.com/wazo-pbx/xivo-lib-python.git
 git+https://github.com/wazo-pbx/xivo-lib-rest-client.git
 git+https://github.com/wazo-pbx/xivo-confd-client.git
-jinja2==2.8
+jinja2==2.10
 psycopg2==2.6.2
 pytz==2016.7
 pyyaml==3.12  # from xivo-lib-python
