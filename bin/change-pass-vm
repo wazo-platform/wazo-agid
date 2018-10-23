@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0+
+
+import argparse
+import sys
+
+from xivo.chain_map import ChainMap
+from xivo.config_helper import (
+    parse_config_file,
+    read_config_file_hierarchy,
+)
+from xivo_auth_client import Client as AuthClient
+from xivo_confd_client import Client as ConfdClient
+
+
+_DEFAULT_CERT_FILE = '/usr/share/xivo-certs/server.crt'
+_DEFAULT_CONFIG = {
+    'config_file': '/etc/xivo-agid/config.yml',
+    'extra_config_files': '/etc/xivo-agid/conf.d/',
+    'auth': {
+        'host': 'localhost',
+        'port': 9497,
+        'verify_certificate': _DEFAULT_CERT_FILE,
+        'backend': 'xivo_service',
+    },
+    'confd': {
+        'host': 'localhost',
+        'port': 9486,
+        'verify_certificate': _DEFAULT_CERT_FILE,
+    },
+}
+_HARD_CODED_CONFIG = {
+    'auth': {
+        'key_file': '/var/lib/xivo-auth-keys/asterisk-key.yml',
+    }
+}
+
+
+def _load_config():
+    file_config = read_config_file_hierarchy(_DEFAULT_CONFIG)
+    service_key = _load_key_file(ChainMap(_HARD_CODED_CONFIG, file_config, _DEFAULT_CONFIG))
+    return ChainMap(_HARD_CODED_CONFIG, service_key, file_config, _DEFAULT_CONFIG)
+
+
+def _load_key_file(config):
+    key_file = parse_config_file(config['auth']['key_file'])
+    return {
+        'auth': {
+            'username': key_file['service_id'],
+            'password': key_file['service_key'],
+        },
+    }
+
+
+def get_voicemail(client, number, context):
+    response = client.voicemails.list(search=number, recurse=True)
+
+    def matches(vm):
+        return vm['number'] == number and vm['context'] == context
+
+    found = [v for v in response['items'] if matches(v)]
+
+    assert len(found) > 0, "voicemail {}@{} not found!".format(number, context)
+    assert len(found) == 1, "more than one voicemail found when searching for {}@{}".format(number, context)
+    return found[0]
+
+
+def update_password(client, voicemail, new_password):
+    voicemail['password'] = new_password
+    client.voicemails.update(voicemail)
+
+
+def _parse_cli_args(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('context', help='The voicemail context')
+    parser.add_argument('number', help='The voicemail number')
+    parser.add_argument('password', help='The new password')
+    parsed_args = parser.parse_args()
+
+    return parsed_args.context, parsed_args.number, parsed_args.password
+
+
+def _change_password(config, context, number, password):
+    auth = AuthClient(**config['auth'])
+    token = auth.token.new(config['auth']['backend'], expiration=60)['token']
+
+    confd = ConfdClient(token=token, **config['confd'])
+    voicemail = get_voicemail(confd, number, context)
+    update_password(confd, voicemail, password)
+
+
+def main(args):
+    context, number, password = _parse_cli_args(args)
+    config = _load_config()
+    _change_password(config, context, number, password)
+
+
+if __name__ == "__main__":
+    main(sys.argv)

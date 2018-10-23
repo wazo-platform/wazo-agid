@@ -1,1 +1,2 @@
 etc/*	etc/
+bin/change-pass-vm /usr/share/asterisk/bin/
