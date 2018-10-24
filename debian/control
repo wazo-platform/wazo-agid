@@ -22,6 +22,7 @@ Depends: ${python:Depends},
          xivo-confd-client,
          xivo-lib-python (>> 15.18),
          xivo-libdao
+Conflicts: xivo-utils (<= 18.09~20180808.174753.0834260.deb9)
 Description: Wazo AGId
  Wazo is a system based on a powerful IPBX, to bring an easy to
  install solution for telephony and related services.
