@@ -2,6 +2,7 @@
 # Copyright 2012-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
+import logging
 import time
 
 from xivo_dao import callfilter_dao, context_dao, user_line_dao as old_user_line_dao
@@ -16,6 +17,8 @@ from xivo_agid.objects import DialAction, CallerID
 from xivo_agid.handlers.handler import Handler
 from xivo_agid import objects
 from xivo_agid import dialplan_variables
+
+logger = logging.getLogger(__name__)
 
 
 class UserFeatures(Handler):
@@ -159,24 +162,29 @@ class UserFeatures(Handler):
 
         boss_callfiltermember = callfilter_dao.find_boss(called.id)
         if not boss_callfiltermember:
+            logger.debug('Ignoring callfilter: No boss')
             return False
 
         if caller is not None:
             secretary_can_call_boss = callfilter_dao.does_secretary_filter_boss(called.id, caller.id)
             if secretary_can_call_boss:
+                logger.debug('Ignoring callfilter: secretary can call boss')
                 return False
 
         callfilter = callfilter_dao.find(boss_callfiltermember.callfilterid)
         if not callfilter:
+            logger.debug('Ignoring callfilter: no such callfilter: "%s"', boss_callfiltermember.callfilterid)
             return False
 
         callfilter_active = callfilter_dao.is_activated_by_callfilter_id(boss_callfiltermember.callfilterid)
 
         if callfilter_active == 0:
+            logger.debug('Ignoring callfilter: callfilter is not active')
             return False
 
         in_zone = self._callfilter_check_in_zone(callfilter.callfrom)
         if in_zone is not True:
+            logger.debug('Ignoring callfilter: call not in zone')
             return False
 
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
