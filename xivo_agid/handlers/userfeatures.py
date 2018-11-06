@@ -128,6 +128,8 @@ class UserFeatures(Handler):
         protocol = line.protocol.upper()
         if protocol == 'CUSTOM':
             return line.name
+        elif protocol == 'SIP':
+            protocol = 'PJSIP'
         return '{}/{}'.format(protocol, line.name)
 
     def _set_xivo_user_name(self):
