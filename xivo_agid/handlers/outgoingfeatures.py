@@ -78,10 +78,15 @@ class OutgoingFeatures(Handler):
 
     def _set_trunk_info(self):
         for i, trunk in enumerate(self.outcall.trunks):
-            # TODO PJSIP remove after migration
-            interface = trunk.interface.replace('SIP', 'PJSIP')
-            self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), interface)
-            self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), self.dstnum)
+            # TODO PJSIP clean after migration
+            if trunk.interface.startswith('SIP'):
+                sufix = trunk.interface.replace('SIP/', '')
+                exten = '{exten}@{name}'.format(exten=self.dstnum, name=sufix)
+                self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), 'PJSIP')
+                self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), exten)
+            else:
+                self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), trunk.interface)
+                self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), self.dstnum)
             if trunk.intfsuffix:
                 intfsuffix = trunk.intfsuffix
             else:
