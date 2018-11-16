@@ -38,7 +38,11 @@ def provision(agi, cursor, args):
     try:
         client = agi.config['confd']['client']
         provcode = args[0]
-        ip = args[1]
+        ip_port = args[1]
+        if ':' in ip_port:
+            ip, _ = ip_port.split(':', 1)
+        else:
+            ip = ip_port
         _do_provision(client, provcode, ip)
     except Exception, e:
         logger.error('Error during provisioning: %s', e)
