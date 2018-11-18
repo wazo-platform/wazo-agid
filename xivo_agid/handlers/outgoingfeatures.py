@@ -80,8 +80,8 @@ class OutgoingFeatures(Handler):
         for i, trunk in enumerate(self.outcall.trunks):
             # TODO PJSIP clean after migration
             if trunk.interface.startswith('SIP'):
-                sufix = trunk.interface.replace('SIP/', '')
-                exten = '{exten}@{name}'.format(exten=self.dstnum, name=sufix)
+                suffix = trunk.interface.replace('SIP/', '')
+                exten = '{exten}@{name}'.format(exten=self.dstnum, name=suffix)
                 self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), 'PJSIP')
                 self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), exten)
             else:
