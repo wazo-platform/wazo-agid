@@ -18,7 +18,7 @@ Depends: ${python:Depends},
          python-unidecode,
          xivo-agentd-client,
          xivo-auth-client,
-         xivo-dird-client,
+         wazo-dird-client,
          xivo-confd-client,
          xivo-lib-python (>> 15.18),
          xivo-libdao

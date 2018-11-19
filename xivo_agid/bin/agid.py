@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import argparse
 import logging
 import xivo_dao
 
-from xivo.token_renewer import TokenRenewer
+from wazo_dird_client import Client as DirdClient
 from xivo.chain_map import ChainMap
-from xivo.config_helper import read_config_file_hierarchy
 from xivo.config_helper import parse_config_file
+from xivo.config_helper import read_config_file_hierarchy
 from xivo.daemonize import pidfile_context
+from xivo.token_renewer import TokenRenewer
 from xivo.user_rights import change_user
 from xivo.xivo_logging import setup_logging, silence_loggers
+from xivo_agentd_client import Client as AgentdClient
+from xivo_auth_client import Client as AuthClient
+from xivo_confd_client import Client as ConfdClient
 
 from xivo_agid import agid
 from xivo_agid.modules import *
-from xivo_agentd_client import Client as AgentdClient
-from xivo_auth_client import Client as AuthClient
-from xivo_dird_client import Client as DirdClient
-from xivo_confd_client import Client as ConfdClient
 
 _DEFAULT_CONFIG = {
     'dird': {
