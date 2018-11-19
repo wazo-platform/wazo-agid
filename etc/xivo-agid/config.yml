@@ -30,7 +30,7 @@ agentd:
   host: localhost
   verify_certificate: /usr/share/xivo-certs/server.crt
 
-# xivo-dird connection informations.
+# wazo-dird connection informations.
 dird:
   host: localhost
   port: 9489
