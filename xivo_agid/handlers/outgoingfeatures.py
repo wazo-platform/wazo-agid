@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import time
@@ -78,8 +78,15 @@ class OutgoingFeatures(Handler):
 
     def _set_trunk_info(self):
         for i, trunk in enumerate(self.outcall.trunks):
-            self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), trunk.interface)
-            self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), self.dstnum)
+            # TODO PJSIP clean after migration
+            if trunk.interface.startswith('SIP'):
+                suffix = trunk.interface.replace('SIP/', '')
+                exten = '{exten}@{name}'.format(exten=self.dstnum, name=suffix)
+                self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), 'PJSIP')
+                self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), exten)
+            else:
+                self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), trunk.interface)
+                self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), self.dstnum)
             if trunk.intfsuffix:
                 intfsuffix = trunk.intfsuffix
             else:

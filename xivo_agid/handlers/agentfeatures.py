@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2016 Avencall
+# Copyright 2013-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import re
@@ -42,6 +42,9 @@ class AgentFeatures(Handler):
         if not res:
             raise LookupError('Unable to find agent (id: %s)' % self.agent_id)
         device = res[0]
+        # TODO clean after pjsip migration
+        if device.startswith('SIP/'):
+            device = device.replace('SIP', 'PJSIP')
         return device
 
     def _set_agent(self):

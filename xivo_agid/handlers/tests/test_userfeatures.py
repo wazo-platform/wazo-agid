@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2013-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import unittest
@@ -181,7 +181,7 @@ class TestUserFeatures(_BaseTestCase):
 
         interface = userfeatures._build_interface_from_line(line)
 
-        self.assertEqual(interface, 'SIP/abcd')
+        self.assertEqual(interface, 'PJSIP/abcd')
 
     def test_set_xivo_user_name(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
