@@ -31,7 +31,7 @@ _DEFAULT_CONFIG = {
     'auth': {
         'host': 'localhost',
         'port': 9497,
-        'key_file': '/var/lib/xivo-auth-keys/xivo-agid-key.yml',
+        'key_file': '/var/lib/wazo-auth-keys/xivo-agid-key.yml',
         'verify_certificate': '/usr/share/xivo-certs/server.crt'
     },
     'user': 'xivo-agid',

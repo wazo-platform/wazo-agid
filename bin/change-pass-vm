@@ -22,7 +22,6 @@ _DEFAULT_CONFIG = {
         'host': 'localhost',
         'port': 9497,
         'verify_certificate': _DEFAULT_CERT_FILE,
-        'backend': 'xivo_service',
     },
     'confd': {
         'host': 'localhost',
@@ -32,7 +31,7 @@ _DEFAULT_CONFIG = {
 }
 _HARD_CODED_CONFIG = {
     'auth': {
-        'key_file': '/var/lib/xivo-auth-keys/asterisk-key.yml',
+        'key_file': '/var/lib/wazo-auth-keys/asterisk-key.yml',
     }
 }
 
