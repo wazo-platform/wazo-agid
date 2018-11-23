@@ -9,7 +9,7 @@ jinja2==2.10
 psycopg2==2.6.2
 pytz==2016.7
 pyyaml==3.12  # from xivo-lib-python
-requests==2.12.4
+requests==2.20.0
 sqlalchemy==1.0.15  # from xivo-dao
 stevedore==1.17.1  # from xivo-lib-rest-client
 unidecode==0.04.19
