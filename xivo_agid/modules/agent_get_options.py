@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2008-2014 Avencall
+# Copyright 2008-2018 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -24,7 +24,7 @@ def agent_get_options(agi, cursor, args):
         return
 
     agi.set_variable('XIVO_AGENTEXISTS', 1)
-    agi.set_variable('XIVO_AGENTPASSWD', agent.passwd)
+    agi.set_variable('XIVO_AGENTPASSWD', agent.passwd or '')
     agi.set_variable('XIVO_AGENTID', agent.id)
     agi.set_variable('XIVO_AGENTNUM', agent.number)
 
