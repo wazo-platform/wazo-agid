@@ -12,6 +12,8 @@ from mock import Mock, call, patch, sentinel
 from xivo_agid.handlers.userfeatures import UserFeatures
 from xivo_agid import objects
 
+ABCD_INTERFACE = 'PJSIP/ycetqvtr/sip:n753iqfr@127.0.0.1:44530;transport=ws&PJSIP/ycetqvtr/sip:b6405ov4@127.0.0.1:44396;transport=ws'
+
 
 class NotEmptyStringMatcher(object):
     def __eq__(self, other):
@@ -32,13 +34,17 @@ class TestUserFeatures(_BaseTestCase):
 
     def setUp(self):
         super(TestUserFeatures, self).setUp()
-        self._variables = {'XIVO_USERID': '42',
-                           'XIVO_DSTID': '33',
-                           'XIVO_CALLORIGIN': 'my_origin',
-                           'XIVO_SRCNUM': '1000',
-                           'XIVO_DSTNUM': '1003',
-                           'XIVO_DST_EXTEN_ID': '983274',
-                           'XIVO_BASE_CONTEXT': 'default'}
+        self._variables = {
+            'PJSIP_DIAL_CONTACTS(abcd)': ABCD_INTERFACE,
+            'PJSIP_DIAL_CONTACTS(foobar)': '',
+            'XIVO_USERID': '42',
+            'XIVO_DSTID': '33',
+            'XIVO_CALLORIGIN': 'my_origin',
+            'XIVO_SRCNUM': '1000',
+            'XIVO_DSTNUM': '1003',
+            'XIVO_DST_EXTEN_ID': '983274',
+            'XIVO_BASE_CONTEXT': 'default',
+        }
 
         def get_variable(key):
             return self._variables[key]
@@ -173,7 +179,7 @@ class TestUserFeatures(_BaseTestCase):
 
         self.assertEqual(interface, 'sip/abcd')
 
-    def test_build_interface_from_sip_line(self):
+    def test_build_interface_from_sip_line_connected(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         line = Mock()
         line.protocol = 'SIP'
@@ -181,7 +187,17 @@ class TestUserFeatures(_BaseTestCase):
 
         interface = userfeatures._build_interface_from_line(line)
 
-        self.assertEqual(interface, 'PJSIP/abcd')
+        self.assertEqual(interface, ABCD_INTERFACE)
+
+    def test_build_interface_from_sip_line_not_connected(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        line = Mock()
+        line.protocol = 'SIP'
+        line.name = 'foobar'
+
+        interface = userfeatures._build_interface_from_line(line)
+
+        self.assertEqual(interface, 'PJSIP/foobar')
 
     def test_set_xivo_user_name(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
