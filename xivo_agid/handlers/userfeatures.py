@@ -127,10 +127,23 @@ class UserFeatures(Handler):
     def _build_interface_from_line(self, line):
         protocol = line.protocol.upper()
         if protocol == 'CUSTOM':
-            return line.name
+            return self._build_custom_interface(line)
         elif protocol == 'SIP':
-            protocol = 'PJSIP'
-        return '{}/{}'.format(protocol, line.name)
+            return self._build_sip_interface(line)
+        else:
+            return self._build_default_interface(line)
+
+    def _build_custom_interface(self, line):
+        return line.name
+
+    def _build_default_interface(self, line):
+        return '{}/{}'.format(line.protocol.upper(), line.name)
+
+    def _build_sip_interface(self, line):
+            interface = self._agi.get_variable('PJSIP_DIAL_CONTACTS({})'.format(line.name))
+            if interface:
+                return interface
+            return 'PJSIP/{}'.format(line.name)
 
     def _set_xivo_user_name(self):
         if self._user:
