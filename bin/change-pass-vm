@@ -82,7 +82,7 @@ def _parse_cli_args(args):
 
 def _change_password(config, context, number, password):
     auth = AuthClient(**config['auth'])
-    token = auth.token.new(config['auth']['backend'], expiration=60)['token']
+    token = auth.token.new(expiration=60)['token']
 
     confd = ConfdClient(token=token, **config['confd'])
     voicemail = get_voicemail(confd, number, context)
