@@ -37,7 +37,7 @@ def paging(agi, cursor, args):
     agi.set_variable('XIVO_PAGING_TIMEOUT', paging_entry.timeout)
 
     # s = call phones only if not busy
-    paging_opts = 's'
+    paging_opts = 'sb(paging^add-sip-headers^1)'
 
     if paging_entry.duplex:
         paging_opts = paging_opts + 'd'
