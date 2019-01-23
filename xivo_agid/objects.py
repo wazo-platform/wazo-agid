@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2007-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2007-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -234,6 +234,8 @@ class User(object):
             raise LookupError("id or exten@context must be provided to look up an user entry")
 
         self.id = user_row.id
+        self.uuid = user_row.uuid
+        self.tenant_uuid = user_row.tenant_uuid
         self.firstname = user_row.firstname
         self.lastname = user_row.lastname
         self.language = user_row.language

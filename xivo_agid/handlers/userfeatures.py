@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -119,6 +119,7 @@ class UserFeatures(Handler):
                 self._agi.dp_break(str(e))
             self._set_xivo_user_name()
             self._set_xivo_redirecting_info()
+            self._set_wazo_uuid()
 
     def _set_xivo_iface(self):
         interfaces = [self._build_interface_from_line(line) for line in self.lines]
@@ -151,6 +152,11 @@ class UserFeatures(Handler):
                 self._agi.set_variable('XIVO_DST_FIRSTNAME', self._user.firstname)
             if self._user.lastname:
                 self._agi.set_variable('XIVO_DST_LASTNAME', self._user.lastname)
+
+    def _set_wazo_uuid(self):
+        if self._user:
+            self._agi.set_variable('WAZO_DST_UUID', self._user.uuid)
+            self._agi.set_variable('WAZO_DST_TENANT_UUID', self._user.tenant_uuid)
 
     def _set_xivo_redirecting_info(self):
         callerid_parsed = CallerID.parse(self._user.callerid)
