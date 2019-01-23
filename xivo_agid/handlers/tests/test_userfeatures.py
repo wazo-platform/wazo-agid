@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2013-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import unittest
@@ -139,6 +139,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._set_xivo_user_name = Mock()
         userfeatures._set_xivo_redirecting_info = Mock()
+        userfeatures._set_wazo_uuid = Mock()
 
         userfeatures._set_user()
 
@@ -154,6 +155,7 @@ class TestUserFeatures(_BaseTestCase):
 
             self.assertEqual(userfeatures._set_xivo_user_name.call_count, 1)
             self.assertEqual(userfeatures._set_xivo_redirecting_info.call_count, 1)
+            self.assertEqual(userfeatures._set_wazo_uuid.call_count, 1)
             self.assertTrue(userfeatures._user is not None)
             self.assertTrue(isinstance(userfeatures._user, objects.User))
 
