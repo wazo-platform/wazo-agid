@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 from xivo_agid import agid
 from xivo_dao.resources.conference import dao as conference_dao
-
-
-CONFBRIDGE_RECORDINGDIR = '/var/lib/asterisk/sounds/confbridge'
 
 
 def incoming_conference_set_features(agi, cursor, args):
