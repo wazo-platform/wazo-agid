@@ -32,12 +32,12 @@ def incoming_conference_set_features(agi, cursor, args):
             agi.dp_break("Unable to join the conference room, wrong pin"
                          "(conference_id: {}, name: {})".format(conference.id, conference.name))
 
-    agi.set_variable('XIVO_CONFBRIDGE_ID', conference.id)
-    agi.set_variable('XIVO_CONFBRIDGE_TENANT_UUID', conference.tenant_uuid)
-    agi.set_variable('XIVO_CONFBRIDGE_BRIDGE_PROFILE', 'xivo-bridge-profile-{}'.format(conference.id))
-    agi.set_variable('XIVO_CONFBRIDGE_USER_PROFILE', user_profile)
-    agi.set_variable('XIVO_CONFBRIDGE_MENU', menu)
-    agi.set_variable('XIVO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or '')
+    agi.set_variable('WAZO_CONFBRIDGE_ID', conference.id)
+    agi.set_variable('WAZO_CONFBRIDGE_TENANT_UUID', conference.tenant_uuid)
+    agi.set_variable('WAZO_CONFBRIDGE_BRIDGE_PROFILE', 'xivo-bridge-profile-{}'.format(conference.id))
+    agi.set_variable('WAZO_CONFBRIDGE_USER_PROFILE', user_profile)
+    agi.set_variable('WAZO_CONFBRIDGE_MENU', menu)
+    agi.set_variable('WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or '')
 
 
 agid.register(incoming_conference_set_features)
