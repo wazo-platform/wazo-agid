@@ -33,6 +33,7 @@ def incoming_conference_set_features(agi, cursor, args):
                          "(conference_id: {}, name: {})".format(conference.id, conference.name))
 
     agi.set_variable('XIVO_CONFBRIDGE_ID', conference.id)
+    agi.set_variable('XIVO_CONFBRIDGE_TENANT_UUID', conference.tenant_uuid)
     agi.set_variable('XIVO_CONFBRIDGE_BRIDGE_PROFILE', 'xivo-bridge-profile-{}'.format(conference.id))
     agi.set_variable('XIVO_CONFBRIDGE_USER_PROFILE', user_profile)
     agi.set_variable('XIVO_CONFBRIDGE_MENU', menu)
