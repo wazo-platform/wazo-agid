@@ -162,7 +162,7 @@ class Paging(object):
         self.cursor = cursor
         self.lines = set()
 
-        columns = ('id', 'number', 'duplex', 'ignore', 'record', 'quiet', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented')
+        columns = ('id','number', 'duplex', 'ignore', 'record', 'quiet', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented', 'tenant_uuid')
 
         cursor.query("SELECT ${columns} FROM paging "
                      "WHERE number = %s "
@@ -175,6 +175,7 @@ class Paging(object):
             raise LookupError("Unable to find paging entry (number: %s)" % (number,))
 
         id = res['id']
+        self.tenant_uuid = res['tenant_uuid']
         self.number = res['number']
         self.duplex = res['duplex']
         self.ignore = res['ignore']

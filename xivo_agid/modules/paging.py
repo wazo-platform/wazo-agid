@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
+import os
+
 from xivo_agid import agid
 from xivo_agid import objects
 
@@ -53,8 +55,11 @@ def paging(agi, cursor, args):
         paging_opts = paging_opts + 'i'
 
     if paging_entry.announcement_play:
-        paging_dir_sound = '/var/lib/xivo/sounds/playback'
-        paging_opts = paging_opts + 'A(%s/%s)' % (paging_dir_sound, paging_entry.announcement_file)
+        announcement_file_name = os.path.join('/var/lib/xivo/sounds/tenants',
+                                              paging_entry.tenant_uuid,
+                                              'playback',
+                                              paging_entry.announcement_file)
+        paging_opts = paging_opts + 'A({file_name})'.format(file_name=announcement_file_name)
 
     if paging_entry.announcement_caller:
         paging_opts = paging_opts + 'n'
