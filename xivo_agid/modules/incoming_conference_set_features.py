@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 from xivo_agid import agid
 from xivo_dao.resources.conference import dao as conference_dao
-
-
-CONFBRIDGE_RECORDINGDIR = '/var/lib/asterisk/sounds/confbridge'
 
 
 def incoming_conference_set_features(agi, cursor, args):
@@ -35,11 +32,12 @@ def incoming_conference_set_features(agi, cursor, args):
             agi.dp_break("Unable to join the conference room, wrong pin"
                          "(conference_id: {}, name: {})".format(conference.id, conference.name))
 
-    agi.set_variable('XIVO_CONFBRIDGE_ID', conference.id)
-    agi.set_variable('XIVO_CONFBRIDGE_BRIDGE_PROFILE', 'xivo-bridge-profile-{}'.format(conference.id))
-    agi.set_variable('XIVO_CONFBRIDGE_USER_PROFILE', user_profile)
-    agi.set_variable('XIVO_CONFBRIDGE_MENU', menu)
-    agi.set_variable('XIVO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or '')
+    agi.set_variable('WAZO_CONFBRIDGE_ID', conference.id)
+    agi.set_variable('WAZO_CONFBRIDGE_TENANT_UUID', conference.tenant_uuid)
+    agi.set_variable('WAZO_CONFBRIDGE_BRIDGE_PROFILE', 'xivo-bridge-profile-{}'.format(conference.id))
+    agi.set_variable('WAZO_CONFBRIDGE_USER_PROFILE', user_profile)
+    agi.set_variable('WAZO_CONFBRIDGE_MENU', menu)
+    agi.set_variable('WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or '')
 
 
 agid.register(incoming_conference_set_features)
