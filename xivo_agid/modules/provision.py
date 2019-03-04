@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2011-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -21,7 +21,7 @@ def _do_provision(client, provcode, ip):
 
 
 def _get_device(client, ip):
-    response = client.devices.list(ip=ip)
+    response = client.devices.list(ip=ip, recurse=True)
     if response['total'] != 1:
         raise Exception("Device with ip {} not found".format(ip))
     return response['items'][0]
