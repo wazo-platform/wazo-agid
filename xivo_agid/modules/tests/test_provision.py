@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2016-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import unittest
@@ -39,7 +39,7 @@ class TestDoProvision(unittest.TestCase):
 
         self.provision("123456", "127.0.0.1")
 
-        self.client.devices.list.assert_called_once_with(ip="127.0.0.1")
+        self.client.devices.list.assert_called_once_with(ip="127.0.0.1", recurse=True)
         self.client.lines.list.assert_called_once_with(provisioning_code="123456", recurse=True)
         self.client.devices.synchronize.assert_called_once_with(device['id'])
 
