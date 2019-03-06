@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright 2004-2018 The Wazo Authors  (see the AUTHORS file)
-# SPDX-License-Identifier: GPL-3.0+
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 # Modifications by Proformatique from pyst-0.2:
 #     - AGI._quote does escaping
