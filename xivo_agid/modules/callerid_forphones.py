@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2016 Avencall
+# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -29,11 +29,16 @@ def callerid_forphones(agi, cursor, args):
             xivo_user_uuid = FAKE_XIVO_USER_UUID
         else:
             xivo_user_uuid = callee_infos.xivo_user_uuid
+
+        tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
         try:
             # It is not possible to associate a profile to a reverse configuration in the webi
-            lookup_result = dird_client.directories.reverse(profile='default',
-                                                            xivo_user_uuid=xivo_user_uuid,
-                                                            exten=cid_number)
+            lookup_result = dird_client.directories.reverse(
+                profile='default',
+                xivo_user_uuid=xivo_user_uuid,
+                exten=cid_number,
+                tenant_uuid=tenant_uuid,
+            )
         except RequestException as e:
             logger.exception('Reverse lookup failed: %s', e)
         else:
