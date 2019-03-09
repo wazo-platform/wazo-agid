@@ -45,6 +45,8 @@ class UserFeatures(Handler):
         self.main_line = None
         self.main_extension = None
 
+        self.auth_client = agi.config['auth']['client']
+
     def execute(self):
         self._set_members()
         self._set_xivo_iface()
@@ -67,6 +69,7 @@ class UserFeatures(Handler):
         self._set_mobile_number()
         self._set_vmbox_lang()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
+        self._set_has_mobile_session()
 
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
@@ -435,3 +438,7 @@ class UserFeatures(Handler):
 
     def _set_dial_action_chanunavail(self):
         objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
+
+    def _set_has_mobile_session(self):
+        has_mobile = [True for session in self.auth_client.users.get_sessions(self._user.uuid)['items'] if session['mobile']]
+        self._agi.set_variable('WAZO_MOBILE_SESSION', has_mobile.pop() if has_mobile else False)

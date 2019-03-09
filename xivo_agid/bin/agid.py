@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
@@ -71,11 +71,13 @@ def main():
     config['agentd']['client'] = AgentdClient(**config['agentd'])
     config['confd']['client'] = ConfdClient(**config['confd'])
     config['dird']['client'] = DirdClient(**config['dird'])
+    config['auth']['client'] = _new_auth_client(config)
 
     def on_token_change(token_id):
         config['agentd']['client'].set_token(token_id)
         config['confd']['client'].set_token(token_id)
         config['dird']['client'].set_token(token_id)
+        config['auth']['client'].set_token(token_id)
     token_renewer.subscribe_to_token_change(on_token_change)
 
     with pidfile_context(config['pidfile'], config['foreground']):
