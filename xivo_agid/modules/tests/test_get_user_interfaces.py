@@ -66,6 +66,7 @@ class TestGetUserInterfaces(unittest.TestCase):
                         'username': 'sip-line',
                     },
                     'endpoint_sccp': None,
+                    'endpoint_custom': None,
                 },
                 {
                     'name': 'sccp-line',
@@ -79,6 +80,21 @@ class TestGetUserInterfaces(unittest.TestCase):
                     'endpoint_sccp': {
                         'id': 543,
                     },
+                    'endpoint_custom': None,
+                },
+                {
+                    'name': 'custom-line',
+                    'extensions': [
+                        {
+                            'exten': '1234',
+                            'context': 'default',
+                        },
+                    ],
+                    'endpoint_sip': None,
+                    'endpoint_sccp': None,
+                    'endpoint_custom': {
+                        'interface': 'DAHDI/custom',
+                    },
                 },
                 {
                     'name': 'no-endpoint',
@@ -90,6 +106,7 @@ class TestGetUserInterfaces(unittest.TestCase):
                     ],
                     'endpoint_sip': None,
                     'endpoint_sccp': None,
+                    'endpoint_custom': None,
                 },
             ]
         }
@@ -97,7 +114,7 @@ class TestGetUserInterfaces(unittest.TestCase):
 
         result = get_user_interfaces(self.agi, self.cursor, [user_uuid])
 
-        self.agi.set_variable.assert_called_once_with('WAZO_USER_INTERFACES', 'PJSIP/sip-line&SCCP/sccp-line')
+        self.agi.set_variable.assert_called_once_with('WAZO_USER_INTERFACES', 'PJSIP/sip-line&SCCP/sccp-line&DAHDI/custom')
 
     def test_get_user_interfaces_pjsip_multicontact(self):
         user_uuid = 'abcdef'
@@ -115,6 +132,7 @@ class TestGetUserInterfaces(unittest.TestCase):
                         'username': 'sip-line',
                     },
                     'endpoint_sccp': None,
+                    'endpoint_custom': None,
                 },
             ]
         }

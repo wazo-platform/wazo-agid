@@ -40,6 +40,9 @@ def _get_line_interfaces(agi, line):
     if line['endpoint_sccp']:
         return ['SCCP/{name}'.format(name=line['name'])]
 
+    if line['endpoint_custom']:
+        return [line['endpoint_custom']['interface']]
+
     return []
 
 
