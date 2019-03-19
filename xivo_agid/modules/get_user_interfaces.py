@@ -34,8 +34,8 @@ def get_user_interfaces(agi, cursor, args):
 def _get_line_interfaces(agi, line):
     if line['endpoint_sip']:
         contacts = agi.get_variable('PJSIP_DIAL_CONTACTS({name})'.format(name=line['endpoint_sip']['username']))
-        contacts = contacts.split('&')
-        return contacts
+        if contacts:
+            return contacts.split('&')
 
     if line['endpoint_sccp']:
         return ['SCCP/{name}'.format(name=line['name'])]
