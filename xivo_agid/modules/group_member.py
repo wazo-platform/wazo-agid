@@ -5,17 +5,13 @@
 import itertools
 import logging
 
-from requests import HTTPError
+from requests import RequestException
 from xivo_agid import agid
 
 logger = logging.getLogger(__name__)
 
 
 class GroupMemberError(Exception):
-    pass
-
-
-class UnknownLine(GroupMemberError):
     pass
 
 
@@ -29,9 +25,19 @@ def group_member_add(agi, cursor, args):
 
     confd_client = agi.config['confd']['client']
 
-    group_name = _get_group(confd_client, group_id)['name']
+    try:
+        group_name = confd_client.groups.get(group_id)['name']
+    except RequestException as e:
+        logger.error('Error while getting group %s: %s', group_id, e)
+        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
+        return
 
-    interfaces = _get_user_interfaces(agi, user_uuid)
+    try:
+        interfaces = _get_user_interfaces(agi, user_uuid)
+    except RequestException as e:
+        logger.error('Error while getting user interfaces: %s', e)
+        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
+        return
 
     for interface in interfaces:
         agi.appexec('AddQueueMember', '{group},{interface}'.format(group=group_name, interface=interface))
@@ -43,9 +49,19 @@ def group_member_remove(agi, cursor, args):
 
     confd_client = agi.config['confd']['client']
 
-    group_name = _get_group(confd_client, group_id)['name']
+    try:
+        group_name = confd_client.groups.get(group_id)['name']
+    except RequestException as e:
+        logger.error('Error while getting group %s: %s', group_id, e)
+        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
+        return
 
-    interfaces = _get_user_interfaces(agi, user_uuid)
+    try:
+        interfaces = _get_user_interfaces(agi, user_uuid)
+    except RequestException as e:
+        logger.error('Error while getting user interfaces: %s', e)
+        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
+        return
 
     for interface in interfaces:
         agi.appexec('RemoveQueueMember', '{group},{interface}'.format(group=group_name, interface=interface))
@@ -57,7 +73,12 @@ def group_member_present(agi, cursors, args):
 
     confd_client = agi.config['confd']['client']
 
-    group_name = _get_group(confd_client, group_id)['name']
+    try:
+        group_name = confd_client.groups.get(group_id)['name']
+    except RequestException as e:
+        logger.error('Error while getting group %s: %s', group_id, e)
+        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
+        return
 
     group_members = agi.get_variable('QUEUE_MEMBER_LIST({group})'.format(group=group_name))
     group_members = group_members.split(',')
@@ -70,18 +91,9 @@ def group_member_present(agi, cursors, args):
         agi.set_variable('WAZO_GROUP_MEMBER_PRESENT', '0')
 
 
-def _get_group(confd_client, group_id):
-    return confd_client.groups.get(group_id)
-
-
 def _get_user_interfaces(agi, user_uuid):
     confd_client = agi.config['confd']['client']
-    try:
-        lines = confd_client.users.get(user_uuid)['lines']
-    except HTTPError as e:
-        if e.response and e.response.status_code == 404:
-            raise UnknownUser()
-        raise
+    lines = confd_client.users.get(user_uuid)['lines']
 
     interfaces = list(itertools.chain(*(_get_line_interfaces(agi, line) for line in lines)))
 
