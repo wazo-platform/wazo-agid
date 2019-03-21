@@ -27,6 +27,10 @@ class ExtenFeatures(object):
                      ('fwdrna', 'rna'),
                      ('fwdunc', 'unc')),
 
+        'groupmember': (('groupmemberjoin',),
+                        ('groupmemberleave',),
+                        ('groupmembertoggle',)),
+
         'services': (('enablevm', 'enablevoicemail'),
                      ('callrecord', 'callrecord'),
                      ('incallfilter', 'incallfilter'),
