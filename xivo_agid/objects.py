@@ -831,7 +831,7 @@ class Context(object):
         self.cursor = cursor
 
         columns = ('context.name', 'context.displayname',
-                   'context.entity', 'contextinclude.include')
+                   'contextinclude.include')
 
         cursor.query("SELECT ${columns} FROM context "
                      "LEFT JOIN contextinclude "
@@ -853,7 +853,6 @@ class Context(object):
 
         self.name = res[0]['context.name']
         self.displayname = res[0]['context.displayname']
-        self.entity = res[0]['context.entity']
         self.include = [self.name]
 
         for row in res:

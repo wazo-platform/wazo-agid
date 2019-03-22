@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
@@ -108,7 +108,6 @@ class OutgoingFeatures(Handler):
             'local_time': time.asctime(time.localtime()),
             'utc_time': time.asctime(time.gmtime()),
             'base_context': self._context,
-            'tenant_name': context_dao.get(self._context).entity,
         }
         return self._call_recording_name_generator.generate(args)
 

@@ -318,7 +318,6 @@ class UserFeatures(Handler):
             'local_time': time.asctime(time.localtime()),
             'utc_time': time.asctime(time.gmtime()),
             'base_context': self._context,
-            'tenant_name': context_dao.get(self._context).entity,
             'tenant_uuid': context_dao.get(self._context).tenant_uuid,
         }
         return self._call_recording_name_generator.generate(args)
