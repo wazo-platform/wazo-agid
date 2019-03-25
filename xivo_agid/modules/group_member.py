@@ -5,7 +5,6 @@
 import itertools
 import logging
 
-from contextlib import contextmanager
 from requests import RequestException
 from xivo_agid import agid
 
@@ -28,8 +27,7 @@ def group_member_add(agi, cursor, args):
     confd_client = agi.config['confd']['client']
 
     try:
-        with _confd_tenant(confd_client, tenant_uuid):
-            group_name = confd_client.groups.get(group_id)['name']
+        group_name = confd_client.groups.get(group_id, tenant_uuid=tenant_uuid)['name']
     except RequestException as e:
         logger.error('Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e)
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
@@ -54,8 +52,7 @@ def group_member_remove(agi, cursor, args):
     confd_client = agi.config['confd']['client']
 
     try:
-        with _confd_tenant(confd_client, tenant_uuid):
-            group_name = confd_client.groups.get(group_id)['name']
+        group_name = confd_client.groups.get(group_id, tenant_uuid=tenant_uuid)['name']
     except RequestException as e:
         logger.error('Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e)
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
@@ -80,8 +77,7 @@ def group_member_present(agi, cursors, args):
     confd_client = agi.config['confd']['client']
 
     try:
-        with _confd_tenant(confd_client, tenant_uuid):
-            group_name = confd_client.groups.get(group_id)['name']
+        group_name = confd_client.groups.get(group_id, tenant_uuid=tenant_uuid)['name']
     except RequestException as e:
         logger.error('Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e)
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
@@ -117,15 +113,6 @@ def _get_line_interfaces(agi, line):
         return ['SCCP/{name}'.format(name=line['name'])]
 
     return []
-
-
-@contextmanager
-def _confd_tenant(confd_client, tenant_uuid):
-    confd_client.set_tenant(tenant_uuid)
-    try:
-        yield
-    finally:
-        confd_client.set_tenant(None)
 
 
 agid.register(group_member_remove)
