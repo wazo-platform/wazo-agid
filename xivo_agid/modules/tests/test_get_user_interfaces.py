@@ -7,7 +7,6 @@ import unittest
 from hamcrest import (
     assert_that,
     calling,
-    contains,
 )
 from mock import Mock
 from requests import HTTPError
