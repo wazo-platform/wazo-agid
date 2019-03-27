@@ -23,8 +23,14 @@ class NotEmptyStringMatcher(object):
 class _BaseTestCase(unittest.TestCase):
 
     def setUp(self):
-        config = {'call_recording': {'filename_template': '{{ mock }}',
-                                     'filename_extension': 'wav'}}
+        self._auth_mock = Mock()
+        config = {
+            'auth': {'client': self._auth_mock},
+            'call_recording': {
+                'filename_template': '{{ mock }}',
+                'filename_extension': 'wav',
+            },
+        }
         self._agi = Mock(config=config)
         self._cursor = Mock(cast=lambda x, y: '')
         self._args = Mock()
