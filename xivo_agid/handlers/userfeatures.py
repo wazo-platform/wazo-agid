@@ -4,6 +4,7 @@
 
 import logging
 import time
+import requests
 
 from xivo_dao import callfilter_dao, context_dao, user_line_dao as old_user_line_dao
 
@@ -440,6 +441,12 @@ class UserFeatures(Handler):
         objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
 
     def _set_has_mobile_session(self):
-        for session in self.auth_client.users.get_sessions(self._user.uuid)['items']:
+        try:
+            response = self.auth_client.users.get_sessions(self._user.uuid)
+        except requests.HTTPError as e:
+            self._agi.verbose('failed to fetch user sessions {}'.format(e))
+            return
+
+        for session in response['items']:
             if session['mobile']:
                 self._agi.set_variable('WAZO_MOBILE_SESSION', True)
