@@ -440,5 +440,6 @@ class UserFeatures(Handler):
         objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
 
     def _set_has_mobile_session(self):
-        has_mobile = [True for session in self.auth_client.users.get_sessions(self._user.uuid)['items'] if session['mobile']]
-        self._agi.set_variable('WAZO_MOBILE_SESSION', has_mobile.pop() if has_mobile else False)
+        for session in self.auth_client.users.get_sessions(self._user.uuid)['items']:
+            if session['mobile']:
+                self._agi.set_variable('WAZO_MOBILE_SESSION', True)
