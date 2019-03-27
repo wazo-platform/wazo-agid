@@ -32,7 +32,7 @@ def wake_mobile(agi, cursor, args):
 
     for interface in interfaces:
         protocol, end = interface.split('/', 1)
-        name, _ = end.split('/', 1)
+        name = end.split('/', 1)[0]
         if not _is_webrtc(agi, protocol, name):
             continue
 
