@@ -2,11 +2,13 @@
 # Copyright 2018-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-import itertools
 import logging
 
 from requests import RequestException
-from xivo_agid import agid
+from xivo_agid import (
+    agid,
+    objects,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -95,24 +97,8 @@ def group_member_present(agi, cursors, args):
 
 
 def _get_user_interfaces(agi, user_uuid):
-    confd_client = agi.config['confd']['client']
-    lines = confd_client.users.get(user_uuid)['lines']
-
-    interfaces = list(itertools.chain(*(_get_line_interfaces(agi, line) for line in lines)))
-
-    return interfaces
-
-
-def _get_line_interfaces(agi, line):
-    if line['endpoint_sip']:
-        contacts = agi.get_variable('PJSIP_DIAL_CONTACTS({name})'.format(name=line['endpoint_sip']['username']))
-        contacts = contacts.split('&')
-        return contacts
-
-    if line['endpoint_sccp']:
-        return ['SCCP/{name}'.format(name=line['name'])]
-
-    return []
+    user_line = objects.UserLine(agi, user_uuid)
+    return user_line.interfaces
 
 
 agid.register(group_member_remove)

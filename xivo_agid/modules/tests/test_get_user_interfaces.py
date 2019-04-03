@@ -11,11 +11,11 @@ from hamcrest import (
 from mock import Mock
 from requests import HTTPError
 from xivo_agid.fastagi import FastAGI
+from xivo_agid.objects import UnknownUser
 from xivo_test_helpers.hamcrest.raises import raises
 
 from ..get_user_interfaces import (
     get_user_interfaces,
-    UnknownUser,
 )
 
 

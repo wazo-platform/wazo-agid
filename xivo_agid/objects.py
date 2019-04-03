@@ -5,12 +5,18 @@
 import logging
 import re
 import time
+from itertools import chain
+from requests import HTTPError
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
 
 from xivo_dao import user_dao
 
 logger = logging.getLogger(__name__)
+
+
+class UnknownUser(Exception):
+    pass
 
 
 class DBUpdateException(Exception):
@@ -223,6 +229,36 @@ class Paging(object):
             else:
                 line = '%s/%s' % (proto_upper, l['name'])
             self.lines.add(line)
+
+
+class UserLine:
+
+    def __init__(self, agi, user_uuid):
+        self._agi = agi
+        confd_client = agi.config['confd']['client']
+        try:
+            lines = confd_client.users.get(user_uuid)['lines']
+        except HTTPError as e:
+            if e.response and e.response.status_code == 404:
+                raise UnknownUser()
+            raise
+
+        self.interfaces = list(chain(*(self._get_line_interfaces(line) for line in lines)))
+
+    def _get_line_interfaces(self, line):
+        if line.get('endpoint_sip'):
+            name = line['endpoint_sip']['username']
+            contacts = self._agi.get_variable('PJSIP_DIAL_CONTACTS({name})'.format(name=name))
+            if contacts:
+                return contacts.split('&')
+
+        if line.get('endpoint_sccp'):
+            return ['SCCP/{name}'.format(name=line['name'])]
+
+        if line.get('endpoint_custom'):
+            return [line['endpoint_custom']['interface']]
+
+        return []
 
 
 class User(object):
