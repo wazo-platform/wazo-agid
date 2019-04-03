@@ -3,12 +3,8 @@
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
-
 from requests import RequestException
-from xivo_agid import (
-    agid,
-    objects,
-)
+from xivo_agid import agid
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +31,16 @@ def group_member_add(agi, cursor, args):
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
         return
 
-    try:
-        interfaces = _get_user_interfaces(agi, user_uuid)
-    except RequestException as e:
-        logger.error('Error while getting user interfaces: %s', e)
-        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
-        return
+    interface = 'Local/{}@usersharedlines'.format(user_uuid)
+    state_interface = 'hint:{}@usersharedlines'.format(user_uuid)
 
-    for interface in interfaces:
-        agi.appexec('AddQueueMember', '{group},{interface}'.format(group=group_name, interface=interface))
+    queue_member_args = {
+        'group': group_name,
+        'interface': interface,
+        'state_interface': state_interface,
+    }
+    args = '{group},{interface},,,,{state_interface}'.format(**queue_member_args)
+    agi.appexec('AddQueueMember', args)
 
 
 def group_member_remove(agi, cursor, args):
@@ -60,15 +57,13 @@ def group_member_remove(agi, cursor, args):
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
         return
 
-    try:
-        interfaces = _get_user_interfaces(agi, user_uuid)
-    except RequestException as e:
-        logger.error('Error while getting user interfaces: %s', e)
-        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
-        return
-
-    for interface in interfaces:
-        agi.appexec('RemoveQueueMember', '{group},{interface}'.format(group=group_name, interface=interface))
+    interface = 'Local/{}@usersharedlines'.format(user_uuid)
+    queue_member_args = {
+        'group': group_name,
+        'interface': interface,
+    }
+    args = '{group},{interface}'.format(**queue_member_args)
+    agi.appexec('RemoveQueueMember', args)
 
 
 def group_member_present(agi, cursors, args):
@@ -88,17 +83,11 @@ def group_member_present(agi, cursors, args):
     group_members = agi.get_variable('QUEUE_MEMBER_LIST({group})'.format(group=group_name))
     group_members = group_members.split(',')
 
-    interfaces = _get_user_interfaces(agi, user_uuid)
-
-    if set(interfaces).intersection(set(group_members)):
+    interface = 'Local/{}@usersharedlines'.format(user_uuid)
+    if interface in group_members:
         agi.set_variable('WAZO_GROUP_MEMBER_PRESENT', '1')
     else:
         agi.set_variable('WAZO_GROUP_MEMBER_PRESENT', '0')
-
-
-def _get_user_interfaces(agi, user_uuid):
-    user_line = objects.UserLine(agi, user_uuid)
-    return user_line.interfaces
 
 
 agid.register(group_member_remove)
