@@ -5,8 +5,6 @@
 import logging
 import re
 import time
-from itertools import chain
-from requests import HTTPError
 from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
 
@@ -237,6 +235,9 @@ class UserLine:
         self._agi = agi
         self.interfaces = []
         hint = agi.get_variable('HINT({}@usersharedlines)'.format(user_uuid))
+        if not hint:
+            raise UnknownUser()
+
         for endpoint in hint.split('&'):
             if '/' not in endpoint:
                 continue
