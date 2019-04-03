@@ -235,30 +235,26 @@ class UserLine:
 
     def __init__(self, agi, user_uuid):
         self._agi = agi
-        confd_client = agi.config['confd']['client']
-        try:
-            lines = confd_client.users.get(user_uuid)['lines']
-        except HTTPError as e:
-            if e.response and e.response.status_code == 404:
-                raise UnknownUser()
-            raise
+        self.interfaces = []
+        hint = agi.get_variable('HINT({}@usersharedlines)'.format(user_uuid))
+        for endpoint in hint.split('&'):
+            if '/' not in endpoint:
+                continue
 
-        self.interfaces = list(chain(*(self._get_line_interfaces(line) for line in lines)))
+            for interface in self._find_matching_interfaces(endpoint):
+                self.interfaces.append(interface)
 
-    def _get_line_interfaces(self, line):
-        if line.get('endpoint_sip'):
-            name = line['endpoint_sip']['username']
+    def _find_matching_interfaces(self, endpoint):
+        protocol, name = endpoint.split('/', 1)
+        if protocol == 'pjsip':
             contacts = self._agi.get_variable('PJSIP_DIAL_CONTACTS({name})'.format(name=name))
-            if contacts:
-                return contacts.split('&')
+            if not contacts:
+                return
 
-        if line.get('endpoint_sccp'):
-            return ['SCCP/{name}'.format(name=line['name'])]
-
-        if line.get('endpoint_custom'):
-            return [line['endpoint_custom']['interface']]
-
-        return []
+            for contact in contacts.split('&'):
+                yield contact
+        else:
+            yield endpoint
 
 
 class User(object):
