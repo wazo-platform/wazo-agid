@@ -13,6 +13,10 @@ from xivo_dao import user_dao
 logger = logging.getLogger(__name__)
 
 
+class UnknownUser(Exception):
+    pass
+
+
 class DBUpdateException(Exception):
     pass
 
@@ -223,6 +227,35 @@ class Paging(object):
             else:
                 line = '%s/%s' % (proto_upper, l['name'])
             self.lines.add(line)
+
+
+class UserLine:
+
+    def __init__(self, agi, user_uuid):
+        self._agi = agi
+        self.interfaces = []
+        hint = agi.get_variable('HINT({}@usersharedlines)'.format(user_uuid))
+        if not hint:
+            raise UnknownUser()
+
+        for endpoint in hint.split('&'):
+            if '/' not in endpoint:
+                continue
+
+            for interface in self._find_matching_interfaces(endpoint):
+                self.interfaces.append(interface)
+
+    def _find_matching_interfaces(self, endpoint):
+        protocol, name = endpoint.split('/', 1)
+        if protocol == 'pjsip':
+            contacts = self._agi.get_variable('PJSIP_DIAL_CONTACTS({name})'.format(name=name))
+            if not contacts:
+                return
+
+            for contact in contacts.split('&'):
+                yield contact
+        else:
+            yield endpoint
 
 
 class User(object):
