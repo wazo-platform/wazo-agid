@@ -484,7 +484,7 @@ class Queue(object):
         self.cursor = cursor
 
         queuefeatures_columns = [
-            'id', 'number', 'context', 'name', 'data_quality',
+            'id', 'tenant_uuid', 'number', 'context', 'name', 'data_quality',
             'hitting_callee', 'hitting_caller', 'retries', 'ring',
             'transfer_user', 'transfer_call', 'write_caller',
             'write_calling', 'ignore_forward', 'url', 'announceoverride', 'timeout',
@@ -525,6 +525,7 @@ class Queue(object):
             raise LookupError("Unable to find queue (id: %s, number: %s, context: %s)" % (xid, number, context))
 
         self.id = res['queuefeatures.id']
+        self.tenant_uuid = res['queuefeatures.tenant_uuid']
         self.number = res['queuefeatures.number']
         self.context = res['queuefeatures.context']
         self.name = res['queuefeatures.name']
@@ -582,7 +583,7 @@ class Agent(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'number', 'passwd', 'firstname', 'lastname', 'language', 'preprocess_subroutine')
+        columns = ('id', 'tenant_uuid', 'number', 'passwd', 'firstname', 'lastname', 'language', 'preprocess_subroutine')
 
         if xid:
             cursor.query("SELECT ${columns} FROM agentfeatures "
@@ -603,6 +604,7 @@ class Agent(object):
             raise LookupError("Unable to find agent (id: %s, number: %s)" % (xid, number))
 
         self.id = res['id']
+        self.tenant_uuid = res['tenant_uuid']
         self.number = res['number']
         self.passwd = res['passwd']
         self.firstname = res['firstname']
