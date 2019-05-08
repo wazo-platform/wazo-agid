@@ -38,7 +38,7 @@ def queue_skill_rule_set(agi, cursor, args):
             _set_variables(agi, call, timeout)
             return
 
-        skill_rule_function = '{}-{}'.format(skill_rule.id, skill_rule.name)
+        skill_rule_function = 'skillrule-{}'.format(skill_rule.id)
         skill_rule_kwargs = []
         if skill_rule_variables:
             skill_rule_variables = skill_rule_variables.replace('|', ',')
