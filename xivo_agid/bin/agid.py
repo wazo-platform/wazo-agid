@@ -6,6 +6,7 @@ import argparse
 import logging
 import xivo_dao
 
+from wazo_auth_client import Client as AuthClient
 from wazo_dird_client import Client as DirdClient
 from xivo.chain_map import ChainMap
 from xivo.config_helper import parse_config_file
@@ -15,7 +16,6 @@ from xivo.token_renewer import TokenRenewer
 from xivo.user_rights import change_user
 from xivo.xivo_logging import setup_logging, silence_loggers
 from xivo_agentd_client import Client as AgentdClient
-from xivo_auth_client import Client as AuthClient
 from xivo_confd_client import Client as ConfdClient
 
 from xivo_agid import agid
