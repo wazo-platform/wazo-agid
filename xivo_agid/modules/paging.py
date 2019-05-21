@@ -55,7 +55,7 @@ def paging(agi, cursor, args):
         paging_opts = paging_opts + 'i'
 
     if paging_entry.announcement_play:
-        announcement_file_name = os.path.join('/var/lib/xivo/sounds/tenants',
+        announcement_file_name = os.path.join('/var/lib/wazo/sounds/tenants',
                                               paging_entry.tenant_uuid,
                                               'playback',
                                               paging_entry.announcement_file)

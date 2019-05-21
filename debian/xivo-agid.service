@@ -1,6 +1,6 @@
 [Unit]
 Description=xivo-agid server
-ConditionPathExists=!/var/lib/xivo/disabled
+ConditionPathExists=!/var/lib/wazo/disabled
 After=network.target postgresql.service
 Before=monit.service
 
