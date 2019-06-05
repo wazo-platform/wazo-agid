@@ -11,7 +11,7 @@ from xivo.config_helper import (
     read_config_file_hierarchy,
 )
 from wazo_auth_client import Client as AuthClient
-from xivo_confd_client import Client as ConfdClient
+from wazo_confd_client import Client as ConfdClient
 
 
 _DEFAULT_CERT_FILE = '/usr/share/xivo-certs/server.crt'
