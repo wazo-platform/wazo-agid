@@ -20,7 +20,7 @@ Depends: ${python:Depends},
          wazo-confd-client-python3,
          wazo-confd-client,
          wazo-dird-client,
-         xivo-agentd-client,
+         wazo-agentd-client,
          xivo-lib-python (>> 15.18),
          xivo-libdao
 Conflicts: xivo-utils (<= 18.09~20180808.174753.0834260.deb9)

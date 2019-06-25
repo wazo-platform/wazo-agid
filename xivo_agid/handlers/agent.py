@@ -2,8 +2,8 @@
 # Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from xivo_agentd_client import error
-from xivo_agentd_client.error import AgentdClientError
+from wazo_agentd_client import error
+from wazo_agentd_client.error import AgentdClientError
 
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
