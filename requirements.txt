@@ -1,6 +1,6 @@
+git+https://github.com/wazo-pbx/wazo-agentd-client.git
 git+https://github.com/wazo-pbx/wazo-auth-client.git
 git+https://github.com/wazo-pbx/wazo-confd-client.git
-git+https://github.com/wazo-pbx/xivo-agentd-client.git
 git+https://github.com/wazo-pbx/xivo-dao.git
 git+https://github.com/wazo-pbx/wazo-dird-client.git
 git+https://github.com/wazo-pbx/xivo-lib-python.git
