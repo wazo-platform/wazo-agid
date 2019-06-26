@@ -16,7 +16,7 @@ from xivo.daemonize import pidfile_context
 from xivo.token_renewer import TokenRenewer
 from xivo.user_rights import change_user
 from xivo.xivo_logging import setup_logging, silence_loggers
-from xivo_agentd_client import Client as AgentdClient
+from wazo_agentd_client import Client as AgentdClient
 
 from xivo_agid import agid
 from xivo_agid.modules import *

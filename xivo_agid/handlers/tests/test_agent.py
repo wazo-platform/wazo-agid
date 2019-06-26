@@ -5,8 +5,8 @@
 import unittest
 
 from mock import ANY, Mock
-from xivo_agentd_client import error
-from xivo_agentd_client.error import AgentdClientError
+from wazo_agentd_client import error
+from wazo_agentd_client.error import AgentdClientError
 from xivo_agid.fastagi import FastAGI
 from xivo_agid.handlers import agent
 
