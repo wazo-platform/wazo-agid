@@ -73,7 +73,8 @@ def main():
     config['dird']['client'] = DirdClient(**config['dird'])
     config['auth']['client'] = _new_auth_client(config)
 
-    def on_token_change(token_id):
+    def on_token_change(token):
+        token_id = token['token']
         config['agentd']['client'].set_token(token_id)
         config['confd']['client'].set_token(token_id)
         config['dird']['client'].set_token(token_id)
