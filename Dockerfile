@@ -17,7 +17,7 @@ RUN apt-get -qq -y install \
     libyaml-dev \
     libsasl2-dev
 
-# Install xivo-agid
+# Install wazo-agid
 WORKDIR /usr/src
 ADD . /usr/src/agid
 WORKDIR agid
@@ -26,10 +26,10 @@ RUN python setup.py install
 
 # Configure environment
 RUN adduser --disabled-password --gecos '' asterisk
-RUN touch /var/log/xivo-agid.log
-RUN mkdir -p /etc/xivo-agid
-RUN mkdir /var/lib/xivo-agid
-RUN cp -a etc/xivo-agid/* /etc/xivo-agid/
+RUN touch /var/log/wazo-agid.log
+RUN mkdir -p /etc/wazo-agid
+RUN mkdir /var/lib/wazo-agid
+RUN cp -a etc/wazo-agid/* /etc/wazo-agid/
 WORKDIR /root
 
 # Clean
@@ -38,4 +38,4 @@ RUN rm -rf /usr/src/agid
 
 EXPOSE 4573
 
-CMD ["xivo-agid", "-fd"]
+CMD ["wazo-agid", "-fd"]
