@@ -120,7 +120,7 @@ class AGID(SocketServer.ThreadingTCPServer):
     request_queue_size = 20
 
     def __init__(self, config):
-        logger.info('xivo-agid starting...')
+        logger.info('wazo-agid starting...')
 
         self.config = config
         signal.signal(signal.SIGHUP, sighup_handle)
