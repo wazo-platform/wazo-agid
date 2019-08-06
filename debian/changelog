@@ -1,3 +1,9 @@
+wazo-agid (19.12~20190806) wazo-dev-stretch; urgency=low
+
+  * Rename to wazo-agid
+
+ -- Wazo Maintainers <dev@wazo.community>  Tue, 06 Aug 2019 13:44:03 -0400
+
 xivo-agid (14.01~20140110.152707.e7c13a2) xivo-dev; urgency=low
 
   * use maintscript instead of renaming conffile manually

@@ -1,10 +1,10 @@
 #!/bin/sh
-# postinst script for xivo-agid
+# postinst script for wazo-agid
 #
 # see: dh_installdeb(1)
 
-DAEMONNAME='xivo-agid'
-USER='xivo-agid'
+DAEMONNAME='wazo-agid'
+USER='wazo-agid'
 GROUP=$USER
 LOG_FILENAME="/var/log/$DAEMONNAME.log"
 
@@ -20,11 +20,25 @@ case "$1" in
             adduser --quiet $USER asterisk
         fi
 
+        # move files from xivo-agid
+        if [ -f /var/log/xivo-agid.log ] ; then
+            rename 's/xivo-agid/wazo-agid/g' /var/log/xivo-agid.log*
+        fi
+        rm -rf /var/run/xivo-agid
+        if [ -d /etc/xivo-agid/conf.d ] ; then
+            find /etc/xivo-agid/conf.d/ -mindepth 1 -exec mv {} /etc/wazo-agid/conf.d/ \;
+            rmdir --ignore-fail-on-non-empty -p /etc/xivo-agid/conf.d
+        fi
+        if getent passwd xivo-agid > /dev/null; then
+            deluser --quiet --system --remove-home xivo-agid
+        fi
+        # End of move files from xivo-agid
+
         # setup permissions for the log file
         if [ ! -e "$LOG_FILENAME" ]; then
             touch "$LOG_FILENAME"
         fi
-        chown $USER:$GROUP "$LOG_FILENAME" /var/lib/xivo-agid
+        chown $USER:$GROUP "$LOG_FILENAME"
 
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
