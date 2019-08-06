@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2014 Avencall
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import mock
 import unittest
-from xivo_agid.agid import Handler
+from wazo_agid.agid import Handler
 
 
 class TestHandler(unittest.TestCase):

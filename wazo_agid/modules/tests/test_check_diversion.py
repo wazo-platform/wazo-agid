@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2014 Avencall
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 from hamcrest import assert_that, equal_to
 from mock import ANY, Mock, call, patch
-from xivo_agid.modules import check_diversion
+from wazo_agid.modules import check_diversion
 
 
 class TestCheckDiversion(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestCheckDiversion(unittest.TestCase):
 
         self.assertFalse(check_diversion._is_agent_ratio_overrun(self.agi, self.queue, waiting_calls))
 
-    @patch('xivo_agid.modules.check_diversion.objects')
+    @patch('wazo_agid.modules.check_diversion.objects')
     def test_check_diversion_xivo_divert_event_is_cleared(self, mock_objects):
         self.queue.waittime = None
         self.queue.waitratio = None

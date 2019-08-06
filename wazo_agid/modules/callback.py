@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2006-2014 Avencall
+# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
 import pwd
 import time
-from xivo_agid import agid
+from wazo_agid import agid
 
 ASTERISK_UID = None
 ASTERISK_GID = None

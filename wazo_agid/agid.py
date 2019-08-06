@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2008-2015 Avencall
+# Copyright 2008-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import signal
@@ -12,7 +12,7 @@ from xivo import agitb
 from xivo import anysql
 from xivo import moresynchro
 from xivo.BackSQL import backpostgresql  # noqa
-from xivo_agid import fastagi
+from wazo_agid import fastagi
 from xivo_dao.helpers.db_utils import session_scope
 
 

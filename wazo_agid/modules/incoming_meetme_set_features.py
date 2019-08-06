@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2006-2014 Avencall
+# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
 
-from xivo_agid import agid
-from xivo_agid import objects
+from wazo_agid import agid
+from wazo_agid import objects
 
 
 MEETME_RECORDINGDIR = '/var/lib/asterisk/sounds/meetme/'

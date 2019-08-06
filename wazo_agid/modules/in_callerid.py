@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
@@ -9,11 +9,11 @@ import ConfigParser
 
 from xivo import OrderedConf
 
-from xivo_agid import agid
+from wazo_agid import agid
 
 RULES_FILE = '/etc/xivo/asterisk/xivo_in_callerid.conf'
 
-log = logging.getLogger('xivo_agid.modules.in_callerid')
+log = logging.getLogger('wazo_agid.modules.in_callerid')
 config = None
 re_objs = {}
 

@@ -9,8 +9,8 @@ from hamcrest import equal_to
 
 from mock import Mock, call, patch, sentinel
 
-from xivo_agid.handlers.userfeatures import UserFeatures
-from xivo_agid import objects
+from wazo_agid.handlers.userfeatures import UserFeatures
+from wazo_agid import objects
 
 ABCD_INTERFACE = 'PJSIP/ycetqvtr/sip:n753iqfr@127.0.0.1:44530;transport=ws&PJSIP/ycetqvtr/sip:b6405ov4@127.0.0.1:44396;transport=ws'
 
@@ -103,7 +103,7 @@ class TestUserFeatures(_BaseTestCase):
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
 
-    @patch('xivo_agid.handlers.userfeatures.context_dao')
+    @patch('wazo_agid.handlers.userfeatures.context_dao')
     def test_set_call_recordfile_doesnt_raise_when_caller_is_none(self, context_dao):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock()
@@ -115,10 +115,10 @@ class TestUserFeatures(_BaseTestCase):
         self._agi.set_variable.assert_called_once_with('XIVO_CALLRECORDFILE',
                                                        NotEmptyStringMatcher())
 
-    @patch('xivo_agid.handlers.userfeatures.extension_dao')
-    @patch('xivo_agid.handlers.userfeatures.line_extension_dao')
-    @patch('xivo_agid.handlers.userfeatures.line_dao')
-    @patch('xivo_agid.handlers.userfeatures.user_line_dao')
+    @patch('wazo_agid.handlers.userfeatures.extension_dao')
+    @patch('wazo_agid.handlers.userfeatures.line_extension_dao')
+    @patch('wazo_agid.handlers.userfeatures.line_dao')
+    @patch('wazo_agid.handlers.userfeatures.user_line_dao')
     def test_set_line(self, user_line_dao, line_dao, line_extension_dao, extension_dao):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 

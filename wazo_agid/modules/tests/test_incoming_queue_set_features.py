@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2015 Avencall
+# Copyright 2015-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 from mock import Mock, patch
-from xivo_agid.modules import incoming_queue_set_features
+from wazo_agid.modules import incoming_queue_set_features
 
 
 class TestHoldtimeAnnounce(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestHoldtimeAnnounce(unittest.TestCase):
         self.queue = Mock()
         self.queue.announce_holdtime = 1
 
-    @patch('xivo_agid.objects.Queue')
+    @patch('wazo_agid.objects.Queue')
     def test_holdtime_use_say_number(self, mock_Queue):
         holdtime_minute = 24
         holdtime_second = holdtime_minute * 60
@@ -27,7 +27,7 @@ class TestHoldtimeAnnounce(unittest.TestCase):
 
         self.agi.say_number.assert_called_once_with(str(holdtime_minute), gender='')
 
-    @patch('xivo_agid.objects.Queue')
+    @patch('wazo_agid.objects.Queue')
     def test_holdtime_use_gender_number(self, mock_Queue):
         holdtime_minute = 1
         holdtime_second = holdtime_minute * 60

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2016 Avencall
+# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
 from mock import call, Mock
-from xivo_agid.modules.phone_get_features import _set_current_forwards
+from wazo_agid.modules.phone_get_features import _set_current_forwards
 
 
 class TestGetFeatures(unittest.TestCase):

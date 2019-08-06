@@ -18,8 +18,8 @@ from xivo.user_rights import change_user
 from xivo.xivo_logging import setup_logging, silence_loggers
 from wazo_agentd_client import Client as AgentdClient
 
-from xivo_agid import agid
-from xivo_agid.modules import *
+from wazo_agid import agid
+from wazo_agid.modules import *
 
 _DEFAULT_CONFIG = {
     'dird': {

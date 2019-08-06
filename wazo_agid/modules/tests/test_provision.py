@@ -6,7 +6,7 @@ import unittest
 
 from mock import Mock
 
-from xivo_agid.modules import provision
+from wazo_agid.modules import provision
 
 
 class TestDoProvision(unittest.TestCase):

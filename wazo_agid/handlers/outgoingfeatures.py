@@ -7,10 +7,10 @@ import logging
 
 from xivo_dao import context_dao
 
-from xivo_agid import dialplan_variables
-from xivo_agid.handlers.handler import Handler
-from xivo_agid.helpers import CallRecordingNameGenerator
-from xivo_agid import objects
+from wazo_agid import dialplan_variables
+from wazo_agid.handlers.handler import Handler
+from wazo_agid.helpers import CallRecordingNameGenerator
+from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@
 import logging
 
 from requests.exceptions import RequestException
-from xivo_agid import agid
+from wazo_agid import agid
 from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
 logger = logging.getLogger(__name__)

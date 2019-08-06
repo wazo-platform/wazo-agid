@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
-from xivo_agid import agid
+from wazo_agid import agid
 
 def _is_registered(agi, aor_name):
     aor = agi.get_variable('PJSIP_AOR({},contact)'.format(aor_name))

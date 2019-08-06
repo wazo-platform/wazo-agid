@@ -6,7 +6,7 @@ import json
 
 from xivo_dao.alchemy.queueskillrule import QueueSkillRule
 from xivo_dao.helpers.db_utils import session_scope
-from xivo_agid import agid
+from wazo_agid import agid
 
 
 def queue_skill_rule_set(agi, cursor, args):

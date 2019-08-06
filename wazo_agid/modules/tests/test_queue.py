@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2014 Avencall
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
 from mock import Mock
-from xivo_agid import objects
-from xivo_agid import fastagi
-from xivo_agid.modules import incoming_queue_set_features
+from wazo_agid import objects
+from wazo_agid import fastagi
+from wazo_agid.modules import incoming_queue_set_features
 
 QUEUE_WRAPUP_TIME = '__QUEUEWRAPUPTIME'
 

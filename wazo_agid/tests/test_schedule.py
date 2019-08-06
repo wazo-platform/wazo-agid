@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2014 Avencall
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import datetime
 import unittest
 from mock import Mock, call
-from xivo_agid.schedule import ScheduleBuilder, SchedulePeriodBuilder, \
+from wazo_agid.schedule import ScheduleBuilder, SchedulePeriodBuilder, \
     HoursChecker, WeekdaysChecker, DaysChecker, MonthsChecker, SchedulePeriod, \
     ScheduleAction
 

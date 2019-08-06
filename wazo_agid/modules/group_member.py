@@ -4,7 +4,7 @@
 
 import logging
 from requests import RequestException
-from xivo_agid import agid
+from wazo_agid import agid
 
 logger = logging.getLogger(__name__)
 

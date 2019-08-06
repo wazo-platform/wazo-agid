@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2014 Avencall
+# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
 # Copyright (C) 2016 Proformatique Inc.
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-from xivo_agid.handlers.groupfeatures import GroupFeatures
+from wazo_agid.handlers.groupfeatures import GroupFeatures
 from mock import Mock, patch, call
 
 
@@ -16,15 +16,15 @@ class TestGroupFeatures(unittest.TestCase):
         self._args = Mock()
         self.group_features = GroupFeatures(self._agi, self._cursor, self._args)
 
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_members')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_options')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_vars')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_preprocess_subroutine')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_timeout')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_dial_action')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_schedule')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._needs_rewrite_cid')
-    @patch('xivo_agid.handlers.groupfeatures.GroupFeatures._set_rewrite_cid')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_members')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_options')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_vars')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_preprocess_subroutine')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_timeout')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_dial_action')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_schedule')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._needs_rewrite_cid')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_rewrite_cid')
     def test_execute(self,
                      _set_rewrite_cid,
                      _needs_rewrite_cid,

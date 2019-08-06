@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-from xivo_agid import agid
-from xivo_agid.handlers import agent
+from wazo_agid import agid
+from wazo_agid.handlers import agent
 
 logger = logging.getLogger(__name__)
 

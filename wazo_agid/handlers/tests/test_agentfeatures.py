@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2015-2016 Avencall
+# Copyright 2015-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -8,7 +8,7 @@ from hamcrest import equal_to
 
 from mock import Mock
 
-from xivo_agid.handlers.agentfeatures import AgentFeatures
+from wazo_agid.handlers.agentfeatures import AgentFeatures
 
 
 class TestAgentFeatures(unittest.TestCase):

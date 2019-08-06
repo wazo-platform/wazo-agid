@@ -12,7 +12,7 @@ from hamcrest import (
     raises,
 )
 
-from xivo_agid.objects import (
+from wazo_agid.objects import (
     UnknownUser,
     UserLine,
 )

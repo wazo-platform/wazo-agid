@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright 2013-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
 
-from xivo_agid import objects
-from xivo_agid.handlers.handler import Handler
+from wazo_agid import objects
+from wazo_agid.handlers.handler import Handler
 
 
 class AgentFeatures(Handler):

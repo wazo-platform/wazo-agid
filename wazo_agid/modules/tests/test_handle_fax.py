@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2016 Avencall
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -7,7 +7,7 @@ import unittest
 from mock import patch, sentinel
 from hamcrest import assert_that, equal_to
 
-from xivo_agid.modules.handle_fax import _convert_config_value_to_bool, _build_backends_list
+from wazo_agid.modules.handle_fax import _convert_config_value_to_bool, _build_backends_list
 
 
 class TestConvertConfigValue(unittest.TestCase):
@@ -54,7 +54,7 @@ class TestBuildBackendList(unittest.TestCase):
 
         assert_that(backends, equal_to([sentinel.foo_backend]))
 
-    @patch('xivo_agid.modules.handle_fax.logger')
+    @patch('wazo_agid.modules.handle_fax.logger')
     def test_build_backends_list_referencing_unknown_backend(self, mock_logger):
         backend_ids = ['foo', 'potato']
 

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import ConfigParser
 import logging
 
-from xivo_agid import agid
+from wazo_agid import agid
 
 CONFIG_FILE = "/etc/xivo/asterisk/xivo_ring.conf"
 CONFIG_PARSER = None

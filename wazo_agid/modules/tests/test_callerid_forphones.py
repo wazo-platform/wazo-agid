@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2013-2016 Avencall
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -9,8 +9,8 @@ from hamcrest import contains_string
 from hamcrest import equal_to
 from mock import Mock
 from mock import patch
-from xivo_agid.fastagi import FastAGI
-from xivo_agid.modules.callerid_forphones import callerid_forphones
+from wazo_agid.fastagi import FastAGI
+from wazo_agid.modules.callerid_forphones import callerid_forphones
 
 
 class TestCallerIdForPhone(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestCallerIdForPhone(unittest.TestCase):
 
         assert_that(self.dird_client.directories.reverse.call_count, equal_to(0))
 
-    @patch('xivo_agid.modules.callerid_forphones.directory_profile_dao')
+    @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_no_result(self, mock_dao):
         self.agi.env = {
             'agi_calleridname': '5555551234',
@@ -46,7 +46,7 @@ class TestCallerIdForPhone(unittest.TestCase):
         assert_that(self.dird_client.directories.reverse.call_count, equal_to(1))
         assert_that(self.agi.set_callerid.call_count, equal_to(0))
 
-    @patch('xivo_agid.modules.callerid_forphones.directory_profile_dao')
+    @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_with_result(self, mock_dao):
         self.agi.env = {
             'agi_calleridname': '5555551234',
@@ -67,7 +67,7 @@ class TestCallerIdForPhone(unittest.TestCase):
             s = '%s: %s' % (key, value)
             assert_that(set_var_result, contains_string(s))
 
-    @patch('xivo_agid.modules.callerid_forphones.directory_profile_dao')
+    @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_when_dao_return_none(self, mock_dao):
         self.agi.env = {
             'agi_calleridname': '5555551234',

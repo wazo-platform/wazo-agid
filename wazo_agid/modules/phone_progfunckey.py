@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright 2009-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2009-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from xivo.xivo_helpers import split_extension
 
-from xivo_agid import agid, objects
+from wazo_agid import agid, objects
 
 
 def phone_progfunckey(agi, cursor, args):

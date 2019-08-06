@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2013-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -7,8 +7,8 @@ import unittest
 from hamcrest import assert_that
 from hamcrest.core import equal_to
 from mock import Mock, call, patch
-from xivo_agid.handlers.outgoingfeatures import OutgoingFeatures
-from xivo_agid import objects
+from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
+from wazo_agid import objects
 
 
 class OutCallBuilder(object):
@@ -119,7 +119,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         self.outgoing_features._set_userfield()
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_outcall_internal(self, mock_set_caller_id):
         user = (a_user()
                 .build())
@@ -134,7 +134,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         self.assertFalse(mock_set_caller_id.called)
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_no_user_and_outcall_external(self, mock_set_caller_id):
         user = None
         outcall = (an_outcall()
@@ -148,7 +148,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         self.assertFalse(mock_set_caller_id.called)
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_no_user_and_outcall_external_caller_id(self, mock_set_caller_id):
         user = None
         outcall = (an_outcall()
@@ -163,7 +163,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         mock_set_caller_id.assert_called_once_with(self._agi, '27857218')
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_default_and_outcall_external(self, mock_set_caller_id):
         user = (a_user()
                 .withDefaultOutCallerId()
@@ -179,7 +179,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         self.assertFalse(mock_set_caller_id.called)
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_default_and_outcall_external_caller_id(self, mock_set_caller_id):
         user = (a_user()
                 .withDefaultOutCallerId()
@@ -196,7 +196,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         mock_set_caller_id.assert_called_once_with(self._agi, '27857218')
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_anonymous_and_outcall_external(self, mock_set_caller_id):
         user = (a_user()
                 .withAnonymousOutCallerId()
@@ -217,7 +217,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_anonymous_and_outcall_external_caller_id(self, mock_set_caller_id):
         user = (a_user()
                 .withAnonymousOutCallerId()
@@ -239,7 +239,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_custom_and_outcall_external(self, mock_set_caller_id):
         user = (a_user()
                 .withCustomOutCallerId('"Custom1"')
@@ -255,7 +255,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         mock_set_caller_id.assert_called_once_with(self._agi, '"Custom1"')
 
-    @patch('xivo_agid.objects.CallerID.set')
+    @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_custom_and_outcall_external_caller_id(self, mock_set_caller_id):
         user = (a_user()
                 .withCustomOutCallerId('"Custom1"')

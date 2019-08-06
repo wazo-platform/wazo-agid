@@ -13,11 +13,11 @@ from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
 from xivo_dao.resources.extension import dao as extension_dao
 
-from xivo_agid.helpers import CallRecordingNameGenerator
-from xivo_agid.objects import DialAction, CallerID
-from xivo_agid.handlers.handler import Handler
-from xivo_agid import objects
-from xivo_agid import dialplan_variables
+from wazo_agid.helpers import CallRecordingNameGenerator
+from wazo_agid.objects import DialAction, CallerID
+from wazo_agid.handlers.handler import Handler
+from wazo_agid import objects
+from wazo_agid import dialplan_variables
 
 logger = logging.getLogger(__name__)
 

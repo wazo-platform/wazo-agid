@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2016 Avencall
+# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
 from mock import call, Mock
-from xivo_agid.modules.phone_set_feature import (_phone_set_busy,
+from wazo_agid.modules.phone_set_feature import (_phone_set_busy,
                                                  _phone_set_dnd,
                                                  _phone_set_incallfilter,
                                                  _phone_set_rna,

@@ -5,7 +5,7 @@
 import logging
 import re
 import time
-from xivo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
+from wazo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
 
 from xivo_dao import user_dao

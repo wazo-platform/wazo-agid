@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2016 Avencall
+# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from xivo_agid.handlers.handler import Handler
-from xivo_agid import objects
-from xivo_agid import dialplan_variables
+from wazo_agid.handlers.handler import Handler
+from wazo_agid import objects
+from wazo_agid import dialplan_variables
 
 
 class GroupFeatures(Handler):

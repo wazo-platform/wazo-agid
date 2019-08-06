@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2006-2014 Avencall
+# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from xivo_agid.handlers.outgoingfeatures import OutgoingFeatures
-from xivo_agid import agid
+from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
+from wazo_agid import agid
 
 
 def outgoing_user_set_features(agi, cursor, args):

@@ -7,8 +7,8 @@ import unittest
 from mock import ANY, Mock
 from wazo_agentd_client import error
 from wazo_agentd_client.error import AgentdClientError
-from xivo_agid.fastagi import FastAGI
-from xivo_agid.handlers import agent
+from wazo_agid.fastagi import FastAGI
+from wazo_agid.handlers import agent
 
 
 class TestAgent(unittest.TestCase):
