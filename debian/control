@@ -1,4 +1,4 @@
-Source: xivo-agid
+Source: wazo-agid
 Section: python
 Priority: extra
 Maintainer: Wazo Maintainers <dev@wazo.community>
@@ -6,25 +6,28 @@ Build-Depends: debhelper (>= 9), dh-python, dh-systemd (>= 1.5), python-all (>= 
 Standards-Version: 3.9.6
 X-Python-Version: >= 2.7
 
-Package: xivo-agid
+Package: wazo-agid
 Architecture: all
 Section: python
 Depends: ${python:Depends},
          ${misc:Depends},
          adduser,
          asterisk | asterisk-virtual,
-         python-tz,
          python-jinja2,
+         python-tz,
          python-unidecode,
-         wazo-auth-client,
-         wazo-confd-client-python3,
-         wazo-confd-client,
-         wazo-dird-client,
+         rename,
          wazo-agentd-client,
-         xivo-lib-python (>> 15.18),
+         wazo-auth-client,
+         wazo-confd-client,
+         wazo-confd-client-python3,
+         wazo-dird-client,
+         xivo-lib-python,
          xivo-libdao
-Conflicts: xivo-utils (<= 18.09~20180808.174753.0834260.deb9)
-Description: Wazo AGId
+Provides: xivo-agid
+Conflicts: xivo-utils (<= 18.09~20180808.174753.0834260.deb9), xivo-agid
+Replaces: xivo-agid
+Description: Wazo AGI Daemon
  Wazo is a system based on a powerful IPBX, to bring an easy to
  install solution for telephony and related services.
  .

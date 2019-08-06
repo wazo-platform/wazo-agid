@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from setuptools import setup
 from setuptools import find_packages
 
 
 setup(
-    name='xivo_agid',
+    name='wazo_agid',
     version='1.1',
-    description='XIVO AGI Daemon',
+    description='Wazo AGI Daemon',
     author='Wazo Authors',
-    author_email='dev.wazo@gmail.com',
+    author_email='dev@wazo.community',
     url='http://wazo.community',
     license='GPLv3',
     packages=find_packages(),
-    scripts=['bin/xivo-agid']
+    scripts=['bin/wazo-agid']
 )
