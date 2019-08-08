@@ -56,7 +56,7 @@ def wake_mobile(agi, cursor, args):
 
 def wait_for_registration(agi, cursor, args):
     aor = args[0]
-    timeout = 10
+    timeout = int(agi.get_variable('PJSIP_ENDPOINT({},@wake_mobile_timeout)'.format(aor)) or 30)
 
     try:
         _wait_for_registration(agi, aor, timeout)
