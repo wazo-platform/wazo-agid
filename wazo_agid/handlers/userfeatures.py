@@ -18,6 +18,7 @@ from wazo_agid.objects import DialAction, CallerID
 from wazo_agid.handlers.handler import Handler
 from wazo_agid import objects
 from wazo_agid import dialplan_variables
+from wazo_agid.helpers import is_registered_and_mobile, is_webrtc
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ class UserFeatures(Handler):
         self._feature_list = None
         self._caller = None
         self._user = None
+        self._has_mobile_session = False
 
         self.lines = []
         self.main_line = None
@@ -50,7 +52,8 @@ class UserFeatures(Handler):
 
     def execute(self):
         self._set_members()
-        self._set_xivo_iface()
+        self._set_has_mobile_session()
+        self._set_interfaces()
 
         filtered = self._call_filtering()
         if filtered:
@@ -70,7 +73,6 @@ class UserFeatures(Handler):
         self._set_mobile_number()
         self._set_vmbox_lang()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
-        self._set_has_mobile_session()
 
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
@@ -125,7 +127,7 @@ class UserFeatures(Handler):
             self._set_xivo_redirecting_info()
             self._set_wazo_uuid()
 
-    def _set_xivo_iface(self):
+    def _set_interfaces(self):
         interfaces = [self._build_interface_from_line(line) for line in self.lines]
         self._agi.set_variable('XIVO_INTERFACE', '&'.join(interfaces))
 
@@ -145,10 +147,14 @@ class UserFeatures(Handler):
         return '{}/{}'.format(line.protocol.upper(), line.name)
 
     def _build_sip_interface(self, line):
-            interface = self._agi.get_variable('PJSIP_DIAL_CONTACTS({})'.format(line.name))
-            if interface:
-                return interface
-            return 'PJSIP/{}'.format(line.name)
+        if self._has_mobile_session:
+            if is_webrtc(self._agi, 'PJSIP', line.name):
+                if not is_registered_and_mobile(self._agi, line.name):
+                    return 'Local/{}@wazo_wait_for_registration'.format(line.name)
+
+        default_interface = 'PJSIP/{}'.format(line.name)
+        registered_interfaces = self._agi.get_variable('PJSIP_DIAL_CONTACTS({})'.format(line.name))
+        return registered_interfaces or default_interface
 
     def _set_xivo_user_name(self):
         if self._user:
@@ -450,3 +456,5 @@ class UserFeatures(Handler):
         for session in response['items']:
             if session['mobile']:
                 self._agi.set_variable('WAZO_MOBILE_SESSION', True)
+                self._has_mobile_session = True
+                return
