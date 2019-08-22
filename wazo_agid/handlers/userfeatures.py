@@ -150,6 +150,7 @@ class UserFeatures(Handler):
         if self._has_mobile_session:
             if is_webrtc(self._agi, 'PJSIP', line.name):
                 if not is_registered_and_mobile(self._agi, line.name):
+                    self._agi.set_variable('WAZO_WAIT_FOR_MOBILE', 1)
                     return 'Local/{}@wazo_wait_for_registration'.format(line.name)
 
         default_interface = 'PJSIP/{}'.format(line.name)
