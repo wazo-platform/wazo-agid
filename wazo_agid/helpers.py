@@ -21,7 +21,7 @@ def is_registered_and_mobile(agi, aor_name):
         return False
 
     mobility = agi.get_variable('PJSIP_CONTACT({},mobility)'.format(contact))
-    return mobility == 'yes'
+    return mobility == 'mobile'
 
 
 class CallRecordingNameGenerator(object):
