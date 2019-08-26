@@ -16,12 +16,16 @@ def is_webrtc(agi, protocol, name):
 
 
 def is_registered_and_mobile(agi, aor_name):
-    contact = agi.get_variable('PJSIP_AOR({},contact)'.format(aor_name))
-    if not contact:
+    raw_contacts = agi.get_variable('PJSIP_AOR({},contact)'.format(aor_name))
+    if not raw_contacts:
         return False
 
-    mobility = agi.get_variable('PJSIP_CONTACT({},mobility)'.format(contact))
-    return mobility == 'mobile'
+    for contact in raw_contacts.split(','):
+        mobility = agi.get_variable('PJSIP_CONTACT({},mobility)'.format(contact))
+        if mobility == 'mobile':
+            return True
+
+    return False
 
 
 class CallRecordingNameGenerator(object):
