@@ -1,6 +1,6 @@
 ## Image to build from sources
 
-FROM debian:stretch
+FROM debian:buster
 MAINTAINER Wazo Maintainers <dev@wazo.community>
 
 ENV DEBIAN_FRONTEND noninteractive
