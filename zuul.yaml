@@ -1,0 +1,3 @@
+- project:
+    templates:
+      - wazo-tox-py27
