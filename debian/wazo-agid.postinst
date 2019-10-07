@@ -20,6 +20,11 @@ case "$1" in
             adduser --quiet $USER asterisk
         fi
 
+        # Fix wazo-agid home from < 19.15
+        if getent passwd wazo-agid | grep -q xivo-agid; then
+            usermod --home /var/lib/wazo-agid wazo-agid
+        fi
+
         # move files from xivo-agid
         if [ -f /var/log/xivo-agid.log ] ; then
             rename 's/xivo-agid/wazo-agid/g' /var/log/xivo-agid.log*
