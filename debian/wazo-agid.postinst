@@ -14,7 +14,7 @@ case "$1" in
         if ! getent passwd $USER > /dev/null ; then
             echo "Adding system user $USER" 1>&2
             adduser --quiet --system --group --no-create-home \
-                    --home /var/lib/xivo-agid \
+                    --home /var/lib/wazo-agid \
                     $USER
             adduser --quiet $USER www-data
             adduser --quiet $USER asterisk
