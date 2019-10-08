@@ -25,6 +25,13 @@ case "$1" in
             usermod --home /var/lib/wazo-agid wazo-agid
         fi
 
+        # move home directory from wrong renaming < 19.15
+        if [ -f /var/lib/xivo-agid ] ; then
+            find /var/lib/xivo-agid/ -mindepth 1 -maxdepth 1 -exec mv {} /var/lib/wazo-agid/ \;
+            chown --recursive wazo-agid:wazo-agid /var/lib/wazo-agid
+            rmdir --ignore-fail-on-non-empty -p /var/lib/xivo-agid
+        fi
+
         # move files from xivo-agid
         if [ -f /var/log/xivo-agid.log ] ; then
             rename 's/xivo-agid/wazo-agid/g' /var/log/xivo-agid.log*
