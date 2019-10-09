@@ -27,16 +27,14 @@ def callerid_forphones(agi, cursor, args):
         callee_infos = directory_profile_dao.find_by_incall_id(incall_id)
         if callee_infos is None:
             xivo_user_uuid = FAKE_XIVO_USER_UUID
-            profile = 'default'
         else:
             xivo_user_uuid = callee_infos.xivo_user_uuid
-            profile = callee_infos.profile
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
         try:
             # It is not possible to associate a profile to a reverse configuration in the webi
             lookup_result = dird_client.directories.reverse(
-                profile=profile,
+                profile='default',
                 xivo_user_uuid=xivo_user_uuid,
                 exten=cid_number,
                 tenant_uuid=tenant_uuid,
