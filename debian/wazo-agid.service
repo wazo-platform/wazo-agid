@@ -6,9 +6,9 @@ Before=monit.service
 
 [Service]
 Type=forking
-ExecStartPre=/usr/bin/install -d -o wazo-agid -g wazo-agid /var/run/wazo-agid
+ExecStartPre=/usr/bin/install -d -o wazo-agid -g wazo-agid /run/wazo-agid
 ExecStart=/usr/bin/wazo-agid
-PIDFile=/var/run/wazo-agid/wazo-agid.pid
+PIDFile=/run/wazo-agid/wazo-agid.pid
 
 [Install]
 WantedBy=multi-user.target

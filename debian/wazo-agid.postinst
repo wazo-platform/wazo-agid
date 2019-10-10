@@ -36,7 +36,7 @@ case "$1" in
         if [ -f /var/log/xivo-agid.log ] ; then
             rename 's/xivo-agid/wazo-agid/g' /var/log/xivo-agid.log*
         fi
-        rm -rf /var/run/xivo-agid
+        rm -rf /run/xivo-agid
         if [ -d /etc/xivo-agid/conf.d ] ; then
             find /etc/xivo-agid/conf.d/ -mindepth 1 -exec mv {} /etc/wazo-agid/conf.d/ \;
             rmdir --ignore-fail-on-non-empty -p /etc/xivo-agid/conf.d
