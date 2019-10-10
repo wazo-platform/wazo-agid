@@ -9,8 +9,9 @@ from hamcrest import contains_string
 from hamcrest import equal_to
 from mock import Mock
 from mock import patch
+from mock import sentinel
 from wazo_agid.fastagi import FastAGI
-from wazo_agid.modules.callerid_forphones import callerid_forphones
+from wazo_agid.modules.callerid_forphones import callerid_forphones, FAKE_XIVO_USER_UUID
 
 
 class TestCallerIdForPhone(unittest.TestCase):
@@ -41,9 +42,17 @@ class TestCallerIdForPhone(unittest.TestCase):
         self.dird_client.directories.reverse.return_value = {'display': None}
         mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'xivo_user_uuid'
 
+        self.agi.get_variable.side_effect = [0, sentinel.agi_variable]
+
         callerid_forphones(self.agi, Mock(), Mock())
 
-        assert_that(self.dird_client.directories.reverse.call_count, equal_to(1))
+        self.dird_client.directories.reverse.assert_called_once_with(
+            profile='default',
+            xivo_user_uuid='xivo_user_uuid',
+            exten=self.agi.env['agi_callerid'],
+            tenant_uuid=sentinel.agi_variable,
+        )
+
         assert_that(self.agi.set_callerid.call_count, equal_to(0))
 
     @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
@@ -58,7 +67,16 @@ class TestCallerIdForPhone(unittest.TestCase):
                                                              'fields': lookup_result}
         mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'xivo_user_uuid'
 
+        self.agi.get_variable.side_effect = [0, sentinel.agi_variable]
+
         callerid_forphones(self.agi, Mock(), Mock())
+
+        self.dird_client.directories.reverse.assert_called_once_with(
+            profile='default',
+            xivo_user_uuid='xivo_user_uuid',
+            exten=self.agi.env['agi_callerid'],
+            tenant_uuid=sentinel.agi_variable,
+        )
 
         expected_callerid = '"Bob" <5555551234>'
         self.agi.set_callerid.assert_called_once_with(expected_callerid)
@@ -76,9 +94,17 @@ class TestCallerIdForPhone(unittest.TestCase):
         self.dird_client.directories.reverse.return_value = {'display': None}
         mock_dao.find_by_incall_id.return_value = None
 
+        self.agi.get_variable.side_effect = [0, sentinel.agi_variable]
+
         callerid_forphones(self.agi, Mock(), Mock())
 
-        assert_that(self.dird_client.directories.reverse.call_count, equal_to(1))
+        self.dird_client.directories.reverse.assert_called_once_with(
+            profile='default',
+            xivo_user_uuid=FAKE_XIVO_USER_UUID,
+            exten=self.agi.env['agi_callerid'],
+            tenant_uuid=sentinel.agi_variable,
+        )
+
         assert_that(self.agi.set_callerid.call_count, equal_to(0))
 
     def test_that_callerid_forphones_never_raises(self):
