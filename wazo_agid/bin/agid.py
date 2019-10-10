@@ -37,7 +37,7 @@ _DEFAULT_CONFIG = {
     'user': 'wazo-agid',
     'debug': False,
     'foreground': False,
-    'pidfile': '/var/run/wazo-agid/wazo-agid.pid',
+    'pidfile': '/run/wazo-agid/wazo-agid.pid',
     'logfile': '/var/log/wazo-agid.log',
     'listen_port': 4573,
     'listen_address': '127.0.0.1',

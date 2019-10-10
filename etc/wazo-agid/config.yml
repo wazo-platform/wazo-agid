@@ -16,7 +16,7 @@ debug: false
 logfile: /var/log/wazo-agid.log
 
 # PID file.
-pidfile: /var/run/wazo-agid/wazo-agid.pid
+pidfile: /run/wazo-agid/wazo-agid.pid
 
 # Database connection informations.
 db_uri: postgresql://asterisk:proformatique@localhost/asterisk
