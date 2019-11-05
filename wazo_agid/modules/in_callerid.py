@@ -7,8 +7,6 @@ import sys
 import logging
 import ConfigParser
 
-from xivo import OrderedConf
-
 from wazo_agid import agid
 
 RULES_FILE = '/etc/xivo/asterisk/xivo_in_callerid.conf'
@@ -62,7 +60,8 @@ def setup(cursor):
     global config
 
     re_objs.clear()
-    config = OrderedConf.OrderedRawConf(filename=RULES_FILE)
+    config = ConfigParser.RawConfigParser()
+    config.read([RULES_FILE])
 
     for section in config:
         try:
