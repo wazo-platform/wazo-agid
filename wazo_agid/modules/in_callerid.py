@@ -21,7 +21,7 @@ def in_callerid(agi, cursor, args):
     callerid_name = agi.env['agi_calleridname']
     same_cid = callerid_num == callerid_name
 
-    for section in config:
+    for section in config.sections():
         section_name = section.get_name()
         log.debug('section `%s`', section_name)
         re_obj = re_objs[section_name]
@@ -63,7 +63,7 @@ def setup(cursor):
     config = ConfigParser.RawConfigParser()
     config.read([RULES_FILE])
 
-    for section in config:
+    for section in config.sections():
         try:
             regexp = section.get('callerid')
         except ConfigParser.NoOptionError:
