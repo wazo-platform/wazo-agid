@@ -21,8 +21,7 @@ def in_callerid(agi, cursor, args):
     callerid_name = agi.env['agi_calleridname']
     same_cid = callerid_num == callerid_name
 
-    for section in config.sections():
-        section_name = section.get_name()
+    for section_name in config.sections():
         log.debug('section `%s`', section_name)
         re_obj = re_objs[section_name]
 
@@ -31,8 +30,8 @@ def in_callerid(agi, cursor, args):
             continue
 
         log.debug('pattern `%s` matches `%s`', re_obj.pattern, callerid_num)
-        if section.has_option('strip'):
-            str_strip = section.get('strip')
+        if config.has_option(section_name, 'strip'):
+            str_strip = config.get(section_name, 'strip')
             log.debug('stripping `%s` digits from `%s`', str_strip, callerid_num)
 
             if str_strip.isdigit():
@@ -41,8 +40,8 @@ def in_callerid(agi, cursor, args):
                 if strip > 0:
                     callerid_num = callerid_num[strip:]
 
-        if section.has_option('add'):
-            add = section.get('add')
+        if config.has_option(section_name, 'add'):
+            add = config.get(section_name, 'add')
             log.debug('prefixing `%s` with `%s`', callerid_num, add)
 
             if add:
@@ -63,20 +62,20 @@ def setup(cursor):
     config = ConfigParser.RawConfigParser()
     config.read([RULES_FILE])
 
-    for section in config.sections():
+    for section_name in config.sections():
         try:
-            regexp = section.get('callerid')
+            regexp = config.get(section_name, 'callerid')
         except ConfigParser.NoOptionError:
-            log.error("option 'callerid' not found in section %r", section.get_name())
+            log.error("option 'callerid' not found in section %r", section_name)
             sys.exit(1)
 
         try:
             re_obj = re.compile(regexp)
         except re.error:
-            log.error("invalid regexp %r in section %r", regexp, section.get_name())
+            log.error("invalid regexp %r in section %r", regexp, section_name)
             sys.exit(1)
 
-        re_objs[section.get_name()] = re_obj
+        re_objs[section_name] = re_obj
 
 
 agid.register(in_callerid, setup)
