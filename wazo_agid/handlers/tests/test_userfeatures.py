@@ -68,7 +68,7 @@ class TestUserFeatures(_BaseTestCase):
     def test_has_mobile_connection_auth_error(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         auth = userfeatures.auth_client = Mock()
-        auth.users.get_sessions.side_effect = requests.HTTPError
+        auth.token.list.side_effect = requests.HTTPError
         userfeatures._user = Mock()
 
         userfeatures._set_has_mobile_connection()
@@ -79,7 +79,7 @@ class TestUserFeatures(_BaseTestCase):
     def test_has_mobile_connection_no_mobile_connections(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         auth = userfeatures.auth_client = Mock()
-        auth.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': False}]}
+        auth.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
         userfeatures._user = Mock()
 
         userfeatures._set_has_mobile_connection()
@@ -90,7 +90,11 @@ class TestUserFeatures(_BaseTestCase):
     def test_has_mobile_connection_with_mobile_connections(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         auth = userfeatures.auth_client = Mock()
-        auth.users.get_sessions.return_value = {'items': [{'mobile': True}, {'mobile': True}, {'mobile': False}]}
+        auth.token.list.return_value = {
+            'items': [{'mobile': True}, {'mobile': True}],
+            'filtered': 2,
+            'total': 42,
+        }
         userfeatures._user = Mock()
 
         userfeatures._set_has_mobile_connection()
