@@ -448,12 +448,27 @@ class UserFeatures(Handler):
         objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
 
     def _set_has_mobile_connection(self):
+        mobile = False
+
         try:
             response = self.auth_client.token.list(self._user.uuid, mobile=True)
         except requests.HTTPError as e:
             self._agi.verbose('failed to fetch user refresh tokens {}'.format(e))
-            return
+        else:
+            mobile = response['filtered'] > 0
 
-        if response['filtered'] > 0:
+        if not mobile:
+            try:
+                response = self.auth_client.users.get_sessions(self._user.uuid)
+            except requests.HTTPError as e:
+                self._agi.verbose('failed to fetch user sessions {}'.format(e))
+                return
+
+            for session in response['items']:
+                if session['mobile']:
+                    mobile = True
+                    break
+
+        if mobile:
             self._agi.set_variable('WAZO_MOBILE_CONNECTION', True)
             self._has_mobile_connection = True

@@ -69,6 +69,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         auth = userfeatures.auth_client = Mock()
         auth.token.list.side_effect = requests.HTTPError
+        auth.users.get_sessions.side_effect = requests.HTTPError
         userfeatures._user = Mock()
 
         userfeatures._set_has_mobile_connection()
@@ -76,10 +77,11 @@ class TestUserFeatures(_BaseTestCase):
         assert_that(userfeatures._has_mobile_connection, equal_to(False))
         self._agi.set_variable.assert_not_called()
 
-    def test_has_mobile_connection_no_mobile_connections(self):
+    def test_has_mobile_connection_no_mobile_connections_no_session(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         auth = userfeatures.auth_client = Mock()
         auth.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
+        auth.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': False}]}
         userfeatures._user = Mock()
 
         userfeatures._set_has_mobile_connection()
@@ -95,6 +97,18 @@ class TestUserFeatures(_BaseTestCase):
             'filtered': 2,
             'total': 42,
         }
+        userfeatures._user = Mock()
+
+        userfeatures._set_has_mobile_connection()
+
+        assert_that(userfeatures._has_mobile_connection, equal_to(True))
+        self._agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)
+
+    def test_mobile_connection_mobile_session_only(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        auth = userfeatures.auth_client = Mock()
+        auth.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
+        auth.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': True}]}
         userfeatures._user = Mock()
 
         userfeatures._set_has_mobile_connection()
