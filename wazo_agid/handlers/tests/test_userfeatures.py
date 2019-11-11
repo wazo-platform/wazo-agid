@@ -44,6 +44,7 @@ class TestUserFeatures(_BaseTestCase):
         self._variables = {
             'PJSIP_DIAL_CONTACTS(abcd)': ABCD_INTERFACE,
             'PJSIP_DIAL_CONTACTS(foobar)': '',
+            'PJSIP_ENDPOINT(abcd,webrtc)': '1',
             'XIVO_USERID': '42',
             'XIVO_DSTID': '33',
             'XIVO_CALLORIGIN': 'my_origin',
@@ -72,9 +73,9 @@ class TestUserFeatures(_BaseTestCase):
         auth.users.get_sessions.side_effect = requests.HTTPError
         userfeatures._user = Mock()
 
-        userfeatures._set_has_mobile_connection()
+        result = userfeatures._has_mobile_connection()
 
-        assert_that(userfeatures._has_mobile_connection, equal_to(False))
+        assert_that(result, equal_to(False))
         self._agi.set_variable.assert_not_called()
 
     def test_has_mobile_connection_no_mobile_connections_no_session(self):
@@ -84,9 +85,9 @@ class TestUserFeatures(_BaseTestCase):
         auth.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': False}]}
         userfeatures._user = Mock()
 
-        userfeatures._set_has_mobile_connection()
+        result = userfeatures._has_mobile_connection()
 
-        assert_that(userfeatures._has_mobile_connection, equal_to(False))
+        assert_that(result, equal_to(False))
         self._agi.set_variable.assert_not_called()
 
     def test_has_mobile_connection_with_mobile_connections(self):
@@ -99,9 +100,9 @@ class TestUserFeatures(_BaseTestCase):
         }
         userfeatures._user = Mock()
 
-        userfeatures._set_has_mobile_connection()
+        result = userfeatures._has_mobile_connection()
 
-        assert_that(userfeatures._has_mobile_connection, equal_to(True))
+        assert_that(result, equal_to(True))
         self._agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)
 
     def test_mobile_connection_mobile_session_only(self):
@@ -111,9 +112,9 @@ class TestUserFeatures(_BaseTestCase):
         auth.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': True}]}
         userfeatures._user = Mock()
 
-        userfeatures._set_has_mobile_connection()
+        result = userfeatures._has_mobile_connection()
 
-        assert_that(userfeatures._has_mobile_connection, equal_to(True))
+        assert_that(result, equal_to(True))
         self._agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)
 
     def test_set_members(self):
@@ -223,7 +224,6 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._set_interfaces = Mock()
         userfeatures._set_user_filter = Mock()
         userfeatures._call_filtering = Mock()
-        userfeatures._set_has_mobile_connection = Mock()
 
         userfeatures.execute()
 
@@ -246,17 +246,20 @@ class TestUserFeatures(_BaseTestCase):
         line.protocol = 'SIP'
         line.name = 'abcd'
 
-        interface = userfeatures._build_interface_from_line(line)
+        with patch.object(userfeatures, '_has_mobile_connection', return_value=False):
+            interface = userfeatures._build_interface_from_line(line)
 
         self.assertEqual(interface, ABCD_INTERFACE)
 
-    def test_build_interface_from_sip_line_not_connected(self):
+    @patch('wazo_agid.handlers.userfeatures.is_webrtc', Mock(return_value=False))
+    def test_build_interface_from_sip_line_not_connected_no_webrtc(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         line = Mock()
         line.protocol = 'SIP'
         line.name = 'foobar'
 
-        interface = userfeatures._build_interface_from_line(line)
+        with patch.object(userfeatures, '_has_mobile_connection', return_value=False):
+            interface = userfeatures._build_interface_from_line(line)
 
         self.assertEqual(interface, 'PJSIP/foobar')
 
@@ -264,13 +267,13 @@ class TestUserFeatures(_BaseTestCase):
     @patch('wazo_agid.handlers.userfeatures.is_registered_and_mobile', Mock(return_value=False))
     def test_build_interface_from_sip_line_mobile_connection_webrtc_not_registered(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._has_mobile_connection = True
 
         line = Mock()
         line.protocol = 'SIP'
         line.name = 'abcd'
 
-        interface = userfeatures._build_interface_from_line(line)
+        with patch.object(userfeatures, '_has_mobile_connection', return_value=True):
+            interface = userfeatures._build_interface_from_line(line)
 
         self.assertEqual(interface, 'Local/abcd@wazo_wait_for_registration')
 
@@ -278,7 +281,6 @@ class TestUserFeatures(_BaseTestCase):
     @patch('wazo_agid.handlers.userfeatures.is_registered_and_mobile', Mock(return_value=True))
     def test_build_interface_from_sip_line_mobile_connection_webrtc_mobile_registered(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._has_mobile_connection = True
 
         line = Mock()
         line.protocol = 'SIP'
@@ -292,7 +294,6 @@ class TestUserFeatures(_BaseTestCase):
     @patch('wazo_agid.handlers.userfeatures.is_registered_and_mobile', Mock(return_value=True))
     def test_build_interface_from_sip_line_no_mobile_connection_webrtc_mobile_not_registered(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._has_mobile_connection = False
 
         line = Mock()
         line.protocol = 'SIP'

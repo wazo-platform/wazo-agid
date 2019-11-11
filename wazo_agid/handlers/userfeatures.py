@@ -42,7 +42,6 @@ class UserFeatures(Handler):
         self._feature_list = None
         self._caller = None
         self._user = None
-        self._has_mobile_connection = False
 
         self.lines = []
         self.main_line = None
@@ -52,7 +51,6 @@ class UserFeatures(Handler):
 
     def execute(self):
         self._set_members()
-        self._set_has_mobile_connection()
         self._set_interfaces()
 
         filtered = self._call_filtering()
@@ -147,9 +145,10 @@ class UserFeatures(Handler):
         return '{}/{}'.format(line.protocol.upper(), line.name)
 
     def _build_sip_interface(self, line):
-        if self._has_mobile_connection:
-            if is_webrtc(self._agi, 'PJSIP', line.name):
-                if not is_registered_and_mobile(self._agi, line.name):
+        if is_webrtc(self._agi, 'PJSIP', line.name):
+            if not is_registered_and_mobile(self._agi, line.name):
+                # Checking for mobile connections last as this operation does HTTP requests
+                if self._has_mobile_connection():
                     self._agi.set_variable('WAZO_WAIT_FOR_MOBILE', 1)
                     return 'Local/{}@wazo_wait_for_registration'.format(line.name)
 
@@ -447,7 +446,7 @@ class UserFeatures(Handler):
     def _set_dial_action_chanunavail(self):
         objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
 
-    def _set_has_mobile_connection(self):
+    def _has_mobile_connection(self):
         mobile = False
 
         try:
@@ -462,13 +461,14 @@ class UserFeatures(Handler):
                 response = self.auth_client.users.get_sessions(self._user.uuid)
             except requests.HTTPError as e:
                 self._agi.verbose('failed to fetch user sessions {}'.format(e))
-                return
-
-            for session in response['items']:
-                if session['mobile']:
-                    mobile = True
-                    break
+            else:
+                for session in response['items']:
+                    if session['mobile']:
+                        mobile = True
+                        break
 
         if mobile:
             self._agi.set_variable('WAZO_MOBILE_CONNECTION', True)
-            self._has_mobile_connection = True
+            return True
+
+        return False
