@@ -11,6 +11,7 @@ Architecture: all
 Section: python
 Depends: ${python:Depends},
          ${misc:Depends},
+         python3,
          adduser,
          asterisk | asterisk-virtual,
          python-jinja2,

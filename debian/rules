@@ -3,3 +3,6 @@
 
 %:
 	dh $@ --with python2,systemd
+
+override_dh_installinit:
+	dh_installinit --noscripts
