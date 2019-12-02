@@ -11,6 +11,9 @@ Architecture: all
 Section: python
 Depends: ${python:Depends},
          ${misc:Depends},
+         python3,
+         wazo-auth-client-python3,
+         xivo-lib-python-python3,
          adduser,
          asterisk | asterisk-virtual,
          python-jinja2,
