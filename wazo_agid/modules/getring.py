@@ -26,8 +26,9 @@ def getring(agi, cursor, args):
     referer_origin_fwd = "%s&forwarded" % referer_origin
     section = None
 
+    agi.set_variable('XIVO_RINGTYPE', "")
+
     if CONFIG_PARSER.has_option('number', "!%s" % dstnum_context):
-        agi.set_variable('XIVO_RINGTYPE', "")
         return
 
     if len(dstnum) > 0 and CONFIG_PARSER.has_option('number', dstnum_context):
@@ -42,7 +43,6 @@ def getring(agi, cursor, args):
             try:
                 section = CONFIG_PARSER.get('number', "@%s" % context)
             except ConfigParser.NoOptionError:
-                agi.set_variable('XIVO_RINGTYPE', "")
                 return
 
         if section == 'number':
@@ -62,7 +62,6 @@ def getring(agi, cursor, args):
         phonetype = CONFIG_PARSER.get(section, 'phonetype')
     except (ConfigParser.NoOptionError, ValueError):
         logger.debug('Ring type exception', exc_info=True)
-        agi.set_variable('XIVO_RINGTYPE', "")
         agi.verbose("Using the native phone ring tone")
     else:
         agi.set_variable('XIVO_RINGTYPE', ringtype)
