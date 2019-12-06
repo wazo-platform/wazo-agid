@@ -39,7 +39,11 @@ def getring(agi, cursor, args):
 
     try:
         if section is None:
-            section = CONFIG_PARSER.get('number', "@%s" % context)
+            try:
+                section = CONFIG_PARSER.get('number', "@%s" % context)
+            except ConfigParser.NoOptionError:
+                agi.set_variable('XIVO_RINGTYPE', "")
+                return
 
         if section == 'number':
             raise ValueError("Invalid section name")
