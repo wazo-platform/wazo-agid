@@ -31,23 +31,21 @@ def callerid_forphones(agi, cursor, args):
             xivo_user_uuid = callee_infos.xivo_user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
-        try:
-            # It is not possible to associate a profile to a reverse configuration in the webi
-            lookup_result = dird_client.directories.reverse(
-                profile='default',
-                xivo_user_uuid=xivo_user_uuid,
-                exten=cid_number,
-                tenant_uuid=tenant_uuid,
-            )
-        except RequestException as e:
-            logger.exception('Reverse lookup failed: %s', e)
-        else:
-            logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
-            if lookup_result['display'] is not None:
-                _set_new_caller_id(agi, lookup_result['display'], cid_number)
-                _set_reverse_lookup_variable(agi, lookup_result['fields'])
-    except Exception:
-        logger.exception('Reverse lookup failed')
+        # It is not possible to associate a profile to a reverse configuration in the webi
+        lookup_result = dird_client.directories.reverse(
+            profile='default',
+            xivo_user_uuid=xivo_user_uuid,
+            exten=cid_number,
+            tenant_uuid=tenant_uuid,
+        )
+        logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
+        if lookup_result['display'] is not None:
+            _set_new_caller_id(agi, lookup_result['display'], cid_number)
+            _set_reverse_lookup_variable(agi, lookup_result['fields'])
+    except Exception as e:
+        msg = 'Reverse lookup failed: {}'.format(e)
+        logger.info(msg)
+        agi.verbose(msg)
 
 
 def _should_reverse_lookup(cid_name, cid_number):

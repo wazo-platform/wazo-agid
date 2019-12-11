@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+# Copyright 2019 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+import unittest
+import ConfigParser
+import StringIO
+
+from hamcrest import assert_that, calling, not_, raises
+from mock import Mock
+
+from .. import getring
+
+DEFAULT_CONFIG = '''\
+[number]
+;101@context = <section>
+;@context = <section>
+;!102@context = 1
+'''
+
+
+class TestGetRing(unittest.TestCase):
+    def setUp(self):
+        self.agi = Mock()
+        self.cursor = Mock()
+
+    def test_that_no_number_config_does_not_raise(self):
+        self._set_config(DEFAULT_CONFIG)
+        variables = {
+            'XIVO_REAL_NUMBER': '1001',
+            'XIVO_REAL_CONTEXT': 'default',
+            'XIVO_FWD_REFERER': 'foo:bar',
+        }
+        self.agi.get_variable.side_effect = lambda var: variables.get(var)
+
+        assert_that(
+            calling(getring.getring).with_args(self.agi, self.cursor, []),
+            not_(raises(Exception)),
+        )
+
+    def _set_config(self, content):
+        file_ = StringIO.StringIO(content)
+
+        getring.CONFIG_PARSER = ConfigParser.RawConfigParser()
+        getring.CONFIG_PARSER.readfp(file_)
