@@ -12,7 +12,7 @@ class GroupFeatures(Handler):
         Handler.__init__(self, agi, cursor, args)
         self._id = None
         self._referer = None
-        self._number = None
+        self._exten = None
         self._context = None
         self._name = None
         self._timeout = None
@@ -43,18 +43,25 @@ class GroupFeatures(Handler):
         self._id = int(self._agi.get_variable(dialplan_variables.DESTINATION_ID))
         self._referer = self._agi.get_variable(dialplan_variables.FWD_REFERER)
 
-        groupfeatures_columns = ('id', 'number', 'context', 'name',
+        groupfeatures_columns = ('id', 'name',
                                  'timeout', 'transfer_user', 'transfer_call',
                                  'write_caller', 'write_calling', 'ignore_forward',
                                  'preprocess_subroutine')
         queue_columns = ('musicclass',)
-        columns = ["groupfeatures." + c for c in groupfeatures_columns] + ["queue." + c for c in queue_columns]
+        extensions_columns = ('exten', 'context')
+        columns = (
+            ["groupfeatures." + c for c in groupfeatures_columns] +
+            ["queue." + c for c in queue_columns] +
+            ["extensions." + c for c in extensions_columns]
+        )
 
         self._cursor.query("SELECT ${columns} FROM groupfeatures "
                            "INNER JOIN queue "
                            "ON groupfeatures.name = queue.name "
+                           "LEFT JOIN extensions "
+                           "ON groupfeatures.id::text = extensions.typeval "
+                           "AND extensions.type = 'group' "
                            "WHERE groupfeatures.id = %s "
-                           "AND groupfeatures.deleted = 0 "
                            "AND queue.category = 'group' "
                            "AND queue.commented = 0",
                            columns,
@@ -64,8 +71,8 @@ class GroupFeatures(Handler):
         if not res:
             raise LookupError("Unable to find group (id: %s)" % (self._id))
 
-        self._number = res['groupfeatures.number']
-        self._context = res['groupfeatures.context']
+        self._exten = res['extensions.exten']
+        self._context = res['extensions.context']
         self._name = res['groupfeatures.name']
         self._timeout = res['groupfeatures.timeout']
         self._transfer_user = res['groupfeatures.transfer_user']
@@ -77,7 +84,7 @@ class GroupFeatures(Handler):
         self._musicclass = res['queue.musicclass']
 
     def _set_vars(self):
-        self._agi.set_variable('XIVO_REAL_NUMBER', self._number)
+        self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
         self._agi.set_variable('XIVO_REAL_CONTEXT', self._context)
         self._agi.set_variable('XIVO_GROUPNAME', self._name)
         if self._musicclass:
