@@ -62,7 +62,6 @@ class GroupFeatures(Handler):
                            "ON groupfeatures.id::text = extensions.typeval "
                            "AND extensions.type = 'group' "
                            "WHERE groupfeatures.id = %s "
-                           "AND groupfeatures.deleted = 0 "
                            "AND queue.category = 'group' "
                            "AND queue.commented = 0",
                            columns,
