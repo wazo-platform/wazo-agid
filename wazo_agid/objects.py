@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2007-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2007-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -649,8 +649,7 @@ class DialAction(object):
         cursor.query("SELECT ${columns} FROM dialaction "
                      "WHERE event = %s "
                      "AND category = %s "
-                     "AND " + cursor.cast('categoryval', 'int') + " = %s "
-                     "AND linked = 1",
+                     "AND " + cursor.cast('categoryval', 'int') + " = %s ",
                      ('action', 'actionarg1', 'actionarg2'),
                      (event, category, categoryval))
         res = cursor.fetchone()
