@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid.handlers.handler import Handler
@@ -46,7 +46,7 @@ class GroupFeatures(Handler):
         groupfeatures_columns = ('id', 'name',
                                  'timeout', 'transfer_user', 'transfer_call',
                                  'write_caller', 'write_calling', 'ignore_forward',
-                                 'preprocess_subroutine')
+                                 'preprocess_subroutine', 'mark_answered_elsewhere')
         queue_columns = ('musicclass',)
         extensions_columns = ('exten', 'context')
         columns = (
@@ -82,6 +82,7 @@ class GroupFeatures(Handler):
         self._ignore_forward = res['groupfeatures.ignore_forward']
         self._preprocess_subroutine = res['groupfeatures.preprocess_subroutine']
         self._musicclass = res['queue.musicclass']
+        self._mark_answered_elsewhere = res['groupfeatures.mark_answered_elsewhere']
 
     def _set_vars(self):
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
@@ -112,6 +113,9 @@ class GroupFeatures(Handler):
         if not self._musicclass:
             options += "r"
             needanswer = "0"
+
+        if self._mark_answered_elsewhere:
+            options += "C"
 
         self._agi.set_variable('XIVO_GROUPOPTIONS', options)
         self._agi.set_variable('XIVO_GROUPNEEDANSWER', needanswer)

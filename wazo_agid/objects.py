@@ -489,7 +489,7 @@ class Queue(object):
             'transfer_user', 'transfer_call', 'write_caller',
             'write_calling', 'ignore_forward', 'url', 'announceoverride', 'timeout',
             'preprocess_subroutine', 'announce_holdtime', 'waittime',
-            'waitratio'
+            'waitratio', 'mark_answered_elsewhere'
         ]
         queuefeatures_columns = ["queuefeatures." + c for c in queuefeatures_columns]
         queue_columns = ['queue.wrapuptime', 'queue.musicclass']
@@ -548,6 +548,7 @@ class Queue(object):
         self.waitratio = res['queuefeatures.waitratio']
         self.wrapuptime = res['queue.wrapuptime']
         self.musiconhold = res['queue.musicclass']
+        self.mark_answered_elsewhere = res['queuefeatures.mark_answered_elsewhere']
 
     def set_dial_actions(self):
         for event in ['congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio']:

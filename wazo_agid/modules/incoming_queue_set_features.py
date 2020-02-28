@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid import agid
@@ -48,6 +48,9 @@ def incoming_queue_set_features(agi, cursor, args):
 
     if queue.ignore_forward:
         options += "i"
+
+    if queue.mark_answered_elsewhere:
+        options += "C"
 
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
