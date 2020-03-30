@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
@@ -47,7 +47,11 @@ class OutgoingFeatures(Handler):
 
     def _retrieve_user(self):
         try:
-            self.user = objects.User(self._agi, self._cursor, int(self.userid))
+            if not self.userid:
+                userid = self.useruuid
+            else:
+                userid = int(self.userid)
+            self.user = objects.User(self._agi, self._cursor, userid)
             if self.user.enablexfer:
                 self.options += 'T'
 
@@ -127,6 +131,7 @@ class OutgoingFeatures(Handler):
 
     def _extract_dialplan_variables(self):
         self.userid = self._agi.get_variable(dialplan_variables.USERID)
+        self.useruuid = self._agi.get_variable(dialplan_variables.USERUUID)
         self.dialpattern_id = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
         self.dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
         self.srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
