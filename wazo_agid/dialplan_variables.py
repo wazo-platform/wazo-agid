@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 BASE_CONTEXT = 'XIVO_BASE_CONTEXT'
@@ -23,3 +23,4 @@ TRUNK_SUFFIX = 'XIVO_TRUNKSUFFIX'
 FWD_REFERER = 'XIVO_FWD_REFERER'
 # ID of the caller
 USERID = 'XIVO_USERID'
+USERUUID = 'WAZO_USERUUID'
