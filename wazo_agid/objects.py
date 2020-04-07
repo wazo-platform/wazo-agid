@@ -906,37 +906,48 @@ CALLERIDNUM_MATCHER = re.compile('^\+?[0-9\*#]+$').match
 class CallerID(object):
     @staticmethod
     def parse(callerid):
+        logger.debug('caller_id parse: parsing "%s"', callerid)
         m = CALLERID_MATCHER(callerid)
 
         if not m:
+            logger.debug('caller_id parse: could not match callerid, giving up')
             return
 
         calleridname = m.group(1)
         calleridnum = m.group(3)
+        logger.debug('caller_id parse: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
 
         if calleridname is None:
             calleridname = m.group(2)
+            logger.debug('caller_id parse: using fallback calleridname: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
 
             if calleridnum is None and CALLERIDNUM_MATCHER(calleridname):
                 calleridnum = m.group(2)
+                logger.debug('caller_id parse: using fallback calleridnum: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
 
         return (calleridname, calleridnum)
 
     @staticmethod
     def set(agi, callerid):
+        logger.debug('caller_id set: parsing "%s"', callerid)
         cid_parsed = CallerID.parse(callerid)
 
         if not cid_parsed:
+            logger.debug('caller_id set: parsing result: "%s", giving up', cid_parsed)
             return
 
         calleridname, calleridnum = cid_parsed
+        logger.debug('caller_id set: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
 
         if calleridname is None and calleridnum is not None:
             calleridname = calleridnum
+            logger.debug('caller_id set: using calleridnum as calleridname: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
 
         if calleridname is not None and calleridnum is None:
+            logger.debug('caller_id set: applying calleridname only: calleridname: "%s"', calleridname)
             agi.set_variable('CALLERID(name)', calleridname)
         else:
+            logger.debug('caller_id set: applying callerid name and num: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
             agi.set_variable('CALLERID(all)', '"%s" <%s>' % (calleridname, calleridnum))
 
         return True
