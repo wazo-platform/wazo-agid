@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -114,6 +114,7 @@ class UserFeatures(Handler):
                 self._agi.dp_break(str(e))
             else:
                 self._agi.set_variable('XIVO_DST_USERNUM', self.main_extension.exten)
+                self._agi.set_variable('WAZO_DST_USER_CONTEXT', self.main_extension.context)
 
     def _set_user(self):
         if self._dstid:
