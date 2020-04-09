@@ -69,15 +69,21 @@ class OutgoingFeatures(Handler):
 
     def _set_caller_id(self):
         if self.outcall.internal:
+            logger.debug('%s: _set_caller_id: skipping caller id update: outcall set to internal caller ID', self._agi.env['agi_channel'])
             return
 
         if self.user is None or self.user.outcallerid == 'default':
             if self.outcall.callerid:
+                logger.debug('%s: _set_caller_id: using outcall caller ID', self._agi.env['agi_channel'])
                 objects.CallerID.set(self._agi, self.outcall.callerid)
+            else:
+                logger.debug('%s: _set_caller_id: using user default caller ID', self._agi.env['agi_channel'])
         elif self.user.outcallerid == 'anonymous':
+            logger.debug('%s: _set_caller_id: using anonymous caller ID', self._agi.env['agi_channel'])
             self._agi.set_variable('CALLERID(name-pres)', 'prohib')
             self._agi.set_variable('CALLERID(num-pres)', 'prohib')
         else:
+            logger.debug('%s: _set_caller_id: using user outgoing caller ID', self._agi.env['agi_channel'])
             objects.CallerID.set(self._agi, self.user.outcallerid)
 
     def _set_trunk_info(self):
