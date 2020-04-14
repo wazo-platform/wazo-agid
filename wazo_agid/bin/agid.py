@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
@@ -31,8 +31,9 @@ _DEFAULT_CONFIG = {
     'auth': {
         'host': 'localhost',
         'port': 9497,
+        'prefix': None,
+        'https': False,
         'key_file': '/var/lib/wazo-auth-keys/wazo-agid-key.yml',
-        'verify_certificate': '/usr/share/xivo-certs/server.crt'
     },
     'user': 'wazo-agid',
     'debug': False,
