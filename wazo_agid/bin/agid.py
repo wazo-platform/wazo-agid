@@ -68,11 +68,11 @@ def main():
 
     xivo_dao.init_db_from_config(config)
 
-    token_renewer = TokenRenewer(_new_auth_client(config))
+    token_renewer = TokenRenewer(AuthClient(**config['auth']))
     config['agentd']['client'] = AgentdClient(**config['agentd'])
     config['confd']['client'] = ConfdClient(**config['confd'])
     config['dird']['client'] = DirdClient(**config['dird'])
-    config['auth']['client'] = _new_auth_client(config)
+    config['auth']['client'] = AuthClient(**config['auth'])
 
     def on_token_change(token_id):
         config['agentd']['client'].set_token(token_id)
@@ -113,17 +113,8 @@ def _parse_args():
 
 def _load_key_file(config):
     key_file = parse_config_file(config['auth']['key_file'])
-    return {'auth': {'service_id': key_file['service_id'],
-                     'service_key': key_file['service_key']}}
-
-
-def _new_auth_client(config):
-    auth_config = config['auth']
-    return AuthClient(auth_config['host'],
-                      port=auth_config['port'],
-                      username=auth_config['service_id'],
-                      password=auth_config['service_key'],
-                      verify_certificate=auth_config['verify_certificate'])
+    return {'auth': {'username': key_file['service_id'],
+                     'password': key_file['service_key']}}
 
 
 if __name__ == '__main__':
