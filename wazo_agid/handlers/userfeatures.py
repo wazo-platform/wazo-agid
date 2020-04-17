@@ -159,10 +159,11 @@ class UserFeatures(Handler):
 
     def _set_xivo_user_name(self):
         if self._user:
-            if self._user.firstname:
-                self._agi.set_variable('XIVO_DST_FIRSTNAME', self._user.firstname)
-            if self._user.lastname:
-                self._agi.set_variable('XIVO_DST_LASTNAME', self._user.lastname)
+            wazo_dst_name = '{firstname} {lastname}'.format(
+                firstname=self._user.firstname if self._user.firstname else '',
+                lastname=self._user.lastname if self._user.lastname else '',
+            )
+            self._agi.set_variable('WAZO_DST_NAME', wazo_dst_name.strip())
 
     def _set_wazo_uuid(self):
         if self._user:

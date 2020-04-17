@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -318,7 +318,7 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_xivo_user_name()
 
-        self.assertEqual(self._agi.set_variable.call_count, 2)
+        self.assertEqual(self._agi.set_variable.call_count, 1)
 
     def test_set_xivo_redirecting_info_full_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
