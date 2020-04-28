@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid import agid
@@ -22,6 +22,7 @@ def incoming_did_set_features(agi, cursor, args):
     agi.set_variable('XIVO_PATH_ID', did.id)
     agi.set_variable('XIVO_REAL_CONTEXT', did.context)
     agi.set_variable('XIVO_REAL_NUMBER', did.exten)
+    agi.set_variable('WAZO_GREETING_SOUND', did.greeting_sound or '')
 
     did.set_dial_actions()
     did.rewrite_cid()

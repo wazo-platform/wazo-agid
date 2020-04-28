@@ -710,7 +710,7 @@ class DID(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'exten', 'context', 'preprocess_subroutine')
+        columns = ('id', 'exten', 'context', 'preprocess_subroutine', 'greeting_sound')
 
         if xid:
             cursor.query("SELECT ${columns} FROM incall "
@@ -738,6 +738,7 @@ class DID(object):
         self.exten = res['exten']
         self.context = res['context']
         self.preprocess_subroutine = res['preprocess_subroutine']
+        self.greeting_sound = res['greeting_sound']
 
     def set_dial_actions(self):
         DialAction(self.agi, self.cursor, "answer", "incall", self.id).set_variables()
