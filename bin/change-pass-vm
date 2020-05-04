@@ -14,7 +14,6 @@ from wazo_auth_client import Client as AuthClient
 from wazo_confd_client import Client as ConfdClient
 
 
-_DEFAULT_CERT_FILE = '/usr/share/xivo-certs/server.crt'
 _DEFAULT_CONFIG = {
     'config_file': '/etc/wazo-agid/config.yml',
     'extra_config_files': '/etc/wazo-agid/conf.d/',
@@ -27,7 +26,8 @@ _DEFAULT_CONFIG = {
     'confd': {
         'host': 'localhost',
         'port': 9486,
-        'verify_certificate': _DEFAULT_CERT_FILE,
+        'prefix': None,
+        'https': False,
     },
 }
 _HARD_CODED_CONFIG = {

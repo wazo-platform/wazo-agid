@@ -35,6 +35,12 @@ _DEFAULT_CONFIG = {
         'https': False,
         'key_file': '/var/lib/wazo-auth-keys/wazo-agid-key.yml',
     },
+    'confd': {
+        'host': 'localhost',
+        'port': 9486,
+        'prefix': None,
+        'https': False,
+    },
     'user': 'wazo-agid',
     'debug': False,
     'foreground': False,
