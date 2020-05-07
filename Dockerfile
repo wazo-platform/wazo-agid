@@ -38,4 +38,4 @@ RUN rm -rf /usr/src/agid
 
 EXPOSE 4573
 
-CMD ["wazo-agid", "-fd"]
+CMD ["wazo-agid", "-d"]

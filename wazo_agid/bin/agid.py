@@ -21,6 +21,7 @@ from wazo_agentd_client import Client as AgentdClient
 from wazo_agid import agid
 from wazo_agid.modules import *
 
+FOREGROUND = True  # Always in foreground systemd takes care of daemonizing
 _DEFAULT_CONFIG = {
     'dird': {
         'host': 'localhost',
@@ -43,7 +44,6 @@ _DEFAULT_CONFIG = {
     },
     'user': 'wazo-agid',
     'debug': False,
-    'foreground': False,
     'pidfile': '/run/wazo-agid/wazo-agid.pid',
     'logfile': '/var/log/wazo-agid.log',
     'listen_port': 4573,
@@ -65,7 +65,7 @@ def main():
     key_config = _load_key_file(ChainMap(cli_config, file_config, _DEFAULT_CONFIG))
     config = ChainMap(cli_config, key_config, file_config, _DEFAULT_CONFIG)
 
-    setup_logging(config['logfile'], config['foreground'], config['debug'])
+    setup_logging(config['logfile'], FOREGROUND, config['debug'])
     silence_loggers(['urllib3'], logging.WARNING)
 
     user = config.get('user')
@@ -87,7 +87,7 @@ def main():
         config['auth']['client'].set_token(token_id)
     token_renewer.subscribe_to_token_change(on_token_change)
 
-    with pidfile_context(config['pidfile'], config['foreground']):
+    with pidfile_context(config['pidfile'], FOREGROUND):
         agid.init(config)
         with token_renewer:
             agid.run()
@@ -96,8 +96,6 @@ def main():
 def _parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config-file', action='store', help='The path to the config file')
-    parser.add_argument('-f', action='store_true', dest='foreground',
-                        help='run in foreground')
     parser.add_argument('-d', action='store_true', dest='debug',
                         help='increase verbosity')
     parser.add_argument('-u', '--user', action='store', help='User to run the daemon')
@@ -109,8 +107,6 @@ def _parse_args():
         config['config_file'] = parsed_args.config_file
     if parsed_args.debug:
         config['debug'] = parsed_args.debug
-    if parsed_args.foreground:
-        config['foreground'] = parsed_args.foreground
     if parsed_args.user:
         config['user'] = parsed_args.user
 
