@@ -34,8 +34,9 @@ agentd:
 dird:
   host: localhost
   port: 9489
+  prefix: null
+  https: false
   timeout: 1
-  verify_certificate: /usr/share/xivo-certs/server.crt
 
 # wazo-auth connection informations.
 auth:

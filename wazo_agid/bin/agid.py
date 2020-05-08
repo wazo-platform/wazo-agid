@@ -26,8 +26,9 @@ _DEFAULT_CONFIG = {
     'dird': {
         'host': 'localhost',
         'port': 9489,
+        'prefix': None,
+        'https': False,
         'timeout': 1,
-        'verify_certificate': '/usr/share/xivo-certs/server.crt'
     },
     'auth': {
         'host': 'localhost',
