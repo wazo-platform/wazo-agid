@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -26,15 +26,15 @@ def callerid_forphones(agi, cursor, args):
         incall_id = int(agi.get_variable('XIVO_INCALL_ID'))
         callee_infos = directory_profile_dao.find_by_incall_id(incall_id)
         if callee_infos is None:
-            xivo_user_uuid = FAKE_XIVO_USER_UUID
+            user_uuid = FAKE_XIVO_USER_UUID
         else:
-            xivo_user_uuid = callee_infos.xivo_user_uuid
+            user_uuid = callee_infos.xivo_user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
         # It is not possible to associate a profile to a reverse configuration in the webi
         lookup_result = dird_client.directories.reverse(
             profile='default',
-            xivo_user_uuid=xivo_user_uuid,
+            user_uuid=user_uuid,
             exten=cid_number,
             tenant_uuid=tenant_uuid,
         )
