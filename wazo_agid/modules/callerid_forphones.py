@@ -4,7 +4,6 @@
 
 import logging
 
-from requests.exceptions import RequestException
 from wazo_agid import agid
 from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
