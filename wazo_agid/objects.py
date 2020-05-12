@@ -1082,29 +1082,6 @@ class ChanIAX2(object):
         return ("IAX2/%s" % res['name'], None)
 
 
-class ChanSCCP(object):
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def get_intf_and_suffix(cursor, category, xid):
-        """NOTE: category is ignored as for now, sccp channel can only be a user
-        """
-        cursor.query("SELECT ${columns} FROM usersccp u, sccpline l "
-                     "WHERE u.id = %s "
-                     "AND u.defaultline = l.id "
-                     "AND u.commented = 0",
-                     ('l.name',),
-                     (xid,))
-        res = cursor.fetchone()
-
-        if not res:
-            raise LookupError("Unable to find usersccp entry (category: %s, id: %s)" % (category, xid))
-
-        return ("SCCP/%s" % res['l.name'], None)
-
-
 class ChanCustom(object):
 
     def __init__(self):
@@ -1134,7 +1111,6 @@ class ChanCustom(object):
 CHAN_PROTOCOL = {
     'sip': ChanSIP,
     'iax': ChanIAX2,
-    'sccp': ChanSCCP,
     'custom': ChanCustom,
 }
 
