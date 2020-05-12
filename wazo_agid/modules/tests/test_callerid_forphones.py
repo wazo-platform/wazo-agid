@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -40,7 +40,7 @@ class TestCallerIdForPhone(unittest.TestCase):
             'agi_callerid': '5555551234',
         }
         self.dird_client.directories.reverse.return_value = {'display': None}
-        mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'xivo_user_uuid'
+        mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'user_uuid'
 
         self.agi.get_variable.side_effect = [0, sentinel.agi_variable]
 
@@ -48,7 +48,7 @@ class TestCallerIdForPhone(unittest.TestCase):
 
         self.dird_client.directories.reverse.assert_called_once_with(
             profile='default',
-            xivo_user_uuid='xivo_user_uuid',
+            user_uuid='user_uuid',
             exten=self.agi.env['agi_callerid'],
             tenant_uuid=sentinel.agi_variable,
         )
@@ -65,7 +65,7 @@ class TestCallerIdForPhone(unittest.TestCase):
         lookup_result = {'number': '415', 'firstname': 'Bob', 'lastname': 'wonderland'}
         self.dird_client.directories.reverse.return_value = {'display': 'Bob',
                                                              'fields': lookup_result}
-        mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'xivo_user_uuid'
+        mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'user_uuid'
 
         self.agi.get_variable.side_effect = [0, sentinel.agi_variable]
 
@@ -73,7 +73,7 @@ class TestCallerIdForPhone(unittest.TestCase):
 
         self.dird_client.directories.reverse.assert_called_once_with(
             profile='default',
-            xivo_user_uuid='xivo_user_uuid',
+            user_uuid='user_uuid',
             exten=self.agi.env['agi_callerid'],
             tenant_uuid=sentinel.agi_variable,
         )
@@ -100,7 +100,7 @@ class TestCallerIdForPhone(unittest.TestCase):
 
         self.dird_client.directories.reverse.assert_called_once_with(
             profile='default',
-            xivo_user_uuid=FAKE_XIVO_USER_UUID,
+            user_uuid=FAKE_XIVO_USER_UUID,
             exten=self.agi.env['agi_callerid'],
             tenant_uuid=sentinel.agi_variable,
         )
