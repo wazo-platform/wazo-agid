@@ -688,7 +688,7 @@ class Trunk(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('protocol', 'protocolid')
+        columns = ('endpoint_sip_id', 'endpoint_iax_id', 'endpoint_custom_id')
 
         cursor.query("SELECT ${columns} FROM trunkfeatures "
                      "WHERE id = %s",
@@ -700,13 +700,15 @@ class Trunk(object):
             raise LookupError("Unable to find trunk (id: %d)" % xid)
 
         self.id = xid
-        self.protocol = res['protocol']
-        self.protocolid = res['protocolid']
 
-        (self.interface, self.intfsuffix) = protocol_intf_and_suffix(cursor,
-                                                                     self.protocol,
-                                                                     'trunk',
-                                                                     self.protocolid)
+        if res['endpoint_sip_id']:
+            (self.interface, self.intfsuffix) = ChanSIP.get_intf_and_suffix(cursor, res['endpoint_sip_id'])
+        elif res['endpoint_iax_id']:
+            (self.interface, self.intfsuffix) = ChanIAX.get_intf_and_suffix(cursor, res['endpoint_iax_id'])
+        elif res['endpoint_custom_id']:
+            (self.interface, self.intfsuffix) = ChanCUSTOM.get_intf_and_suffix(cursor, res['endpoint_custom_id'])
+        else:
+            raise ValueError("Unknown protocol %r" % protocol)
 
 
 class DID(object):
@@ -1044,18 +1046,17 @@ class ChanSIP(object):
         pass
 
     @staticmethod
-    def get_intf_and_suffix(cursor, category, xid):
+    def get_intf_and_suffix(cursor, xid):
 
         cursor.query("SELECT ${columns} FROM usersip "
                      "WHERE id = %s "
-                     "AND category = %s "
                      "AND commented = 0",
                      ('name',),
-                     (xid, category))
+                     (xid,))
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find usersip entry (category: %s, id: %s)" % (category, xid))
+            raise LookupError("Unable to find usersip entry (id: {})".format(xid))
 
         return ("SIP/%s" % res['name'], None)
 
@@ -1066,18 +1067,17 @@ class ChanIAX2(object):
         pass
 
     @staticmethod
-    def get_intf_and_suffix(cursor, category, xid):
+    def get_intf_and_suffix(cursor, xid):
 
         cursor.query("SELECT ${columns} FROM useriax "
                      "WHERE id = %s "
-                     "AND category = %s "
                      "AND commented = 0",
                      ('name',),
-                     (xid, category))
+                     (xid,))
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find useriax entry (category: %s, id: %s)" % (category, xid))
+            raise LookupError("Unable to find useriax entry (id: {})".format(xid))
 
         return ("IAX2/%s" % res['name'], None)
 
@@ -1088,39 +1088,20 @@ class ChanCustom(object):
         pass
 
     @staticmethod
-    def get_intf_and_suffix(cursor, category, xid):
+    def get_intf_and_suffix(cursor, xid):
 
         cursor.query("SELECT ${columns} FROM usercustom "
                      "WHERE id = %s "
-                     "AND category = %s "
                      "AND commented = 0",
                      ('interface', 'intfsuffix'),
-                     (xid, category))
+                     (xid,))
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find usercustom entry (category: %s, id: %s)" % (category, xid))
+            raise LookupError("Unable to find usercustom entry (id: {})".format(xid))
 
         # In case the suffix is the integer 0, bool(intfsuffix)
         # returns False though there is a suffix. Casting it to
         # a string prevents such an error.
 
         return (res['interface'], str(res['intfsuffix']))
-
-
-CHAN_PROTOCOL = {
-    'sip': ChanSIP,
-    'iax': ChanIAX2,
-    'custom': ChanCustom,
-}
-
-
-def protocol_intf_and_suffix(cursor, protocol, category, xid):
-    """
-    Lookup by protocol, category, xid and return the interface and interface suffix.
-    On error, raise LookupError, ValueError, or an exception coming from the SQL backend.
-    """
-    if protocol in CHAN_PROTOCOL:
-        return CHAN_PROTOCOL[protocol].get_intf_and_suffix(cursor, category, xid)
-    else:
-        raise ValueError("Unknown protocol %r" % protocol)
