@@ -23,6 +23,12 @@ from wazo_agid.modules import *
 
 FOREGROUND = True  # Always in foreground systemd takes care of daemonizing
 _DEFAULT_CONFIG = {
+    'agentd': {
+        'host': 'localhost',
+        'port': 9493,
+        'prefix': None,
+        'https': False,
+    },
     'dird': {
         'host': 'localhost',
         'port': 9489,
