@@ -28,7 +28,9 @@ listen_port: 4573
 # wazo-agentd connection informations.
 agentd:
   host: localhost
-  verify_certificate: /usr/share/xivo-certs/server.crt
+  port: 9493
+  prefix: null
+  https: false
 
 # wazo-dird connection informations.
 dird:
