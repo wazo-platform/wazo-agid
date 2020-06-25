@@ -704,7 +704,7 @@ class Trunk(object):
         if res['endpoint_sip_id']:
             (self.interface, self.intfsuffix) = ChanSIP.get_intf_and_suffix(cursor, res['endpoint_sip_id'])
         elif res['endpoint_iax_id']:
-            (self.interface, self.intfsuffix) = ChanIAX.get_intf_and_suffix(cursor, res['endpoint_iax_id'])
+            (self.interface, self.intfsuffix) = ChanIAX2.get_intf_and_suffix(cursor, res['endpoint_iax_id'])
         elif res['endpoint_custom_id']:
             (self.interface, self.intfsuffix) = ChanCUSTOM.get_intf_and_suffix(cursor, res['endpoint_custom_id'])
         else:
