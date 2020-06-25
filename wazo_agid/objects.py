@@ -706,7 +706,7 @@ class Trunk(object):
         elif res['endpoint_iax_id']:
             (self.interface, self.intfsuffix) = ChanIAX2.get_intf_and_suffix(cursor, res['endpoint_iax_id'])
         elif res['endpoint_custom_id']:
-            (self.interface, self.intfsuffix) = ChanCUSTOM.get_intf_and_suffix(cursor, res['endpoint_custom_id'])
+            (self.interface, self.intfsuffix) = ChanCustom.get_intf_and_suffix(cursor, res['endpoint_custom_id'])
         else:
             raise ValueError("Unknown protocol %r" % protocol)
 
