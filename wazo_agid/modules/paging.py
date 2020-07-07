@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -54,7 +54,7 @@ def paging(agi, cursor, args):
     if paging_entry.ignore:
         paging_opts = paging_opts + 'i'
 
-    if paging_entry.announcement_play:
+    if paging_entry.announcement_play and paging_entry.announcement_file:
         announcement_file_name = os.path.join('/var/lib/wazo/sounds/tenants',
                                               paging_entry.tenant_uuid,
                                               'playback',
