@@ -37,34 +37,41 @@ def paging(agi, cursor, args):
 
     agi.set_variable('XIVO_PAGING_LINES', paging_line)
     agi.set_variable('XIVO_PAGING_TIMEOUT', paging_entry.timeout)
+    agi.set_variable('XIVO_PAGING_OPTS', build_options(paging_entry))
 
+
+def build_options(paging):
     # s = call phones only if not busy
     # b = Gosub for each destination channels
     paging_opts = 'sb(paging^add-sip-headers^1)'
 
-    if paging_entry.duplex:
+    if paging.duplex:
         paging_opts = paging_opts + 'd'
 
-    if paging_entry.quiet:
+    if paging.quiet:
         paging_opts = paging_opts + 'q'
 
-    if paging_entry.record:
+    if paging.record:
         paging_opts = paging_opts + 'r'
 
-    if paging_entry.ignore:
+    if paging.ignore:
         paging_opts = paging_opts + 'i'
 
-    if paging_entry.announcement_play and paging_entry.announcement_file:
-        announcement_file_name = os.path.join('/var/lib/wazo/sounds/tenants',
-                                              paging_entry.tenant_uuid,
-                                              'playback',
-                                              paging_entry.announcement_file)
-        paging_opts = paging_opts + 'A({file_name})'.format(file_name=announcement_file_name)
+    if paging.announcement_play and paging.announcement_file:
+        sound_file_directory='/var/lib/wazo/sounds/tenants'
+        announcement_file_name = os.path.join(
+            sound_file_directory,
+            paging.tenant_uuid,
+            'playback',
+            paging.announcement_file,
+        )
 
-    if paging_entry.announcement_caller:
+        paging_opts = paging_opts + u'A({file_name})'.format(file_name=announcement_file_name)
+
+    if paging.announcement_caller:
         paging_opts = paging_opts + 'n'
 
-    agi.set_variable('XIVO_PAGING_OPTS', paging_opts)
+    return paging_opts
 
 
 agid.register(paging)
