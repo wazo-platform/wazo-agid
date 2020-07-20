@@ -71,6 +71,7 @@ class UserFeatures(Handler):
         self._set_mobile_number()
         self._set_vmbox_lang()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
+        self._is_video_call()
 
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
@@ -474,3 +475,9 @@ class UserFeatures(Handler):
             return True
 
         return False
+
+    def _is_video_call(self):
+        self._agi.set_variable('WAZO_VIDEO_CALL', False)
+        video = self._agi.get_variable('CHANNEL(videonativeformat)')
+        if not 'nothing' in video:
+            self._agi.set_variable('WAZO_VIDEO_CALL', True)

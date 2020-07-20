@@ -11,7 +11,8 @@ def wake_mobile(agi, cursor, args):
         return
 
     user_uuid = agi.get_variable('WAZO_DST_UUID')
-    agi.appexec('UserEvent', 'Pushmobile,WAZO_DST_UUID: {}'.format(user_uuid))
+    video = agi.get_variable('WAZO_VIDEO_CALL')
+    agi.appexec('UserEvent', 'Pushmobile,WAZO_DST_UUID: {},WAZO_VIDEO_CALL: {}'.format(user_uuid, video))
 
 
 agid.register(wake_mobile)
