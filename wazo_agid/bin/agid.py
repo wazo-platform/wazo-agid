@@ -12,7 +12,6 @@ from wazo_dird_client import Client as DirdClient
 from xivo.chain_map import ChainMap
 from xivo.config_helper import parse_config_file
 from xivo.config_helper import read_config_file_hierarchy
-from xivo.daemonize import pidfile_context
 from xivo.token_renewer import TokenRenewer
 from xivo.user_rights import change_user
 from xivo.xivo_logging import setup_logging, silence_loggers
@@ -21,7 +20,6 @@ from wazo_agentd_client import Client as AgentdClient
 from wazo_agid import agid
 from wazo_agid.modules import *
 
-FOREGROUND = True  # Always in foreground systemd takes care of daemonizing
 _DEFAULT_CONFIG = {
     'agentd': {
         'host': 'localhost',
@@ -51,7 +49,6 @@ _DEFAULT_CONFIG = {
     },
     'user': 'wazo-agid',
     'debug': False,
-    'pidfile': '/run/wazo-agid/wazo-agid.pid',
     'logfile': '/var/log/wazo-agid.log',
     'listen_port': 4573,
     'listen_address': '127.0.0.1',
@@ -72,7 +69,7 @@ def main():
     key_config = _load_key_file(ChainMap(cli_config, file_config, _DEFAULT_CONFIG))
     config = ChainMap(cli_config, key_config, file_config, _DEFAULT_CONFIG)
 
-    setup_logging(config['logfile'], FOREGROUND, config['debug'])
+    setup_logging(config['logfile'], debug=config['debug'])
     silence_loggers(['urllib3'], logging.WARNING)
 
     user = config.get('user')
@@ -94,10 +91,9 @@ def main():
         config['auth']['client'].set_token(token_id)
     token_renewer.subscribe_to_token_change(on_token_change)
 
-    with pidfile_context(config['pidfile'], FOREGROUND):
-        agid.init(config)
-        with token_renewer:
-            agid.run()
+    agid.init(config)
+    with token_renewer:
+        agid.run()
 
 
 def _parse_args():
