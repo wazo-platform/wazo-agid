@@ -2,12 +2,13 @@
 Description=wazo-agid server
 ConditionPathExists=!/var/lib/wazo/disabled
 After=network.target postgresql.service
-Before=monit.service
+StartLimitBurst=15
+StartLimitIntervalSec=150
 
 [Service]
-ExecStartPre=/usr/bin/install -d -o wazo-agid -g wazo-agid /run/wazo-agid
 ExecStart=/usr/bin/wazo-agid
-PIDFile=/run/wazo-agid/wazo-agid.pid
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

@@ -32,20 +32,6 @@ case "$1" in
             rmdir --ignore-fail-on-non-empty /var/lib/xivo-agid
         fi
 
-        # move files from xivo-agid
-        if [ -f /var/log/xivo-agid.log ] ; then
-            rename 's/xivo-agid/wazo-agid/g' /var/log/xivo-agid.log*
-        fi
-        rm -rf /run/xivo-agid
-        if [ -d /etc/xivo-agid/conf.d ] ; then
-            find /etc/xivo-agid/conf.d/ -mindepth 1 -exec mv {} /etc/wazo-agid/conf.d/ \;
-            rmdir --ignore-fail-on-non-empty -p /etc/xivo-agid/conf.d
-        fi
-        if getent passwd xivo-agid > /dev/null; then
-            deluser --quiet --system --remove-home xivo-agid
-        fi
-        # End of move files from xivo-agid
-
         # setup permissions for the log file
         if [ ! -e "$LOG_FILENAME" ]; then
             touch "$LOG_FILENAME"
