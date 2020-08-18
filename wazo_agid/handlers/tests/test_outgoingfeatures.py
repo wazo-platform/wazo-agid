@@ -42,6 +42,7 @@ class UserBuilder(object):
         self._caller_id = '"John"'
         self._out_caller_id = 'default'
         self._userfield = None
+        self._musiconhold = None
 
     def withCallerId(self, caller_id):
         self._caller_id = caller_id
@@ -63,11 +64,16 @@ class UserBuilder(object):
         self._userfield = userfield
         return self
 
+    def withMoh(self, moh):
+        self._musiconhold = moh
+        return self
+
     def build(self):
         user = Mock(objects.User)
         user.callerid = self._caller_id
         user.outcallerid = self._out_caller_id
         user.userfield = self._userfield
+        user.musiconhold = self._musiconhold
         return user
 
 
@@ -121,6 +127,36 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.outgoing_features.outcall = outcall
 
         self.outgoing_features._set_userfield()
+
+    def test_set_user_music_on_hold(self):
+        moh = 'a-moh'
+        user = a_user().withMoh(moh).build()
+        outcall = an_outcall().build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_user_music_on_hold()
+
+        self._agi.set_variable.assert_called_once_with('CHANNEL(musicclass)', moh)
+
+    def test_set_user_music_on_hold_empty(self):
+        user = a_user().build()
+        outcall = an_outcall().build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_user_music_on_hold()
+
+        assert_that(self._agi.set_variable.call_count, equal_to(0), 'Set variable call count')
+
+    def test_set_user_music_on_hold_no_user_no_error(self):
+        outcall = an_outcall().build()
+
+        self.outgoing_features.outcall = outcall
+
+        self.outgoing_features._set_user_music_on_hold()
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_outcall_internal(self, mock_set_caller_id):
