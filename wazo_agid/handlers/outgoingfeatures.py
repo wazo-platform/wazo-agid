@@ -67,6 +67,10 @@ class OutgoingFeatures(Handler):
         if self.user and self.user.userfield:
             self._agi.set_variable('CHANNEL(userfield)', self.user.userfield)
 
+    def _set_user_music_on_hold(self):
+        if self.user and self.user.musiconhold:
+            self._agi.set_variable('CHANNEL(musicclass)', self.user.musiconhold)
+
     def _set_caller_id(self):
         if self.outcall.internal:
             logger.debug('%s: _set_caller_id: skipping caller id update: outcall set to internal caller ID', self._agi.env['agi_channel'])
@@ -150,6 +154,7 @@ class OutgoingFeatures(Handler):
         self._set_destination_number()
         self._retrieve_user()
         self._set_userfield()
+        self._set_user_music_on_hold()
         self._set_caller_id()
         self._set_trunk_info()
         self._set_record_file_name()
