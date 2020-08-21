@@ -688,27 +688,28 @@ class Trunk(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('endpoint_sip_id', 'endpoint_iax_id', 'endpoint_custom_id')
+        columns = ('endpoint_sip_uuid', 'endpoint_iax_id', 'endpoint_custom_id')
 
         cursor.query("SELECT ${columns} FROM trunkfeatures "
                      "WHERE id = %s",
                      columns,
                      (xid,))
         res = cursor.fetchone()
+        self.agi.verbose('res {}'.format(res))
 
         if not res:
             raise LookupError("Unable to find trunk (id: %d)" % xid)
 
         self.id = xid
 
-        if res['endpoint_sip_id']:
-            (self.interface, self.intfsuffix) = ChanSIP.get_intf_and_suffix(cursor, res['endpoint_sip_id'])
+        if res['endpoint_sip_uuid']:
+            (self.interface, self.intfsuffix) = ChanSIP.get_intf_and_suffix(cursor, res['endpoint_sip_uuid'])
         elif res['endpoint_iax_id']:
             (self.interface, self.intfsuffix) = ChanIAX2.get_intf_and_suffix(cursor, res['endpoint_iax_id'])
         elif res['endpoint_custom_id']:
             (self.interface, self.intfsuffix) = ChanCustom.get_intf_and_suffix(cursor, res['endpoint_custom_id'])
         else:
-            raise ValueError("Unknown protocol %r" % protocol)
+            raise ValueError("Unknown protocol for trunk {}".format(xid))
 
 
 class DID(object):
@@ -1042,29 +1043,22 @@ class CallerID(object):
 
 class ChanSIP(object):
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def get_intf_and_suffix(cursor, xid):
-
-        cursor.query("SELECT ${columns} FROM usersip "
-                     "WHERE id = %s "
-                     "AND commented = 0",
-                     ('name',),
-                     (xid,))
+        cursor.query(
+            "SELECT ${columns} FROM endpoint_sip WHERE uuid = %s",
+            ('name',),
+            (xid,),
+        )
         res = cursor.fetchone()
 
         if not res:
             raise LookupError("Unable to find usersip entry (id: {})".format(xid))
 
-        return ("SIP/%s" % res['name'], None)
+        return 'PJSIP/{}'.format(res['name']), None
 
 
 class ChanIAX2(object):
-
-    def __init__(self):
-        pass
 
     @staticmethod
     def get_intf_and_suffix(cursor, xid):
@@ -1083,9 +1077,6 @@ class ChanIAX2(object):
 
 
 class ChanCustom(object):
-
-    def __init__(self):
-        pass
 
     @staticmethod
     def get_intf_and_suffix(cursor, xid):
