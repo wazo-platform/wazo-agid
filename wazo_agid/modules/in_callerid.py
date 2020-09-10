@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
@@ -48,7 +48,7 @@ def in_callerid(agi, cursor, args):
                 callerid_num = add + callerid_num
 
         if same_cid:
-            agi.set_callerid(callerid_num)
+            agi.set_variable('CALLERID(all)', '"{num}" <{num}>'.format(num=callerid_num))
         else:
             agi.set_variable('CALLERID(num)', callerid_num)
 
