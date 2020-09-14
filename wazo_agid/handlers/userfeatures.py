@@ -70,6 +70,7 @@ class UserFeatures(Handler):
         self._set_preprocess_subroutine()
         self._set_mobile_number()
         self._set_vmbox_lang()
+        self._set_video_enabled()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
 
     def _set_members(self):
@@ -474,3 +475,8 @@ class UserFeatures(Handler):
             return True
 
         return False
+
+    def _set_video_enabled(self):
+        native_video_format = self._agi.get_variable('CHANNEL(videonativeformat)')
+        is_video_enabled = '0' if native_video_format == '(nothing)' else '1'
+        self._agi.set_variable('WAZO_VIDEO_ENABLED', is_video_enabled)
