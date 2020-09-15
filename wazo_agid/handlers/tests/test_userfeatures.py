@@ -395,6 +395,14 @@ class TestUserFeatures(_BaseTestCase):
 
         self._agi.set_variable.assert_called_once_with(name, value)
 
+    def test_set_video_enabled(self):
+        user_features = UserFeatures(self._agi, self._cursor, self._args)
+        self._variables['CHANNEL(videonativeformat)'] = '(vp9)'
+
+        user_features._set_video_enabled()
+
+        assert_that(self._agi.set_variable.called_once_with('WAZO_VIDEO_ENABLED', '1'))
+
 
 class TestSetForwardNoAnswer(_BaseTestCase):
 
