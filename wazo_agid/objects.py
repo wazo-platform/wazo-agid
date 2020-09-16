@@ -834,9 +834,9 @@ class ScheduleDataMapper(object):
         timezone = res['timezone']
         if not timezone:
             columns = ('timezone',)
-            cursor.query("SELECT ${columns} FROM general", columns)
-            general = cursor.fetchone()
-            timezone = general['timezone']
+            cursor.query("SELECT ${columns} FROM infos", columns)
+            infos = cursor.fetchone()
+            timezone = infos['timezone']
 
         default_action = ScheduleAction(res['fallback_action'],
                                         res['fallback_actionid'],
