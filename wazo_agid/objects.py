@@ -206,7 +206,7 @@ class Paging(object):
         if not res:
             raise LookupError("Unable to find paging caller entry (userfeaturesid: %s)" % (userid,))
 
-        columns = ('endpoint_sip_id', 'endpoint_sccp_id', 'endpoint_custom_id', 'name')
+        columns = ('endpoint_sip_uuid', 'endpoint_sccp_id', 'endpoint_custom_id', 'name')
 
         cursor.query("SELECT ${columns} FROM paginguser "
                      "JOIN user_line ON paginguser.userfeaturesid = user_line.user_id "
@@ -221,7 +221,7 @@ class Paging(object):
             raise LookupError("Unable to find paging users entry (id: %s)" % (id,))
 
         for l in res:
-            if l['endpoint_sip_id']:
+            if l['endpoint_sip_uuid']:
                 line = 'SIP/{}'.format(l['name'])
             elif l['endpoint_sccp_id']:
                 line = 'SCCP/{}/autoanswer'.format(l['name'])
