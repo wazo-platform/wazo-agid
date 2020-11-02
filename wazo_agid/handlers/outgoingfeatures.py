@@ -32,6 +32,7 @@ class OutgoingFeatures(Handler):
         self.options = ""
         self._context = None
         self.outcall = objects.Outcall(self._agi, self._cursor)
+        self._tenant_uuid = None
 
     def _retrieve_outcall(self):
         try:
@@ -121,6 +122,7 @@ class OutgoingFeatures(Handler):
             'local_time': time.asctime(time.localtime()),
             'utc_time': time.asctime(time.gmtime()),
             'base_context': self._context,
+            'tenant_uuid': self._tenant_uuid,
         }
         return self._call_recording_name_generator.generate(args)
 
@@ -146,6 +148,7 @@ class OutgoingFeatures(Handler):
         self.srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self.orig_dstnum = self.dstnum
         self._context = self._agi.get_variable(dialplan_variables.BASE_CONTEXT)
+        self._tenant_uuid = self._agi.get_variable(dialplan_variables.TENANT_UUID)
 
     def execute(self):
         self._extract_dialplan_variables()
