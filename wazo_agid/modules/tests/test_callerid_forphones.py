@@ -34,6 +34,19 @@ class TestCallerIdForPhone(unittest.TestCase):
         assert_that(self.dird_client.directories.reverse.call_count, equal_to(0))
 
     @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
+    def test_callerid_forphones_on_unknown_cid_name(self, _):
+        # Some operators send "unknown" in the caller id name
+        self.agi.env = {
+            'agi_calleridname': 'unknown',
+            'agi_callerid': '5555551234',
+        }
+        self.dird_client.directories.reverse.return_value = {'display': None}
+
+        callerid_forphones(self.agi, Mock(), Mock())
+
+        assert_that(self.dird_client.directories.reverse.call_count, equal_to(1))
+
+    @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_no_result(self, mock_dao):
         self.agi.env = {
             'agi_calleridname': '5555551234',
