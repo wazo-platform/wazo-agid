@@ -48,7 +48,7 @@ def callerid_forphones(agi, cursor, args):
 
 
 def _should_reverse_lookup(cid_name, cid_number):
-    return cid_name == cid_number
+    return cid_name == cid_number or cid_name == 'unknown'
 
 
 def _set_new_caller_id(agi, display_name, cid_number):
