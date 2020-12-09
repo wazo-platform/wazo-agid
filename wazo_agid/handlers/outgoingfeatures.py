@@ -111,13 +111,6 @@ class OutgoingFeatures(Handler):
         self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if self.callrecord else '0')
 
     def _set_record_file_name(self):
-        callrecordfile = self._build_call_record_file_name() or ''
-        self._agi.set_variable(dialplan_variables.CALL_RECORD_FILE_NAME, callrecordfile)
-
-    def _build_call_record_file_name(self):
-        if not self.callrecord:
-            return
-
         args = {
             'srcnum': self.srcnum,
             'dstnum': self.orig_dstnum,
@@ -127,7 +120,8 @@ class OutgoingFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': self._tenant_uuid,
         }
-        return self._call_recording_name_generator.generate(args)
+        callrecordfile = self._call_recording_name_generator.generate(args)
+        self._agi.set_variable(dialplan_variables.CALL_RECORD_FILE_NAME, callrecordfile)
 
     def _set_preprocess_subroutine(self):
         if self.outcall.preprocess_subroutine:
