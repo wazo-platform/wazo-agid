@@ -156,6 +156,16 @@ class TestUserFeatures(_BaseTestCase):
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
 
+    def test_set_call_record_enabled_doesnt_raise_when_caller_is_none(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        userfeatures._user = Mock()
+        userfeatures._user.callrecord = False
+        userfeatures._context = 'default'
+
+        userfeatures._set_call_record_active()
+
+        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+
     @patch('wazo_agid.handlers.userfeatures.context_dao')
     def test_set_call_recordfile_doesnt_raise_when_caller_is_none(self, context_dao):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)

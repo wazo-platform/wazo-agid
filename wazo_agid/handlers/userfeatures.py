@@ -66,6 +66,7 @@ class UserFeatures(Handler):
         self._set_dial_action_congestion()
         self._set_dial_action_chanunavail()
         self._set_music_on_hold()
+        self._set_call_record_enabled()
         self._set_call_recordfile()
         self._set_preprocess_subroutine()
         self._set_mobile_number()
@@ -314,6 +315,10 @@ class UserFeatures(Handler):
         else:
             preprocess_subroutine = ""
         self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
+
+    def _set_call_record_enabled(self):
+        should_record = self._user.callrecord or (self._caller and self._caller.callrecord)
+        self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if should_record else '0')
 
     def _set_call_recordfile(self):
         callrecordfile = self._build_call_record_file_name() or ''
