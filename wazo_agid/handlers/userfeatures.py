@@ -321,14 +321,6 @@ class UserFeatures(Handler):
         self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if should_record else '0')
 
     def _set_call_recordfile(self):
-        callrecordfile = self._build_call_record_file_name() or ''
-        self._agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
-
-    def _build_call_record_file_name(self):
-        should_record = self._user.callrecord or (self._caller and self._caller.callrecord)
-        if not should_record:
-            return
-
         args = {
             'srcnum': self._srcnum,
             'dstnum': self._dstnum,
@@ -338,7 +330,8 @@ class UserFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': context_dao.get(self._context).tenant_uuid,
         }
-        return self._call_recording_name_generator.generate(args)
+        callrecordfile = self._call_recording_name_generator.generate(args)
+        self._agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:
