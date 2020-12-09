@@ -331,7 +331,7 @@ class UserFeatures(Handler):
             'tenant_uuid': context_dao.get(self._context).tenant_uuid,
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('XIVO_CALLRECORDFILE', callrecordfile)
+        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:

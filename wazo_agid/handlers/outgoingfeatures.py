@@ -121,7 +121,7 @@ class OutgoingFeatures(Handler):
             'tenant_uuid': self._tenant_uuid,
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable(dialplan_variables.CALL_RECORD_FILE_NAME, callrecordfile)
+        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
 
     def _set_preprocess_subroutine(self):
         if self.outcall.preprocess_subroutine:
