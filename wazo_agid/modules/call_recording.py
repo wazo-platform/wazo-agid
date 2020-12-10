@@ -8,14 +8,6 @@ from wazo_agid import agid
 logger = logging.getLogger(__name__)
 
 
-class RecordingForbidden(Exception):
-
-    def __init__(self, user_id, firstname, lastname):
-        self.user_id = user_id
-        self.firstname = firstname
-        self.lastname = lastname
-
-
 def call_recording(agi, cursor, args):
     if agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1':
         _disable_call_recording(agi, cursor, args)
