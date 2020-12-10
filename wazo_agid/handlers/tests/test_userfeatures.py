@@ -162,7 +162,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._user.callrecord = False
         userfeatures._context = 'default'
 
-        userfeatures._set_call_record_active()
+        userfeatures._set_call_record_enabled()
 
         self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
 
