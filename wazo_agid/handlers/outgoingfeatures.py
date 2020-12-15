@@ -107,14 +107,10 @@ class OutgoingFeatures(Handler):
                 intfsuffix = ""
             self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_SUFFIX, i), intfsuffix)
 
+    def _set_record_enabled(self):
+        self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if self.callrecord else '0')
+
     def _set_record_file_name(self):
-        callrecordfile = self._build_call_record_file_name() or ''
-        self._agi.set_variable(dialplan_variables.CALL_RECORD_FILE_NAME, callrecordfile)
-
-    def _build_call_record_file_name(self):
-        if not self.callrecord:
-            return
-
         args = {
             'srcnum': self.srcnum,
             'dstnum': self.orig_dstnum,
@@ -124,7 +120,8 @@ class OutgoingFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': self._tenant_uuid,
         }
-        return self._call_recording_name_generator.generate(args)
+        callrecordfile = self._call_recording_name_generator.generate(args)
+        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
 
     def _set_preprocess_subroutine(self):
         if self.outcall.preprocess_subroutine:
@@ -159,6 +156,7 @@ class OutgoingFeatures(Handler):
         self._set_user_music_on_hold()
         self._set_caller_id()
         self._set_trunk_info()
+        self._set_record_enabled()
         self._set_record_file_name()
         self._set_preprocess_subroutine()
         self._set_hangup_ring_time()

@@ -156,17 +156,15 @@ class TestUserFeatures(_BaseTestCase):
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
 
-    @patch('wazo_agid.handlers.userfeatures.context_dao')
-    def test_set_call_recordfile_doesnt_raise_when_caller_is_none(self, context_dao):
+    def test_set_call_record_enabled_doesnt_raise_when_caller_is_none(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock()
-        userfeatures._user.callrecord = True
+        userfeatures._user.callrecord = False
         userfeatures._context = 'default'
 
-        userfeatures._set_call_recordfile()
+        userfeatures._set_call_record_enabled()
 
-        self._agi.set_variable.assert_called_once_with('XIVO_CALLRECORDFILE',
-                                                       NotEmptyStringMatcher())
+        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
 
     @patch('wazo_agid.handlers.userfeatures.extension_dao')
     @patch('wazo_agid.handlers.userfeatures.line_extension_dao')
