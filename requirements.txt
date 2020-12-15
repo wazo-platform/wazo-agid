@@ -5,7 +5,7 @@ https://github.com/wazo-platform/wazo-confd-client/archive/master.zip
 https://github.com/wazo-platform/xivo-dao/archive/master.zip
 https://github.com/wazo-platform/wazo-dird-client/archive/master.zip
 https://github.com/wazo-platform/xivo-lib-python/archive/master.zip
-jinja2==2.10
+jinja2==2.10.1
 psycopg2==2.7.7
 pytz==2019.1
 pyyaml==3.13  # from xivo-lib-python
