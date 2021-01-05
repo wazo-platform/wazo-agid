@@ -170,7 +170,20 @@ class Paging(object):
         self.cursor = cursor
         self.lines = set()
 
-        columns = ('id','number', 'duplex', 'ignore', 'record', 'quiet', 'timeout', 'announcement_file', 'announcement_play', 'announcement_caller', 'commented', 'tenant_uuid')
+        columns = (
+            'id',
+            'number',
+            'duplex',
+            'ignore',
+            'record',
+            'quiet',
+            'timeout',
+            'announcement_file',
+            'announcement_play',
+            'announcement_caller',
+            'commented',
+            'tenant_uuid',
+        )
 
         cursor.query("SELECT ${columns} FROM paging "
                      "WHERE number = %s "
@@ -220,13 +233,13 @@ class Paging(object):
         if not res:
             raise LookupError("Unable to find paging users entry (id: %s)" % (id,))
 
-        for l in res:
-            if l['endpoint_sip_uuid']:
-                line = 'SIP/{}'.format(l['name'])
-            elif l['endpoint_sccp_id']:
-                line = 'SCCP/{}/autoanswer'.format(l['name'])
-            elif l['endpoint_custom_id']:
-                line = 'CUSTOM/{}'.format(l['name'])
+        for line in res:
+            if line['endpoint_sip_uuid']:
+                line = 'SIP/{}'.format(line['name'])
+            elif line['endpoint_sccp_id']:
+                line = 'SCCP/{}/autoanswer'.format(line['name'])
+            elif line['endpoint_custom_id']:
+                line = 'CUSTOM/{}'.format(line['name'])
             else:
                 raise LookupError("Unable to find protocol for user (id: %s)" % (id,))
 
@@ -418,7 +431,7 @@ class MeetMe(object):
             self.starttime = None
 
         for name, value in res.iteritems():
-            if name not in('staticmeetme.var_val', 'extensions.exten'):
+            if name not in ('staticmeetme.var_val', 'extensions.exten'):
                 setattr(self, name.split('.', 1)[1], value)
 
         self.options = ()
