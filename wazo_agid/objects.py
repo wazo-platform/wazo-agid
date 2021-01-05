@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2007-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2007-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -717,22 +717,36 @@ class DID(object):
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'exten', 'context', 'preprocess_subroutine', 'greeting_sound')
+        columns = (
+            'incall.id',
+            'incall.preprocess_subroutine',
+            'incall.greeting_sound',
+            'extensions.exten',
+            'extensions.context',
+        )
 
         if xid:
-            cursor.query("SELECT ${columns} FROM incall "
-                         "WHERE id = %s "
-                         "AND commented = 0",
-                         columns,
-                         (xid,))
+            cursor.query(
+                "SELECT ${columns} FROM incall "
+                "JOIN extensions ON extensions.type = 'incall' "
+                "AND extensions.typeval = CAST(incall.id AS VARCHAR(255)) "
+                "WHERE incall.id = %s "
+                "AND incall.commented = 0 AND extensions.commented = 0",
+                columns,
+                (xid,),
+            )
         elif exten and context:
             contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM incall "
-                         "WHERE exten = %s "
-                         "AND context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND commented = 0",
-                         columns,
-                         [exten] + contextinclude)
+            cursor.query(
+                "SELECT ${columns} FROM incall "
+                "JOIN extensions ON extensions.type = 'incall' "
+                "AND extensions.typeval = CAST(incall.id AS VARCHAR(255)) "
+                "WHERE extensions.exten = %s "
+                "AND extensions.context IN (%s) "
+                "AND incall.commented = 0 AND extensions.commented = 0",
+                columns,
+                (exten, ','.join(contextinclude)),
+            )
         else:
             raise LookupError("id or exten@context must be provided to look up a DID entry")
 
@@ -741,11 +755,11 @@ class DID(object):
         if not res:
             raise LookupError("Unable to find DID entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
 
-        self.id = res['id']
-        self.exten = res['exten']
-        self.context = res['context']
-        self.preprocess_subroutine = res['preprocess_subroutine']
-        self.greeting_sound = res['greeting_sound']
+        self.id = res['incall.id']
+        self.exten = res['extensions.exten']
+        self.context = res['extensions.context']
+        self.preprocess_subroutine = res['incall.preprocess_subroutine']
+        self.greeting_sound = res['incall.greeting_sound']
 
     def set_dial_actions(self):
         DialAction(self.agi, self.cursor, "answer", "incall", self.id).set_variables()
