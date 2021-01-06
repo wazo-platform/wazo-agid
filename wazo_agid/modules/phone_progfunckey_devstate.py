@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2009-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2009-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from xivo.xivo_helpers import fkey_extension
@@ -50,7 +50,7 @@ def phone_progfunckey_devstate(agi, cursor, args):
         agi.verbose("Invalid feature: %r" % feature)
         return
 
-    forwards = dict(extenfeatures.FEATURES['forwards'])
+    forwards = extenfeatures.FEATURES['forwards']
     services_api = ['incallfilter', 'enablednd']
     if feature in forwards or feature in services_api:
         return

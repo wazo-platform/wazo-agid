@@ -23,22 +23,28 @@ class DBUpdateException(Exception):
 
 class ExtenFeatures(object):
     FEATURES = {
-        'agents': (('agentstaticlogin',),
-                   ('agentstaticlogoff',),
-                   ('agentstaticlogtoggle',)),
-
-        'forwards': (('fwdbusy', 'busy'),
-                     ('fwdrna', 'rna'),
-                     ('fwdunc', 'unc')),
-
-        'groupmember': (('groupmemberjoin',),
-                        ('groupmemberleave',),
-                        ('groupmembertoggle',)),
-
-        'services': (('enablevm', 'enablevoicemail'),
-                     ('callrecord', 'callrecord'),
-                     ('incallfilter', 'incallfilter'),
-                     ('enablednd', 'enablednd'))}
+        'agents': (
+            'agentstaticlogin',
+            'agentstaticlogoff',
+            'agentstaticlogtoggle',
+        ),
+        'forwards': (
+            'fwdbusy',
+            'fwdrna',
+            'fwdunc',
+        ),
+        'groupmember': (
+            'groupmemberjoin',
+            'groupmemberleave',
+            'groupmembertoggle',
+        ),
+        'services': (
+            'enablevm',
+            'callrecord',
+            'incallfilter',
+            'enablednd',
+        )
+    }
 
     def __init__(self, agi, cursor):
         self.agi = agi
@@ -48,7 +54,7 @@ class ExtenFeatures(object):
 
         for xtype in self.FEATURES.itervalues():
             for x in xtype:
-                featureslist.append(x[0])
+                featureslist.append(x)
 
         self.featureslist = tuple(featureslist)
 
