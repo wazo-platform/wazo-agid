@@ -514,7 +514,7 @@ class Queue(object):
         columns = queuefeatures_columns + queue_columns
 
         if not queue_id:
-            raise LookupError("id or must be provided to look up a queue")
+            raise LookupError("id must be provided to look up a queue")
 
         cursor.query(
             "SELECT ${columns} FROM queuefeatures "
