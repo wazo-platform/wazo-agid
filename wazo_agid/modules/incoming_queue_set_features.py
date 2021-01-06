@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid import agid
@@ -7,12 +7,12 @@ from wazo_agid import objects
 
 
 def incoming_queue_set_features(agi, cursor, args):
-    queueid = agi.get_variable('XIVO_DSTID')
+    queue_id = agi.get_variable('XIVO_DSTID')
     referer = agi.get_variable('XIVO_FWD_REFERER')
 
     try:
-        queue = objects.Queue(agi, cursor, xid=int(queueid))
-    except (ValueError, LookupError), e:
+        queue = objects.Queue(agi, cursor, int(queue_id))
+    except (ValueError, LookupError) as e:
         agi.dp_break(str(e))
 
     options = ""
@@ -102,10 +102,10 @@ def _set_wrapup_time(agi, queue):
 
 
 def holdtime_announce(agi, cursor, args):
-    queueid = agi.get_variable('XIVO_DSTID')
+    queue_id = agi.get_variable('XIVO_DSTID')
     try:
-        queue = objects.Queue(agi, cursor, xid=int(queueid))
-    except (ValueError, LookupError), e:
+        queue = objects.Queue(agi, cursor, int(queue_id))
+    except (ValueError, LookupError) as e:
         agi.dp_break(str(e))
 
     if queue.announce_holdtime != 1:
