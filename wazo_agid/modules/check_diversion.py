@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2010-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2010-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid import agid
@@ -7,10 +7,10 @@ from wazo_agid import objects
 
 
 def check_diversion(agi, cursor, args):
-    queueid = agi.get_variable('XIVO_DSTID')
+    queue_id = agi.get_variable('XIVO_DSTID')
     try:
-        queue = objects.Queue(agi, cursor, xid=int(queueid))
-    except (ValueError, LookupError), e:
+        queue = objects.Queue(agi, cursor, int(queue_id))
+    except (ValueError, LookupError) as e:
         agi.dp_break(str(e))
 
     waiting_calls = int(agi.get_variable('QUEUE_WAITING_COUNT({})'.format(queue.name)))

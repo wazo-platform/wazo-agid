@@ -496,7 +496,7 @@ class MeetMe(object):
 
 
 class Queue(object):
-    def __init__(self, agi, cursor, xid=None, number=None, context=None):
+    def __init__(self, agi, cursor, queue_id):
         self.agi = agi
         self.cursor = cursor
 
@@ -513,33 +513,24 @@ class Queue(object):
 
         columns = queuefeatures_columns + queue_columns
 
-        if xid:
-            cursor.query("SELECT ${columns} FROM queuefeatures "
-                         "INNER JOIN queue "
-                         "ON queuefeatures.name = queue.name "
-                         "WHERE queuefeatures.id = %s "
-                         "AND queue.commented = 0 "
-                         "AND queue.category = 'queue'",
-                         columns,
-                         (xid,))
-        elif number and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM queuefeatures "
-                         "INNER JOIN queue "
-                         "ON queuefeatures.name = queue.name "
-                         "WHERE queuefeatures.number = %s "
-                         "AND queuefeatures.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") "
-                         "AND queue.commented = 0 "
-                         "AND queue.category = 'queue'",
-                         columns,
-                         [number] + contextinclude)
-        else:
-            raise LookupError("id or number@context must be provided to look up a queue")
+        if not queue_id:
+            raise LookupError("id must be provided to look up a queue")
+
+        cursor.query(
+            "SELECT ${columns} FROM queuefeatures "
+            "INNER JOIN queue "
+            "ON queuefeatures.name = queue.name "
+            "WHERE queuefeatures.id = %s "
+            "AND queue.commented = 0 "
+            "AND queue.category = 'queue'",
+            columns,
+            (queue_id,),
+        )
 
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find queue (id: %s, number: %s, context: %s)" % (xid, number, context))
+            raise LookupError("Unable to find queue (id: %s)" % (queue_id,))
 
         self.id = res['queuefeatures.id']
         self.tenant_uuid = res['queuefeatures.tenant_uuid']
