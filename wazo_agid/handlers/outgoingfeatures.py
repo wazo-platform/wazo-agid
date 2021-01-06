@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
 import logging
-
-from xivo_dao import context_dao
 
 from wazo_agid import dialplan_variables
 from wazo_agid.handlers.handler import Handler
@@ -59,7 +57,7 @@ class OutgoingFeatures(Handler):
             if not self.outcall.internal:
                 if self.user.enableonlinerec:
                     self.options += "X"
-                self.callrecord = self.user.callrecord
+                self.callrecord = self.user.call_record_outgoing_external_enabled
         except (ValueError, LookupError):
             logger.debug('Could not retrieve user %s', self.userid)
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)

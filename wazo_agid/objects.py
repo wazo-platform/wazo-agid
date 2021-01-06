@@ -317,11 +317,15 @@ class User(object):
         self.preprocess_subroutine = user_row.preprocess_subroutine
         self.bsfilter = user_row.bsfilter
         self.rightcallcode = user_row.rightcallcode
+        self.call_record_outgoing_external_enabled = user_row.call_record_outgoing_external_enabled
+        self.call_record_outgoing_internal_enabled = user_row.call_record_outgoing_internal_enabled
+        self.call_record_incoming_external_enabled = user_row.call_record_incoming_external_enabled
+        self.call_record_incoming_internal_enabled = user_row.call_record_incoming_internal_enabled
         self.call_record_enabled = all((
-            user_row.call_record_outgoing_external_enabled,
-            user_row.call_record_outgoing_internal_enabled,
-            user_row.call_record_incoming_external_enabled,
-            user_row.call_record_incoming_internal_enabled,
+            self.call_record_outgoing_external_enabled,
+            self.call_record_outgoing_internal_enabled,
+            self.call_record_incoming_external_enabled,
+            self.call_record_incoming_internal_enabled,
         ))
 
         if self.destunc == '':
