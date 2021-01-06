@@ -339,20 +339,25 @@ class User(object):
             self.enablevoicemail = 0
 
     def toggle_feature(self, feature):
-        if feature not in ("enablevoicemail", "callrecord"):
+        if feature == 'enablevoicemail':
+            enabled = int(not self.enablevoicemail)
+            self.cursor.query(
+                "UPDATE userfeatures SET enablevoicemail = %s WHERE id = %s",
+                parameters=(enabled, self.id),
+            )
+            self.enablevoicemail = enabled
+        elif feature == 'callrecord':
+            enabled = int(not self.callrecord)
+            self.cursor.query(
+                "UPDATE userfeatures SET callrecord = %s WHERE id = %s",
+                parameters=(enabled, self.id),
+            )
+            self.callrecord = enabled
+        else:
             raise ValueError("invalid feature")
-
-        enabled = int(not getattr(self, feature))
-
-        self.cursor.query("UPDATE userfeatures "
-                          "SET %s = %%s "
-                          "WHERE id = %%s" % feature,
-                          parameters=(enabled, self.id))
 
         if self.cursor.rowcount != 1:
             raise DBUpdateException("Unable to perform the requested update")
-        else:
-            setattr(self, feature, enabled)
 
 
 class MeetMe(object):
