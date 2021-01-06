@@ -726,9 +726,12 @@ class Trunk(object):
 
 
 class DID(object):
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None):
+    def __init__(self, agi, cursor, incall_id):
         self.agi = agi
         self.cursor = cursor
+
+        if not incall_id:
+            raise LookupError("id must be provided to look up a DID entry")
 
         columns = (
             'incall.id',
@@ -738,35 +741,20 @@ class DID(object):
             'extensions.context',
         )
 
-        if xid:
-            cursor.query(
-                "SELECT ${columns} FROM incall "
-                "JOIN extensions ON extensions.type = 'incall' "
-                "AND extensions.typeval = CAST(incall.id AS VARCHAR(255)) "
-                "WHERE incall.id = %s "
-                "AND incall.commented = 0 AND extensions.commented = 0",
-                columns,
-                (xid,),
-            )
-        elif exten and context:
-            contextinclude = Context(agi, cursor, context).include
-            cursor.query(
-                "SELECT ${columns} FROM incall "
-                "JOIN extensions ON extensions.type = 'incall' "
-                "AND extensions.typeval = CAST(incall.id AS VARCHAR(255)) "
-                "WHERE extensions.exten = %s "
-                "AND extensions.context IN (%s) "
-                "AND incall.commented = 0 AND extensions.commented = 0",
-                columns,
-                (exten, ','.join(contextinclude)),
-            )
-        else:
-            raise LookupError("id or exten@context must be provided to look up a DID entry")
+        cursor.query(
+            "SELECT ${columns} FROM incall "
+            "JOIN extensions ON extensions.type = 'incall' "
+            "AND extensions.typeval = CAST(incall.id AS VARCHAR(255)) "
+            "WHERE incall.id = %s "
+            "AND incall.commented = 0 AND extensions.commented = 0",
+            columns,
+            (incall_id,),
+        )
 
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find DID entry (id: %s, exten: %s, context: %s)" % (xid, exten, context))
+            raise LookupError("Unable to find DID entry (id: %s)" % (incall_id,))
 
         self.id = res['incall.id']
         self.exten = res['extensions.exten']
