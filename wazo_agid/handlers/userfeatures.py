@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -112,7 +112,7 @@ class UserFeatures(Handler):
                     line = line_dao.find_by(id=line_extension.line_id)  # XXX Should use get_by
                     self.lines.append(line)
 
-            except (ValueError, LookupError), e:
+            except (ValueError, LookupError) as e:
                 self._agi.dp_break(str(e))
             else:
                 self._agi.set_variable('XIVO_DST_USERNUM', self.main_extension.exten)
@@ -122,7 +122,7 @@ class UserFeatures(Handler):
         if self._dstid:
             try:
                 self._user = objects.User(self._agi, self._cursor, int(self._dstid))
-            except (ValueError, LookupError), e:
+            except (ValueError, LookupError) as e:
                 self._agi.dp_break(str(e))
             self._set_xivo_user_name()
             self._set_xivo_redirecting_info()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2008-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2008-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import signal
@@ -90,7 +90,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
         # just give up.
         # XXX It may be here that dropping database connection
         # exceptions could be catched.
-        except fastagi.FastAGIDialPlanBreak, message:
+        except fastagi.FastAGIDialPlanBreak as message:
             logger.info("invalid request, dial plan broken")
 
             try:

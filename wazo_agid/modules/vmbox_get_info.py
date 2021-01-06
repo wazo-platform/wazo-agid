@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -23,7 +23,7 @@ def vmbox_get_info(agi, cursor, args):
                 agi.dp_break('Could not get the context of the caller')
 
             vmbox = objects.VMBox(agi, cursor, mailbox=args[0], context=context)
-        except (ValueError, LookupError), e:
+        except (ValueError, LookupError) as e:
             logger.error('Error while retrieving vmbox from number and context',
                          exc_info=True)
             agi.dp_break(str(e))
@@ -31,7 +31,7 @@ def vmbox_get_info(agi, cursor, args):
         try:
             vmboxid = int(agi.get_variable('XIVO_VMBOXID'))
             vmbox = objects.VMBox(agi, cursor, vmboxid)
-        except (ValueError, LookupError), e:
+        except (ValueError, LookupError) as e:
             logger.error('Error while retrieving vmbox from id',
                          exc_info=True)
             agi.dp_break(str(e))
