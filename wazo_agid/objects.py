@@ -306,7 +306,6 @@ class User(object):
         self.enablexfer = user_row.enablexfer
         self.dtmf_hangup = user_row.dtmf_hangup
         self.enableonlinerec = user_row.enableonlinerec
-        self.callrecord = user_row.callrecord
         self.incallfilter = user_row.incallfilter
         self.enablednd = user_row.enablednd
         self.enableunc = user_row.enableunc
@@ -318,6 +317,12 @@ class User(object):
         self.preprocess_subroutine = user_row.preprocess_subroutine
         self.bsfilter = user_row.bsfilter
         self.rightcallcode = user_row.rightcallcode
+        self.call_record_enabled = all((
+            user_row.call_record_outgoing_external_enabled,
+            user_row.call_record_outgoing_internal_enabled,
+            user_row.call_record_incoming_external_enabled,
+            user_row.call_record_incoming_internal_enabled,
+        ))
 
         if self.destunc == '':
             self.enableunc = 0
@@ -347,12 +352,23 @@ class User(object):
             )
             self.enablevoicemail = enabled
         elif feature == 'callrecord':
-            enabled = int(not self.callrecord)
+            enabled = not self.call_record_enabled
             self.cursor.query(
-                "UPDATE userfeatures SET callrecord = %s WHERE id = %s",
-                parameters=(enabled, self.id),
+                "UPDATE userfeatures SET "
+                "call_record_outgoing_external_enabled = %s, "
+                "call_record_outgoing_internal_enabled = %s, "
+                "call_record_incoming_external_enabled = %s, "
+                "call_record_incoming_internal_enabled = %s "
+                "WHERE id = %s",
+                parameters=(
+                    enabled,
+                    enabled,
+                    enabled,
+                    enabled,
+                    self.id
+                ),
             )
-            self.callrecord = enabled
+            self.call_record_enabled = enabled
         else:
             raise ValueError("invalid feature")
 
