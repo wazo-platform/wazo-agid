@@ -317,7 +317,13 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     def _set_call_record_enabled(self):
-        should_record = self._user.callrecord or (self._caller and self._caller.callrecord)
+        caller = self._caller  # NOTE(fblackburn): no caller means incoming external call
+        called = self._user
+        should_record = (
+            (caller and caller.call_record_outgoing_internal_enabled)
+            or (caller and called.call_record_incoming_internal_enabled)
+            or (not caller and called.call_record_incoming_external_enabled)
+        )
         self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if should_record else '0')
 
     def _set_call_recordfile(self):
