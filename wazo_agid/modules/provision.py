@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2011-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -44,7 +44,7 @@ def provision(agi, cursor, args):
         else:
             ip = ip_port
         _do_provision(client, provcode, ip)
-    except Exception, e:
+    except Exception as e:
         logger.error('Error during provisioning: %s', e)
     else:
         agi.set_variable('XIVO_PROV_OK', '1')

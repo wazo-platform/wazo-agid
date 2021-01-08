@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
@@ -42,7 +42,7 @@ def incoming_meetme_set_features(agi, cursor, args):
         meetme = objects.MeetMe(agi,
                                 cursor,
                                 int(xid))
-    except (ValueError, LookupError), e:
+    except (ValueError, LookupError) as e:
         agi.dp_break(str(e))
 
     if not conf_is_open(meetme.starttime, meetme.durationm):

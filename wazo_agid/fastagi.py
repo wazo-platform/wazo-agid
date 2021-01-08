@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2004-2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2004-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Modifications by Proformatique from pyst-0.2:
@@ -131,7 +131,7 @@ class FastAGI(object):
         try:
             self.send_command(command, *args)
             return self.get_result()
-        except IOError, e:
+        except IOError as e:
             if e.errno == 32:
                 # Broken Pipe * let us go
                 raise FastAGISIGPIPEHangup("Received SIGPIPE")
@@ -152,7 +152,7 @@ class FastAGI(object):
         """
         try:
             self.send_command("failure to have pure code")
-        except IOError, e:
+        except IOError as e:
             if e.errno != 32:
                 raise
 

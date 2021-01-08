@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -20,8 +20,18 @@ def phone_get_features(agi, cursor, args):
     _set_current_forwards(agi, user.id)
 
     for service in objects.ExtenFeatures.FEATURES['services']:
-        enable = bool(getattr(user, service[1], 0))
-        agi.set_variable("XIVO_%s" % service[1].upper(), int(enable))
+        if service == 'callrecord':
+            enabled = user.call_record_enabled
+            agi.set_variable("XIVO_CALLRECORD", int(enabled))
+        elif service == 'enablevm':
+            enabled = user.enablevoicemail
+            agi.set_variable("XIVO_ENABLEVOICEMAIL", int(enabled))
+        elif service == 'incallfilter':
+            enabled = user.incallfilter
+            agi.set_variable("XIVO_INCALLFILTER", int(enabled))
+        elif service == 'enablednd':
+            enabled = user.enablednd
+            agi.set_variable("XIVO_ENABLEDND", int(enabled))
 
 
 def _set_current_forwards(agi, user_id):

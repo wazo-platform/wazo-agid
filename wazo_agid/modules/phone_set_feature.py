@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -24,7 +24,7 @@ def phone_set_feature(agi, cursor, args):
 
     try:
         function(agi, cursor, args)
-    except LookupError, e:
+    except LookupError as e:
         agi.dp_break(str(e))
 
 
@@ -32,7 +32,7 @@ def _phone_set_callrecord(agi, cursor, args):
     calling_user = _get_calling_user(agi, cursor)
     calling_user.toggle_feature('callrecord')
 
-    agi.set_variable('XIVO_CALLRECORDENABLED', calling_user.callrecord)
+    agi.set_variable('XIVO_CALLRECORDENABLED', int(calling_user.call_record_enabled))
     agi.set_variable('XIVO_USERID_OWNER', calling_user.id)
 
 
@@ -48,7 +48,7 @@ def _phone_set_dnd(agi, cursor, args):
     try:
         user_id = _get_id_of_calling_user(agi)
         new_value = _user_set_service(agi, user_id, 'dnd')
-    except Exception, e:
+    except Exception as e:
         logger.error('Error during setting dnd : %s', e)
     else:
         agi.set_variable('XIVO_DNDENABLED', int(new_value['enabled']))
@@ -59,7 +59,7 @@ def _phone_set_incallfilter(agi, cursor, args):
     try:
         user_id = _get_id_of_calling_user(agi)
         new_value = _user_set_service(agi, user_id, 'incallfilter')
-    except Exception, e:
+    except Exception as e:
         logger.error('Error during setting incallfilter : %s', e)
     else:
         agi.set_variable('XIVO_INCALLFILTERENABLED', int(new_value['enabled']))
@@ -126,7 +126,7 @@ def _phone_set_forward(agi, forward_name, args):
     try:
         user_id = _get_id_of_calling_user(agi)
         result = _user_set_forward(agi, user_id, forward_name, args)
-    except Exception, e:
+    except Exception as e:
         logger.error('Error during setting %s: %s', forward_name, e)
         return None
     else:

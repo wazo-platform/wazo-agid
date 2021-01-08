@@ -23,22 +23,28 @@ class DBUpdateException(Exception):
 
 class ExtenFeatures(object):
     FEATURES = {
-        'agents': (('agentstaticlogin',),
-                   ('agentstaticlogoff',),
-                   ('agentstaticlogtoggle',)),
-
-        'forwards': (('fwdbusy', 'busy'),
-                     ('fwdrna', 'rna'),
-                     ('fwdunc', 'unc')),
-
-        'groupmember': (('groupmemberjoin',),
-                        ('groupmemberleave',),
-                        ('groupmembertoggle',)),
-
-        'services': (('enablevm', 'enablevoicemail'),
-                     ('callrecord', 'callrecord'),
-                     ('incallfilter', 'incallfilter'),
-                     ('enablednd', 'enablednd'))}
+        'agents': (
+            'agentstaticlogin',
+            'agentstaticlogoff',
+            'agentstaticlogtoggle',
+        ),
+        'forwards': (
+            'fwdbusy',
+            'fwdrna',
+            'fwdunc',
+        ),
+        'groupmember': (
+            'groupmemberjoin',
+            'groupmemberleave',
+            'groupmembertoggle',
+        ),
+        'services': (
+            'enablevm',
+            'callrecord',
+            'incallfilter',
+            'enablednd',
+        )
+    }
 
     def __init__(self, agi, cursor):
         self.agi = agi
@@ -48,7 +54,7 @@ class ExtenFeatures(object):
 
         for xtype in self.FEATURES.itervalues():
             for x in xtype:
-                featureslist.append(x[0])
+                featureslist.append(x)
 
         self.featureslist = tuple(featureslist)
 
@@ -306,7 +312,6 @@ class User(object):
         self.enablexfer = user_row.enablexfer
         self.dtmf_hangup = user_row.dtmf_hangup
         self.enableonlinerec = user_row.enableonlinerec
-        self.callrecord = user_row.callrecord
         self.incallfilter = user_row.incallfilter
         self.enablednd = user_row.enablednd
         self.enableunc = user_row.enableunc
@@ -318,6 +323,16 @@ class User(object):
         self.preprocess_subroutine = user_row.preprocess_subroutine
         self.bsfilter = user_row.bsfilter
         self.rightcallcode = user_row.rightcallcode
+        self.call_record_outgoing_external_enabled = user_row.call_record_outgoing_external_enabled
+        self.call_record_outgoing_internal_enabled = user_row.call_record_outgoing_internal_enabled
+        self.call_record_incoming_external_enabled = user_row.call_record_incoming_external_enabled
+        self.call_record_incoming_internal_enabled = user_row.call_record_incoming_internal_enabled
+        self.call_record_enabled = all((
+            self.call_record_outgoing_external_enabled,
+            self.call_record_outgoing_internal_enabled,
+            self.call_record_incoming_external_enabled,
+            self.call_record_incoming_internal_enabled,
+        ))
 
         if self.destunc == '':
             self.enableunc = 0
@@ -339,20 +354,36 @@ class User(object):
             self.enablevoicemail = 0
 
     def toggle_feature(self, feature):
-        if feature not in ("enablevoicemail", "callrecord"):
+        if feature == 'enablevoicemail':
+            enabled = int(not self.enablevoicemail)
+            self.cursor.query(
+                "UPDATE userfeatures SET enablevoicemail = %s WHERE id = %s",
+                parameters=(enabled, self.id),
+            )
+            self.enablevoicemail = enabled
+        elif feature == 'callrecord':
+            enabled = not self.call_record_enabled
+            self.cursor.query(
+                "UPDATE userfeatures SET "
+                "call_record_outgoing_external_enabled = %s, "
+                "call_record_outgoing_internal_enabled = %s, "
+                "call_record_incoming_external_enabled = %s, "
+                "call_record_incoming_internal_enabled = %s "
+                "WHERE id = %s",
+                parameters=(
+                    enabled,
+                    enabled,
+                    enabled,
+                    enabled,
+                    self.id
+                ),
+            )
+            self.call_record_enabled = enabled
+        else:
             raise ValueError("invalid feature")
-
-        enabled = int(not getattr(self, feature))
-
-        self.cursor.query("UPDATE userfeatures "
-                          "SET %s = %%s "
-                          "WHERE id = %%s" % feature,
-                          parameters=(enabled, self.id))
 
         if self.cursor.rowcount != 1:
             raise DBUpdateException("Unable to perform the requested update")
-        else:
-            setattr(self, feature, enabled)
 
 
 class MeetMe(object):
