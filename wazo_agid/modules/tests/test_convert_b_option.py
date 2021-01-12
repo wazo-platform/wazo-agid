@@ -44,5 +44,5 @@ class TestConvertBOption(unittest.TestCase):
 
         assert_that(self.agi.set_variable.call_args_list, contains_inanyorder(
             call('XIVO_CALLOPTIONS', 'XB(foobar^s^1)'),
-            call('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', 'foobaz^s^1')
+            call('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', 'foobaz,s,1')
         ))
