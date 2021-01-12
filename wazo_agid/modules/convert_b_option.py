@@ -31,12 +31,7 @@ def convert_b_option(agi, cursor, args):
     agi.set_variable(CALL_OPTIONS, pruned_call_options)
 
     new_handler = '{}^s^1'.format(to_stack)
-    pre_dial_handlers = agi.get_variable('WAZO_PRE_DIAL_HANDLERS')
-    if pre_dial_handlers:
-        pre_dial_handlers = '{}|{}'.format(pre_dial_handlers, new_handler)
-    else:
-        pre_dial_handlers = new_handler
-    agi.set_variable('_WAZO_PRE_DIAL_HANDLERS', pre_dial_handlers)
+    agi.set_variable('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', new_handler)
 
 
 agid.register(convert_b_option)
