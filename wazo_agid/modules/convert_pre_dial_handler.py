@@ -12,7 +12,7 @@ B_REGEX = re.compile(r'b\(([\-_0-9A-Za-z]+)\^?.*?\)')
 
 # This AGI was added in 21.01 to avoid breaking user written dialplan
 # This AGI and all of it's calls should be deleted in a reasonable amount of time 22.01?
-def convert_b_option(agi, cursor, args):
+def convert_pre_dial_handler(agi, cursor, args):
     call_options = agi.get_variable(CALL_OPTIONS)
     if not call_options:
         return
@@ -34,4 +34,4 @@ def convert_b_option(agi, cursor, args):
     agi.set_variable('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', new_handler)
 
 
-agid.register(convert_b_option)
+agid.register(convert_pre_dial_handler)
