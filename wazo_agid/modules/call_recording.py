@@ -28,16 +28,12 @@ def _enable_call_recording(agi, calld, channel_id):
     except Exception as e:
         logger.error('Error during enabling call recording: %s', e)
 
-    agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
-
 
 def _disable_call_recording(agi, calld, channel_id):
     try:
         calld.calls.stop_record(channel_id)
     except Exception as e:
         logger.error('Error during disabling call recording: %s', e)
-
-    agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '0')
 
 
 agid.register(call_recording)
