@@ -18,11 +18,6 @@ def call_recording(agi, cursor, args):
 
 
 def _enable_call_recording(agi, calld, channel_id):
-    record_filename = agi.get_variable('XIVO_CALLRECORDFILE')
-    if not record_filename:
-        logger.error('Could not start recording: could not determine record file')
-        return
-
     try:
         calld.calls.start_record(channel_id)
     except Exception as e:
