@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
@@ -7,6 +7,7 @@ import logging
 import xivo_dao
 
 from wazo_auth_client import Client as AuthClient
+from wazo_calld_client import Client as CalldClient
 from wazo_confd_client import Client as ConfdClient
 from wazo_dird_client import Client as DirdClient
 from xivo.chain_map import ChainMap
@@ -40,6 +41,12 @@ _DEFAULT_CONFIG = {
         'prefix': None,
         'https': False,
         'key_file': '/var/lib/wazo-auth-keys/wazo-agid-key.yml',
+    },
+    'calld': {
+        'host': 'localhost',
+        'port': 9500,
+        'prefix': None,
+        'https': False,
     },
     'confd': {
         'host': 'localhost',
@@ -80,12 +87,14 @@ def main():
 
     token_renewer = TokenRenewer(AuthClient(**config['auth']))
     config['agentd']['client'] = AgentdClient(**config['agentd'])
+    config['calld']['client'] = CalldClient(**config['calld'])
     config['confd']['client'] = ConfdClient(**config['confd'])
     config['dird']['client'] = DirdClient(**config['dird'])
     config['auth']['client'] = AuthClient(**config['auth'])
 
     def on_token_change(token_id):
         config['agentd']['client'].set_token(token_id)
+        config['calld']['client'].set_token(token_id)
         config['confd']['client'].set_token(token_id)
         config['dird']['client'].set_token(token_id)
         config['auth']['client'].set_token(token_id)
