@@ -55,11 +55,7 @@ class TestUserFeatures(_BaseTestCase):
             'WAZO_CALL_RECORD_ACTIVE': '0',
         }
 
-        # TODO: Does the agi.get_variable really raises a KeyError?
-        def get_variable(key):
-            return self._variables[key]
-
-        self._agi.get_variable = get_variable
+        self._agi.get_variable = lambda name: self._variables.get(name, '')
 
     def test_userfeatures(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)

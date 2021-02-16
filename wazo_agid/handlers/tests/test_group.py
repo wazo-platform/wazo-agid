@@ -76,9 +76,8 @@ class TestAnswerHandler(TestCase):
         assert_that(calling(self.handler.get_user), raises(LookupError))
 
     def test_record_call_already_recorded(self):
-        # TODO check the side effect of get_variable on an inexisting variable
         chan_vars = {'WAZO_CALL_RECORD_ACTIVE': '1'}
-        self.agi.get_variable.side_effect = chan_vars.get
+        self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock()
 
         self.handler.record_call(user)
@@ -89,7 +88,7 @@ class TestAnswerHandler(TestCase):
     def test_record_call_incoming_internal_enabled(self):
         filename = '/foo/bar.wav'
         chan_vars = {'XIVO_CALLRECORDFILE': filename}
-        self.agi.get_variable.side_effect = chan_vars.get
+        self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock(
             call_record_incoming_internal_enabled=True,
             call_record_incoming_external_enabled=False,
@@ -103,7 +102,7 @@ class TestAnswerHandler(TestCase):
     def test_record_call_incoming_external_enabled(self):
         filename = '/foo/bar.wav'
         chan_vars = {'XIVO_CALLRECORDFILE': filename}
-        self.agi.get_variable.side_effect = chan_vars.get
+        self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock(
             call_record_incoming_internal_enabled=False,
             call_record_incoming_external_enabled=True,
@@ -117,7 +116,7 @@ class TestAnswerHandler(TestCase):
     def test_record_call_incoming_disabled(self):
         filename = '/foo/bar.wav'
         chan_vars = {'XIVO_CALLRECORDFILE': filename}
-        self.agi.get_variable.side_effect = chan_vars.get
+        self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock(
             call_record_incoming_internal_enabled=False,
             call_record_incoming_external_enabled=False,
