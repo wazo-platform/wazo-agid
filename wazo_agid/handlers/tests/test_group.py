@@ -101,7 +101,10 @@ class TestAnswerHandler(TestCase):
 
     def test_record_call_incoming_external_enabled(self):
         filename = '/foo/bar.wav'
-        chan_vars = {'XIVO_CALLRECORDFILE': filename}
+        chan_vars = {
+            'XIVO_CALLRECORDFILE': filename,
+            'XIVO_CALLORIGIN': 'extern',
+        }
         self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock(
             call_record_incoming_internal_enabled=False,

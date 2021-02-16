@@ -41,9 +41,11 @@ class AnswerHandler(handler.Handler):
         if recording_is_on:
             return
 
+        external = self._agi.get_variable('XIVO_CALLORIGIN') == 'extern'
+        internal = not external
         should_record = any([
-            callee.call_record_incoming_internal_enabled,
-            callee.call_record_incoming_external_enabled,
+            internal and callee.call_record_incoming_internal_enabled,
+            external and callee.call_record_incoming_external_enabled,
         ])
         if not should_record:
             return
