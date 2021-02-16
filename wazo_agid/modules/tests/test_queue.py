@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
-from mock import Mock
+from mock import Mock, patch
 from wazo_agid import objects
 from wazo_agid import fastagi
 from wazo_agid.modules import incoming_queue_set_features
@@ -29,6 +29,30 @@ class TestQueue(unittest.TestCase):
         queue.wrapuptime = 30
         incoming_queue_set_features._set_wrapup_time(agi, queue)
         self.assert_dialplan_variable_set(agi, QUEUE_WRAPUP_TIME, 30)
+
+    @patch('wazo_agid.modules.incoming_queue_set_features.CallRecordingNameGenerator')
+    def test_set_call_record_filename(self, CallRecordingNameGenerator):
+        agi = Mock(config={
+            'call_recording': {
+                'filename_template': '{{ mock }}',
+                'filename_extension': 'wav',
+            },
+        })
+        queue = Mock(
+            exten='1001',
+            context='here',
+        )
+        agi.get_variable.side_effect = {
+            'WAZO_TENANT_UUID': '190849e0-e7dc-494d-a26d-034aa37b98c4',
+        }.get
+        filename = '/foo/bar.wav'
+        generator = Mock()
+        generator.generate.return_value = filename
+        CallRecordingNameGenerator.return_value = generator
+
+        incoming_queue_set_features.set_call_record_filename(agi, queue)
+
+        agi.set_variable.assert_called_once_with('__XIVO_CALLRECORDFILE', filename)
 
     def assert_dialplan_variable_not_set(self, agi, unexpected_variable_name):
         value = self.get_channel_variable_value(agi, unexpected_variable_name)
