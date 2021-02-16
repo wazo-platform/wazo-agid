@@ -7,7 +7,7 @@ import re
 from wazo_agid import objects
 from wazo_agid.handlers import handler
 
-EXTEN_CONTEXT_RE = re.compile(r'^Local/(.+)@(.+)-\d+;1$')
+EXTEN_CONTEXT_RE = re.compile(r'^Local/(.+)@(.+)-[a-f0-9]+;1$')
 
 
 class AnswerHandler(handler.Handler):

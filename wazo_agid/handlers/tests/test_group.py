@@ -23,7 +23,7 @@ class TestAnswerHandler(TestCase):
         extension = '1001'
         context = 'here'
 
-        chan_name = 'Local/{extension}@{context}-000000001;1'.format(
+        chan_name = 'Local/{extension}@{context}-0000000a1;1'.format(
             extension=extension,
             context=context,
         )
