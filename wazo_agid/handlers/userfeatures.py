@@ -335,6 +335,7 @@ class UserFeatures(Handler):
             'utc_time': time.asctime(time.gmtime()),
             'base_context': self._context,
             'tenant_uuid': context_dao.get(self._context).tenant_uuid,
+            'dest_type': 'user',
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
         self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
