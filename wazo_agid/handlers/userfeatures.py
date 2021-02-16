@@ -318,7 +318,9 @@ class UserFeatures(Handler):
 
     def _set_call_record_enabled(self):
         is_being_recorded = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
-        if is_being_recorded:
+        is_a_group_call = self._agi.get_variable('XIVO_FROMGROUP') == '1'
+        if is_being_recorded or is_a_group_call:
+            # If this is a group call MixMonitor will be called during group-answered-call
             should_record = False
         else:
             caller = self._caller  # NOTE(fblackburn): no caller means incoming external call

@@ -218,6 +218,27 @@ class TestUserFeatures(_BaseTestCase):
 
         self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
 
+    def test_set_call_record_enabled_from_group(self):
+        self._variables['XIVO_FROMGROUP'] = '1'
+
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        userfeatures._user = Mock(
+            call_record_incoming_internal_enabled=True,
+            call_record_incoming_external_enabled=True,
+            call_record_outgoing_internal_enabled=True,
+            call_record_outgoing_external_enabled=True,
+        )
+        userfeatures._caller = Mock(
+            call_record_incoming_internal_enabled=True,
+            call_record_incoming_external_enabled=True,
+            call_record_outgoing_internal_enabled=True,
+            call_record_outgoing_external_enabled=True,
+        )
+
+        userfeatures._set_call_record_enabled()
+
+        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+
     @patch('wazo_agid.handlers.userfeatures.extension_dao')
     @patch('wazo_agid.handlers.userfeatures.line_extension_dao')
     @patch('wazo_agid.handlers.userfeatures.line_dao')
