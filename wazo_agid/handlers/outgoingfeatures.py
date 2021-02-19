@@ -117,6 +117,7 @@ class OutgoingFeatures(Handler):
             'utc_time': time.asctime(time.gmtime()),
             'base_context': self._context,
             'tenant_uuid': self._tenant_uuid,
+            'dest_type': 'outcall',
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
         self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
