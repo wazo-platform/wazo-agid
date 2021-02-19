@@ -118,6 +118,7 @@ class OutgoingFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': self._tenant_uuid,
             'dest_type': 'outcall',
+            'side': 'caller',
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
         self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)

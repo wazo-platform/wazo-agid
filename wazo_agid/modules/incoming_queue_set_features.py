@@ -137,6 +137,7 @@ def set_call_record_filename(agi, queue):
         'base_context': queue.context,
         'tenant_uuid': agi.get_variable(dialplan_variables.TENANT_UUID),
         'dest_type': 'queue',
+        'side': 'callee',  # This is the filename of the answering channel
     }
     generator = CallRecordingNameGenerator(
         agi.config['call_recording']['filename_template'],

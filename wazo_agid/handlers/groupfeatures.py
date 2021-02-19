@@ -161,6 +161,7 @@ class GroupFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': self._agi.get_variable(dialplan_variables.TENANT_UUID),
             'dest_type': 'group',
+            'side': 'callee',
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
         self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)

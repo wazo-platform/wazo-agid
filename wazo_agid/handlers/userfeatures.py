@@ -342,6 +342,7 @@ class UserFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': context_dao.get(self._context).tenant_uuid,
             'dest_type': 'user',
+            'side': 'callee',  # This is the filename of the answering channel
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
         self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
