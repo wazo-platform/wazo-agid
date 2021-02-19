@@ -157,45 +157,40 @@ class TestUserFeatures(_BaseTestCase):
     def test_set_call_record_enabled_incoming_external_call(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock()
+        userfeatures._zone = ''
 
         userfeatures._user.call_record_incoming_external_enabled = False
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+        self._agi.set_variable.assert_not_called()
         self._agi.set_variable.reset_mock()
 
         userfeatures._user.call_record_incoming_external_enabled = True
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '1')
+
+        # This is the same thing as calling GoSub(wazo-add-pre-dial-hook,s,1(wazo-record-peer))
+        self._agi.set_variable.assert_called_once_with(
+            'PUSH(_WAZO_PRE_DIAL_HANDLERS,|)',
+            'wazo-record-peer,s,1',
+        )
 
     def test_set_call_record_enabled_incoming_internal_call(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock()
-        userfeatures._caller = Mock()
-        userfeatures._caller.call_record_outgoing_internal_enabled = False
+        userfeatures._zone = 'intern'
 
         userfeatures._user.call_record_incoming_internal_enabled = False
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+        self._agi.set_variable.assert_not_called()
         self._agi.set_variable.reset_mock()
 
         userfeatures._user.call_record_incoming_internal_enabled = True
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '1')
 
-    def test_set_call_record_enabled_outgoing_internal_call(self):
-        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._user = Mock()
-        userfeatures._user.call_record_incoming_internal_enabled = False
-        userfeatures._caller = Mock()
-
-        userfeatures._caller.call_record_outgoing_internal_enabled = False
-        userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
-        self._agi.set_variable.reset_mock()
-
-        userfeatures._caller.call_record_outgoing_internal_enabled = True
-        userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '1')
+        # This is the same thing as calling GoSub(wazo-add-pre-dial-hook,s,1(wazo-record-peer))
+        self._agi.set_variable.assert_called_once_with(
+            'PUSH(_WAZO_PRE_DIAL_HANDLERS,|)',
+            'wazo-record-peer,s,1',
+        )
 
     def test_set_call_record_enabled_already_recorded(self):
         self._variables['WAZO_CALL_RECORD_ACTIVE'] = '1'
@@ -216,7 +211,7 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_call_record_enabled()
 
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+        self._agi.set_variable.assert_not_called()
 
     def test_set_call_record_enabled_from_group(self):
         self._variables['XIVO_FROMGROUP'] = '1'
@@ -237,7 +232,7 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_call_record_enabled()
 
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+        self._agi.set_variable.assert_not_called()
 
     @patch('wazo_agid.handlers.userfeatures.extension_dao')
     @patch('wazo_agid.handlers.userfeatures.line_extension_dao')

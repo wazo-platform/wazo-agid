@@ -318,19 +318,17 @@ class UserFeatures(Handler):
 
     def _set_call_record_enabled(self):
         is_being_recorded = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
-        is_a_group_call = self._agi.get_variable('XIVO_FROMGROUP') == '1'
-        if is_being_recorded or is_a_group_call:
-            # If this is a group call MixMonitor will be called during group-answered-call
-            should_record = False
-        else:
-            caller = self._caller  # NOTE(fblackburn): no caller means incoming external call
-            called = self._user
-            should_record = (
-                (caller and caller.call_record_outgoing_internal_enabled)
-                or (caller and called.call_record_incoming_internal_enabled)
-                or (not caller and called.call_record_incoming_external_enabled)
-            )
-        self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if should_record else '0')
+        is_a_group_extension_member = self._agi.get_variable('XIVO_FROMGROUP') == '1'
+        if is_being_recorded or is_a_group_extension_member:
+            return
+
+        is_internal = self._zone == 'intern'
+        should_record = (
+            (is_internal and self._user.call_record_incoming_internal_enabled)
+            or (not is_internal and self._user.call_record_incoming_external_enabled)
+        )
+        if should_record:
+            self._agi.set_variable('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', 'wazo-record-peer,s,1')
 
     def _set_call_recordfile(self):
         args = {
@@ -345,7 +343,7 @@ class UserFeatures(Handler):
             'side': 'callee',  # This is the filename of the answering channel
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
+        self._agi.set_variable('__WAZO_PEER_CALL_RECORD_FILE', callrecordfile)
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:
