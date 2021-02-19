@@ -21,20 +21,8 @@ def call_recording(agi, cursor, args):
 
 
 def record_caller(agi, cursor, args):
-    user_id = agi.get_variable(dialplan_variables.USERID)
-    if not user_id:
-        return
-
     is_being_recorded = agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
     if is_being_recorded:
-        return
-
-    caller = objects.User(agi, cursor, int(user_id))
-    if not caller:
-        return
-
-    should_record = caller and caller.call_record_outgoing_internal_enabled
-    if not should_record:
         return
 
     args = {
@@ -53,9 +41,21 @@ def record_caller(agi, cursor, args):
         agi.config['call_recording']['filename_extension'],
     )
     filename = generator.generate(args)
+    agi.set_variable('XIVO_CALLRECORDFILE', filename)
+
+    user_id = agi.get_variable(dialplan_variables.USERID)
+    if not user_id:
+        return
+
+    caller = objects.User(agi, cursor, int(user_id))
+    if not caller:
+        return
+
+    should_record = caller and caller.call_record_outgoing_internal_enabled
+    if not should_record:
+        return
 
     agi.appexec('MixMonitor', filename)
-    agi.set_variable('XIVO_CALLRECORDFILE', filename)
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
 

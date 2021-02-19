@@ -43,6 +43,9 @@ class AnswerHandler(handler.Handler):
         if recording_is_on:
             return
 
+        filename = self._agi.get_variable('WAZO_PEER_CALL_RECORD_FILE')
+        self._agi.set_variable('XIVO_CALLRECORDFILE', filename)
+
         external = self._agi.get_variable('XIVO_CALLORIGIN') == 'extern'
         internal = not external
         should_record = any([
@@ -52,7 +55,5 @@ class AnswerHandler(handler.Handler):
         if not should_record:
             return
 
-        filename = self._agi.get_variable('WAZO_PEER_CALL_RECORD_FILE')
         self._agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
-        self._agi.set_variable('XIVO_CALLRECORDFILE', filename)
         self._agi.appexec('MixMonitor', filename)

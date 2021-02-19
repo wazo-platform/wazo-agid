@@ -128,5 +128,5 @@ class TestAnswerHandler(TestCase):
 
         self.handler.record_call(user)
 
-        self.agi.set_variable.assert_not_called()
+        self.agi.set_variable.assert_called_once_with('XIVO_CALLRECORDFILE', filename)
         self.agi.appexec.assert_not_called()

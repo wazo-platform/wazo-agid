@@ -111,7 +111,7 @@ class TestAnswerHandler(TestCase):
 
     def test_record_call_incoming_disabled(self):
         filename = '/foo/bar.wav'
-        chan_vars = {'XIVO_CALLRECORDFILE': filename}
+        chan_vars = {'WAZO_PEER_CALL_RECORD_FILE': filename}
         self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock(
             call_record_incoming_internal_enabled=False,
@@ -120,5 +120,5 @@ class TestAnswerHandler(TestCase):
 
         self.handler.record_call(user)
 
-        self.agi.set_variable.assert_not_called()
+        self.agi.set_variable.assert_called_once_with('XIVO_CALLRECORDFILE', filename)
         self.agi.appexec.assert_not_called()
