@@ -144,7 +144,7 @@ def set_call_record_filename(agi, queue):
         agi.config['call_recording']['filename_extension'],
     )
     callrecordfile = generator.generate(args)
-    agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
+    agi.set_variable('__WAZO_PEER_CALL_RECORD_FILE', callrecordfile)
 
 
 agid.register(incoming_queue_set_features)

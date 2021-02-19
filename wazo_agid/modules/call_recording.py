@@ -55,7 +55,7 @@ def record_caller(agi, cursor, args):
     filename = generator.generate(args)
 
     agi.appexec('MixMonitor', filename)
-    agi.set_variable('XIVO_CALLRECORDFILE, filename')
+    agi.set_variable('XIVO_CALLRECORDFILE', filename)
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
 

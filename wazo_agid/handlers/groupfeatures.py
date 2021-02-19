@@ -164,4 +164,4 @@ class GroupFeatures(Handler):
             'side': 'callee',
         }
         callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
+        self._agi.set_variable('__WAZO_PEER_CALL_RECORD_FILE', callrecordfile)
