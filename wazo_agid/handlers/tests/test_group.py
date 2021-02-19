@@ -87,7 +87,7 @@ class TestAnswerHandler(TestCase):
 
     def test_record_call_incoming_internal_enabled(self):
         filename = '/foo/bar.wav'
-        chan_vars = {'XIVO_CALLRECORDFILE': filename}
+        chan_vars = {'WAZO_PEER_CALL_RECORD_FILE': filename}
         self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock(
             call_record_incoming_internal_enabled=True,
@@ -96,13 +96,14 @@ class TestAnswerHandler(TestCase):
 
         self.handler.record_call(user)
 
-        self.agi.set_variable.assert_any_call('__WAZO_CALL_RECORD_ACTIVE', '1')
+        self.agi.set_variable.assert_any_call('WAZO_CALL_RECORD_ACTIVE', '1')
+        self.agi.set_variable.assert_any_call('XIVO_CALLRECORDFILE', filename)
         self.agi.appexec.assert_called_once_with('MixMonitor', filename)
 
     def test_record_call_incoming_external_enabled(self):
         filename = '/foo/bar.wav'
         chan_vars = {
-            'XIVO_CALLRECORDFILE': filename,
+            'WAZO_PEER_CALL_RECORD_FILE': filename,
             'XIVO_CALLORIGIN': 'extern',
         }
         self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
@@ -113,12 +114,12 @@ class TestAnswerHandler(TestCase):
 
         self.handler.record_call(user)
 
-        self.agi.set_variable.assert_any_call('__WAZO_CALL_RECORD_ACTIVE', '1')
+        self.agi.set_variable.assert_any_call('WAZO_CALL_RECORD_ACTIVE', '1')
         self.agi.appexec.assert_called_once_with('MixMonitor', filename)
 
     def test_record_call_incoming_disabled(self):
         filename = '/foo/bar.wav'
-        chan_vars = {'XIVO_CALLRECORDFILE': filename}
+        chan_vars = {'WAZO_PEER_CALL_RECORD_FILE': filename}
         self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         user = Mock(
             call_record_incoming_internal_enabled=False,

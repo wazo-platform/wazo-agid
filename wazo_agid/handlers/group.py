@@ -51,6 +51,6 @@ class AnswerHandler(handler.Handler):
             return
 
         filename = self._agi.get_variable('WAZO_PEER_CALL_RECORD_FILE')
-        self._agi.set_variable('__WAZO_CALL_RECORD_ACTIVE', '1')
+        self._agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
         self._agi.set_variable('XIVO_CALLRECORDFILE', filename)
         self._agi.appexec('MixMonitor', filename)

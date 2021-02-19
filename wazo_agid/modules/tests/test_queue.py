@@ -52,7 +52,7 @@ class TestQueue(unittest.TestCase):
 
         incoming_queue_set_features.set_call_record_filename(agi, queue)
 
-        agi.set_variable.assert_called_once_with('__XIVO_CALLRECORDFILE', filename)
+        agi.set_variable.assert_called_once_with('__WAZO_PEER_CALL_RECORD_FILE', filename)
 
     def assert_dialplan_variable_not_set(self, agi, unexpected_variable_name):
         value = self.get_channel_variable_value(agi, unexpected_variable_name)

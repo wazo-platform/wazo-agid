@@ -86,4 +86,4 @@ class TestGroupFeatures(unittest.TestCase):
 
         self.group_features._set_call_record_filename()
 
-        self._agi.set_variable.assert_called_once_with('__XIVO_CALLRECORDFILE', filename)
+        self._agi.set_variable.assert_called_once_with('__WAZO_PEER_CALL_RECORD_FILE', filename)
