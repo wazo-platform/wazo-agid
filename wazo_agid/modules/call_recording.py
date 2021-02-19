@@ -45,7 +45,7 @@ def record_caller(agi, cursor, args):
         'utc_time': time.asctime(time.gmtime()),
         'base_context': agi.get_variable('XIVO_REAL_CONTEXT'),
         'tenant_uuid': agi.get_variable(dialplan_variables.TENANT_UUID),
-        'dest_type': 'group',
+        'dest_type': agi.get_variable('CONTEXT'),
         'side': 'caller',
     }
     generator = CallRecordingNameGenerator(
