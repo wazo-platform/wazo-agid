@@ -2,7 +2,6 @@
 # Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import time
 import logging
 
 from wazo_agid import dialplan_variables
@@ -105,24 +104,6 @@ class OutgoingFeatures(Handler):
                 intfsuffix = ""
             self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_SUFFIX, i), intfsuffix)
 
-    def _set_record_enabled(self):
-        self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if self.callrecord else '0')
-
-    def _set_record_file_name(self):
-        args = {
-            'srcnum': self.srcnum,
-            'dstnum': self.orig_dstnum,
-            'timestamp': int(time.time()),
-            'local_time': time.asctime(time.localtime()),
-            'utc_time': time.asctime(time.gmtime()),
-            'base_context': self._context,
-            'tenant_uuid': self._tenant_uuid,
-            'dest_type': 'outcall',
-            'side': 'caller',
-        }
-        callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
-
     def _set_preprocess_subroutine(self):
         if self.outcall.preprocess_subroutine:
             preprocess_subroutine = self.outcall.preprocess_subroutine
@@ -156,8 +137,6 @@ class OutgoingFeatures(Handler):
         self._set_user_music_on_hold()
         self._set_caller_id()
         self._set_trunk_info()
-        self._set_record_enabled()
-        self._set_record_file_name()
         self._set_preprocess_subroutine()
         self._set_hangup_ring_time()
         self._agi.set_variable(dialplan_variables.OUTCALL_ID, self.outcall.id)
