@@ -27,11 +27,11 @@ def record_caller(agi, cursor, args):
 
     args = {
         'srcnum': agi.get_variable(dialplan_variables.SOURCE_NUMBER),
-        'dstnum': agi.get_variable('XIVO_REAL_NUMBER'),
+        'dstnum': agi.get_variable('XIVO_BASE_EXTEN'),
         'timestamp': int(time.time()),
         'local_time': time.asctime(time.localtime()),
         'utc_time': time.asctime(time.gmtime()),
-        'base_context': agi.get_variable('XIVO_REAL_CONTEXT'),
+        'base_context': agi.get_variable('XIVO_BASE_CONTEXT'),
         'tenant_uuid': agi.get_variable(dialplan_variables.TENANT_UUID),
         'dest_type': agi.get_variable('CONTEXT'),
         'side': 'caller',
