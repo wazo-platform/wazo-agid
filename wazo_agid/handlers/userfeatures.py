@@ -329,7 +329,6 @@ class UserFeatures(Handler):
         )
         if should_record:
             self._agi.set_variable('__WAZO_PEER_CALL_RECORD_ENABLED', '1')
-        self._agi.set_variable('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', 'wazo-record-peer,s,1')
 
     def _set_call_recordfile(self):
         args = {
