@@ -331,6 +331,9 @@ class UserFeatures(Handler):
             self._agi.set_variable('__WAZO_PEER_CALL_RECORD_ENABLED', '1')
 
     def _set_call_recordfile(self):
+        if self._agi.get_variable('WAZO_CALL_RECORD_FILE_CALLEE'):
+            return
+
         args = {
             'srcnum': self._srcnum,
             'dstnum': self._dstnum,
@@ -340,10 +343,16 @@ class UserFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': context_dao.get(self._context).tenant_uuid,
             'dest_type': 'user',
-            'side': 'callee',  # This is the filename of the answering channel
         }
-        callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('__WAZO_PEER_CALL_RECORD_FILE', callrecordfile)
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLEE',
+            self._call_recording_name_generator.generate(side='callee', **args),
+        )
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLER',
+            self._call_recording_name_generator.generate(side='caller', **args),
+        )
+        self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:

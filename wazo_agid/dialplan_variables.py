@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 BASE_CONTEXT = 'XIVO_BASE_CONTEXT'
 CALL_OPTIONS = 'XIVO_CALLOPTIONS'
 CALL_ORIGIN = 'XIVO_CALLORIGIN'
-CALL_RECORD_FILE_NAME = 'XIVO_CALLRECORDFILE'
 # ID of the callee
 SRCNUM = 'XIVO_SRCNUM'
 DESTINATION_ID = 'XIVO_DSTID'

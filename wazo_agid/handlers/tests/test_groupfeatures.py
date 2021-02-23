@@ -76,14 +76,3 @@ class TestGroupFeatures(unittest.TestCase):
 
         self._agi.set_variable.assert_any_call('XIVO_PATH', 'group')
         self._agi.set_variable.assert_any_call('XIVO_PATH_ID', 34)
-
-    def test_call_record_filename(self):
-        self._agi.get_variable.side_effect = {
-            'WAZO_TENANT_UUID': '190849e0-e7dc-494d-a26d-034aa37b98c4',
-        }.get
-        filename = '/foo/bar.wav'
-        self.call_recording_name_generator.generate.return_value = filename
-
-        self.group_features._set_call_record_filename()
-
-        self._agi.set_variable.assert_called_once_with('__WAZO_PEER_CALL_RECORD_FILE', filename)

@@ -41,9 +41,6 @@ class AnswerHandler(handler.Handler):
         if recording_is_on:
             return
 
-        filename = self._agi.get_variable('WAZO_PEER_CALL_RECORD_FILE')
-        self._agi.set_variable('XIVO_CALLRECORDFILE', filename)
-
         external = self._agi.get_variable('XIVO_CALLORIGIN') == 'extern'
         internal = not external
         should_record = any([
@@ -53,5 +50,12 @@ class AnswerHandler(handler.Handler):
         if not should_record:
             return
 
-        self._agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
-        self._agi.appexec('MixMonitor', filename)
+        calld = self._agi.config['calld']['client']
+        channel_id = self._agi.env['agi_uniqueid']
+        self._agi.set_variable('WAZO_RECORD_GROUP_CALLEE', '1')
+        try:
+            calld.calls.start_record(channel_id)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error('Error during enabling call recording: %s', e)

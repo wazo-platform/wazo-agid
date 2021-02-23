@@ -4,6 +4,8 @@
 
 import time
 
+from uuid import uuid4
+
 from wazo_agid import agid, dialplan_variables, objects
 from wazo_agid.helpers import CallRecordingNameGenerator
 
@@ -137,14 +139,21 @@ def set_call_record_filename(agi, queue):
         'base_context': queue.context,
         'tenant_uuid': agi.get_variable(dialplan_variables.TENANT_UUID),
         'dest_type': 'queue',
-        'side': 'callee',  # This is the filename of the answering channel
     }
     generator = CallRecordingNameGenerator(
         agi.config['call_recording']['filename_template'],
         agi.config['call_recording']['filename_extension'],
     )
-    callrecordfile = generator.generate(args)
-    agi.set_variable('__WAZO_PEER_CALL_RECORD_FILE', callrecordfile)
+    agi.set_variable(
+        '__WAZO_CALL_RECORD_FILE_CALLEE',
+        generator.generate(side='callee', **args),
+    )
+    agi.set_variable(
+        '__WAZO_CALL_RECORD_FILE_CALLER',
+        generator.generate(side='caller', **args),
+    )
+    agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
+    agi.set_variable('__WAZO_LOCAL_CHAN_MATCH_UUID', str(uuid4()))
 
 
 agid.register(incoming_queue_set_features)

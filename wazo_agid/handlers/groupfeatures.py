@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
+from uuid import uuid4
 
 from wazo_agid.handlers.handler import Handler
 from wazo_agid import objects
@@ -161,7 +162,15 @@ class GroupFeatures(Handler):
             'base_context': self._context,
             'tenant_uuid': self._agi.get_variable(dialplan_variables.TENANT_UUID),
             'dest_type': 'group',
-            'side': 'callee',
         }
-        callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('__WAZO_PEER_CALL_RECORD_FILE', callrecordfile)
+
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLEE',
+            self._call_recording_name_generator.generate(side='callee', **args),
+        )
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLER',
+            self._call_recording_name_generator.generate(side='caller', **args),
+        )
+        self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
+        self._agi.set_variable('__WAZO_LOCAL_CHAN_MATCH_UUID', str(uuid4()))

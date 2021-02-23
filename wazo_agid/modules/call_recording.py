@@ -3,10 +3,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-import time
 
 from wazo_agid import agid, dialplan_variables, objects
-from wazo_agid.helpers import CallRecordingNameGenerator
+#from wazo_agid.helpers import CallRecordingNameGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -25,24 +24,6 @@ def record_caller(agi, cursor, args):
     if is_being_recorded:
         return
 
-    args = {
-        'srcnum': agi.get_variable(dialplan_variables.SOURCE_NUMBER),
-        'dstnum': agi.get_variable('XIVO_BASE_EXTEN'),
-        'timestamp': int(time.time()),
-        'local_time': time.asctime(time.localtime()),
-        'utc_time': time.asctime(time.gmtime()),
-        'base_context': agi.get_variable('XIVO_BASE_CONTEXT'),
-        'tenant_uuid': agi.get_variable(dialplan_variables.TENANT_UUID),
-        'dest_type': agi.get_variable('CONTEXT'),
-        'side': 'caller',
-    }
-    generator = CallRecordingNameGenerator(
-        agi.config['call_recording']['filename_template'],
-        agi.config['call_recording']['filename_extension'],
-    )
-    filename = generator.generate(args)
-    agi.set_variable('XIVO_CALLRECORDFILE', filename)
-
     user_id = agi.get_variable(dialplan_variables.USERID)
     if not user_id:
         return
@@ -55,6 +36,7 @@ def record_caller(agi, cursor, args):
     if not should_record:
         return
 
+    filename = agi.get_variable('WAZO_CALL_RECORD_FILE_CALLER')
     agi.appexec('MixMonitor', filename)
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
