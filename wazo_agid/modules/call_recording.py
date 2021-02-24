@@ -32,7 +32,11 @@ def record_caller(agi, cursor, args):
     if not caller:
         return
 
-    should_record = caller and caller.call_record_outgoing_internal_enabled
+    is_internal = agi.get_variable(dialplan_variables.CALL_ORIGIN) == 'intern'
+    should_record = caller and (
+        (is_internal and caller.call_record_outgoing_internal_enabled)
+        or (not is_internal and caller.call_record_outgoing_external_enabled)
+    )
     if not should_record:
         return
 
