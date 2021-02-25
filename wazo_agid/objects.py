@@ -282,7 +282,7 @@ class UserLine:
 
 class User(object):
 
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None):
+    def __init__(self, agi, cursor, xid=None, exten=None, context=None, agent_id=None):
         self.agi = agi
         self.cursor = cursor
 
@@ -290,8 +290,12 @@ class User(object):
             user_row = user_dao.get(xid)
         elif exten and context:
             user_row = user_dao.get_user_by_number_context(exten, context)
+        elif agent_id:
+            user_row = user_dao.get_user_by_agent_id(agent_id)
         else:
-            raise LookupError("id or exten@context must be provided to look up an user entry")
+            raise LookupError(
+                '"id", "exten@context" or "agent_id" must be provided to look up an user entry'
+            )
 
         self.id = user_row.id
         self.uuid = user_row.uuid

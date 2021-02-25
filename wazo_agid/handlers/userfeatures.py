@@ -317,16 +317,23 @@ class UserFeatures(Handler):
         self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     def _set_call_record_enabled(self):
-        caller = self._caller  # NOTE(fblackburn): no caller means incoming external call
-        called = self._user
+        is_being_recorded = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
+        is_a_group_extension_member = self._agi.get_variable('XIVO_FROMGROUP') == '1'
+        if is_being_recorded or is_a_group_extension_member:
+            return
+
+        is_internal = self._zone == 'intern'
         should_record = (
-            (caller and caller.call_record_outgoing_internal_enabled)
-            or (caller and called.call_record_incoming_internal_enabled)
-            or (not caller and called.call_record_incoming_external_enabled)
+            (is_internal and self._user.call_record_incoming_internal_enabled)
+            or (not is_internal and self._user.call_record_incoming_external_enabled)
         )
-        self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if should_record else '0')
+        if should_record:
+            self._agi.set_variable('__WAZO_PEER_CALL_RECORD_ENABLED', '1')
 
     def _set_call_recordfile(self):
+        if self._agi.get_variable('WAZO_CALL_RECORD_FILE_CALLEE'):
+            return
+
         args = {
             'srcnum': self._srcnum,
             'dstnum': self._dstnum,
@@ -335,9 +342,17 @@ class UserFeatures(Handler):
             'utc_time': time.asctime(time.gmtime()),
             'base_context': self._context,
             'tenant_uuid': context_dao.get(self._context).tenant_uuid,
+            'dest_type': 'user',
         }
-        callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLEE',
+            self._call_recording_name_generator.generate(side='callee', **args),
+        )
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLER',
+            self._call_recording_name_generator.generate(side='caller', **args),
+        )
+        self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
 
     def _set_music_on_hold(self):
         if self._user.musiconhold:

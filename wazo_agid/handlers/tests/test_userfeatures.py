@@ -52,12 +52,10 @@ class TestUserFeatures(_BaseTestCase):
             'XIVO_DSTNUM': '1003',
             'XIVO_DST_EXTEN_ID': '983274',
             'XIVO_BASE_CONTEXT': 'default',
+            'WAZO_CALL_RECORD_ACTIVE': '0',
         }
 
-        def get_variable(key):
-            return self._variables[key]
-
-        self._agi.get_variable = get_variable
+        self._agi.get_variable = lambda name: self._variables.get(name, '')
 
     def test_userfeatures(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -159,45 +157,70 @@ class TestUserFeatures(_BaseTestCase):
     def test_set_call_record_enabled_incoming_external_call(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock()
+        userfeatures._zone = ''
 
         userfeatures._user.call_record_incoming_external_enabled = False
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+        self._agi.set_variable.assert_not_called()
         self._agi.set_variable.reset_mock()
 
         userfeatures._user.call_record_incoming_external_enabled = True
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '1')
 
     def test_set_call_record_enabled_incoming_internal_call(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock()
-        userfeatures._caller = Mock()
-        userfeatures._caller.call_record_outgoing_internal_enabled = False
+        userfeatures._zone = 'intern'
 
         userfeatures._user.call_record_incoming_internal_enabled = False
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
+        self._agi.set_variable.assert_not_called()
         self._agi.set_variable.reset_mock()
 
         userfeatures._user.call_record_incoming_internal_enabled = True
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '1')
 
-    def test_set_call_record_enabled_outgoing_internal_call(self):
+    def test_set_call_record_enabled_already_recorded(self):
+        self._variables['WAZO_CALL_RECORD_ACTIVE'] = '1'
+
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._user = Mock()
-        userfeatures._user.call_record_incoming_internal_enabled = False
-        userfeatures._caller = Mock()
+        userfeatures._user = Mock(
+            call_record_incoming_internal_enabled=True,
+            call_record_incoming_external_enabled=True,
+            call_record_outgoing_internal_enabled=True,
+            call_record_outgoing_external_enabled=True,
+        )
+        userfeatures._caller = Mock(
+            call_record_incoming_internal_enabled=True,
+            call_record_incoming_external_enabled=True,
+            call_record_outgoing_internal_enabled=True,
+            call_record_outgoing_external_enabled=True,
+        )
 
-        userfeatures._caller.call_record_outgoing_internal_enabled = False
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '0')
-        self._agi.set_variable.reset_mock()
 
-        userfeatures._caller.call_record_outgoing_internal_enabled = True
+        self._agi.set_variable.assert_not_called()
+
+    def test_set_call_record_enabled_from_group(self):
+        self._variables['XIVO_FROMGROUP'] = '1'
+
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        userfeatures._user = Mock(
+            call_record_incoming_internal_enabled=True,
+            call_record_incoming_external_enabled=True,
+            call_record_outgoing_internal_enabled=True,
+            call_record_outgoing_external_enabled=True,
+        )
+        userfeatures._caller = Mock(
+            call_record_incoming_internal_enabled=True,
+            call_record_incoming_external_enabled=True,
+            call_record_outgoing_internal_enabled=True,
+            call_record_outgoing_external_enabled=True,
+        )
+
         userfeatures._set_call_record_enabled()
-        self._agi.set_variable.assert_called_once_with('WAZO_CALL_RECORD_ENABLED', '1')
+
+        self._agi.set_variable.assert_not_called()
 
     @patch('wazo_agid.handlers.userfeatures.extension_dao')
     @patch('wazo_agid.handlers.userfeatures.line_extension_dao')

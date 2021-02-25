@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2017-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import time
@@ -36,7 +36,7 @@ class CallRecordingNameGenerator(object):
         self._template = Template(filename_template)
         self._extension = filename_extension
 
-    def generate(self, context):
+    def generate(self, **context):
         generated_filename = self._template.render(context)
         ascii_filename = unidecode(generated_filename)
         filename = ''.join(c for c in ascii_filename if self._is_valid_character(c))

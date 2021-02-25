@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2017-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -75,21 +75,21 @@ class TestCallRecordingNameGenerator(unittest.TestCase):
     def test_that_unicode_chars_are_replaced(self):
         generator = CallRecordingNameGenerator(u'{{ name }}', 'wav')
 
-        result = generator.generate({'name': u'pépé'})
+        result = generator.generate(name=u'pépé')
 
         assert_that(result, equal_to('pepe.wav'))
 
     def test_that_unacceptable_chars_are_removed(self):
         generator = CallRecordingNameGenerator(u'{{ name }}', 'wav')
 
-        result = generator.generate({'name': u'test\**test'})
+        result = generator.generate(name=u'test\**test')
 
         assert_that(result, equal_to('testtest.wav'))
 
     def test_that_empty_names_are_not_generated(self):
         generator = CallRecordingNameGenerator(u'{{ name }}', 'wav')
 
-        result = generator.generate({'name': u'\**'})
+        result = generator.generate(name=u'\**')
 
         name, extension = result.rsplit('.', 1)
         assert_that(len(name), greater_than(0), 'a name should have been generated')

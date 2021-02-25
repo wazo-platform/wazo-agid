@@ -63,5 +63,5 @@ bus:
   exchange_durable: True
 
 call_recording:
-  filename_template: "/var/lib/wazo/sounds/tenants/{{ tenant_uuid }}/monitor/user-{{ srcnum }}-{{ dstnum }}-{{ timestamp }}"
+  filename_template: "/var/lib/wazo/sounds/tenants/{{ tenant_uuid }}/monitor/{{ dest_type }}-{{ srcnum }}-{{ dstnum }}-{{ timestamp }}-{{ side }}"
   filename_extension: wav

@@ -2,8 +2,8 @@
 # Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import time
 import logging
+import time
 
 from wazo_agid import dialplan_variables
 from wazo_agid.handlers.handler import Handler
@@ -37,6 +37,30 @@ class OutgoingFeatures(Handler):
             self.outcall.retrieve_values(self.dialpattern_id)
         except (ValueError, LookupError) as e:
             self._agi.dp_break(str(e))
+
+    def _set_call_record_filename(self):
+        if self._agi.get_variable('WAZO_CALL_RECORD_FILE_CALLER'):
+            return
+
+        args = {
+            'srcnum': self.srcnum,
+            'dstnum': self.dstnum,
+            'timestamp': int(time.time()),
+            'local_time': time.asctime(time.localtime()),
+            'utc_time': time.asctime(time.gmtime()),
+            'base_context': self._context,
+            'tenant_uuid': self._agi.get_variable(dialplan_variables.TENANT_UUID),
+            'dest_type': 'outcall',
+        }
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLEE',
+            self._call_recording_name_generator.generate(side='callee', **args),
+        )
+        self._agi.set_variable(
+            '__WAZO_CALL_RECORD_FILE_CALLER',
+            self._call_recording_name_generator.generate(side='caller', **args),
+        )
+        self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
 
     def _set_destination_number(self):
         if self.outcall.stripnum > 0:
@@ -105,22 +129,6 @@ class OutgoingFeatures(Handler):
                 intfsuffix = ""
             self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_SUFFIX, i), intfsuffix)
 
-    def _set_record_enabled(self):
-        self._agi.set_variable('WAZO_CALL_RECORD_ENABLED', '1' if self.callrecord else '0')
-
-    def _set_record_file_name(self):
-        args = {
-            'srcnum': self.srcnum,
-            'dstnum': self.orig_dstnum,
-            'timestamp': int(time.time()),
-            'local_time': time.asctime(time.localtime()),
-            'utc_time': time.asctime(time.gmtime()),
-            'base_context': self._context,
-            'tenant_uuid': self._tenant_uuid,
-        }
-        callrecordfile = self._call_recording_name_generator.generate(args)
-        self._agi.set_variable('__XIVO_CALLRECORDFILE', callrecordfile)
-
     def _set_preprocess_subroutine(self):
         if self.outcall.preprocess_subroutine:
             preprocess_subroutine = self.outcall.preprocess_subroutine
@@ -154,9 +162,8 @@ class OutgoingFeatures(Handler):
         self._set_user_music_on_hold()
         self._set_caller_id()
         self._set_trunk_info()
-        self._set_record_enabled()
-        self._set_record_file_name()
         self._set_preprocess_subroutine()
         self._set_hangup_ring_time()
         self._agi.set_variable(dialplan_variables.OUTCALL_ID, self.outcall.id)
         self._set_path(OutgoingFeatures.PATH_TYPE, self.outcall.id)
+        self._set_call_record_filename()
