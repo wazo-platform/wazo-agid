@@ -4,7 +4,7 @@
 
 import unittest
 
-from mock import Mock, patch
+from mock import Mock
 from wazo_agid import objects
 from wazo_agid import fastagi
 from wazo_agid.modules import incoming_queue_set_features
