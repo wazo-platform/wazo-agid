@@ -3,9 +3,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
+import logging
 
 from wazo_agid import objects
 from wazo_agid.handlers import handler
+
+logger = logging.getLogger(__name__)
 
 AGENT_CHANNEL_RE = re.compile(r'^Local/id-(\d+)@agentcallback-[a-f0-9]+;1$')
 
@@ -57,6 +60,4 @@ class AnswerHandler(handler.Handler):
         try:
             calld.calls.start_record(channel_id)
         except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error('Error during enabling call recording: %s', e)

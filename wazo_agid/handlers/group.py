@@ -2,10 +2,13 @@
 # Copyright 2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import logging
 import re
 
 from wazo_agid import objects
 from wazo_agid.handlers import handler
+
+logger = logging.getLogger(__name__)
 
 EXTEN_CONTEXT_RE = re.compile(r'^Local/(.+)@(.+)-[a-f0-9]+;1$')
 
@@ -56,6 +59,4 @@ class AnswerHandler(handler.Handler):
         try:
             calld.calls.start_record(channel_id)
         except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error('Error during enabling call recording: %s', e)
