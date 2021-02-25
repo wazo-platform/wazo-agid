@@ -5,7 +5,6 @@
 import logging
 
 from wazo_agid import agid, dialplan_variables, objects
-#from wazo_agid.helpers import CallRecordingNameGenerator
 
 logger = logging.getLogger(__name__)
 
