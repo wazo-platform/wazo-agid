@@ -40,7 +40,8 @@ def record_caller(agi, cursor, args):
         return
 
     filename = agi.get_variable('WAZO_CALL_RECORD_FILE_CALLER')
-    agi.appexec('MixMonitor', filename)
+    mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
+    agi.appexec('MixMonitor', '{},{}'.format(filename, mix_monitor_options))
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
 
