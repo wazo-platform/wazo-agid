@@ -2,14 +2,11 @@
 # Copyright 2020-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import re
 import logging
 
 from wazo_agid import agid, dialplan_variables, objects
 
 logger = logging.getLogger(__name__)
-
-PARAM_REMOVING_RE = re.compile(r'\(.+?\)')  # Turns pPbi(foo)a(bar) into pPbia
 
 
 def call_recording(agi, cursor, args):
@@ -44,22 +41,8 @@ def record_caller(agi, cursor, args):
 
     filename = agi.get_variable('WAZO_CALL_RECORD_FILE_CALLER')
     mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
-    need_progress = _has_option(mix_monitor_options, 'p')
-    if need_progress:
-        _progress(agi)
     agi.appexec('MixMonitor', '{},{}'.format(filename, mix_monitor_options))
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
-
-
-def _has_option(options, option):
-    raw_options = PARAM_REMOVING_RE.sub('', options)
-    return option in raw_options
-
-
-def _progress(agi):
-    if agi.get_variable('CHANNEL(state)' == 'Up'):
-        return
-    agi.appexec('Progress')
 
 
 def _enable_call_recording(agi, calld, channel_id):
