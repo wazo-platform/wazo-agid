@@ -23,6 +23,7 @@ class GroupFeatures(Handler):
         self._exten = None
         self._context = None
         self._name = None
+        self._label = None
         self._timeout = None
         self._transfer_user = None
         self._transfer_call = None
@@ -32,9 +33,11 @@ class GroupFeatures(Handler):
         self._preprocess_subroutine = None
         self._musicclass = None
         self._pickup_member = None
+        self._tenant_uuid = None
 
     def execute(self):
         self._set_members()
+        self._display_queue()
         self._set_options()
         self._set_vars()
         self._set_preprocess_subroutine()
@@ -45,6 +48,11 @@ class GroupFeatures(Handler):
             self._set_rewrite_cid()
         self._set_call_record_filename()
 
+    def _display_queue(self):
+        self._agi.verbose(
+            'Calling group "{}" from tenant "{}"'.format(self._label, self._tenant_uuid),
+        )
+
     def _needs_rewrite_cid(self):
         return self._referer == ("group:%s" % self._id)
 
@@ -52,10 +60,11 @@ class GroupFeatures(Handler):
         self._id = int(self._agi.get_variable(dialplan_variables.DESTINATION_ID))
         self._referer = self._agi.get_variable(dialplan_variables.FWD_REFERER)
 
-        groupfeatures_columns = ('id', 'name',
-                                 'timeout', 'transfer_user', 'transfer_call',
-                                 'write_caller', 'write_calling', 'ignore_forward',
-                                 'preprocess_subroutine', 'mark_answered_elsewhere')
+        groupfeatures_columns = (
+            'id', 'name', 'label', 'timeout', 'transfer_user', 'transfer_call', 'write_caller',
+            'write_calling', 'ignore_forward', 'preprocess_subroutine', 'mark_answered_elsewhere',
+            'tenant_uuid',
+        )
         queue_columns = ('musicclass',)
         extensions_columns = ('exten', 'context')
         columns = (
@@ -83,6 +92,7 @@ class GroupFeatures(Handler):
         self._exten = res['extensions.exten']
         self._context = res['extensions.context']
         self._name = res['groupfeatures.name']
+        self._label = res['groupfeatures.label']
         self._timeout = res['groupfeatures.timeout']
         self._transfer_user = res['groupfeatures.transfer_user']
         self._transfer_call = res['groupfeatures.transfer_call']
@@ -92,6 +102,7 @@ class GroupFeatures(Handler):
         self._preprocess_subroutine = res['groupfeatures.preprocess_subroutine']
         self._musicclass = res['queue.musicclass']
         self._mark_answered_elsewhere = res['groupfeatures.mark_answered_elsewhere']
+        self._tenant_uuid = res['groupfeatures.tenant_uuid']
 
     def _set_vars(self):
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
