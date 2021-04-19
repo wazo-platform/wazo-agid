@@ -3,17 +3,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-import time
 import requests
 
-from xivo_dao import callfilter_dao, context_dao, user_line_dao as old_user_line_dao
+from xivo_dao import callfilter_dao, user_line_dao as old_user_line_dao
 
 from xivo_dao.resources.user_line import dao as user_line_dao
 from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
 from xivo_dao.resources.extension import dao as extension_dao
 
-from wazo_agid.helpers import CallRecordingNameGenerator
 from wazo_agid.objects import DialAction, CallerID
 from wazo_agid.handlers.handler import Handler
 from wazo_agid import objects
@@ -29,10 +27,6 @@ class UserFeatures(Handler):
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
-        self._call_recording_name_generator = CallRecordingNameGenerator(
-            agi.config['call_recording']['filename_template'],
-            agi.config['call_recording']['filename_extension'],
-        )
         self._userid = None
         self._dstid = None
         self._destination_extension_id = None
@@ -67,7 +61,7 @@ class UserFeatures(Handler):
         self._set_dial_action_chanunavail()
         self._set_music_on_hold()
         self._set_call_record_enabled()
-        self._set_call_recordfile()
+        self._set_call_record_side()
         self._set_preprocess_subroutine()
         self._set_mobile_number()
         self._set_vmbox_lang()
@@ -330,28 +324,7 @@ class UserFeatures(Handler):
         if should_record:
             self._agi.set_variable('__WAZO_PEER_CALL_RECORD_ENABLED', '1')
 
-    def _set_call_recordfile(self):
-        if self._agi.get_variable('WAZO_CALL_RECORD_FILE_CALLEE'):
-            return
-
-        args = {
-            'srcnum': self._srcnum,
-            'dstnum': self._dstnum,
-            'timestamp': int(time.time()),
-            'local_time': time.asctime(time.localtime()),
-            'utc_time': time.asctime(time.gmtime()),
-            'base_context': self._context,
-            'tenant_uuid': context_dao.get(self._context).tenant_uuid,
-            'dest_type': 'user',
-        }
-        self._agi.set_variable(
-            '__WAZO_CALL_RECORD_FILE_CALLEE',
-            self._call_recording_name_generator.generate(side='callee', **args),
-        )
-        self._agi.set_variable(
-            '__WAZO_CALL_RECORD_FILE_CALLER',
-            self._call_recording_name_generator.generate(side='caller', **args),
-        )
+    def _set_call_record_side(self):
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
 
     def _set_music_on_hold(self):

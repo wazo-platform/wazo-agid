@@ -2,12 +2,9 @@
 # Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import time
-
 from uuid import uuid4
 
-from wazo_agid import agid, dialplan_variables, objects
-from wazo_agid.helpers import CallRecordingNameGenerator
+from wazo_agid import agid, objects
 
 
 def incoming_queue_set_features(agi, cursor, args):
@@ -99,7 +96,7 @@ def incoming_queue_set_features(agi, cursor, args):
     pickups = queue.pickupgroups()
     agi.set_variable('XIVO_PICKUPGROUP', ','.join(pickups))
 
-    set_call_record_filename(agi, queue)
+    set_call_record_side(agi, queue)
 
 
 def _set_wrapup_time(agi, queue):
@@ -129,29 +126,7 @@ def holdtime_announce(agi, cursor, args):
     agi.stream_file('queue-minutes')
 
 
-def set_call_record_filename(agi, queue):
-    args = {
-        'srcnum': agi.get_variable(dialplan_variables.SOURCE_NUMBER),
-        'dstnum': queue.number,
-        'timestamp': int(time.time()),
-        'local_time': time.asctime(time.localtime()),
-        'utc_time': time.asctime(time.gmtime()),
-        'base_context': queue.context,
-        'tenant_uuid': agi.get_variable(dialplan_variables.TENANT_UUID),
-        'dest_type': 'queue',
-    }
-    generator = CallRecordingNameGenerator(
-        agi.config['call_recording']['filename_template'],
-        agi.config['call_recording']['filename_extension'],
-    )
-    agi.set_variable(
-        '__WAZO_CALL_RECORD_FILE_CALLEE',
-        generator.generate(side='callee', **args),
-    )
-    agi.set_variable(
-        '__WAZO_CALL_RECORD_FILE_CALLER',
-        generator.generate(side='caller', **args),
-    )
+def set_call_record_side(agi, queue):
     agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
     agi.set_variable('__WAZO_LOCAL_CHAN_MATCH_UUID', str(uuid4()))
 

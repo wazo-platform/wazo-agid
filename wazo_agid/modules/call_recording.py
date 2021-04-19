@@ -3,10 +3,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
+import uuid
 
 from wazo_agid import agid, dialplan_variables, objects
 
 logger = logging.getLogger(__name__)
+
+CALL_RECORDING_FILENAME_TEMPLATE = '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
 
 
 def call_recording(agi, cursor, args):
@@ -39,10 +42,7 @@ def record_caller(agi, cursor, args):
     if not should_record:
         return
 
-    filename = agi.get_variable('WAZO_CALL_RECORD_FILE_CALLER')
-    mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
-    agi.appexec('MixMonitor', '{},{}'.format(filename, mix_monitor_options))
-    agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
+    _start_mix_monitor(agi)
 
 
 def _enable_call_recording(agi, calld, channel_id):
@@ -57,6 +57,23 @@ def _disable_call_recording(agi, calld, channel_id):
         calld.calls.stop_record(channel_id)
     except Exception as e:
         logger.error('Error during disabling call recording: %s', e)
+
+
+def start_mix_monitor(agi, cursor, args):
+    _start_mix_monitor(agi)
+
+
+def _start_mix_monitor(agi):
+    tenant_uuid = agi.get_variable(dialplan_variables.TENANT_UUID)
+    recording_uuid = str(uuid.uuid4())
+    filename = CALL_RECORDING_FILENAME_TEMPLATE.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
+
+    agi.appexec('MixMonitor', '{},{}'.format(filename, mix_monitor_options))
+    agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
 
 agid.register(call_recording)

@@ -2,22 +2,16 @@
 # Copyright 2012-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import time
 from uuid import uuid4
 
 from wazo_agid.handlers.handler import Handler
 from wazo_agid import objects
 from wazo_agid import dialplan_variables
-from wazo_agid.helpers import CallRecordingNameGenerator
 
 
 class GroupFeatures(Handler):
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
-        self._call_recording_name_generator = CallRecordingNameGenerator(
-            agi.config['call_recording']['filename_template'],
-            agi.config['call_recording']['filename_extension'],
-        )
         self._id = None
         self._referer = None
         self._exten = None
@@ -46,7 +40,7 @@ class GroupFeatures(Handler):
         self._set_schedule()
         if self._needs_rewrite_cid():
             self._set_rewrite_cid()
-        self._set_call_record_filename()
+        self._set_call_record_side()
 
     def _display_queue(self):
         self._agi.verbose(
@@ -163,25 +157,6 @@ class GroupFeatures(Handler):
             self._agi.set_variable('XIVO_PATH', 'group')
             self._agi.set_variable('XIVO_PATH_ID', self._id)
 
-    def _set_call_record_filename(self):
-        args = {
-            'srcnum': self._agi.get_variable(dialplan_variables.SOURCE_NUMBER),
-            'dstnum': self._exten,
-            'timestamp': int(time.time()),
-            'local_time': time.asctime(time.localtime()),
-            'utc_time': time.asctime(time.gmtime()),
-            'base_context': self._context,
-            'tenant_uuid': self._agi.get_variable(dialplan_variables.TENANT_UUID),
-            'dest_type': 'group',
-        }
-
-        self._agi.set_variable(
-            '__WAZO_CALL_RECORD_FILE_CALLEE',
-            self._call_recording_name_generator.generate(side='callee', **args),
-        )
-        self._agi.set_variable(
-            '__WAZO_CALL_RECORD_FILE_CALLER',
-            self._call_recording_name_generator.generate(side='caller', **args),
-        )
+    def _set_call_record_side(self):
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
         self._agi.set_variable('__WAZO_LOCAL_CHAN_MATCH_UUID', str(uuid4()))

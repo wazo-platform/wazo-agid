@@ -3,11 +3,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-import time
 
 from wazo_agid import dialplan_variables
 from wazo_agid.handlers.handler import Handler
-from wazo_agid.helpers import CallRecordingNameGenerator
 from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
@@ -19,10 +17,6 @@ class OutgoingFeatures(Handler):
 
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
-        self._call_recording_name_generator = CallRecordingNameGenerator(
-            agi.config['call_recording']['filename_template'],
-            agi.config['call_recording']['filename_extension'],
-        )
         self.user = None
         self.userid = None
         self.callerid = None
@@ -38,28 +32,7 @@ class OutgoingFeatures(Handler):
         except (ValueError, LookupError) as e:
             self._agi.dp_break(str(e))
 
-    def _set_call_record_filename(self):
-        if self._agi.get_variable('WAZO_CALL_RECORD_FILE_CALLER'):
-            return
-
-        args = {
-            'srcnum': self.srcnum,
-            'dstnum': self.dstnum,
-            'timestamp': int(time.time()),
-            'local_time': time.asctime(time.localtime()),
-            'utc_time': time.asctime(time.gmtime()),
-            'base_context': self._context,
-            'tenant_uuid': self._agi.get_variable(dialplan_variables.TENANT_UUID),
-            'dest_type': 'outcall',
-        }
-        self._agi.set_variable(
-            '__WAZO_CALL_RECORD_FILE_CALLEE',
-            self._call_recording_name_generator.generate(side='callee', **args),
-        )
-        self._agi.set_variable(
-            '__WAZO_CALL_RECORD_FILE_CALLER',
-            self._call_recording_name_generator.generate(side='caller', **args),
-        )
+    def _set_call_record_side(self):
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
 
     def _set_destination_number(self):
@@ -166,4 +139,4 @@ class OutgoingFeatures(Handler):
         self._set_hangup_ring_time()
         self._agi.set_variable(dialplan_variables.OUTCALL_ID, self.outcall.id)
         self._set_path(OutgoingFeatures.PATH_TYPE, self.outcall.id)
-        self._set_call_record_filename()
+        self._set_call_record_side()

@@ -61,7 +61,3 @@ bus:
   exchange_name: xivo
   exchange_type: topic
   exchange_durable: True
-
-call_recording:
-  filename_template: "/var/lib/wazo/sounds/tenants/{{ tenant_uuid }}/monitor/{{ dest_type }}-{{ srcnum }}-{{ dstnum }}-{{ timestamp }}-{{ side }}"
-  filename_extension: wav
