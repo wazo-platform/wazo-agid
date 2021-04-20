@@ -78,3 +78,4 @@ def _start_mix_monitor(agi):
 
 agid.register(call_recording)
 agid.register(record_caller)
+agid.register(start_mix_monitor)
