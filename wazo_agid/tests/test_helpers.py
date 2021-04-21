@@ -11,7 +11,6 @@ from hamcrest import (
 from mock import Mock
 
 from ..helpers import (
-    CallRecordingNameGenerator,
     is_registered_and_mobile,
 )
 
@@ -68,29 +67,3 @@ class TestIsRegisteredAndMobile(unittest.TestCase):
         result = is_registered_and_mobile(agi, 'name')
 
         assert_that(result, equal_to(True))
-
-
-class TestCallRecordingNameGenerator(unittest.TestCase):
-
-    def test_that_unicode_chars_are_replaced(self):
-        generator = CallRecordingNameGenerator(u'{{ name }}', 'wav')
-
-        result = generator.generate(name=u'pépé')
-
-        assert_that(result, equal_to('pepe.wav'))
-
-    def test_that_unacceptable_chars_are_removed(self):
-        generator = CallRecordingNameGenerator(u'{{ name }}', 'wav')
-
-        result = generator.generate(name=u'test\**test')
-
-        assert_that(result, equal_to('testtest.wav'))
-
-    def test_that_empty_names_are_not_generated(self):
-        generator = CallRecordingNameGenerator(u'{{ name }}', 'wav')
-
-        result = generator.generate(name=u'\**')
-
-        name, extension = result.rsplit('.', 1)
-        assert_that(len(name), greater_than(0), 'a name should have been generated')
-        assert_that(extension, equal_to('wav'))

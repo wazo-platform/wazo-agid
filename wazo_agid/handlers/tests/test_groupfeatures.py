@@ -10,18 +10,10 @@ from mock import Mock, patch, call
 class TestGroupFeatures(unittest.TestCase):
 
     def setUp(self):
-        config = {
-            'call_recording': {
-                'filename_template': '{{ mock }}',
-                'filename_extension': 'wav',
-            },
-        }
-        self._agi = Mock(config=config)
+        self._agi = Mock()
         self._cursor = Mock()
         self._args = Mock()
         self.group_features = GroupFeatures(self._agi, self._cursor, self._args)
-        self.call_recording_name_generator = Mock()
-        self.group_features._call_recording_name_generator = self.call_recording_name_generator
 
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_members')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_options')
@@ -32,7 +24,7 @@ class TestGroupFeatures(unittest.TestCase):
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_schedule')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._needs_rewrite_cid')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_rewrite_cid')
-    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_call_record_filename')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_call_record_side')
     def test_execute(self,
                      _set_rewrite_cid,
                      _needs_rewrite_cid,
@@ -43,7 +35,7 @@ class TestGroupFeatures(unittest.TestCase):
                      _set_vars,
                      _set_options,
                      _set_members,
-                     _set_call_record_filename):
+                     _set_call_record_side):
         _needs_rewrite_cid.return_value = True
 
         self.group_features.execute()
@@ -56,7 +48,7 @@ class TestGroupFeatures(unittest.TestCase):
         _set_dial_action.assert_called_once_with()
         _set_schedule.assert_called_once_with()
         _set_rewrite_cid.assert_called_once_with()
-        _set_call_record_filename.assert_called_once_with()
+        _set_call_record_side.assert_called_once_with()
 
     def test_referer_myself_needs_rewrite_cid(self):
         self.group_features._id = 3
