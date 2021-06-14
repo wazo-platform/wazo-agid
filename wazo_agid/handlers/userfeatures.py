@@ -36,6 +36,8 @@ class UserFeatures(Handler):
         self._feature_list = None
         self._caller = None
         self._user = None
+        self._moh_uuid = None
+        self._moh = None
 
         self.lines = []
         self.main_line = None
@@ -46,6 +48,7 @@ class UserFeatures(Handler):
     def execute(self):
         self._set_members()
         self._set_interfaces()
+        self._find_moh()
 
         filtered = self._call_filtering()
         if filtered:
@@ -68,6 +71,14 @@ class UserFeatures(Handler):
         self._set_video_enabled()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
 
+    def _find_moh(self):
+        if self._moh_uuid:
+            try:
+                self._moh = objects.MOH(self._agi, self._cursor, self._moh_uuid)
+            except LookupError:
+                msg = 'expected MOH with UUID {} but could not find it'.format(self._moh_uuid)
+                self._agi.verbose(msg)
+
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
@@ -76,6 +87,7 @@ class UserFeatures(Handler):
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
         self._context = self._agi.get_variable(dialplan_variables.BASE_CONTEXT)
+        self._moh_uuid = self._agi.get_variable(dialplan_variables.USER_MOH)
         self._set_caller()
         self._set_line()
         self._set_user()
@@ -347,6 +359,8 @@ class UserFeatures(Handler):
             options += "X"
         if self._user.incallfilter:
             options += "p"
+        if self._moh:
+            options += 'm({})'.format(self._moh.name)
         self._agi.set_variable('XIVO_CALLOPTIONS', options)
 
     def _set_ringseconds(self):

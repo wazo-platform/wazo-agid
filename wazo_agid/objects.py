@@ -168,6 +168,28 @@ class VMBox(object):
             self.commented = enabled
 
 
+class MOH(object):
+
+    def __init__(self, agi, cursor, uuid):
+        self.agi = agi
+        self.cursor = cursor
+        self.name = None
+
+        columns = ('name',)
+
+        cursor.query(
+            "SELECT ${columns} FROM moh WHERE uuid = %s",
+            columns,
+            (uuid,),
+        )
+
+        res = cursor.fetchone()
+        if not res:
+            raise LookupError('Unable to find MOH {}'.format(uuid))
+
+        self.name = res['name']
+
+
 class Paging(object):
 
     def __init__(self, agi, cursor, number, userid):

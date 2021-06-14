@@ -53,6 +53,7 @@ class TestUserFeatures(_BaseTestCase):
             'XIVO_DST_EXTEN_ID': '983274',
             'XIVO_BASE_CONTEXT': 'default',
             'WAZO_CALL_RECORD_ACTIVE': '0',
+            'WAZO_USER_MOH_UUID': '00000000-feed-dada-1ced-c0ffee000000'
         }
 
         self._agi.get_variable = lambda name: self._variables.get(name, '')
@@ -130,11 +131,27 @@ class TestUserFeatures(_BaseTestCase):
         self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
         self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
         self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
+        self.assertEqual(userfeatures._moh_uuid, self._variables['WAZO_USER_MOH_UUID'])
         self.assertTrue(userfeatures._set_caller.called)
         self.assertTrue(userfeatures._set_line.called)
         self.assertTrue(userfeatures._set_user.called)
 
         objects.User, old_user = old_user, None
+
+    def test_set_options_with_moh(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        moh = userfeatures._moh = Mock()
+        moh.name = 'my-music-class'
+        userfeatures._user = Mock(
+            dtmf_hangup=False,
+            enablexfer=False,
+            enableonlinerec=False,
+            incallfilter=False,
+        )
+
+        userfeatures._set_options()
+
+        self._agi.set_variable.assert_called_once_with('XIVO_CALLOPTIONS', 'm(my-music-class)')
 
     def test_set_caller(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
