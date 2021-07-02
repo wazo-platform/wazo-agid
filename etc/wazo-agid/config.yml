@@ -16,7 +16,7 @@ debug: false
 logfile: /var/log/wazo-agid.log
 
 # Database connection informations.
-db_uri: postgresql://asterisk:proformatique@localhost/asterisk
+db_uri: postgresql://asterisk:proformatique@localhost/asterisk?application_name=wazo-agid
 
 # AGI server listening informations.
 listen_address: 127.0.0.1
