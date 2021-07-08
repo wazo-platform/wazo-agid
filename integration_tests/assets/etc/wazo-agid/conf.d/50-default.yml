@@ -1,0 +1,8 @@
+user: asterisk
+debug: true
+listen_address: 0.0.0.0
+auth:
+  host: auth
+bus:
+  host: rabbitmq
+db_uri: postgresql://asterisk:proformatique@postgres/asterisk

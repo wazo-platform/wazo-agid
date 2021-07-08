@@ -1,0 +1,8 @@
+FROM wazoplatform/wazo-agid
+
+ENV PYTHONDONTWRITEBYTECODE='true'
+
+COPY . /usr/src/wazo-agid
+
+WORKDIR /usr/src/wazo-agid
+RUN python setup.py develop

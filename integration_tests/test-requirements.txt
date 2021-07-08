@@ -1,0 +1,5 @@
+docker
+docker-compose
+pytest
+
+https://github.com/wazo-platform/xivo-test-helpers/archive/master.zip

@@ -1,0 +1,8 @@
+version: '3'
+services:
+  sync:
+    depends_on:
+      - agid
+      - postgres
+    environment:
+      TARGETS: "agid:4573 postgres:5432"
