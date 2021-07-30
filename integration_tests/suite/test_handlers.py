@@ -141,3 +141,7 @@ class TestHandlers(IntegrationTest):
         )
 
         assert recv_cmds['FAILURE'] is False
+
+    @pytest.mark.skip('FIXME: need to verify file on filesystem')
+    def test_callback(self):
+        pass
