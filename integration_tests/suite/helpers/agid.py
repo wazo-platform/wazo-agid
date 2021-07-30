@@ -75,6 +75,16 @@ class AgidClient:
             variables, commands = self._process_communicate()
         return variables, commands
 
+    def callerid_forphones(self, calleridname, callerid):
+        with self._connect():
+            self._send_handler(
+                'callerid_forphones',
+                agi_calleridname=calleridname,
+                agi_callerid=callerid,
+            )
+            variables, commands = self._process_communicate()
+        return variables, commands
+
     @contextmanager
     def _connect(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
