@@ -45,6 +45,12 @@ class AgidClient:
             variables, commands = self._process_communicate()
         return variables, commands
 
+    def agent_get_status(self, tenant_uuid, agent_id):
+        with self._connect():
+            self._send_handler('agent_get_status', tenant_uuid, agent_id)
+            variables, commands = self._process_communicate()
+        return variables, commands
+
     @contextmanager
     def _connect(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

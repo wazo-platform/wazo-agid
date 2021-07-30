@@ -1,6 +1,7 @@
 # Copyright 2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import pytest
 from .helpers.base import IntegrationTest, use_asset
 
 
@@ -99,3 +100,16 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_AGENTID'] == str(agent['id'])
         assert recv_vars['XIVO_AGENTNUM'] == agent['number']
         assert recv_vars['CHANNEL(language)'] == agent['language']
+
+    @pytest.mark.skip('FIXME: need agentd mock')
+    def test_agent_get_status(self):
+        with self.db.queries() as queries:
+            agent = queries.insert_agent()
+
+        recv_vars, recv_cmds = self.agid.agent_get_status(
+            agent['tenant_uuid'],
+            agent['id'],
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_AGENT_LOGIN_STATUS'] == 'logged_in'
