@@ -13,3 +13,13 @@ apt-get install libpq-dev python-dev libffi-dev libyaml-dev
 pip install tox
 tox --recreate -e py27
 ```
+
+## Integration tests
+
+To add feature to AGI mock server:
+
+* On wazo host: `tcpdump -i lo -w /tmp/agi.pcap`
+* Execute the real agi
+* `scp <wazo>:/tmp/agi.pcap .`
+* Open `agi.pcap` with Wireshark
+* Apply filter `tcp.port == 4573`
