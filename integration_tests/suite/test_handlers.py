@@ -113,3 +113,31 @@ class TestHandlers(IntegrationTest):
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_AGENT_LOGIN_STATUS'] == 'logged_in'
+
+    @pytest.mark.skip('FIXME: need agentd mock')
+    def test_agent_login(self):
+        with self.db.queries() as queries:
+            agent = queries.insert_agent()
+            extension = queries.insert_extension()
+
+        recv_vars, recv_cmds = self.agid.agent_login(
+            agent['tenant_uuid'],
+            agent['id'],
+            extension['exten'],
+            extension['context'],
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_AGENTSTATUS'] == 'logged'
+
+    @pytest.mark.skip('FIXME: need agentd mock')
+    def test_agent_logoff(self):
+        with self.db.queries() as queries:
+            agent = queries.insert_agent()
+
+        recv_vars, recv_cmds = self.agid.agent_logoff(
+            agent['tenant_uuid'],
+            agent['id'],
+        )
+
+        assert recv_cmds['FAILURE'] is False

@@ -51,6 +51,24 @@ class AgidClient:
             variables, commands = self._process_communicate()
         return variables, commands
 
+    def agent_login(self, tenant_uuid, agent_id, exten, context):
+        with self._connect():
+            self._send_handler(
+                'agent_login',
+                tenant_uuid,
+                agent_id,
+                exten,
+                context
+            )
+            variables, commands = self._process_communicate()
+        return variables, commands
+
+    def agent_logoff(self, tenant_uuid, agent_id):
+        with self._connect():
+            self._send_handler('agent_logoff', tenant_uuid, agent_id)
+            variables, commands = self._process_communicate()
+        return variables, commands
+
     @contextmanager
     def _connect(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

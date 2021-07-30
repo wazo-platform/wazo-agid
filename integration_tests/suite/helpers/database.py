@@ -129,3 +129,11 @@ class DatabaseQueries(object):
                 'number': agent.number,
                 'language': agent.language,
             }
+
+    def insert_extension(self, **kwargs):
+        with self.inserter() as inserter:
+            extension = inserter.add_extension(**kwargs)
+            return {
+                'exten': extension.exten,
+                'context': extension.context,
+            }
