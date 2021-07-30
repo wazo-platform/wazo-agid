@@ -21,69 +21,11 @@ class UnknownCommandException(Exception):
     pass
 
 
-class AgidClient:
+class _BaseAgidClient:
     def __init__(self, host, port):
         self._host = host
         self._port = port
         self._socket = None
-
-    def monitoring(self):
-        with self._connect():
-            self._send_handler('monitoring')
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def incoming_user_set_features(self, variables):
-        with self._connect():
-            self._send_handler('incoming_user_set_features')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def agent_get_options(self, tenant_uuid, number):
-        with self._connect():
-            self._send_handler('agent_get_options', tenant_uuid, number)
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def agent_get_status(self, tenant_uuid, agent_id):
-        with self._connect():
-            self._send_handler('agent_get_status', tenant_uuid, agent_id)
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def agent_login(self, tenant_uuid, agent_id, exten, context):
-        with self._connect():
-            self._send_handler(
-                'agent_login',
-                tenant_uuid,
-                agent_id,
-                exten,
-                context
-            )
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def agent_logoff(self, tenant_uuid, agent_id):
-        with self._connect():
-            self._send_handler('agent_logoff', tenant_uuid, agent_id)
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def callerid_extend(self, callington):
-        with self._connect():
-            self._send_handler('callerid_extend', agi_callington=callington)
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def callerid_forphones(self, calleridname, callerid):
-        with self._connect():
-            self._send_handler(
-                'callerid_forphones',
-                agi_calleridname=calleridname,
-                agi_callerid=callerid,
-            )
-            variables, commands = self._process_communicate()
-        return variables, commands
 
     @contextmanager
     def _connect(self):
@@ -171,3 +113,63 @@ class AgidClient:
             raise UnknownCommandException(data)
 
         return received_variables, received_commands
+
+
+class AgidClient(_BaseAgidClient):
+    def monitoring(self):
+        with self._connect():
+            self._send_handler('monitoring')
+            variables, commands = self._process_communicate()
+        return variables, commands
+
+    def incoming_user_set_features(self, variables):
+        with self._connect():
+            self._send_handler('incoming_user_set_features')
+            variables, commands = self._process_communicate(variables)
+        return variables, commands
+
+    def agent_get_options(self, tenant_uuid, number):
+        with self._connect():
+            self._send_handler('agent_get_options', tenant_uuid, number)
+            variables, commands = self._process_communicate()
+        return variables, commands
+
+    def agent_get_status(self, tenant_uuid, agent_id):
+        with self._connect():
+            self._send_handler('agent_get_status', tenant_uuid, agent_id)
+            variables, commands = self._process_communicate()
+        return variables, commands
+
+    def agent_login(self, tenant_uuid, agent_id, exten, context):
+        with self._connect():
+            self._send_handler(
+                'agent_login',
+                tenant_uuid,
+                agent_id,
+                exten,
+                context
+            )
+            variables, commands = self._process_communicate()
+        return variables, commands
+
+    def agent_logoff(self, tenant_uuid, agent_id):
+        with self._connect():
+            self._send_handler('agent_logoff', tenant_uuid, agent_id)
+            variables, commands = self._process_communicate()
+        return variables, commands
+
+    def callerid_extend(self, callington):
+        with self._connect():
+            self._send_handler('callerid_extend', agi_callington=callington)
+            variables, commands = self._process_communicate()
+        return variables, commands
+
+    def callerid_forphones(self, calleridname, callerid):
+        with self._connect():
+            self._send_handler(
+                'callerid_forphones',
+                agi_calleridname=calleridname,
+                agi_callerid=callerid,
+            )
+            variables, commands = self._process_communicate()
+        return variables, commands
