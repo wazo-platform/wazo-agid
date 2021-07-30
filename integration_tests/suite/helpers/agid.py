@@ -9,7 +9,16 @@ GET_VARIABLE_REGEX = r'^GET VARIABLE "(.*)"$'
 SET_VARIABLE_REGEX = r'^SET VARIABLE "(.*)" "(.*)"$'
 CMD_STATUS_REGEX = r'^Status: OK$'
 CMD_VERBOSE_REGEX = r'^VERBOSE "(.*)" (\d)$'
+CMD_AGI_FAIL = r'.*agi_fail.*'
 CMD_GENERIC_REGEX = r'^(.*) "(.*)"'
+
+
+class AGIFailException(Exception):
+    pass
+
+
+class UnknownCommandException(Exception):
+    pass
 
 
 class AgidClient:
@@ -59,11 +68,16 @@ class AgidClient:
 
     def _process_communicate(self, variables=None):
         received_variables = {}
-        received_commands = {'VERBOSE': []}
+        received_commands = {'VERBOSE': [], 'FAILURE': False}
         while True:
             data = self._socket.recv(1024).decode('utf-8')
             if not data:
                 break
+
+            result = re.search(CMD_AGI_FAIL, data)
+            if result:
+                received_commands['FAILURE'] = True
+                raise AGIFailException(received_commands)
 
             result = re.search(GET_VARIABLE_REGEX, data)
             if result:
@@ -102,6 +116,6 @@ class AgidClient:
                 continue
             return received_variables, received_commands
 
-            raise Exception(data)
+            raise UnknownCommandException(data)
 
         return received_variables, received_commands

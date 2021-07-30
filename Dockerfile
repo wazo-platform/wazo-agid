@@ -30,6 +30,12 @@ RUN touch /var/log/wazo-agid.log
 RUN mkdir -p /etc/wazo-agid
 RUN mkdir /var/lib/wazo-agid
 RUN cp -a etc/wazo-agid/* /etc/wazo-agid/
+
+RUN mkdir -p /etc/xivo/asterisk
+RUN touch /etc/xivo/asterisk/xivo_ring.conf
+RUN touch /etc/xivo/asterisk/xivo_fax.conf
+RUN touch /etc/xivo/asterisk/xivo_in_callerid.conf
+
 WORKDIR /root
 
 # Clean
