@@ -39,6 +39,12 @@ class AgidClient:
             variables, commands = self._process_communicate(variables)
         return variables, commands
 
+    def agent_get_options(self, tenant_uuid, number):
+        with self._connect():
+            self._send_handler('agent_get_options', tenant_uuid, number)
+            variables, commands = self._process_communicate()
+        return variables, commands
+
     @contextmanager
     def _connect(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -48,11 +54,14 @@ class AgidClient:
             self._socket.close()
             self._socket = None
 
-    def _send_handler(self, command):
+    def _send_handler(self, command, *args):
         self._send_fragment('agi_network: yes')
         self._send_fragment(f'agi_network_script: {command}')
         fragment = f'agi_request: agi://localhost/{command}'
         self._send_fragment(fragment)
+        if args:
+            options = [f'agi_arg_{x+1}: {arg}' for x, arg in enumerate(args)]
+            self._send_fragment('\n'.join(options))
         self._send_fragment('')
 
     def _send_result(self, result=1, data=None):

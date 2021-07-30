@@ -123,4 +123,9 @@ class DatabaseQueries(object):
     def insert_agent(self, **kwargs):
         with self.inserter() as inserter:
             agent = inserter.add_agent(**kwargs)
-            return {'id': agent.id}
+            return {
+                'id': agent.id,
+                'tenant_uuid': agent.tenant_uuid,
+                'number': agent.number,
+                'language': agent.language,
+            }
