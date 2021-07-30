@@ -145,3 +145,9 @@ class TestHandlers(IntegrationTest):
     @pytest.mark.skip('FIXME: need to verify file on filesystem')
     def test_callback(self):
         pass
+
+    def test_callerid_extend(self):
+        recv_vars, recv_cmds = self.agid.callerid_extend('en')
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_SRCTON'] == 'en'
