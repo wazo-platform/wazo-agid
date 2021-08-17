@@ -42,8 +42,6 @@ class UserFeatures(Handler):
         self.main_line = None
         self.main_extension = None
 
-        self.auth_client = agi.config['auth']['client']
-
     def execute(self):
         self._set_members()
         self._set_interfaces()
@@ -153,12 +151,7 @@ class UserFeatures(Handler):
         return '{}/{}'.format(line.protocol.upper(), line.name)
 
     def _build_sip_interface(self, line):
-        return build_sip_interface(
-            self._agi,
-            self.auth_client,
-            self._user.uuid,
-            line.name
-        )
+        return build_sip_interface(self._agi, self._user.uuid, line.name)
 
     def _set_xivo_user_name(self):
         if self._user:

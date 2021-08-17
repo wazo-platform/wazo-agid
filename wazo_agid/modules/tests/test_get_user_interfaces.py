@@ -58,4 +58,5 @@ class TestUserLine(TestCase):
             'one-1',
             'one-2',
             'two-1',
+            'PJSIP/three',
         ))

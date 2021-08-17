@@ -25,6 +25,7 @@ class TestBuildSIPInterface(unittest.TestCase):
     def setUp(self):
         self.agi = Mock()
         self.auth_client = Mock()
+        self.agi.config = {'auth': {'client': self.auth_client}}
         self.channel_variables = {}
         self.agi.get_variable.side_effect = lambda var: self.channel_variables.get(var, '')
 
@@ -33,7 +34,7 @@ class TestBuildSIPInterface(unittest.TestCase):
     def test_not_connected_no_webrtc(self):
         aor_name = 'foobar'
 
-        interface = build_sip_interface(self.agi, self.auth_client, s.user_uuid, aor_name)
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
 
         self.assertEqual(interface, 'PJSIP/foobar')
 
@@ -43,7 +44,7 @@ class TestBuildSIPInterface(unittest.TestCase):
     def test_mobile_connection_webrtc_not_registered(self):
         aor_name = 'abcd'
 
-        interface = build_sip_interface(self.agi, self.auth_client, s.user_uuid, aor_name)
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
 
         self.assertEqual(interface, 'Local/abcd@wazo_wait_for_registration')
 
@@ -53,7 +54,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
         aor_name = 'abcd'
 
-        interface = build_sip_interface(self.agi, self.auth_client, s.user_uuid, aor_name)
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
 
         self.assertEqual(interface, ABCD_INTERFACE)
 
@@ -63,7 +64,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
         aor_name = 'abcd'
 
-        interface = build_sip_interface(self.agi, self.auth_client, s.user_uuid, aor_name)
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
 
         self.assertEqual(interface, ABCD_INTERFACE)
 
@@ -74,7 +75,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
         aor_name = 'abcd'
 
-        interface = build_sip_interface(self.agi, self.auth_client, s.user_uuid, aor_name)
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
 
         self.assertEqual(interface, ABCD_INTERFACE)
 
@@ -138,12 +139,13 @@ class TestHasMobileConnection(unittest.TestCase):
     def setUp(self):
         self.agi = Mock()
         self.auth_client = Mock()
+        self.agi.config = {'auth': {'client': self.auth_client}}
 
     def test_auth_error(self):
         self.auth_client.token.list.side_effect = requests.HTTPError
         self.auth_client.users.get_sessions.side_effect = requests.HTTPError
 
-        result = has_mobile_connection(self.agi, self.auth_client, s.user_uuid)
+        result = has_mobile_connection(self.agi, s.user_uuid)
 
         assert_that(result, equal_to(False))
         self.agi.set_variable.assert_not_called()
@@ -152,7 +154,7 @@ class TestHasMobileConnection(unittest.TestCase):
         self.auth_client.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
         self.auth_client.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': False}]}
 
-        result = has_mobile_connection(self.agi, self.auth_client, s.user_uuid)
+        result = has_mobile_connection(self.agi, s.user_uuid)
 
         assert_that(result, equal_to(False))
         self.agi.set_variable.assert_not_called()
@@ -164,7 +166,7 @@ class TestHasMobileConnection(unittest.TestCase):
             'total': 42,
         }
 
-        result = has_mobile_connection(self.agi, self.auth_client, s.user_uuid)
+        result = has_mobile_connection(self.agi, s.user_uuid)
 
         assert_that(result, equal_to(True))
         self.agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)
@@ -173,7 +175,7 @@ class TestHasMobileConnection(unittest.TestCase):
         self.auth_client.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
         self.auth_client.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': True}]}
 
-        result = has_mobile_connection(self.agi, self.auth_client, s.user_uuid)
+        result = has_mobile_connection(self.agi, s.user_uuid)
 
         assert_that(result, equal_to(True))
         self.agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)

@@ -5,11 +5,11 @@
 import requests
 
 
-def build_sip_interface(agi, auth_client, user_uuid, aor_name):
+def build_sip_interface(agi, user_uuid, aor_name):
     if _is_webrtc(agi, 'PJSIP', aor_name):
         if not _is_registered_and_mobile(agi, aor_name):
             # Checking for mobile connections last as this operation does HTTP requests
-            if _has_mobile_connection(agi, auth_client, user_uuid):
+            if _has_mobile_connection(agi, user_uuid):
                 agi.set_variable('WAZO_WAIT_FOR_MOBILE', 1)
                 return 'Local/{}@wazo_wait_for_registration'.format(aor_name)
 
@@ -18,8 +18,9 @@ def build_sip_interface(agi, auth_client, user_uuid, aor_name):
     return registered_interfaces or default_interface
 
 
-def _has_mobile_connection(agi, auth_client, user_uuid):
+def _has_mobile_connection(agi, user_uuid):
     mobile = False
+    auth_client = agi.config['auth']['client']
 
     try:
         response = auth_client.token.list(user_uuid, mobile=True)
