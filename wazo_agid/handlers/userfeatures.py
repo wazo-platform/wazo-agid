@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-import requests
 
 from xivo_dao import callfilter_dao, user_line_dao as old_user_line_dao
 
@@ -16,7 +15,7 @@ from wazo_agid.objects import DialAction, CallerID
 from wazo_agid.handlers.handler import Handler
 from wazo_agid import objects
 from wazo_agid import dialplan_variables
-from wazo_agid.helpers import is_registered_and_mobile, is_webrtc
+from wazo_agid.helpers import build_sip_interface
 
 logger = logging.getLogger(__name__)
 
@@ -154,16 +153,12 @@ class UserFeatures(Handler):
         return '{}/{}'.format(line.protocol.upper(), line.name)
 
     def _build_sip_interface(self, line):
-        if is_webrtc(self._agi, 'PJSIP', line.name):
-            if not is_registered_and_mobile(self._agi, line.name):
-                # Checking for mobile connections last as this operation does HTTP requests
-                if self._has_mobile_connection():
-                    self._agi.set_variable('WAZO_WAIT_FOR_MOBILE', 1)
-                    return 'Local/{}@wazo_wait_for_registration'.format(line.name)
-
-        default_interface = 'PJSIP/{}'.format(line.name)
-        registered_interfaces = self._agi.get_variable('PJSIP_DIAL_CONTACTS({})'.format(line.name))
-        return registered_interfaces or default_interface
+        return build_sip_interface(
+            self._agi,
+            self.auth_client,
+            self._user.uuid,
+            line.name
+        )
 
     def _set_xivo_user_name(self):
         if self._user:
@@ -448,33 +443,6 @@ class UserFeatures(Handler):
 
     def _set_dial_action_chanunavail(self):
         objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
-
-    def _has_mobile_connection(self):
-        mobile = False
-
-        try:
-            response = self.auth_client.token.list(self._user.uuid, mobile=True)
-        except requests.HTTPError as e:
-            self._agi.verbose('failed to fetch user refresh tokens {}'.format(e))
-        else:
-            mobile = response['filtered'] > 0
-
-        if not mobile:
-            try:
-                response = self.auth_client.users.get_sessions(self._user.uuid)
-            except requests.HTTPError as e:
-                self._agi.verbose('failed to fetch user sessions {}'.format(e))
-            else:
-                for session in response['items']:
-                    if session['mobile']:
-                        mobile = True
-                        break
-
-        if mobile:
-            self._agi.set_variable('WAZO_MOBILE_CONNECTION', True)
-            return True
-
-        return False
 
     def _set_video_enabled(self):
         native_video_format = self._agi.get_variable('CHANNEL(videonativeformat)')
