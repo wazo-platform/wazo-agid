@@ -101,7 +101,7 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_AGENTNUM'] == agent['number']
         assert recv_vars['CHANNEL(language)'] == agent['language']
 
-    @pytest.mark.skip('FIXME: need agentd mock')
+    @pytest.mark.skip('NotImplemented: need agentd mock')
     def test_agent_get_status(self):
         with self.db.queries() as queries:
             agent = queries.insert_agent()
@@ -114,7 +114,7 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_AGENT_LOGIN_STATUS'] == 'logged_in'
 
-    @pytest.mark.skip('FIXME: need agentd mock')
+    @pytest.mark.skip('NotImplemented: need agentd mock')
     def test_agent_login(self):
         with self.db.queries() as queries:
             agent = queries.insert_agent()
@@ -130,7 +130,7 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_AGENTSTATUS'] == 'logged'
 
-    @pytest.mark.skip('FIXME: need agentd mock')
+    @pytest.mark.skip('NotImplemented: need agentd mock')
     def test_agent_logoff(self):
         with self.db.queries() as queries:
             agent = queries.insert_agent()
@@ -142,7 +142,7 @@ class TestHandlers(IntegrationTest):
 
         assert recv_cmds['FAILURE'] is False
 
-    @pytest.mark.skip('FIXME: need to verify file on filesystem')
+    @pytest.mark.skip('NotImplemented: need to verify file on filesystem')
     def test_callback(self):
         pass
 
@@ -159,3 +159,119 @@ class TestHandlers(IntegrationTest):
         )
 
         assert recv_cmds['FAILURE'] is False
+
+    @pytest.mark.skip('NotImplemented')
+    def test_callfilter(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_call_recording(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_check_diversion(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_check_schedule(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_convert_pre_dial_handler(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_fwdundoall(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_getring(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_get_user_interfaces(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_group_answered_call(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_group_member(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_handler_fax(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_in_callerid(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_incoming_agent_set_features(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_incoming_conference_set_features(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_incoming_did_set_features(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_incoming_group_set_features(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_incoming_queue_set_features(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_outgoing_user_set_features(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_paging(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_phone_get_features(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_phone_progfunckey_devstate(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_phone_progfunckey(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_provision(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_queue_answered_call(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_queue_skill_rule_set(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_user_get_vmbox(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_user_set_call_rights(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_vmbox_get_info(self):
+        pass
+
+    @pytest.mark.skip('NotImplemented')
+    def test_wake_mobile(self):
+        pass
