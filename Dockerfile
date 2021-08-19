@@ -1,47 +1,36 @@
-## Image to build from sources
+FROM python:2.7-slim-buster AS compile-image
+LABEL maintainer="Wazo Maintainers <dev@wazo.community>"
 
-FROM debian:buster
-MAINTAINER Wazo Maintainers <dev@wazo.community>
+RUN apt-get -qq update && apt-get -qq -y install python-virtualenv
+RUN virtualenv /opt/venv
+# Activate virtual env
+ENV PATH="/opt/venv/bin:$PATH"
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV HOME /root
-
-# Add dependencies
-RUN apt-get -qq update
-RUN apt-get -qq -y install \
-    git \
-    apt-utils \
-    python-pip \
-    python-dev \
-    libpq-dev \
-    libyaml-dev \
-    libsasl2-dev
-
-# Install wazo-agid
-WORKDIR /usr/src
-ADD . /usr/src/agid
-WORKDIR agid
+COPY requirements.txt /usr/local/src/wazo-agid/requirements.txt
+WORKDIR /usr/local/src/wazo-agid
 RUN pip install -r requirements.txt
+
+COPY setup.py /usr/local/src/wazo-agid/
+COPY bin /usr/local/src/wazo-agid/bin
+COPY wazo_agid /usr/local/src/wazo-agid/wazo_agid
 RUN python setup.py install
 
-# Configure environment
-RUN adduser --disabled-password --gecos '' asterisk
-RUN touch /var/log/wazo-agid.log
-RUN mkdir -p /etc/wazo-agid
-RUN mkdir /var/lib/wazo-agid
-RUN cp -a etc/wazo-agid/* /etc/wazo-agid/
+FROM python:2.7-slim-buster AS build-image
+COPY --from=compile-image /opt/venv /opt/venv
 
-RUN mkdir -p /etc/xivo/asterisk
-RUN touch /etc/xivo/asterisk/xivo_ring.conf
-RUN touch /etc/xivo/asterisk/xivo_fax.conf
-RUN touch /etc/xivo/asterisk/xivo_in_callerid.conf
-
-WORKDIR /root
-
-# Clean
-RUN apt-get clean
-RUN rm -rf /usr/src/agid
+COPY ./etc/wazo-agid /etc/wazo-agid
+RUN true\
+    && adduser --disabled-password --gecos '' asterisk \
+    && mkdir -p /etc/wazo-agid/conf.d \
+    && mkdir -p /etc/xivo \
+    && mkdir -p /var/lib/wazo-agid \
+    && install -D -o root -g root /dev/null /var/log/wazo-agid.log \
+    && install -D -o root -g root /dev/null /etc/xivo/asterisk/xivo_ring.conf \
+    && install -D -o root -g root /dev/null /etc/xivo/asterisk/xivo_fax.conf \
+    && install -D -o root -g root /dev/null /etc/xivo/asterisk/xivo_in_callerid.conf
 
 EXPOSE 4573
 
-CMD ["wazo-agid", "-d"]
+# Activate virtual env
+ENV PATH="/opt/venv/bin:$PATH"
+CMD ["wazo-agid"]
