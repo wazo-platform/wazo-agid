@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -25,16 +25,7 @@ def paging(agi, cursor, args):
         agi.stream_file('vm-incorrect')
         agi.dp_break('Sorry you are not authorize to page this group : %s' % str(e))
 
-    # TODO PJSIP migration
-    lines = []
-    for line in paging_entry.lines:
-        if line.startswith('SIP/'):
-            lines.append('PJ{}'.format(line))
-        else:
-            lines.append(line)
-
-    paging_line = '&'.join(lines)
-
+    paging_line = '&'.join(paging_entry.lines)
     agi.set_variable('XIVO_PAGING_LINES', paging_line)
     agi.set_variable('XIVO_PAGING_TIMEOUT', paging_entry.timeout)
     agi.set_variable('XIVO_PAGING_OPTS', build_options(paging_entry))
