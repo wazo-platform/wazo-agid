@@ -6,6 +6,8 @@ wazo-agid is a server used by [Wazo](http://wazo.community) to serve
 [AGI](https://wiki.asterisk.org/wiki/pages/viewpage.action?pageId=32375589) requests coming from
 [Asterisk](http://asterisk.org).
 
+The AGI protocol is documented in the [Asterisk wiki](https://wiki.asterisk.org/wiki/display/AST/Asterisk+18+AGI+Commands).
+
 ## Running unit tests
 
 ```bash
