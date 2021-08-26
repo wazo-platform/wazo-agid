@@ -51,13 +51,3 @@ confd:
   port: 9486
   prefix: null
   https: false
-
-# Event bus (AMQP) connection informations
-bus:
-  username: guest
-  password: guest
-  host: localhost
-  port: 5672
-  exchange_name: xivo
-  exchange_type: topic
-  exchange_durable: True
