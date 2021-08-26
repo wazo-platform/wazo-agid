@@ -1,6 +1,6 @@
 docker
 docker-compose
-sqlalchemy==1.2.18
+sqlalchemy==1.3.0
 pytest
 psycopg2-binary
 
