@@ -42,7 +42,7 @@ class _BaseAgidClient:
         fragment = f'agi_request: agi://localhost/{command}'
         self._send_fragment(fragment)
         if args:
-            options = [f'agi_arg_{x+1}: {arg}' for x, arg in enumerate(args)]
+            options = [f'agi_arg_{x}: {arg}' for x, arg in enumerate(args, start=1)]
             self._send_fragment('\n'.join(options))
         if kwargs:
             options = [f'{key}: {value}' for key, value in kwargs.items()]
