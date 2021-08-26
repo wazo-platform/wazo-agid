@@ -1,8 +1,9 @@
 docker
 docker-compose
-sqlalchemy==1.2.18
+pyhamcrest
 pytest
 psycopg2-binary
+sqlalchemy==1.2.18
 
 https://github.com/wazo-platform/xivo-dao/archive/master.zip
 https://github.com/wazo-platform/xivo-lib-python/archive/master.zip

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from xivo_dao.resources.switchboard import dao as switchboard_dao
+from xivo_dao.helpers.exception import NotFoundError
 from wazo_agid.handlers.handler import Handler
 
 
@@ -27,22 +28,18 @@ class SwitchboardFeatures(Handler):
     def _set_switchboard(self):
         try:
             self.switchboard = switchboard_dao.get(self.switchboard_uuid)
-        except (LookupError, IndexError) as e:
+        except NotFoundError as e:
             self._agi.dp_break(str(e))
 
     def _set_fallback_destination(self):
+        self._agi.set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTION', '')
+        self._agi.set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG1', '')
+        self._agi.set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG2', '')
+
         noanswer_fallback = self.switchboard.fallbacks.get('noanswer')
         if noanswer_fallback:
-            self._set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTION', noanswer_fallback.action)
-            self._set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG1', noanswer_fallback.actionarg1)
-            self._set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG2', noanswer_fallback.actionarg2)
+            self._agi.set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTION', noanswer_fallback.action)
+            self._agi.set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG1', noanswer_fallback.actionarg1)
+            self._agi.set_variable('WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG2', noanswer_fallback.actionarg2)
 
-        self._set_variable('WAZO_SWITCHBOARD_TIMEOUT', self.switchboard.timeout)
-
-    def _set_variable(self, variable, value):
-        if value:
-            self._agi.set_variable(variable, value)
-        else:
-            # when forwarding across multiple switchboard, previous switchboards
-            # must not affect the current fallbacks
-            self._agi.set_variable(variable, '')
+        self._agi.set_variable('WAZO_SWITCHBOARD_TIMEOUT', self.switchboard.timeout)

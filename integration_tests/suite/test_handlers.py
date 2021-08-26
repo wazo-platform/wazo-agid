@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
+from hamcrest import assert_that, calling, raises
 from .helpers.base import IntegrationTest, use_asset
+from .helpers.agid import AGIFailException
 
 
 @use_asset('base')
@@ -259,6 +261,38 @@ class TestHandlers(IntegrationTest):
     @pytest.mark.skip('NotImplemented')
     def test_queue_skill_rule_set(self):
         pass
+
+    def test_switchboard_set_features_no_switchboard(self):
+        assert_that(
+            calling(self.agid.switchboard_set_features).with_args('switchboard-not-found'),
+            raises(AGIFailException)
+        )
+
+    def test_switchboard_set_features_fallback_no_fallback(self):
+        with self.db.queries() as queries:
+            switchboard = queries.insert_switchboard()
+
+        recv_vars, recv_cmds = self.agid.switchboard_set_features(switchboard['uuid'])
+
+        assert recv_cmds['FAILURE'] is False
+        # resetting those variables is important when chaining switcbhoard forwards
+        assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTION'] == ''
+        assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG1'] == ''
+        assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG2'] == ''
+
+    def test_switchboard_set_features_with_fallback(self):
+        with self.db.queries() as queries:
+            fallbacks = {
+                'noanswer': {'event': 'noanswer', 'action': 'user', 'actionarg1': '1', 'actionarg2': '2'}
+            }
+            switchboard = queries.insert_switchboard(fallbacks=fallbacks)
+
+        recv_vars, recv_cmds = self.agid.switchboard_set_features(switchboard['uuid'])
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTION'] == 'user'
+        assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG1'] == '1'
+        assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG2'] == '2'
 
     @pytest.mark.skip('NotImplemented')
     def test_user_get_vmbox(self):

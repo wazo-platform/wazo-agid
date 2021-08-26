@@ -173,3 +173,9 @@ class AgidClient(_BaseAgidClient):
             )
             variables, commands = self._process_communicate()
         return variables, commands
+
+    def switchboard_set_features(self, switchboard_uuid):
+        with self._connect():
+            self._send_handler('switchboard_set_features', switchboard_uuid)
+            variables, commands = self._process_communicate()
+        return variables, commands
