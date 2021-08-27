@@ -137,3 +137,10 @@ class DatabaseQueries(object):
                 'exten': extension.exten,
                 'context': extension.context,
             }
+
+    def insert_switchboard(self, **kwargs):
+        with self.inserter() as inserter:
+            switchboard = inserter.add_switchboard(**kwargs)
+            return {
+                'uuid': switchboard.uuid,
+            }
