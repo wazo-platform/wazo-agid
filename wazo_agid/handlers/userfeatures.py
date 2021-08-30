@@ -231,8 +231,10 @@ class UserFeatures(Handler):
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
 
         boss_line = self.main_line
-        protocol = boss_line.protocol.upper()
-        boss_interface = '{}/{}'.format(protocol, boss_line.name)
+        techno = boss_line.protocol.upper()
+        if techno == 'SIP':
+            techno = 'PJSIP'
+        boss_interface = '{}/{}'.format(techno, boss_line.name)
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
