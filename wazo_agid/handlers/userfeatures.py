@@ -231,11 +231,10 @@ class UserFeatures(Handler):
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
 
         boss_line = self.main_line
-        protocol = boss_line.protocol.upper()
-        # TODO PJSIP migration
-        if protocol.startswith('SIP'):
-            protocol = 'PJ{}'.format(protocol)
-        boss_interface = '{}/{}'.format(protocol, boss_line.name)
+        techno = boss_line.protocol.upper()
+        if techno == 'SIP':
+            techno = 'PJSIP'
+        boss_interface = '{}/{}'.format(techno, boss_line.name)
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
@@ -247,11 +246,6 @@ class UserFeatures(Handler):
             secretary_callfiltermember, ringseconds = secretary
             if secretary_callfiltermember.active:
                 iface = old_user_line_dao.get_line_identity_by_user_id(secretary_callfiltermember.typeval)
-                # TODO PJSIP migration
-                if iface.startswith('SIP'):
-                    iface = 'PJ{}'.format(iface)
-                if iface.startswith('sip'):
-                    iface = 'pj{}'.format(iface)
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):

@@ -262,7 +262,7 @@ class Paging(object):
 
         for line in res:
             if line['endpoint_sip_uuid']:
-                line = 'SIP/{}'.format(line['name'])
+                line = 'PJSIP/{}'.format(line['name'])
             elif line['endpoint_sccp_id']:
                 line = 'SCCP/{}/autoanswer'.format(line['name'])
             elif line['endpoint_custom_id']:
