@@ -3,16 +3,81 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
+
 from hamcrest import (
     assert_that,
     equal_to,
-    greater_than,
 )
-from mock import Mock
+from mock import (Mock, patch, sentinel as s)
 
 from ..helpers import (
-    is_registered_and_mobile,
+    build_sip_interface,
+    _is_registered_and_mobile as is_registered_and_mobile,
+    requests,
+    _has_mobile_connection as has_mobile_connection,
 )
+
+ABCD_INTERFACE = 'PJSIP/ycetqvtr/sip:n753iqfr@127.0.0.1:44530;transport=ws&PJSIP/ycetqvtr/sip:b6405ov4@127.0.0.1:44396;transport=ws'
+
+
+class TestBuildSIPInterface(unittest.TestCase):
+
+    def setUp(self):
+        self.agi = Mock()
+        self.auth_client = Mock()
+        self.agi.config = {'auth': {'client': self.auth_client}}
+        self.channel_variables = {}
+        self.agi.get_variable.side_effect = lambda var: self.channel_variables.get(var, '')
+
+    @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=False))
+    @patch('wazo_agid.helpers._has_mobile_connection', Mock(return_value=False))
+    def test_not_connected_no_webrtc(self):
+        aor_name = 'foobar'
+
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
+
+        self.assertEqual(interface, 'PJSIP/foobar')
+
+    @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
+    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=False))
+    @patch('wazo_agid.helpers._has_mobile_connection', Mock(return_value=True))
+    def test_mobile_connection_webrtc_not_registered(self):
+        aor_name = 'abcd'
+
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
+
+        self.assertEqual(interface, 'Local/abcd@wazo_wait_for_registration')
+
+    @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
+    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=True))
+    def test_mobile_connection_webrtc_mobile_registered(self):
+        self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
+        aor_name = 'abcd'
+
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
+
+        self.assertEqual(interface, ABCD_INTERFACE)
+
+    @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
+    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=True))
+    def test_no_mobile_connection_webrtc_mobile_not_registered(self):
+        self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
+        aor_name = 'abcd'
+
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
+
+        self.assertEqual(interface, ABCD_INTERFACE)
+
+    @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
+    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=True))
+    @patch('wazo_agid.helpers._has_mobile_connection', Mock(return_value=False))
+    def test_connected(self):
+        self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
+        aor_name = 'abcd'
+
+        interface = build_sip_interface(self.agi, s.user_uuid, aor_name)
+
+        self.assertEqual(interface, ABCD_INTERFACE)
 
 
 class TestIsRegisteredAndMobile(unittest.TestCase):
@@ -67,3 +132,50 @@ class TestIsRegisteredAndMobile(unittest.TestCase):
         result = is_registered_and_mobile(agi, 'name')
 
         assert_that(result, equal_to(True))
+
+
+class TestHasMobileConnection(unittest.TestCase):
+
+    def setUp(self):
+        self.agi = Mock()
+        self.auth_client = Mock()
+        self.agi.config = {'auth': {'client': self.auth_client}}
+
+    def test_auth_error(self):
+        self.auth_client.token.list.side_effect = requests.HTTPError
+        self.auth_client.users.get_sessions.side_effect = requests.HTTPError
+
+        result = has_mobile_connection(self.agi, s.user_uuid)
+
+        assert_that(result, equal_to(False))
+        self.agi.set_variable.assert_not_called()
+
+    def test_no_mobile_connections_no_session(self):
+        self.auth_client.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
+        self.auth_client.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': False}]}
+
+        result = has_mobile_connection(self.agi, s.user_uuid)
+
+        assert_that(result, equal_to(False))
+        self.agi.set_variable.assert_not_called()
+
+    def test_with_mobile_connections(self):
+        self.auth_client.token.list.return_value = {
+            'items': [{'mobile': True}, {'mobile': True}],
+            'filtered': 2,
+            'total': 42,
+        }
+
+        result = has_mobile_connection(self.agi, s.user_uuid)
+
+        assert_that(result, equal_to(True))
+        self.agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)
+
+    def test_mobile_session_only(self):
+        self.auth_client.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
+        self.auth_client.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': True}]}
+
+        result = has_mobile_connection(self.agi, s.user_uuid)
+
+        assert_that(result, equal_to(True))
+        self.agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)
