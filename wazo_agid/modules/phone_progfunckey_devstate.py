@@ -61,14 +61,8 @@ def phone_progfunckey_devstate(agi, cursor, args):
         agi.verbose(str(e))
         return
 
-    xset = set()
-    xset.add(fkey_extension(ppfkexten,
-                            (user.id,
-                             featureexten,
-                             dest)))
-
-    for x in xset:
-        agi.set_variable("DEVICE_STATE(Custom:%s)" % x, devstate)
+    exten = fkey_extension(ppfkexten, (user.id, featureexten, dest))
+    agi.set_variable("DEVICE_STATE(Custom:%s)" % exten, devstate)
 
 
 agid.register(phone_progfunckey_devstate)
