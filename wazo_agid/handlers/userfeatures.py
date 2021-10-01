@@ -120,6 +120,10 @@ class UserFeatures(Handler):
             else:
                 self._agi.set_variable('XIVO_DST_USERNUM', self.main_extension.exten)
                 self._agi.set_variable('WAZO_DST_USER_CONTEXT', self.main_extension.context)
+                self._agi.set_variable('__PICKUPMARK', '{}%{}'.format(
+                    self.main_extension.exten,
+                    self.main_extension.context,
+                ))
 
     def _set_user(self):
         if self._dstid:
