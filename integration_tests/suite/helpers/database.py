@@ -138,6 +138,15 @@ class DatabaseQueries(object):
                 'context': extension.context,
             }
 
+    def insert_meeting(self, **kwargs):
+        with self.inserter() as inserter:
+            meeting = inserter.add_meeting(**kwargs)
+            return {
+                'uuid': str(meeting.uuid),
+                'name': meeting.name,
+                'tenant_uuid': str(meeting.tenant_uuid),
+            }
+
     def insert_switchboard(self, **kwargs):
         with self.inserter() as inserter:
             switchboard = inserter.add_switchboard(**kwargs)
