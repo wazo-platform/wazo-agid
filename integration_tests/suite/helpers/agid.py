@@ -116,6 +116,12 @@ class _BaseAgidClient:
 
 
 class AgidClient(_BaseAgidClient):
+    def meeting_user(self, variables, meeting_uuid):
+        with self._connect():
+            self._send_handler('meeting_user', meeting_uuid)
+            variables, commands = self._process_communicate(variables)
+        return variables, commands
+
     def monitoring(self):
         with self._connect():
             self._send_handler('monitoring')

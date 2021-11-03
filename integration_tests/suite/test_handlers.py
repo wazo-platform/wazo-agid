@@ -234,6 +234,22 @@ class TestHandlers(IntegrationTest):
     def test_outgoing_user_set_features(self):
         pass
 
+    def test_meeting_user(self):
+        with self.db.queries() as queries:
+            meeting = queries.insert_meeting()
+
+        variables = {
+            'WAZO_TENANT_UUID': meeting['tenant_uuid'],
+        }
+
+        recv_vars, recv_cmds = self.agid.meeting_user(
+            variables, 'wazo-meeting-{uuid}'.format(**meeting),
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_MEETING_NAME'] == meeting['name']
+        assert recv_vars['WAZO_MEETING_UUID'] == meeting['uuid']
+
     @pytest.mark.skip('NotImplemented')
     def test_paging(self):
         pass

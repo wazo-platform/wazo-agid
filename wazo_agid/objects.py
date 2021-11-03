@@ -164,6 +164,30 @@ class VMBox(object):
             self.commented = enabled
 
 
+class Meeting(object):
+
+    def __init__(self, agi, cursor, tenant_uuid, uuid):
+        self.agi = agi
+        self.cursor = cursor
+        self.uuid = uuid
+        self.tenant_uuid = tenant_uuid
+
+        columns = ('name',)
+        cursor.query(
+            "SELECT ${columns} FROM meeting WHERE uuid = %s and tenant_uuid = %s",
+            columns,
+            (uuid, tenant_uuid)
+        )
+
+        res = cursor.fetchone()
+        if not res:
+            raise LookupError(
+                'Unable to find Meeting {} in tenant {}'.format(uuid, tenant_uuid)
+            )
+
+        self.name = res['name']
+
+
 class MOH(object):
 
     def __init__(self, agi, cursor, uuid):
