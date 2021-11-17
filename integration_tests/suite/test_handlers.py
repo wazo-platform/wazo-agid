@@ -214,9 +214,26 @@ class TestHandlers(IntegrationTest):
     def test_incoming_agent_set_features(self):
         pass
 
-    @pytest.mark.skip('NotImplemented')
     def test_incoming_conference_set_features(self):
-        pass
+        name = 'My Conference'
+        with self.db.queries() as queries:
+            conference = queries.insert_conference(name=name)
+
+        variables = {
+            'XIVO_DSTID': conference['id'],
+        }
+        recv_vars, recv_cmds = self.agid.incoming_conference_set_features(variables)
+
+        bridge_profile = 'xivo-bridge-profile-{}'.format(conference['id'])
+        user_profile = 'xivo-user-profile-{}'.format(conference['id'])
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_CONFBRIDGE_ID'] == str(conference['id'])
+        assert recv_vars['WAZO_CONFBRIDGE_TENANT_UUID'] == conference['tenant_uuid']
+        assert recv_vars['WAZO_CONFBRIDGE_BRIDGE_PROFILE'] == bridge_profile
+        assert recv_vars['WAZO_CONFBRIDGE_USER_PROFILE'] == user_profile
+        assert recv_vars['WAZO_CONFBRIDGE_MENU'] == 'xivo-default-user-menu'
+        assert recv_vars['WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE'] == ''
+        assert recv_cmds['EXEC CELGenUserEvent'] == 'WAZO_CONFERENCE, NAME: {}'.format(name)
 
     @pytest.mark.skip('NotImplemented')
     def test_incoming_did_set_features(self):
