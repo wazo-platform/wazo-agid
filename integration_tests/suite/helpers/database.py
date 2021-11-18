@@ -90,6 +90,15 @@ class DatabaseQueries(object):
         yield ItemInserter(session, tenant_uuid=TENANT_UUID)
         session.commit()
 
+    def insert_conference(self, **kwargs):
+        with self.inserter() as inserter:
+            conference = inserter.add_conference(**kwargs)
+            return {
+                'id': conference.id,
+                'name': conference.name,
+                'tenant_uuid': conference.tenant_uuid,
+            }
+
     def insert_user_line_extension(self, **kwargs):
         with self.inserter() as inserter:
             ule = inserter.add_user_line_with_exten(**kwargs)

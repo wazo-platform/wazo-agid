@@ -38,6 +38,7 @@ def incoming_conference_set_features(agi, cursor, args):
     agi.set_variable('WAZO_CONFBRIDGE_USER_PROFILE', user_profile)
     agi.set_variable('WAZO_CONFBRIDGE_MENU', menu)
     agi.set_variable('WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or '')
+    agi.appexec('CELGenUserEvent', 'WAZO_CONFERENCE, NAME: {}'.format(conference.name or ''))
 
 
 agid.register(incoming_conference_set_features)

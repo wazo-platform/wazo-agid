@@ -128,6 +128,12 @@ class AgidClient(_BaseAgidClient):
             variables, commands = self._process_communicate()
         return variables, commands
 
+    def incoming_conference_set_features(self, variables):
+        with self._connect():
+            self._send_handler('incoming_conference_set_features')
+            variables, commands = self._process_communicate(variables)
+        return variables, commands
+
     def incoming_user_set_features(self, variables):
         with self._connect():
             self._send_handler('incoming_user_set_features')
