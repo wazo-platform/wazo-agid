@@ -7,32 +7,33 @@ import re
 from wazo_agid import agid, objects
 
 
-MEETING_RE = re.compile(r'^wazo-meeting-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$')
+MEETING_RE = re.compile(
+    r'^wazo-meeting-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$'
+)
 
 
 def meeting_user(agi, cursor, args):
     tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
-    if not args:
-        return _fail(agi, args)
     try:
-        matches = MEETING_RE.match(args[0])
-    except TypeError:
-        return _fail(agi, args)
+        meeting = _find_meeting(agi, cursor, tenant_uuid, args)
+    except (AttributeError, LookupError, TypeError) as e:
+        agi.verbose('Failed to find meeting {}'.format(e))
+        agi.answer()
+        agi.stream_file('invalid')
+        return agi.dp_break('Could not find meeting matching {}'.format(args))
 
-    meeting_uuid = matches.group(1) if matches else None
-    try:
-        meeting = objects.Meeting(agi, cursor, tenant_uuid, meeting_uuid)
-    except LookupError:
-        return _fail(agi, args)
-
-    agi.set_variable('WAZO_MEETING_UUID', meeting_uuid)
+    agi.set_variable('WAZO_MEETING_UUID', meeting.uuid)
     agi.set_variable('WAZO_MEETING_NAME', meeting.name)
 
 
-def _fail(agi, args):
-    agi.answer()
-    agi.stream_file('invalid')
-    agi.dp_break('Could not find meeting matching {}'.format(args))
+def _find_meeting(agi, cursor, tenant_uuid, args):
+    identifier = args[0]
+
+    if identifier.isdigit():
+        return objects.Meeting(agi, cursor, tenant_uuid, number=identifier)
+    else:
+        matches = MEETING_RE.match(identifier)
+        return objects.Meeting(agi, cursor, tenant_uuid, uuid=matches.group(1))
 
 
 agid.register(meeting_user)

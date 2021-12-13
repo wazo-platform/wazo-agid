@@ -154,6 +154,7 @@ class DatabaseQueries(object):
                 'uuid': str(meeting.uuid),
                 'name': meeting.name,
                 'tenant_uuid': str(meeting.tenant_uuid),
+                'number': meeting.number,
             }
 
     def insert_switchboard(self, **kwargs):
