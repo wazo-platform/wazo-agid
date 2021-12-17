@@ -259,8 +259,18 @@ class TestHandlers(IntegrationTest):
             'WAZO_TENANT_UUID': meeting['tenant_uuid'],
         }
 
+        # Lookup by UUID
         recv_vars, recv_cmds = self.agid.meeting_user(
             variables, 'wazo-meeting-{uuid}'.format(**meeting),
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_MEETING_NAME'] == meeting['name']
+        assert recv_vars['WAZO_MEETING_UUID'] == meeting['uuid']
+
+        # Lookup by number
+        recv_vars, recv_cmds = self.agid.meeting_user(
+            variables, meeting['number'],
         )
 
         assert recv_cmds['FAILURE'] is False

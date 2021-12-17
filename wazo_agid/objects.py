@@ -166,18 +166,24 @@ class VMBox(object):
 
 class Meeting(object):
 
-    def __init__(self, agi, cursor, tenant_uuid, uuid):
+    def __init__(self, agi, cursor, tenant_uuid, uuid=None, number=None):
         self.agi = agi
         self.cursor = cursor
         self.uuid = uuid
+        self.number = number
         self.tenant_uuid = tenant_uuid
 
-        columns = ('name',)
-        cursor.query(
-            "SELECT ${columns} FROM meeting WHERE uuid = %s and tenant_uuid = %s",
-            columns,
-            (uuid, tenant_uuid)
-        )
+        columns = ('uuid', 'name')
+        if uuid:
+            query = "SELECT ${columns} FROM meeting WHERE uuid = %s and tenant_uuid = %s"
+            arguments = (uuid, tenant_uuid)
+        elif number:
+            query = "SELECT ${columns} FROM meeting WHERE number = %s and tenant_uuid = %s"
+            arguments = (number, tenant_uuid)
+        else:
+            raise Exception('Cannot find a meeting with no UUID or number')
+
+        cursor.query(query, columns, arguments)
 
         res = cursor.fetchone()
         if not res:
@@ -185,6 +191,7 @@ class Meeting(object):
                 'Unable to find Meeting {} in tenant {}'.format(uuid, tenant_uuid)
             )
 
+        self.uuid = res['uuid']
         self.name = res['name']
 
 
