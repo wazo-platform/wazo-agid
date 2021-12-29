@@ -7,7 +7,7 @@ import unittest
 
 from .agid import AgidClient
 from .database import DbHelper
-from xivo_test_helpers.asset_launching_test_case import (
+from wazo_test_helpers.asset_launching_test_case import (
     AssetLaunchingTestCase,
     NoSuchPort,
     NoSuchService,
