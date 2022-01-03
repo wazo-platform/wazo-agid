@@ -1,4 +1,4 @@
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
@@ -215,7 +215,7 @@ class TestHandlers(IntegrationTest):
         pass
 
     def test_incoming_conference_set_features(self):
-        name = 'My Conference'
+        name = u'My Conférence'
         with self.db.queries() as queries:
             conference = queries.insert_conference(name=name)
 
