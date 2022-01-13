@@ -1,5 +1,3 @@
-docker
-docker-compose
 pyhamcrest
 pytest
 psycopg2-binary
