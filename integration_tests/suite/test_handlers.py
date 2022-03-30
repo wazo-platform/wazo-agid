@@ -336,6 +336,16 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTION'] == 'user'
         assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG1'] == '1'
         assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG2'] == '2'
+        assert recv_vars['WAZO_SWITCHBOARD_TIMEOUT'] == ''
+
+    def test_switchboard_set_features_with_timeout(self):
+        with self.db.queries() as queries:
+            switchboard = queries.insert_switchboard(timeout=42)
+
+        recv_vars, recv_cmds = self.agid.switchboard_set_features(switchboard['uuid'])
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_SWITCHBOARD_TIMEOUT'] == '42'
 
     @pytest.mark.skip('NotImplemented')
     def test_user_get_vmbox(self):
