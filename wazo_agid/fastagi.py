@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2004-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2004-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Modifications by Proformatique from pyst-0.2:
@@ -116,7 +116,9 @@ class FastAGI(object):
 
     @staticmethod
     def _quote(string):
-        if not isinstance(string, unicode):
+        if string is None:
+            string = ''
+        elif not isinstance(string, unicode):
             string = str(string)
         else:
             string = string.encode('utf8')
