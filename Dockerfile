@@ -21,9 +21,9 @@ COPY --from=compile-image /opt/venv /opt/venv
 COPY ./etc/wazo-agid /etc/wazo-agid
 RUN true\
     && adduser --disabled-password --gecos '' asterisk \
+    && adduser --quiet --system --group --home /var/lib/wazo-agid wazo-agid \
     && mkdir -p /etc/wazo-agid/conf.d \
     && mkdir -p /etc/xivo \
-    && mkdir -p /var/lib/wazo-agid \
     && install -D -o root -g root /dev/null /var/log/wazo-agid.log \
     && install -D -o root -g root /dev/null /etc/xivo/asterisk/xivo_ring.conf \
     && install -D -o root -g root /dev/null /etc/xivo/asterisk/xivo_fax.conf \
