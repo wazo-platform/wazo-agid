@@ -54,7 +54,8 @@ def _is_registered_and_mobile(agi, aor_name):
 
     for contact in raw_contacts.split(','):
         mobility = agi.get_variable('PJSIP_CONTACT({},mobility)'.format(contact))
-        if mobility == 'mobile':
+        is_available = agi.get_variable('PJSIP_CONTACT({},status)'.format(contact))
+        if mobility == 'mobile' and is_available == 'Reachable':
             return True
 
     return False
