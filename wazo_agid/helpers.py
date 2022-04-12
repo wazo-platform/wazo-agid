@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2017-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import requests
@@ -7,7 +7,7 @@ import requests
 
 def build_sip_interface(agi, user_uuid, aor_name):
     if _is_webrtc(agi, 'PJSIP', aor_name):
-        if not _is_registered_and_mobile(agi, aor_name):
+        if not _is_mobile_reachable(agi, aor_name):
             # Checking for mobile connections last as this operation does HTTP requests
             if _has_mobile_connection(agi, user_uuid):
                 agi.set_variable('WAZO_WAIT_FOR_MOBILE', 1)
@@ -47,14 +47,17 @@ def _has_mobile_connection(agi, user_uuid):
     return False
 
 
-def _is_registered_and_mobile(agi, aor_name):
+def _is_mobile_reachable(agi, aor_name):
     raw_contacts = agi.get_variable('PJSIP_AOR({},contact)'.format(aor_name))
     if not raw_contacts:
         return False
 
     for contact in raw_contacts.split(','):
         mobility = agi.get_variable('PJSIP_CONTACT({},mobility)'.format(contact))
-        if mobility == 'mobile':
+        if mobility != 'mobile':
+            continue
+        status = agi.get_variable('PJSIP_CONTACT({},status)'.format(contact))
+        if status == 'Reachable':
             return True
 
     return False

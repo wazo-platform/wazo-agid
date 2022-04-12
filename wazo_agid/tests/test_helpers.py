@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2017-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -12,7 +12,7 @@ from mock import (Mock, patch, sentinel as s)
 
 from ..helpers import (
     build_sip_interface,
-    _is_registered_and_mobile as is_registered_and_mobile,
+    _is_mobile_reachable as is_mobile_and_reachable,
     requests,
     _has_mobile_connection as has_mobile_connection,
 )
@@ -39,7 +39,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.assertEqual(interface, 'PJSIP/foobar')
 
     @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
-    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=False))
+    @patch('wazo_agid.helpers._is_mobile_reachable', Mock(return_value=False))
     @patch('wazo_agid.helpers._has_mobile_connection', Mock(return_value=True))
     def test_mobile_connection_webrtc_not_registered(self):
         aor_name = 'abcd'
@@ -49,7 +49,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.assertEqual(interface, 'Local/abcd@wazo_wait_for_registration')
 
     @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
-    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=True))
+    @patch('wazo_agid.helpers._is_mobile_reachable', Mock(return_value=True))
     def test_mobile_connection_webrtc_mobile_registered(self):
         self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
         aor_name = 'abcd'
@@ -59,7 +59,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.assertEqual(interface, ABCD_INTERFACE)
 
     @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
-    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=True))
+    @patch('wazo_agid.helpers._is_mobile_reachable', Mock(return_value=True))
     def test_no_mobile_connection_webrtc_mobile_not_registered(self):
         self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
         aor_name = 'abcd'
@@ -69,7 +69,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.assertEqual(interface, ABCD_INTERFACE)
 
     @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=True))
-    @patch('wazo_agid.helpers._is_registered_and_mobile', Mock(return_value=True))
+    @patch('wazo_agid.helpers._is_mobile_reachable', Mock(return_value=True))
     @patch('wazo_agid.helpers._has_mobile_connection', Mock(return_value=False))
     def test_connected(self):
         self.channel_variables['PJSIP_DIAL_CONTACTS(abcd)'] = ABCD_INTERFACE
@@ -86,7 +86,7 @@ class TestIsRegisteredAndMobile(unittest.TestCase):
         agi = Mock()
         agi.get_variable.return_value = ''
 
-        result = is_registered_and_mobile(agi, 'name')
+        result = is_mobile_and_reachable(agi, 'name')
 
         assert_that(result, equal_to(False))
 
@@ -100,7 +100,7 @@ class TestIsRegisteredAndMobile(unittest.TestCase):
         agi = Mock()
         agi.get_variable.side_effect = get_variable
 
-        result = is_registered_and_mobile(agi, 'name')
+        result = is_mobile_and_reachable(agi, 'name')
 
         assert_that(result, equal_to(False))
 
@@ -114,22 +114,25 @@ class TestIsRegisteredAndMobile(unittest.TestCase):
         agi = Mock()
         agi.get_variable.side_effect = get_variable
 
-        result = is_registered_and_mobile(agi, 'name')
+        result = is_mobile_and_reachable(agi, 'name')
 
         assert_that(result, equal_to(False))
 
-    def test_multiple_contacts_one_mobile(self):
+    def test_multiple_contacts_one_mobile_and_reachable(self):
         def get_variable(key):
             variables = {
                 'PJSIP_AOR(name,contact)': 'contact;1,contact;2,contact;3',
-                'PJSIP_CONTACT(contact;2,mobility)': 'mobile',
+                'PJSIP_CONTACT(contact;1,mobility)': 'mobile',
+                'PJSIP_CONTACT(contact;1,status)': 'Unreachable',
+                'PJSIP_CONTACT(contact;3,mobility)': 'mobile',
+                'PJSIP_CONTACT(contact;3,status)': 'Reachable',
             }
             return variables.get(key, '')
 
         agi = Mock()
         agi.get_variable.side_effect = get_variable
 
-        result = is_registered_and_mobile(agi, 'name')
+        result = is_mobile_and_reachable(agi, 'name')
 
         assert_that(result, equal_to(True))
 
