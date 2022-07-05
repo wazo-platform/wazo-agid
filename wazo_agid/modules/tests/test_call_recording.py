@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
@@ -26,26 +26,44 @@ class TestRecordCaller(TestCase):
         start_mix_monitor.assert_not_called()
 
     @patch('wazo_agid.modules.call_recording._start_mix_monitor')
-    def test_record_caller_does_not_start_recording_when_no_user_id(self, start_mix_monitor):
+    def test_record_caller_does_not_start_recording_when_no_user_id_or_uuid(self, start_mix_monitor):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
             'XIVO_USERID': '',
+            'WAZO_USERUUID': '',
         }
         self.agi.get_variable.side_effect = agi_variables.get
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_USERID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_not_called()
 
     @patch('wazo_agid.modules.call_recording._start_mix_monitor')
     @patch('wazo_agid.objects.User')
-    def test_record_caller_does_not_record_when_not_an_outcall(self, user, start_mix_monitor):
+    def test_record_caller_does_not_start_recording_fallback_to_user_id_when_no_uuid(self, user, start_mix_monitor):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
             'XIVO_USERID': '1',
+            'WAZO_USERUUID': '',
+        }
+        self.agi.get_variable.side_effect = agi_variables.get
+
+        record_caller(self.agi, self.cursor, None)
+
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID')]
+        self.agi.get_variable.assert_has_calls(calls)
+
+        start_mix_monitor.assert_called_once()
+
+    @patch('wazo_agid.modules.call_recording._start_mix_monitor')
+    @patch('wazo_agid.objects.User')
+    def test_record_caller_does_not_record_when_not_an_outcall(self, user, start_mix_monitor):
+        agi_variables = {
+            'WAZO_CALL_RECORD_ACTIVE': '',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -56,7 +74,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_not_called()
@@ -68,7 +86,7 @@ class TestRecordCaller(TestCase):
     ):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '1',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -79,7 +97,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_not_called()
@@ -89,7 +107,7 @@ class TestRecordCaller(TestCase):
     def test_record_caller_records_when_an_outcall_and_enabled(self, user, start_mix_monitor):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '1',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -100,7 +118,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_called_once()
@@ -112,7 +130,7 @@ class TestRecordCaller(TestCase):
     ):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '1',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -123,7 +141,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_not_called()
@@ -135,7 +153,7 @@ class TestRecordCaller(TestCase):
     ):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -146,7 +164,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_called_once()
@@ -156,7 +174,7 @@ class TestRecordCaller(TestCase):
     def test_record_caller_records_when_an_outcall_and_all_enabled(self, user, start_mix_monitor):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '1',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -167,7 +185,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_called_once()
@@ -179,7 +197,7 @@ class TestRecordCaller(TestCase):
     ):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -190,7 +208,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_called_once()
@@ -200,7 +218,7 @@ class TestRecordCaller(TestCase):
     def test_record_caller_records_when_an_outcall_and_all_enabled(self, user, start_mix_monitor):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERUUID': 'the-users-uuid',
             'XIVO_OUTCALLID': '1',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -211,7 +229,7 @@ class TestRecordCaller(TestCase):
 
         record_caller(self.agi, self.cursor, None)
 
-        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('XIVO_USERID'), call('XIVO_OUTCALLID')]
+        calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID'), call('XIVO_OUTCALLID')]
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_called_once()

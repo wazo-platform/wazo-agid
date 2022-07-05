@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2020-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2020-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -26,11 +26,17 @@ def record_caller(agi, cursor, args):
     if is_being_recorded:
         return
 
-    user_id = agi.get_variable(dialplan_variables.USERID)
-    if not user_id:
-        return
+    argument = {}
+    user_uuid = agi.get_variable(dialplan_variables.USERUUID)
+    if user_uuid:
+        argument['xid'] = user_uuid
+    else:
+        user_id = agi.get_variable(dialplan_variables.USERID)
+        if not user_id:
+            return
+        argument['xid'] = int(user_id)
 
-    caller = objects.User(agi, cursor, int(user_id))
+    caller = objects.User(agi, cursor, **argument)
     if not caller:
         return
 
