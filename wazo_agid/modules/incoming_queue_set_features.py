@@ -53,6 +53,9 @@ def incoming_queue_set_features(agi, cursor, args):
     if queue.mark_answered_elsewhere:
         options += "C"
 
+    if queue.set_continue:
+        options += "c"
+
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
     agi.set_variable('XIVO_QUEUENAME', queue.name)

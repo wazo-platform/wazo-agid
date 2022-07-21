@@ -471,6 +471,7 @@ class Queue(object):
         self.wrapuptime = res['queue.wrapuptime']
         self.musiconhold = res['queue.musicclass']
         self.mark_answered_elsewhere = res['queuefeatures.mark_answered_elsewhere']
+        self.set_continue = res['queuefeatures.set_continue']
 
     def set_dial_actions(self):
         for event in ['congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio']:
