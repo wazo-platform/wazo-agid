@@ -1,4 +1,4 @@
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
@@ -184,6 +184,18 @@ class AgidClient(_BaseAgidClient):
                 agi_callerid=callerid,
             )
             variables, commands = self._process_communicate()
+        return variables, commands
+
+    def check_diversion(self, variables):
+        with self._connect():
+            self._send_handler('check_diversion')
+            variables, commands = self._process_communicate(variables)
+        return variables, commands
+
+    def get_user_interfaces(self, user_uuid, variables):
+        with self._connect():
+            self._send_handler('get_user_interfaces', user_uuid)
+            variables, commands = self._process_communicate(variables)
         return variables, commands
 
     def switchboard_set_features(self, switchboard_uuid):

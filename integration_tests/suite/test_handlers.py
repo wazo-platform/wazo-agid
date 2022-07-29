@@ -170,9 +170,39 @@ class TestHandlers(IntegrationTest):
     def test_call_recording(self):
         pass
 
-    @pytest.mark.skip('NotImplemented')
-    def test_check_diversion(self):
-        pass
+    def test_check_diversion_hold_time(self):
+        queue_name = 'queue-wait-time'
+        with self.db.queries() as queries:
+            queue = queries.insert_queue_feature(name=queue_name, waittime=5)
+
+        variables = {
+            'XIVO_DSTID': queue['id'],
+            f'QUEUE_WAITING_COUNT({queue_name})': '1',
+            'QUEUEHOLDTIME': '6'
+        }
+
+        recv_vars, recv_cmds = self.agid.check_diversion(variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_HOLDTIME'
+        assert recv_vars['XIVO_FWD_TYPE'] == 'QUEUE_QWAITTIME'
+
+    def test_check_diversion_wait_ratio(self):
+        queue_name = 'queue-wait-ratio'
+        with self.db.queries() as queries:
+            queue = queries.insert_queue_feature(name=queue_name, waitratio=1.2)
+
+        variables = {
+            'XIVO_DSTID': queue['id'],
+            f'QUEUE_WAITING_COUNT({queue_name})': '2',
+            f'QUEUE_MEMBER({queue_name},logged)': '2',
+        }
+
+        recv_vars, recv_cmds = self.agid.check_diversion(variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_CA_RATIO'
+        assert recv_vars['XIVO_FWD_TYPE'] == 'QUEUE_QWAITRATIO'
 
     @pytest.mark.skip('NotImplemented')
     def test_check_schedule(self):
@@ -192,7 +222,22 @@ class TestHandlers(IntegrationTest):
 
     @pytest.mark.skip('NotImplemented')
     def test_get_user_interfaces(self):
-        pass
+        with self.db.queries() as queries:
+            user_1, line_1, extension_1 = queries.insert_user_line_extension(
+                exten='1802',
+                endpoint_sip_uuid=queries.insert_endpoint_sip()['uuid'],
+            )
+            line_2, extension_2 = queries.insert_extra_user_line(user_1['id'])
+
+        variables = {
+            f'HINT({user_1["uuid"]}@usersharedlines)': f'sccp/{line_1["name"]}&pjsip/{line_2["name"]}',
+            f'PJSIP_ENDPOINT({line_2["name"]},webrtc)': 'no',
+            f'PJSIP_DIAL_CONTACTS({line_2["name"]})': 'contact',
+        }
+        recv_vars, recv_cmds = self.agid.get_user_interfaces(user_1['uuid'], variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_USER_INTERFACES'] == f'sccp/{line_1["name"]}&contact'
 
     @pytest.mark.skip('NotImplemented')
     def test_group_answered_call(self):

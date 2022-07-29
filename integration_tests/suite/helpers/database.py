@@ -1,9 +1,10 @@
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
 import sqlalchemy as sa
 
+import random
 from contextlib import contextmanager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
@@ -124,6 +125,33 @@ class DatabaseQueries(object):
             }
             return user, line, extension
 
+    def insert_extra_user_line(self, user_id, **kwargs):
+        context = kwargs.get('context', 'foocontext')
+
+        with self.inserter() as inserter:
+            line = inserter.add_line(
+                context=context,
+                name=kwargs.get('name_line', ''.join(random.choice('0123456789ABCDEF') for _ in range(6))),
+                device=kwargs.get('device', 1),
+                commented=kwargs.get('commented_line', 0),
+                endpoint_sip_uuid=kwargs.get('endpoint_sip_uuid', None),
+                endpoint_sccp_id=kwargs.get('endpoint_sccp_id', None),
+                endpoint_custom_id=kwargs.get('endpoint_custom_id', None)
+            )
+            extension = inserter.add_extension(
+                exten=kwargs.get('exten', str(random.randint(1000, 1999))),
+                context=context,
+                typeval=user_id
+            )
+            inserter.add_user_line(line_id=line.id, user_id=user_id)
+            inserter.add_line_extension(line_id=line.id, extension_id=extension.id)
+
+            line = {'id': line.id, 'name': line.name}
+            extension = {'id': extension.id, 'exten': extension.exten, 'context': extension.context}
+
+            return line, extension
+
+
     def insert_endpoint_sip(self, **kwargs):
         with self.inserter() as inserter:
             sip = inserter.add_endpoint_sip(**kwargs)
@@ -138,6 +166,11 @@ class DatabaseQueries(object):
                 'number': agent.number,
                 'language': agent.language,
             }
+
+    def insert_queue_feature(self, **kwargs):
+        with self.inserter() as inserter:
+            queue_feature = inserter.add_queuefeatures(**kwargs)
+            return {'id': queue_feature.id, 'name': queue_feature.name}
 
     def insert_extension(self, **kwargs):
         with self.inserter() as inserter:
