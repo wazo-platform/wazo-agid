@@ -1,4 +1,4 @@
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
@@ -7,6 +7,7 @@ import unittest
 
 from .agid import AgidClient
 from .database import DbHelper
+from .filesystem import FileSystemClient
 from wazo_test_helpers.asset_launching_test_case import (
     AssetLaunchingTestCase,
     NoSuchPort,
@@ -47,11 +48,18 @@ class BaseAssetLaunchingTestCase(AssetLaunchingTestCase):
 
 
 class IntegrationTest(unittest.TestCase):
+    asset_cls = BaseAssetLaunchingTestCase
+
     @classmethod
     def setUpClass(cls):
         cls.reset_clients()
 
     @classmethod
     def reset_clients(cls):
-        cls.agid = BaseAssetLaunchingTestCase.make_agid()
-        cls.db = BaseAssetLaunchingTestCase.make_database()
+        cls.agid = cls.asset_cls.make_agid()
+        cls.db = cls.asset_cls.make_database()
+        cls.filesystem = FileSystemClient(
+            execute=cls.asset_cls.docker_exec,
+            service_name=cls.asset_cls.service,
+        )
+
