@@ -18,6 +18,9 @@ RUN python setup.py install
 FROM python:2.7-slim-buster AS build-image
 COPY --from=compile-image /opt/venv /opt/venv
 
+RUN apt-get -qq update && apt-get -qq -y install netcat-openbsd && apt-get -qq clean
+HEALTHCHECK --interval=1s --retries=30 CMD nc -z -w1 localhost 4573
+
 COPY ./etc/wazo-agid /etc/wazo-agid
 RUN true\
     && adduser --disabled-password --gecos '' asterisk \

@@ -1,9 +1,10 @@
-version: '3'
+version: '3.9'
 services:
   sync:
     depends_on:
-      - agid
-      - auth
-      - postgres
-    environment:
-      TARGETS: "agid:4573 auth:9497 postgres:5432"
+      agid:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
