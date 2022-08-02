@@ -3,6 +3,7 @@
 
 import re
 import socket
+import time
 from contextlib import contextmanager
 
 GET_VARIABLE_REGEX = r'^GET VARIABLE "(.*)"$'
@@ -26,6 +27,18 @@ class _BaseAgidClient:
         self._host = host
         self._port = port
         self._socket = None
+
+    def wait_until_ready(self, timeout=30):
+        for _ in range(timeout):
+            try:
+                with self._connect():
+                    self._send_handler('monitoring')
+                    variables = self._process_communicate()[0]
+                    assert variables.get('FAILURE') is False
+                    break
+            except (ConnectionError, AGIFailException, AssertionError):
+                time.sleep(1)
+
 
     @contextmanager
     def _connect(self):
@@ -189,6 +202,12 @@ class AgidClient(_BaseAgidClient):
     def check_diversion(self, variables):
         with self._connect():
             self._send_handler('check_diversion')
+            variables, commands = self._process_communicate(variables)
+        return variables, commands
+
+    def getring(self, variables):
+        with self._connect():
+            self._send_handler('getring')
             variables, commands = self._process_communicate(variables)
         return variables, commands
 

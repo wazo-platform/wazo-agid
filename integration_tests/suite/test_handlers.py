@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
+from textwrap import dedent
 from hamcrest import assert_that, calling, raises
 from .helpers.base import IntegrationTest, use_asset
 from .helpers.agid import AGIFailException
@@ -216,11 +217,39 @@ class TestHandlers(IntegrationTest):
     def test_fwdundoall(self):
         pass
 
-    @pytest.mark.skip('NotImplemented')
     def test_getring(self):
-        pass
+        ring_config_path = '/etc/xivo/asterisk/xivo_ring.conf'
+        variables = {
+            'XIVO_REAL_NUMBER': '1001',
+            'XIVO_REAL_CONTEXT': 'default',
+            'XIVO_CALLORIGIN': 'patate',
+            'XIVO_FWD_REFERER': 'foo:bar',
+            'XIVO_CALLFORWARDED': '1',
+        }
+        self.filesystem.write_file(path=ring_config_path, content=dedent('''
+        [number]
+        1001@default = linksys
+        @default     = linksys
+        
+        [linksys]
+        phonetype = linksys
+        intern = Office
+        extern = Classic-1
+        group = Simple-3
+        foo@patate&forwarded = test-ring
+        '''))
+        self.asset_cls.restart_service('agid')
+        self.reset_clients()
+        self.agid.wait_until_ready()
 
-    @pytest.mark.skip('NotImplemented')
+        recv_vars, recv_cmds = self.agid.getring(variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_PHONETYPE'] == 'linksys'
+        assert recv_vars['XIVO_RINGTYPE'] == 'test-ring'
+
+        self.filesystem.write_file(path=ring_config_path, content='')
+
     def test_get_user_interfaces(self):
         with self.db.queries() as queries:
             user_1, line_1, extension_1 = queries.insert_user_line_extension(
