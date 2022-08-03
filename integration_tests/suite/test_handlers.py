@@ -252,18 +252,19 @@ class TestHandlers(IntegrationTest):
 
     def test_get_user_interfaces(self):
         with self.db.queries() as queries:
-            user_1, line_1, extension_1 = queries.insert_user_line_extension(
+            user, line_1, extension_1 = queries.insert_user_line_extension(
                 exten='1802',
                 endpoint_sip_uuid=queries.insert_endpoint_sip()['uuid'],
             )
-            line_2, extension_2 = queries.insert_extra_user_line(user_1['id'])
+            line_2 = queries.insert_line(typeval=user['id'])
+            queries.insert_user_line(user['id'], line_2['id'])
 
         variables = {
-            f'HINT({user_1["uuid"]}@usersharedlines)': f'sccp/{line_1["name"]}&pjsip/{line_2["name"]}',
+            f'HINT({user["uuid"]}@usersharedlines)': f'sccp/{line_1["name"]}&pjsip/{line_2["name"]}',
             f'PJSIP_ENDPOINT({line_2["name"]},webrtc)': 'no',
             f'PJSIP_DIAL_CONTACTS({line_2["name"]})': 'contact',
         }
-        recv_vars, recv_cmds = self.agid.get_user_interfaces(user_1['uuid'], variables)
+        recv_vars, recv_cmds = self.agid.get_user_interfaces(user['uuid'], variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['WAZO_USER_INTERFACES'] == f'sccp/{line_1["name"]}&contact'

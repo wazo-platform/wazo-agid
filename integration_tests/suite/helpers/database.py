@@ -125,32 +125,26 @@ class DatabaseQueries(object):
             }
             return user, line, extension
 
-    def insert_extra_user_line(self, user_id, **kwargs):
-        context = kwargs.get('context', 'foocontext')
+    def insert_line(self, **kwargs):
+        if 'name' not in kwargs:
+            kwargs['name'] = ''.join(random.choice('0123456789ABCDEF') for _ in range(6))
 
         with self.inserter() as inserter:
             line = inserter.add_line(
-                context=context,
-                name=kwargs.get('name_line', ''.join(random.choice('0123456789ABCDEF') for _ in range(6))),
+                context=kwargs.get('context', 'foocontext'),
+                name=kwargs['name'],
                 device=kwargs.get('device', 1),
                 commented=kwargs.get('commented_line', 0),
                 endpoint_sip_uuid=kwargs.get('endpoint_sip_uuid', None),
                 endpoint_sccp_id=kwargs.get('endpoint_sccp_id', None),
                 endpoint_custom_id=kwargs.get('endpoint_custom_id', None)
             )
-            extension = inserter.add_extension(
-                exten=kwargs.get('exten', str(random.randint(1000, 1999))),
-                context=context,
-                typeval=user_id
-            )
-            inserter.add_user_line(line_id=line.id, user_id=user_id)
-            inserter.add_line_extension(line_id=line.id, extension_id=extension.id)
+            return {'id': line.id, 'name': line.name}
 
-            line = {'id': line.id, 'name': line.name}
-            extension = {'id': extension.id, 'exten': extension.exten, 'context': extension.context}
-
-            return line, extension
-
+    def insert_user_line(self, user_id, line_id, **kwargs):
+        with self.inserter() as inserter:
+            inserter.add_user_line(line_id=line_id, user_id=user_id, **kwargs)
+            return {}
 
     def insert_endpoint_sip(self, **kwargs):
         with self.inserter() as inserter:
