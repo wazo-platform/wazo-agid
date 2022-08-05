@@ -163,9 +163,21 @@ class TestHandlers(IntegrationTest):
 
         assert recv_cmds['FAILURE'] is False
 
-    @pytest.mark.skip('NotImplemented')
     def test_callfilter(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user()
+            call_filter = queries.insert_call_filter()
+            call_filter_member = queries.insert_call_filter_member(
+                type='user', typeval=user['id'], callfilterid=call_filter['id'], active=1
+            )
+
+        variables = {
+            'XIVO_USERID': user['id'],
+        }
+        recv_vars, recv_cmds = self.agid.callfilter(call_filter_member['id'], variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_BSFILTERENABLED'] == '0'
 
     @pytest.mark.skip('NotImplemented')
     def test_call_recording(self):
@@ -320,20 +332,32 @@ class TestHandlers(IntegrationTest):
         }
         recv_vars, recv_cmds = self.agid.incoming_conference_set_features(variables=variables)
 
-        bridge_profile = 'xivo-bridge-profile-{}'.format(conference['id'])
-        user_profile = 'xivo-user-profile-{}'.format(conference['id'])
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['WAZO_CONFBRIDGE_ID'] == str(conference['id'])
         assert recv_vars['WAZO_CONFBRIDGE_TENANT_UUID'] == conference['tenant_uuid']
-        assert recv_vars['WAZO_CONFBRIDGE_BRIDGE_PROFILE'] == bridge_profile
-        assert recv_vars['WAZO_CONFBRIDGE_USER_PROFILE'] == user_profile
+        assert recv_vars['WAZO_CONFBRIDGE_BRIDGE_PROFILE'] == f'xivo-bridge-profile-{conference["id"]}'
+        assert recv_vars['WAZO_CONFBRIDGE_USER_PROFILE'] == f'xivo-user-profile-{conference["id"]}'
         assert recv_vars['WAZO_CONFBRIDGE_MENU'] == 'xivo-default-user-menu'
         assert recv_vars['WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE'] == ''
         assert recv_cmds['EXEC CELGenUserEvent'] == 'WAZO_CONFERENCE, NAME: {}'.format(name)
 
-    @pytest.mark.skip('NotImplemented')
     def test_incoming_did_set_features(self):
-        pass
+        with self.db.queries() as queries:
+            conference = queries.insert_conference()
+            incall = queries.insert_incall(preprocess_subroutine='test-subroutine')
+
+        variables = {
+            'XIVO_INCALL_ID': incall['id'],
+            'XIVO_DSTID': conference['id'],
+        }
+        recv_vars, recv_cmds = self.agid.incoming_conference_set_features(variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_CONFBRIDGE_ID'] == str(conference['id'])
+        assert recv_vars['WAZO_CONFBRIDGE_TENANT_UUID'] == conference['tenant_uuid']
+        assert recv_vars['WAZO_CONFBRIDGE_BRIDGE_PROFILE'] == f'xivo-bridge-profile-{conference["id"]}'
+        assert recv_vars['WAZO_CONFBRIDGE_USER_PROFILE'] == f'xivo-user-profile-{conference["id"]}'
+        assert recv_vars['WAZO_CONFBRIDGE_MENU'] == 'xivo-default-user-menu'
 
     @pytest.mark.skip('NotImplemented')
     def test_incoming_group_set_features(self):
@@ -399,9 +423,18 @@ class TestHandlers(IntegrationTest):
     def test_queue_answered_call(self):
         pass
 
-    @pytest.mark.skip('NotImplemented')
     def test_queue_skill_rule_set(self):
-        pass
+        with self.db.queries() as queries:
+            skill_rule = queries.insert_queue_skill_rule()
+
+        recv_vars, recv_cmds = self.agid.queue_skill_rule_set('queue_skill_rule_set', variables={
+            'ARG2': f'timeout;{skill_rule["id"]};{{"opt1":1|"opt2": "val2"}}',
+            'XIVO_QUEUESKILLRULESET': 'call'
+        })
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_QUEUESKILLRULESET'] == f'skillrule-{skill_rule["id"]}(opt1=1,opt2=val2)'
+        assert recv_vars['ARG2_TIMEOUT'] == 'timeout'
 
     def test_switchboard_set_features_no_switchboard(self):
         assert_that(

@@ -240,3 +240,29 @@ class DatabaseQueries(object):
                 'mode': schedule_time.mode,
                 'schedule_id': schedule_time.schedule_id,
             }
+
+    def insert_queue_skill_rule(self, **kwargs):
+        with self.inserter() as inserter:
+            skill_rule = inserter.add_queue_skill_rule(**kwargs)
+            return {
+                'id': skill_rule.id,
+                'name': skill_rule.name,
+                'rule': skill_rule.rule,
+                'tenant_uuid': skill_rule.tenant_uuid,
+            }
+
+    def insert_incall(self, **kwargs):
+        with self.inserter() as inserter:
+            incall = inserter.add_incall(**kwargs)
+            return {'id': incall.id}
+
+    def insert_call_filter(self, **kwargs):
+        with self.inserter() as inserter:
+            call_filter = inserter.add_call_filter(**kwargs)
+            return {'id': call_filter.id}
+
+    def insert_call_filter_member(self, **kwargs):
+        with self.inserter() as inserter:
+            call_filter_member = inserter.add_call_filter_member(**kwargs)
+            return {'id': call_filter_member.id}
+
