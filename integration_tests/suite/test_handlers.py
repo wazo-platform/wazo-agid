@@ -205,13 +205,34 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_CA_RATIO'
         assert recv_vars['XIVO_FWD_TYPE'] == 'QUEUE_QWAITRATIO'
 
-    @pytest.mark.skip('NotImplemented')
     def test_check_schedule(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user()
+            schedule = queries.insert_schedule()
+            schedule_path = queries.insert_schedule_path(schedule_id=schedule['id'], pathid=user['id'])
+            queries.insert_schedule_time(mode='closed', schedule_id=schedule['id'])
 
-    @pytest.mark.skip('NotImplemented')
+        variables = {
+            'XIVO_PATH': schedule_path['path'],
+            'XIVO_PATH_ID': str(schedule_path['path_id']),
+        }
+
+        recv_vars, recv_cmds = self.agid.check_schedule(variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_SCHEDULE_STATUS'] == 'closed'
+        assert recv_vars['XIVO_PATH'] == ''
+
     def test_convert_pre_dial_handler(self):
-        pass
+        variables = {
+            'XIVO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
+        }
+
+        recv_vars, recv_cmds = self.agid.convert_pre_dial_handler(variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_CALLOPTIONS'] == 'XB(foobar^s^1)'
+        assert recv_vars['PUSH(_WAZO_PRE_DIAL_HANDLERS,|)'] == 'foobaz,s,1'
 
     @pytest.mark.skip('NotImplemented')
     def test_fwdundoall(self):

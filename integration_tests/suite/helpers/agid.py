@@ -205,6 +205,18 @@ class AgidClient(_BaseAgidClient):
             variables, commands = self._process_communicate(variables)
         return variables, commands
 
+    def check_schedule(self, variables):
+        with self._connect():
+            self._send_handler('check_schedule')
+            variables, commands = self._process_communicate(variables)
+        return variables, commands
+
+    def convert_pre_dial_handler(self, variables):
+        with self._connect():
+            self._send_handler('convert_pre_dial_handler')
+            variables, commands = self._process_communicate(variables)
+        return variables, commands
+
     def getring(self, variables):
         with self._connect():
             self._send_handler('getring')

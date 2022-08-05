@@ -190,3 +190,53 @@ class DatabaseQueries(object):
             return {
                 'uuid': switchboard.uuid,
             }
+
+    def insert_user(self, **kwargs):
+        with self.inserter() as inserter:
+            user = inserter.add_user(
+                firstname=kwargs.get('firstname', 'unittest'),
+                lastname=kwargs.get('lastname', 'unittest'),
+                callerid=kwargs.get('callerid', 'unittest test'),
+                voicemailid=kwargs.get('voicemail_id', None),
+                musiconhold=kwargs.get('musiconhold', 'default'),
+                agentid=kwargs.get('agentid', None),
+                mobilephonenumber=kwargs.get('mobilephonenumber'),
+                userfield=kwargs.get('userfield'),
+                description=kwargs.get('description')
+            )
+            return {
+                'id': user.id,
+                'uuid': user.uuid,
+            }
+
+    def insert_schedule(self, **kwargs):
+        kwargs.setdefault('timezone', 'America/Montreal')
+        with self.inserter() as inserter:
+            schedule = inserter.add_schedule(**kwargs)
+            return {
+                'id': schedule.id,
+                'name': schedule.name,
+            }
+
+    def insert_schedule_path(self, **kwargs):
+        with self.inserter() as inserter:
+            schedule_path = inserter.add_schedule_path(**kwargs)
+            return {
+                'schedule_id': schedule_path.schedule_id,
+                'path': schedule_path.path,
+                'path_id': schedule_path.pathid,
+            }
+
+    def insert_schedule_time(self, **kwargs):
+        kwargs.setdefault('mode', 'open')
+        kwargs.setdefault('hours', '00:00-23:59')
+        kwargs.setdefault('weekdays', '1-7')
+        kwargs.setdefault('monthdays', '1-31')
+        kwargs.setdefault('months', '1-12')
+        with self.inserter() as inserter:
+            schedule_time = inserter.add_schedule_time(**kwargs)
+            return {
+                'id': schedule_time.id,
+                'mode': schedule_time.mode,
+                'schedule_id': schedule_time.schedule_id,
+            }
