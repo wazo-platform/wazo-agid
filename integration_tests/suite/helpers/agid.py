@@ -129,41 +129,6 @@ class _BaseAgidClient:
 
 
 class AgidClient(_BaseAgidClient):
-    def meeting_user(self, variables, meeting_uuid):
-        with self._connect():
-            self._send_handler('meeting_user', meeting_uuid)
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def monitoring(self):
-        with self._connect():
-            self._send_handler('monitoring')
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def incoming_conference_set_features(self, variables):
-        with self._connect():
-            self._send_handler('incoming_conference_set_features')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def incoming_user_set_features(self, variables):
-        with self._connect():
-            self._send_handler('incoming_user_set_features')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def agent_get_options(self, tenant_uuid, number):
-        with self._connect():
-            self._send_handler('agent_get_options', tenant_uuid, number)
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def agent_get_status(self, tenant_uuid, agent_id):
-        with self._connect():
-            self._send_handler('agent_get_status', tenant_uuid, agent_id)
-            variables, commands = self._process_communicate()
-        return variables, commands
 
     def agent_login(self, tenant_uuid, agent_id, exten, context):
         with self._connect():
@@ -174,12 +139,6 @@ class AgidClient(_BaseAgidClient):
                 exten,
                 context
             )
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def agent_logoff(self, tenant_uuid, agent_id):
-        with self._connect():
-            self._send_handler('agent_logoff', tenant_uuid, agent_id)
             variables, commands = self._process_communicate()
         return variables, commands
 
@@ -199,38 +158,10 @@ class AgidClient(_BaseAgidClient):
             variables, commands = self._process_communicate()
         return variables, commands
 
-    def check_diversion(self, variables):
-        with self._connect():
-            self._send_handler('check_diversion')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def check_schedule(self, variables):
-        with self._connect():
-            self._send_handler('check_schedule')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def convert_pre_dial_handler(self, variables):
-        with self._connect():
-            self._send_handler('convert_pre_dial_handler')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def getring(self, variables):
-        with self._connect():
-            self._send_handler('getring')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def get_user_interfaces(self, user_uuid, variables):
-        with self._connect():
-            self._send_handler('get_user_interfaces', user_uuid)
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def switchboard_set_features(self, switchboard_uuid):
-        with self._connect():
-            self._send_handler('switchboard_set_features', switchboard_uuid)
-            variables, commands = self._process_communicate()
-        return variables, commands
+    def __getattr__(self, handler_name):
+        def generic_call_handler(*args, variables=None, **kwargs):
+            with self._connect():
+                self._send_handler(handler_name, *args, **kwargs)
+                variables, commands = self._process_communicate(variables)
+            return variables, commands
+        return generic_call_handler

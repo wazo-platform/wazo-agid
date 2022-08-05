@@ -40,7 +40,7 @@ class TestHandlers(IntegrationTest):
             f'PJSIP_DIAL_CONTACTS({line["name"]})': 'contact',
             'CHANNEL(videonativeformat)': '1',
         }
-        recv_vars, recv_cmds = self.agid.incoming_user_set_features(variables)
+        recv_vars, recv_cmds = self.agid.incoming_user_set_features(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
 
@@ -182,7 +182,7 @@ class TestHandlers(IntegrationTest):
             'QUEUEHOLDTIME': '6'
         }
 
-        recv_vars, recv_cmds = self.agid.check_diversion(variables)
+        recv_vars, recv_cmds = self.agid.check_diversion(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_HOLDTIME'
@@ -199,7 +199,7 @@ class TestHandlers(IntegrationTest):
             f'QUEUE_MEMBER({queue_name},logged)': '2',
         }
 
-        recv_vars, recv_cmds = self.agid.check_diversion(variables)
+        recv_vars, recv_cmds = self.agid.check_diversion(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_CA_RATIO'
@@ -217,7 +217,7 @@ class TestHandlers(IntegrationTest):
             'XIVO_PATH_ID': str(schedule_path['path_id']),
         }
 
-        recv_vars, recv_cmds = self.agid.check_schedule(variables)
+        recv_vars, recv_cmds = self.agid.check_schedule(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_SCHEDULE_STATUS'] == 'closed'
@@ -228,7 +228,7 @@ class TestHandlers(IntegrationTest):
             'XIVO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
         }
 
-        recv_vars, recv_cmds = self.agid.convert_pre_dial_handler(variables)
+        recv_vars, recv_cmds = self.agid.convert_pre_dial_handler(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_CALLOPTIONS'] == 'XB(foobar^s^1)'
@@ -263,7 +263,7 @@ class TestHandlers(IntegrationTest):
         self.reset_clients()
         self.agid.wait_until_ready()
 
-        recv_vars, recv_cmds = self.agid.getring(variables)
+        recv_vars, recv_cmds = self.agid.getring(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_PHONETYPE'] == 'linksys'
@@ -285,7 +285,7 @@ class TestHandlers(IntegrationTest):
             f'PJSIP_ENDPOINT({line_2["name"]},webrtc)': 'no',
             f'PJSIP_DIAL_CONTACTS({line_2["name"]})': 'contact',
         }
-        recv_vars, recv_cmds = self.agid.get_user_interfaces(user['uuid'], variables)
+        recv_vars, recv_cmds = self.agid.get_user_interfaces(user['uuid'], variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['WAZO_USER_INTERFACES'] == f'sccp/{line_1["name"]}&contact'
@@ -318,7 +318,7 @@ class TestHandlers(IntegrationTest):
         variables = {
             'XIVO_DSTID': conference['id'],
         }
-        recv_vars, recv_cmds = self.agid.incoming_conference_set_features(variables)
+        recv_vars, recv_cmds = self.agid.incoming_conference_set_features(variables=variables)
 
         bridge_profile = 'xivo-bridge-profile-{}'.format(conference['id'])
         user_profile = 'xivo-user-profile-{}'.format(conference['id'])
@@ -357,7 +357,8 @@ class TestHandlers(IntegrationTest):
 
         # Lookup by UUID
         recv_vars, recv_cmds = self.agid.meeting_user(
-            variables, 'wazo-meeting-{uuid}'.format(**meeting),
+            'wazo-meeting-{uuid}'.format(**meeting),
+            variables=variables,
         )
 
         assert recv_cmds['FAILURE'] is False
@@ -366,7 +367,8 @@ class TestHandlers(IntegrationTest):
 
         # Lookup by number
         recv_vars, recv_cmds = self.agid.meeting_user(
-            variables, meeting['number'],
+            meeting['number'],
+            variables=variables,
         )
 
         assert recv_cmds['FAILURE'] is False
