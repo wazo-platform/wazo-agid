@@ -7,7 +7,7 @@ class FileSystemClient:
         self.execute = execute
         self.service_name = service_name
 
-    def write_file(self, path, content='content', mode='666', root=False):
+    def write_file(self, path, content='content', mode='666'):
         command = ['sh', '-c', f'cat <<EOF > {path}\n{content}\nEOF']
         self.execute(command, service_name=self.service_name)
         self.execute(['cat', path], service_name=self.service_name)
