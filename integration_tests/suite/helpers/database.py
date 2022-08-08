@@ -254,7 +254,7 @@ class DatabaseQueries(object):
     def insert_incall(self, **kwargs):
         with self.inserter() as inserter:
             incall = inserter.add_incall(**kwargs)
-            return {'id': incall.id}
+            return {'id': incall.id, 'tenant_uuid': incall.tenant_uuid}
 
     def insert_call_filter(self, **kwargs):
         with self.inserter() as inserter:
