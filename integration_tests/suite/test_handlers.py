@@ -145,9 +145,36 @@ class TestHandlers(IntegrationTest):
 
         assert recv_cmds['FAILURE'] is False
 
-    @pytest.mark.skip('NotImplemented: need to verify file on filesystem')
     def test_callback(self):
-        pass
+        pytest.xfail("Will fail until Wazo-578 is fixed")
+
+        with self.db.queries() as queries:
+            extension = queries.insert_extension()
+
+        extension_number, context = extension['exten'], extension['context']
+        variables = {
+            'XIVO_SRCNUM': extension_number,
+            'AST_CONFIG(asterisk.conf,directories,astspooldir)': '/var/spool/asterisk',
+        }
+        chown = f"asterisk:asterisk"
+        self.filesystem.create_path('/var/spool/asterisk/tmp', chown=chown)
+        self.filesystem.create_path('/var/spool/asterisk/outgoing', chown=chown)
+
+        recv_vars, recv_cmds = self.agid.callback(context, variables=variables)
+        assert recv_cmds['FAILURE'] is False
+
+        file_name = self.filesystem.find_file('/var/spool/asterisk/outgoing/', f'{extension_number}-*.call')
+        assert file_name
+        assert self.filesystem.read_file(file_name) == dedent(f"""\
+            Channel: Local/{extension_number}@{context}
+            MaxRetries: 0
+            RetryTime: 30
+            WaitTime: 30
+            CallerID: {extension_number}
+            Set: XIVO_DISACONTEXT={context}
+            Context: xivo-callbackdisa
+            Extension: s
+        """).strip('\n')
 
     def test_callerid_extend(self):
         recv_vars, recv_cmds = self.agid.callerid_extend('en')
