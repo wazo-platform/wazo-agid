@@ -505,17 +505,49 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['WAZO_SWITCHBOARD_TIMEOUT'] == '42'
 
-    @pytest.mark.skip('NotImplemented')
     def test_user_get_vmbox(self):
-        pass
+        with self.db.queries() as queries:
+            context = 'test-context'
+            voicemail = queries.insert_voicemail(context=context, skipcheckpass='1')
+            user, line, extension = queries.insert_user_line_extension(
+                enablevoicemail=1, voicemail_id=voicemail['id'], context=context,
+            )
+
+        variables = {
+            'XIVO_USERID': user['id'],
+            'XIVO_BASE_CONTEXT': context,
+        }
+        recv_vars, recv_cmds = self.agid.user_get_vmbox(extension['exten'], variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
+        assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
+        assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
 
     @pytest.mark.skip('NotImplemented')
     def test_user_set_call_rights(self):
         pass
 
-    @pytest.mark.skip('NotImplemented')
     def test_vmbox_get_info(self):
-        pass
+        with self.db.queries() as queries:
+            context = 'default'
+            voicemail = queries.insert_voicemail(context=context, skipcheckpass='1')
+            user, line, extension = queries.insert_user_line_extension(
+                enablevoicemail=1, voicemail_id=voicemail['id'], context=context
+            )
+
+        variables = {
+            'XIVO_USERID': user['id'],
+            'XIVO_VMBOXID': voicemail['id'],
+            'XIVO_BASE_CONTEXT': context,
+        }
+        recv_vars, recv_cmds = self.agid.vmbox_get_info(voicemail['mailbox'], variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
+        assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
+        assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
+        assert recv_vars['XIVO_MAILBOX_LANGUAGE'] == 'fr_FR'
 
     @pytest.mark.skip('NotImplemented')
     def test_wake_mobile(self):

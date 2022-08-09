@@ -123,6 +123,9 @@ class DatabaseQueries(object):
                 'exten': ule.extension.exten,
                 'context': ule.extension.context,
             }
+            if ule.user.voicemail_id and kwargs.get('enablevoicemail'):
+                ule.user.enablevoicemail = 1
+                inserter.link_user_and_voicemail(ule.user, ule.user.voicemailid)
             return user, line, extension
 
     def insert_line(self, **kwargs):
@@ -208,6 +211,11 @@ class DatabaseQueries(object):
                 'id': user.id,
                 'uuid': user.uuid,
             }
+
+    def insert_voicemail(self, **kwargs):
+        with self.inserter() as inserter:
+            voicemail = inserter.add_voicemail(**kwargs)
+            return {'id': voicemail.id, 'mailbox': voicemail.mailbox}
 
     def insert_schedule(self, **kwargs):
         kwargs.setdefault('timezone', 'America/Montreal')
