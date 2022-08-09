@@ -6,30 +6,30 @@
 # should be.
 extra_config_files: /etc/wazo-agid/conf.d/
 
-# Owned of the process
+# Owner of the process
 user: wazo-agid
 
-# Change the log level to debug level.
+# Change the log level to debug.
 debug: false
 
 # Log file.
 logfile: /var/log/wazo-agid.log
 
-# Database connection informations.
+# Database connection settings
 db_uri: postgresql://asterisk:proformatique@localhost/asterisk?application_name=wazo-agid
 
-# AGI server listening informations.
+# AGI server settings
 listen_address: 127.0.0.1
 listen_port: 4573
 
-# wazo-agentd connection informations.
+# wazo-agentd connection settings
 agentd:
   host: localhost
   port: 9493
   prefix: null
   https: false
 
-# wazo-dird connection informations.
+# wazo-dird connection settings
 dird:
   host: localhost
   port: 9489
@@ -37,7 +37,7 @@ dird:
   https: false
   timeout: 1
 
-# wazo-auth connection informations.
+# wazo-auth connection settings
 auth:
   host: localhost
   port: 9497
@@ -45,7 +45,7 @@ auth:
   https: false
   key_file: /var/lib/wazo-auth-keys/wazo-agid-key.yml
 
-# wazo-confd connection information
+# wazo-confd connection settings
 confd:
   host: localhost
   port: 9486
