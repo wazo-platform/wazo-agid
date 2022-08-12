@@ -278,7 +278,6 @@ class TestHandlers(IntegrationTest):
         pass
 
     def test_getring(self):
-        ring_config_path = '/etc/xivo/asterisk/xivo_ring.conf'
         variables = {
             'XIVO_REAL_NUMBER': '1001',
             'XIVO_REAL_CONTEXT': 'default',
@@ -286,29 +285,12 @@ class TestHandlers(IntegrationTest):
             'XIVO_FWD_REFERER': 'foo:bar',
             'XIVO_CALLFORWARDED': '1',
         }
-        self.filesystem.write_file(path=ring_config_path, content=dedent('''
-        [number]
-        1001@default = linksys
-        @default     = linksys
-        
-        [linksys]
-        phonetype = linksys
-        intern = Office
-        extern = Classic-1
-        group = Simple-3
-        foo@patate&forwarded = test-ring
-        '''))
-        self.asset_cls.restart_service('agid')
-        self.reset_clients()
-        self.agid.wait_until_ready()
 
         recv_vars, recv_cmds = self.agid.getring(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_PHONETYPE'] == 'linksys'
         assert recv_vars['XIVO_RINGTYPE'] == 'test-ring'
-
-        self.filesystem.write_file(path=ring_config_path, content='')
 
     def test_get_user_interfaces(self):
         with self.db.queries() as queries:
@@ -341,9 +323,14 @@ class TestHandlers(IntegrationTest):
     def test_handler_fax(self):
         pass
 
-    @pytest.mark.skip('NotImplemented')
     def test_in_callerid(self):
-        pass
+        number = '+155555555555'
+        recv_vars, recv_cmds = self.agid.in_callerid(
+            agi_callerid=number,
+            agi_calleridname=number,
+        )
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['CALLERID(all)'] == '\\"00155555555555\\" <00155555555555>'
 
     @pytest.mark.skip('NotImplemented')
     def test_incoming_agent_set_features(self):
@@ -366,7 +353,7 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['WAZO_CONFBRIDGE_USER_PROFILE'] == f'xivo-user-profile-{conference["id"]}'
         assert recv_vars['WAZO_CONFBRIDGE_MENU'] == 'xivo-default-user-menu'
         assert recv_vars['WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE'] == ''
-        assert recv_cmds['EXEC CELGenUserEvent'] == 'WAZO_CONFERENCE, NAME: {}'.format(name)
+        assert recv_cmds['EXEC CELGenUserEvent'] == f'WAZO_CONFERENCE, NAME: {name}'
 
     def test_incoming_did_set_features(self):
         with self.db.queries() as queries:
@@ -426,13 +413,72 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['WAZO_MEETING_NAME'] == meeting['name']
         assert recv_vars['WAZO_MEETING_UUID'] == meeting['uuid']
 
-    @pytest.mark.skip('NotImplemented')
     def test_paging(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user()
+            sip = queries.insert_endpoint_sip()
+            paging = queries.insert_paging(
+                timeout=25,
+                duplex=1,
+                ignore=1,
+                quiet=1,
+                record=1,
+                commented=0,
+                announcement_play=1,
+                announcement_file='sounds.wav',
+            )
+            queries.insert_paging_user(userfeaturesid=user['id'], pagingid=paging['id'], caller=1)
+            queries.insert_paging_user(userfeaturesid=user['id'], pagingid=paging['id'], caller=0)
+            line_1 = queries.insert_line(typeval=user['id'], endpoint_sip_uuid=sip['uuid'])
+            line_2 = queries.insert_line(typeval=user['id'], endpoint_sip_uuid=sip['uuid'])
+            queries.insert_user_line(user['id'], line_1['id'])
+            queries.insert_user_line(user['id'], line_2['id'])
 
-    @pytest.mark.skip('NotImplemented')
+        variables = {
+            'XIVO_USERID': user['id'],
+        }
+
+        recv_vars, recv_cmds = self.agid.paging(
+            paging['number'],
+            variables=variables,
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert f'PJSIP/{line_1["name"]}' in recv_vars['XIVO_PAGING_LINES']
+        assert f'PJSIP/{line_2["name"]}' in recv_vars['XIVO_PAGING_LINES']
+        assert recv_vars['XIVO_PAGING_TIMEOUT'] == '25'
+        assert recv_vars['XIVO_PAGING_OPTS'] == (
+            f'sb(paging^add-sip-headers^1)dqri'
+            f'A(/var/lib/wazo/sounds/tenants/{paging["tenant_uuid"]}/playback/sounds.wav)'
+        )
+
     def test_phone_get_features(self):
-        pass
+        with self.db.queries() as queries:
+            context = 'test-context'
+            voicemail = queries.insert_voicemail(context=context, skipcheckpass='1')
+            user = queries.insert_user(
+                enablevoicemail=1,
+                voicemailid=voicemail['id'],
+                enableonlinerec=1,
+                call_record_outgoing_external_enabled=1,
+                call_record_outgoing_internal_enabled=1,
+                call_record_incoming_external_enabled=1,
+                call_record_incoming_internal_enabled=1,
+                incallfilter=1,
+                enablednd=1,
+            )
+        variables = {
+            'XIVO_USERID': user['id'],
+        }
+        # Lookup by UUID
+        recv_vars, recv_cmds = self.agid.phone_get_features(variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        # TODO also test forwards from confd
+        assert recv_vars['XIVO_ENABLEVOICEMAIL'] == '1'
+        assert recv_vars['XIVO_CALLRECORD'] == '1'
+        assert recv_vars['XIVO_INCALLFILTER'] == '1'
+        assert recv_vars['XIVO_ENABLEDND'] == '1'
 
     @pytest.mark.skip('NotImplemented')
     def test_phone_progfunckey_devstate(self):
@@ -476,7 +522,7 @@ class TestHandlers(IntegrationTest):
         recv_vars, recv_cmds = self.agid.switchboard_set_features(switchboard['uuid'])
 
         assert recv_cmds['FAILURE'] is False
-        # resetting those variables is important when chaining switcbhoard forwards
+        # resetting those variables is important when chaining switchboard forwards
         assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTION'] == ''
         assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG1'] == ''
         assert recv_vars['WAZO_SWITCHBOARD_FALLBACK_NOANSWER_ACTIONARG2'] == ''
@@ -549,6 +595,15 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
         assert recv_vars['XIVO_MAILBOX_LANGUAGE'] == 'fr_FR'
 
-    @pytest.mark.skip('NotImplemented')
     def test_wake_mobile(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user()
+
+        variables = {
+            'WAZO_WAIT_FOR_MOBILE': '1',
+            'WAZO_VIDEO_ENABLED': '1',
+        }
+        recv_cmds = self.agid.wake_mobile(user['uuid'], variables=variables)[1]
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_cmds['EXEC UserEvent'] == f'Pushmobile,WAZO_DST_UUID: {user["uuid"]},WAZO_VIDEO_ENABLED: 1'

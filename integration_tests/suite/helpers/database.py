@@ -200,12 +200,8 @@ class DatabaseQueries(object):
                 firstname=kwargs.get('firstname', 'unittest'),
                 lastname=kwargs.get('lastname', 'unittest'),
                 callerid=kwargs.get('callerid', 'unittest test'),
-                voicemailid=kwargs.get('voicemail_id', None),
                 musiconhold=kwargs.get('musiconhold', 'default'),
-                agentid=kwargs.get('agentid', None),
-                mobilephonenumber=kwargs.get('mobilephonenumber'),
-                userfield=kwargs.get('userfield'),
-                description=kwargs.get('description')
+                **kwargs,
             )
             return {
                 'id': user.id,
@@ -216,6 +212,22 @@ class DatabaseQueries(object):
         with self.inserter() as inserter:
             voicemail = inserter.add_voicemail(**kwargs)
             return {'id': voicemail.id, 'mailbox': voicemail.mailbox}
+
+    def insert_paging(self, **kwargs):
+        with self.inserter() as inserter:
+            if 'number' not in kwargs:
+                kwargs['number'] = inserter._generate_paging_number()
+            paging = inserter.add_paging(**kwargs)
+            return {
+                'id': paging.id,
+                'number': paging.number,
+                'tenant_uuid': paging.tenant_uuid,
+            }
+
+    def insert_paging_user(self, **kwargs):
+        with self.inserter() as inserter:
+            paging_user = inserter.add_paging_user(**kwargs)
+            return {'caller': paging_user.caller}
 
     def insert_schedule(self, **kwargs):
         kwargs.setdefault('timezone', 'America/Montreal')
