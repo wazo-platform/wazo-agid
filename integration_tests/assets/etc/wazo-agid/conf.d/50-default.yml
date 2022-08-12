@@ -7,3 +7,7 @@ auth:
 bus:
   host: rabbitmq
 db_uri: postgresql://asterisk:proformatique@postgres/asterisk
+confd:
+  host: confd
+agentd:
+  host: agentd

@@ -4,6 +4,8 @@ services:
     depends_on:
       - agid
       - auth
+      - confd
+      - agentd
       - postgres
     environment:
-      TARGETS: "agid:4573 auth:9497 postgres:5432"
+      TARGETS: "agid:4573 auth:9497 confd:9486 agentd:9493 postgres:5432"

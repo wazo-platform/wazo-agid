@@ -104,11 +104,11 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_AGENTNUM'] == agent['number']
         assert recv_vars['CHANNEL(language)'] == agent['language']
 
-    @pytest.mark.skip('NotImplemented: need agentd mock')
     def test_agent_get_status(self):
         with self.db.queries() as queries:
             agent = queries.insert_agent()
 
+        self.agentd.expect_get_agent_status(agent['id'], agent['tenant_uuid'])
         recv_vars, recv_cmds = self.agid.agent_get_status(
             agent['tenant_uuid'],
             agent['id'],
@@ -117,12 +117,16 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_AGENT_LOGIN_STATUS'] == 'logged_in'
 
-    @pytest.mark.skip('NotImplemented: need agentd mock')
+        assert self.agentd.verify_get_agent_status_called(agent['id']) is True
+
     def test_agent_login(self):
         with self.db.queries() as queries:
             agent = queries.insert_agent()
             extension = queries.insert_extension()
 
+        self.agentd.expect_agent_login(
+            agent['id'], agent['tenant_uuid'], extension['context'], extension['exten'],
+        )
         recv_vars, recv_cmds = self.agid.agent_login(
             agent['tenant_uuid'],
             agent['id'],
@@ -133,10 +137,13 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_AGENTSTATUS'] == 'logged'
 
-    @pytest.mark.skip('NotImplemented: need agentd mock')
+        assert self.agentd.verify_agent_login_called(agent['id']) is True
+
     def test_agent_logoff(self):
         with self.db.queries() as queries:
             agent = queries.insert_agent()
+
+        self.agentd.expect_agent_logoff(agent['id'], agent['tenant_uuid'])
 
         recv_vars, recv_cmds = self.agid.agent_logoff(
             agent['tenant_uuid'],
@@ -144,6 +151,7 @@ class TestHandlers(IntegrationTest):
         )
 
         assert recv_cmds['FAILURE'] is False
+        assert self.agentd.verify_agent_logoff_called(agent['id']) is True
 
     def test_callback(self):
         pytest.xfail("Will fail until Wazo-578 is fixed")
@@ -273,9 +281,20 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_CALLOPTIONS'] == 'XB(foobar^s^1)'
         assert recv_vars['PUSH(_WAZO_PRE_DIAL_HANDLERS,|)'] == 'foobaz,s,1'
 
-    @pytest.mark.skip('NotImplemented')
     def test_fwdundoall(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user()
+
+        variables = {
+            'XIVO_USERID': user['id'],
+        }
+        self.confd.expect_update_forwards(user['id'], {
+            forward: {'enabled': False} for forward in ('busy', 'noanswer', 'unconditional')
+        })
+        recv_vars, recv_cmds = self.agid.fwdundoall(variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert self.confd.verify_update_forwards_called(user['id']) is True
 
     def test_getring(self):
         variables = {
@@ -471,22 +490,57 @@ class TestHandlers(IntegrationTest):
             'XIVO_USERID': user['id'],
         }
         # Lookup by UUID
+        self.confd.expect_forwards(user['id'], {
+            "busy": {
+                "destination": "dest-busy",
+                "enabled": True
+            },
+            "noanswer": {
+                "destination": "dest-noanswer",
+                "enabled": True
+            },
+            "unconditional": {
+                "destination": "dest-unconditional",
+                "enabled": False
+            }
+        })
         recv_vars, recv_cmds = self.agid.phone_get_features(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
-        # TODO also test forwards from confd
+
         assert recv_vars['XIVO_ENABLEVOICEMAIL'] == '1'
         assert recv_vars['XIVO_CALLRECORD'] == '1'
         assert recv_vars['XIVO_INCALLFILTER'] == '1'
         assert recv_vars['XIVO_ENABLEDND'] == '1'
 
+        assert recv_vars['XIVO_ENABLEBUSY'] == '1'
+        assert recv_vars['XIVO_DESTBUSY'] == 'dest-busy'
+        assert recv_vars['XIVO_ENABLERNA'] == '1'
+        assert recv_vars['XIVO_DESTRNA'] == 'dest-noanswer'
+        assert recv_vars['XIVO_ENABLEUNC'] == '0'
+        assert recv_vars['XIVO_DESTUNC'] == 'dest-unconditional'
+
     @pytest.mark.skip('NotImplemented')
     def test_phone_progfunckey_devstate(self):
         pass
 
-    @pytest.mark.skip('NotImplemented')
     def test_phone_progfunckey(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user()
+            extension = queries.insert_extension(typeval='fwdbusy')
+
+        variables = {
+            'XIVO_USERID': user['id'],
+        }
+
+        recv_vars, recv_cmds = self.agid.phone_progfunckey(
+            f'{user["id"]}*{extension["exten"]}',
+            variables=variables,
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_PHONE_PROGFUNCKEY'] == extension["exten"]
+        assert recv_vars['XIVO_PHONE_PROGFUNCKEY_FEATURE'] == 'fwdbusy'
 
     @pytest.mark.skip('NotImplemented')
     def test_provision(self):
