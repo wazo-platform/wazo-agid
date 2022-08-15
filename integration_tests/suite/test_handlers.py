@@ -1,6 +1,6 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
-
+import re
 import pytest
 from textwrap import dedent
 from hamcrest import assert_that, calling, raises
@@ -214,9 +214,74 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_BSFILTERENABLED'] == '0'
 
-    @pytest.mark.skip('NotImplemented')
-    def test_call_recording(self):
-        pass
+    def test_call_recording_start(self):
+        with self.db.queries() as queries:
+            agent = queries.insert_agent()
+
+        variables = {
+            'WAZO_CALL_RECORD_ACTIVE': '0',
+        }
+
+        self.calld.expect_calls_record_start(1)
+
+        recv_vars, recv_cmds = self.agid.call_recording(
+            agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
+            agi_uniqueid='1',
+            variables=variables,
+        )
+
+        self.calld.verify_calls_record_start_called(1)
+        self.calld.clear()
+
+        assert recv_cmds['FAILURE'] is False
+
+    def test_call_recording_stop(self):
+        with self.db.queries() as queries:
+            agent = queries.insert_agent()
+
+        variables = {
+            'WAZO_CALL_RECORD_ACTIVE': '1',
+        }
+
+        self.calld.expect_calls_record_stop(1)
+
+        recv_vars, recv_cmds = self.agid.call_recording(
+            agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
+            agi_uniqueid='1',
+            variables=variables,
+        )
+
+        self.calld.verify_calls_record_stop_called(1)
+        self.calld.clear()
+
+        assert recv_cmds['FAILURE'] is False
+
+    def test_call_record_caller(self):
+        with self.db.queries() as queries:
+            agent = queries.insert_agent()
+            user = queries.insert_user(agent_id=agent['id'], call_record_outgoing_internal_enabled=1)
+
+        variables = {
+            'WAZO_CALL_RECORD_ACTIVE': '0',
+            'WAZO_USERUUID': user['uuid'],
+            'WAZO_TENANT_UUID': agent['tenant_uuid'],
+            'XIVO_CALLORIGIN': 'intern',
+            'XIVO_OUTCALLID': '',
+            'WAZO_MIXMONITOR_OPTIONS': 'mix-options',
+        }
+
+        recv_vars, recv_cmds = self.agid.record_caller(
+            agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
+            agi_uniqueid='1',
+            variables=variables,
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_CALL_RECORD_ACTIVE'] == '1'
+        assert re.match(
+            rf'/var/lib/wazo/sounds/tenants/{agent["tenant_uuid"]}/monitor/[a-f0-9\-]{{36}}.wav,mix-options',
+            recv_cmds['EXEC MixMonitor'],
+        ) is not None
 
     def test_check_diversion_hold_time(self):
         queue_name = 'queue-wait-time'
@@ -557,7 +622,6 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_PHONE_PROGFUNCKEY'] == extension["exten"]
         assert recv_vars['XIVO_PHONE_PROGFUNCKEY_FEATURE'] == 'fwdbusy'
 
-
     def test_provision_autoprov(self):
         self.confd.expect_devices({
             'items': [{
@@ -708,10 +772,12 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
 
     def test_user_set_call_rights(self):
-        # TODO finish
+        # TODO Add test for deny. Requires inserting into `rightcallexten`
         with self.db.queries() as queries:
             context = 'test-context'
             user, line, extension = queries.insert_user_line_extension(context=context)
+            call_permission = queries.insert_call_permission()
+            queries.insert_user_call_permission(user_id=user['id'], call_permission_id=call_permission['id'])
 
         variables = {
             'XIVO_USERID': user['id'],
@@ -721,6 +787,7 @@ class TestHandlers(IntegrationTest):
         recv_vars, recv_cmds = self.agid.user_set_call_rights(extension['exten'], variables=variables)
 
         assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_AUTHORIZATION'] == 'ALLOW'
 
     def test_vmbox_get_info(self):
         with self.db.queries() as queries:

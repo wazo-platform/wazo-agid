@@ -149,6 +149,16 @@ class DatabaseQueries(object):
             inserter.add_user_line(line_id=line_id, user_id=user_id, **kwargs)
             return {}
 
+    def insert_call_permission(self, **kwargs):
+        with self.inserter() as inserter:
+            call_permission = inserter.add_call_permission(**kwargs)
+            return {'id': call_permission.id, 'name': call_permission.name}
+
+    def insert_user_call_permission(self, **kwargs):
+        with self.inserter() as inserter:
+            user_call_permission = inserter.add_user_call_permission(**kwargs)
+            return {'id': user_call_permission.id}
+
     def insert_endpoint_sip(self, **kwargs):
         with self.inserter() as inserter:
             sip = inserter.add_endpoint_sip(**kwargs)
