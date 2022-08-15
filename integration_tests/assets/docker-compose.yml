@@ -24,6 +24,13 @@ services:
     ports:
       - '9497'
 
+  calld:
+    image: mockserver/mockserver
+    environment:
+      MOCKSERVER_SERVER_PORT: 9500
+    ports:
+      - "9500"
+
   confd:
     image: mockserver/mockserver
     environment:

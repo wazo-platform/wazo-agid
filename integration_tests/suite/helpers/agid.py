@@ -33,12 +33,11 @@ class _BaseAgidClient:
             try:
                 with self._connect():
                     self._send_handler('monitoring')
-                    variables = self._process_communicate()[0]
-                    assert variables.get('FAILURE') is False
+                    commands = self._process_communicate()[1]
+                    assert commands.get('FAILURE') is False
                     break
             except (ConnectionError, AGIFailException, AssertionError):
                 time.sleep(1)
-
 
     @contextmanager
     def _connect(self):

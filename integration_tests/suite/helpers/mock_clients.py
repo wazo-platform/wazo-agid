@@ -27,6 +27,9 @@ class MockServerClient:
     def reset(self):
         return requests.put(f'{self._url}/reset')
 
+    def clear(self):
+        return requests.put(f'{self._url}/clear')
+
     def verify_called(self, method, path, times_called=1, **kwargs):
         verification = {
             'httpRequest': {

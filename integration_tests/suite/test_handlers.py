@@ -520,9 +520,24 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_ENABLEUNC'] == '0'
         assert recv_vars['XIVO_DESTUNC'] == 'dest-unconditional'
 
-    @pytest.mark.skip('NotImplemented')
     def test_phone_progfunckey_devstate(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user()
+            extension = queries.insert_extension(typeval='agentstaticlogin')
+
+        variables = {
+            'XIVO_USERID': user['id'],
+        }
+
+        recv_vars, recv_cmds = self.agid.phone_progfunckey_devstate(
+            'agentstaticlogin',
+            'ONHOLD',
+            'dest',
+            variables=variables,
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars[f'DEVICE_STATE(Custom:*735{user["id"]}*{extension["exten"]}*dest)'] == 'ONHOLD'
 
     def test_phone_progfunckey(self):
         with self.db.queries() as queries:
@@ -542,13 +557,81 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_PHONE_PROGFUNCKEY'] == extension["exten"]
         assert recv_vars['XIVO_PHONE_PROGFUNCKEY_FEATURE'] == 'fwdbusy'
 
-    @pytest.mark.skip('NotImplemented')
-    def test_provision(self):
-        pass
 
-    @pytest.mark.skip('NotImplemented')
+    def test_provision_autoprov(self):
+        self.confd.expect_devices({
+            'items': [{
+                "ip": "192.168.1.1",
+                "id": 1,
+            }],
+            'total': 1,
+        })
+        self.confd.expect_devices_autoprov(1)
+        self.confd.expect_devices_synchronize(1)
+
+        recv_vars, recv_cmds = self.agid.provision(
+            'autoprov',
+            '192.168.1.1:1234',
+        )
+
+        assert self.confd.verify_devices_called() is True
+        assert self.confd.verify_devices_autoprov_called(1) is True
+        assert self.confd.verify_devices_synchronize_called(1) is True
+        self.confd.clear()
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_PROV_OK'] == '1'
+
+    def test_provision_add_device(self):
+        self.confd.expect_devices({
+            'items': [{
+                "ip": "192.168.1.2",
+                "id": 2,
+            }],
+            'total': 1,
+        })
+        self.confd.expect_lines({
+            'items': [{"id": 1}],
+            'total': 1,
+        })
+        self.confd.expect_lines_devices(1, 2)
+        self.confd.expect_devices_synchronize(2)
+
+        recv_vars, recv_cmds = self.agid.provision(
+            '123',
+            '192.168.1.2:1234',
+        )
+
+        assert self.confd.verify_devices_called() is True
+        assert self.confd.verify_lines_called() is True
+        assert self.confd.verify_lines_devices_called(1, 2) is True
+        assert self.confd.verify_devices_synchronize_called(2) is True
+        self.confd.clear()
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_PROV_OK'] == '1'
+
     def test_queue_answered_call(self):
-        pass
+        with self.db.queries() as queries:
+            agent = queries.insert_agent()
+            queries.insert_user(agent_id=agent['id'], call_record_incoming_external_enabled=1)
+
+        variables = {
+            'WAZO_CALL_RECORD_ACTIVE': '0',
+            'XIVO_CALLORIGIN': 'extern',
+        }
+
+        self.calld.expect_calls_record_start(1)
+
+        recv_vars, recv_cmds = self.agid.queue_answered_call(
+            agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
+            agi_uniqueid='1',
+            variables=variables,
+        )
+
+        self.calld.verify_calls_record_start_called(1)
+        self.calld.clear()
+
+        assert recv_cmds['FAILURE'] is False
 
     def test_queue_skill_rule_set(self):
         with self.db.queries() as queries:
@@ -624,16 +707,27 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
         assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
 
-    @pytest.mark.skip('NotImplemented')
     def test_user_set_call_rights(self):
-        pass
+        # TODO finish
+        with self.db.queries() as queries:
+            context = 'test-context'
+            user, line, extension = queries.insert_user_line_extension(context=context)
+
+        variables = {
+            'XIVO_USERID': user['id'],
+            'XIVO_DSTNUM': context,
+            'XIVO_OUTCALLID': context,
+        }
+        recv_vars, recv_cmds = self.agid.user_set_call_rights(extension['exten'], variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
 
     def test_vmbox_get_info(self):
         with self.db.queries() as queries:
             context = 'default'
             voicemail = queries.insert_voicemail(context=context, skipcheckpass='1')
             user, line, extension = queries.insert_user_line_extension(
-                enablevoicemail=1, voicemail_id=voicemail['id'], context=context
+                enablevoicemail=1, voicemail_id=voicemail['id'], context=context,
             )
 
         variables = {
