@@ -230,7 +230,7 @@ class TestHandlers(IntegrationTest):
             variables=variables,
         )
 
-        self.calld.verify_calls_record_start_called(1)
+        assert self.calld.verify_calls_record_start_called(1) is True
         self.calld.clear()
 
         assert recv_cmds['FAILURE'] is False
@@ -251,7 +251,7 @@ class TestHandlers(IntegrationTest):
             variables=variables,
         )
 
-        self.calld.verify_calls_record_stop_called(1)
+        assert self.calld.verify_calls_record_stop_called(1) is True
         self.calld.clear()
 
         assert recv_cmds['FAILURE'] is False
@@ -395,13 +395,84 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['WAZO_USER_INTERFACES'] == f'sccp/{line_1["name"]}&contact'
 
-    @pytest.mark.skip('NotImplemented')
     def test_group_answered_call(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user(call_record_incoming_external_enabled=1)
+            extension = queries.insert_extension(typeval=user['id'])
+            line = queries.insert_line(
+                typeval=user['id'],
+                context=extension['context'],
+                endpoint_sip_uuid=queries.insert_endpoint_sip()['uuid']
+            )
+            queries.insert_extension_line(extension['id'], line['id'])
+            queries.insert_user_line(user['id'], line['id'], main_line=True)
 
-    @pytest.mark.skip('NotImplemented')
-    def test_group_member(self):
-        pass
+        variables = {
+            'WAZO_CALL_RECORD_ACTIVE': '0',
+            'XIVO_CALLORIGIN': 'extern',
+        }
+
+        self.calld.expect_calls_record_start(1)
+
+        recv_vars, recv_cmds = self.agid.group_answered_call(
+            agi_channel=f'Local/{extension["exten"]}@{extension["context"]}-0000000a1;1',
+            agi_uniqueid='1',
+            variables=variables,
+        )
+
+        assert self.calld.verify_calls_record_start_called(1) is True
+        self.calld.clear()
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_RECORD_GROUP_CALLEE'] == '1'
+
+    def test_group_member_add(self):
+        self.confd.expect_groups_get(2, {'name': 'test-group'})
+
+        recv_vars, recv_cmds = self.agid.group_member_add(
+            'tenant-uuid',
+            'user-uuid',
+            '2',
+        )
+
+        assert self.confd.verify_groups_get_called(2) is True
+        self.confd.clear()
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_cmds['EXEC AddQueueMember'] == 'test-group,Local/user-uuid@usersharedlines,,,,hint:user-uuid@usersharedlines'
+
+    def test_group_member_present(self):
+        self.confd.expect_groups_get(2, {'name': 'test-group'})
+
+        recv_vars, recv_cmds = self.agid.group_member_present(
+            'tenant-uuid',
+            'user-uuid',
+            '2',
+            variables={
+                'QUEUE_MEMBER_LIST(test-group)': 'Local/user-uuid@usersharedlines',
+            }
+        )
+
+        assert self.confd.verify_groups_get_called(2) is True
+        self.confd.clear()
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['WAZO_GROUP_MEMBER_PRESENT'] == '1'
+
+    def test_group_member_remove(self):
+        self.confd.expect_groups_get(2, {'name': 'test-group'})
+
+        recv_vars, recv_cmds = self.agid.group_member_remove(
+            'tenant-uuid',
+            'user-uuid',
+            '2',
+        )
+
+        assert self.confd.verify_groups_get_called(2) is True
+        self.confd.clear()
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_cmds['EXEC RemoveQueueMember'] == 'test-group,Local/user-uuid@usersharedlines'
 
     @pytest.mark.skip('NotImplemented')
     def test_handler_fax(self):
@@ -416,9 +487,22 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['CALLERID(all)'] == '\\"00155555555555\\" <00155555555555>'
 
-    @pytest.mark.skip('NotImplemented')
     def test_incoming_agent_set_features(self):
-        pass
+        with self.db.queries() as queries:
+            agent = queries.insert_agent(preprocess_subroutine='test-subroutine')
+            queries.insert_agent_login_status(agent_id=agent['id'], state_interface='test-device')
+
+        variables = {
+            'XIVO_QUEUEOPTIONS': 'hitPwxk',
+        }
+        recv_vars, recv_cmds = self.agid.incoming_agent_set_features(
+            agent['id'],
+            variables=variables
+        )
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_AGENT_INTERFACE'] == 'test-device'
+        assert recv_vars['XIVO_AGENTPREPROCESS_SUBROUTINE'] == 'test-subroutine'
+        assert recv_vars['XIVO_QUEUECALLOPTIONS'] == 'hitwxk'
 
     def test_incoming_conference_set_features(self):
         name = u'My Conférence'
@@ -441,33 +525,185 @@ class TestHandlers(IntegrationTest):
 
     def test_incoming_did_set_features(self):
         with self.db.queries() as queries:
-            incall = queries.insert_incall(preprocess_subroutine='test-subroutine')
+            call = queries.insert_incoming_call(preprocess_subroutine='test-subroutine', greeting_sound='test-sound')
+            extension = queries.insert_extension(type='incall', typeval=call['id'])
 
         variables = {
-            'XIVO_INCALL_ID': incall['id'],
-            'XIVO_DSTID': incall['id'],
+            'XIVO_INCALL_ID': call['id'],
+            'XIVO_DSTID': call['id'],
         }
-        recv_vars, recv_cmds = self.agid.incoming_conference_set_features(variables=variables)
+        recv_vars, recv_cmds = self.agid.incoming_did_set_features(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
-        assert recv_vars['WAZO_CONFBRIDGE_ID'] == str(incall['id'])
-        assert recv_vars['WAZO_CONFBRIDGE_TENANT_UUID'] == incall['tenant_uuid']
-        assert recv_vars['WAZO_CONFBRIDGE_BRIDGE_PROFILE'] == f'xivo-bridge-profile-{incall["id"]}'
-        assert recv_vars['WAZO_CONFBRIDGE_USER_PROFILE'] == f'xivo-user-profile-{incall["id"]}'
-        assert recv_vars['WAZO_CONFBRIDGE_MENU'] == 'xivo-default-user-menu'
-        assert recv_vars['WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE'] == ''
+        assert recv_vars['XIVO_DIDPREPROCESS_SUBROUTINE'] == 'test-subroutine'
+        assert recv_vars['XIVO_EXTENPATTERN'] == extension['exten']
+        assert recv_vars['XIVO_PATH'] == 'incall'
+        assert recv_vars['XIVO_PATH_ID'] == str(call['id'])
+        assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
+        assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
+        assert recv_vars['WAZO_GREETING_SOUND'] == 'test-sound'
 
-    @pytest.mark.skip('NotImplemented')
     def test_incoming_group_set_features(self):
-        pass
+        with self.db.queries() as queries:
+            group = queries.insert_group(name='incoming_group_set_features', timeout=25)
+            extension = queries.insert_extension(type='group', typeval=group['id'])
+            for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
+                queries.insert_dial_action(
+                    event=event,
+                    category='group',
+                    categoryval=group['id'],
+                    action='group',
+                    actionarg1=f'{event}-actionarg1',
+                    actionarg2=f'{event}-actionarg2',
+                )
 
-    @pytest.mark.skip('NotImplemented')
+        variables = {
+            'XIVO_DSTID': group['id'],
+            'XIVO_FWD_REFERER': group['id'],
+            'XIVO_PATH': None,
+        }
+        recv_vars, recv_cmds = self.agid.incoming_group_set_features(variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_GROUPOPTIONS'] == 'ir'
+        assert recv_vars['XIVO_GROUPNEEDANSWER'] == '0'
+        assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
+        assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
+        assert recv_vars['XIVO_GROUPNAME'] == 'incoming_group_set_features'
+        assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
+
+        assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTION'] == 'group'
+        assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTIONARG1'] == 'noanswer-actionarg1'
+        assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTIONARG2'] == 'noanswer-actionarg2'
+        assert recv_vars['XIVO_FWD_GROUP_CONGESTION_ACTION'] == 'group'
+        assert recv_vars['XIVO_FWD_GROUP_CONGESTION_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_GROUP_CONGESTION_ACTIONARG1'] == 'congestion-actionarg1'
+        assert recv_vars['XIVO_FWD_GROUP_CONGESTION_ACTIONARG2'] == 'congestion-actionarg2'
+        assert recv_vars['XIVO_FWD_GROUP_BUSY_ACTION'] == 'group'
+        assert recv_vars['XIVO_FWD_GROUP_BUSY_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_GROUP_BUSY_ACTIONARG1'] == 'busy-actionarg1'
+        assert recv_vars['XIVO_FWD_GROUP_BUSY_ACTIONARG2'] == 'busy-actionarg2'
+        assert recv_vars['XIVO_FWD_GROUP_CHANUNAVAIL_ACTION'] == 'group'
+        assert recv_vars['XIVO_FWD_GROUP_CHANUNAVAIL_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_GROUP_CHANUNAVAIL_ACTIONARG1'] == 'chanunavail-actionarg1'
+        assert recv_vars['XIVO_FWD_GROUP_CHANUNAVAIL_ACTIONARG2'] == 'chanunavail-actionarg2'
+
+        assert recv_vars['XIVO_PATH'] == 'group'
+        assert recv_vars['XIVO_PATH_ID'] == str(group['id'])
+        assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
+        assert re.match(r'^[a-f0-9\-]{36}$', recv_vars['__WAZO_LOCAL_CHAN_MATCH_UUID']) is not None
+
     def test_incoming_queue_set_features(self):
-        pass
+        with self.db.queries() as queries:
+            queue = queries.insert_queue_feature(
+                number='1234',
+                context='default',
+                timeout=25,
+                data_quality=1,
+                hitting_callee=1,
+                hitting_caller=1,
+                retries=1,
+                ring=1,
+                transfer_user=1,
+                transfer_call=1,
+                write_caller=1,
+                write_calling=1,
+                ignore_forward=1,
+                mark_answered_elsewhere=1,
+            )
+            for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
+                queries.insert_dial_action(
+                    event=event,
+                    category='queue',
+                    categoryval=queue['id'],
+                    action='queue',
+                    actionarg1=f'{event}-actionarg1',
+                    actionarg2=f'{event}-actionarg2',
+                )
 
-    @pytest.mark.skip('NotImplemented')
+        variables = {
+            'XIVO_DSTID': queue['id'],
+            'XIVO_FWD_REFERER': queue['id'],
+            'XIVO_PATH': '',
+        }
+        recv_vars, recv_cmds = self.agid.incoming_queue_set_features(variables=variables)
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_REAL_NUMBER'] == queue['number'] or None
+        assert recv_vars['XIVO_REAL_CONTEXT'] == 'default'
+        assert recv_vars['XIVO_QUEUENAME'] == queue['name']
+        assert recv_vars['XIVO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
+        assert recv_vars['XIVO_QUEUENEEDANSWER'] == '0'
+        assert recv_vars['XIVO_QUEUEURL'] == queue['url']
+        assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == queue['url']
+        assert recv_vars['XIVO_QUEUEPREPROCESS_SUBROUTINE'] == queue['url']
+        assert recv_vars['XIVO_QUEUETIMEOUT'] == '25'
+
+        assert recv_vars['XIVO_FWD_QUEUE_NOANSWER_ACTION'] == 'queue'
+        assert recv_vars['XIVO_FWD_QUEUE_NOANSWER_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_QUEUE_NOANSWER_ACTIONARG1'] == 'noanswer-actionarg1'
+        assert recv_vars['XIVO_FWD_QUEUE_NOANSWER_ACTIONARG2'] == 'noanswer-actionarg2'
+        assert recv_vars['XIVO_FWD_QUEUE_CONGESTION_ACTION'] == 'queue'
+        assert recv_vars['XIVO_FWD_QUEUE_CONGESTION_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_QUEUE_CONGESTION_ACTIONARG1'] == 'congestion-actionarg1'
+        assert recv_vars['XIVO_FWD_QUEUE_CONGESTION_ACTIONARG2'] == 'congestion-actionarg2'
+        assert recv_vars['XIVO_FWD_QUEUE_BUSY_ACTION'] == 'queue'
+        assert recv_vars['XIVO_FWD_QUEUE_BUSY_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_QUEUE_BUSY_ACTIONARG1'] == 'busy-actionarg1'
+        assert recv_vars['XIVO_FWD_QUEUE_BUSY_ACTIONARG2'] == 'busy-actionarg2'
+        assert recv_vars['XIVO_FWD_QUEUE_CHANUNAVAIL_ACTION'] == 'queue'
+        assert recv_vars['XIVO_FWD_QUEUE_CHANUNAVAIL_ISDA'] == '1'
+        assert recv_vars['XIVO_FWD_QUEUE_CHANUNAVAIL_ACTIONARG1'] == 'chanunavail-actionarg1'
+        assert recv_vars['XIVO_FWD_QUEUE_CHANUNAVAIL_ACTIONARG2'] == 'chanunavail-actionarg2'
+
+        assert recv_vars['XIVO_QUEUESTATUS'] == 'ok'
+        assert recv_vars['XIVO_PATH'] == 'queue'
+        assert recv_vars['XIVO_PATH_ID'] == str(queue['id'])
+        assert recv_vars['XIVO_PICKUPGROUP'] == ''
+        assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
+        assert re.match(r'^[a-f0-9\-]{36}$', recv_vars['__WAZO_LOCAL_CHAN_MATCH_UUID']) is not None
+
     def test_outgoing_user_set_features(self):
-        pass
+        with self.db.queries() as queries:
+            user = queries.insert_user(outcallerid='anonymous', enablexfer=1)
+            call = queries.insert_outgoing_call(preprocess_subroutine='test-subroutine', hangupringtime=10)
+            sip = queries.insert_endpoint_sip()
+            trunk = queries.insert_trunk(endpoint_sip_uuid=sip['uuid'])
+            queries.insert_outgoing_call_trunk(outcallid=call['id'], trunkfeaturesid=trunk['id'])
+
+            dial_pattern = queries.insert_dial_pattern(typeid=call['id'])
+            extension = queries.insert_extension(type='outcall', typeval=call['id'])
+
+        variables = {
+            'XIVO_USERID': user['id'],
+            'WAZO_USERUUID': user['uuid'],
+            'XIVO_DSTID': dial_pattern['id'],
+            'XIVO_DSTNUM': extension['exten'],
+            'XIVO_SRCNUM': extension['exten'],
+            'XIVO_BASE_CONTEXT': extension['context'],
+            'WAZO_TENANT_UUID': '',
+            'XIVO_PATH': '',
+        }
+        recv_vars, recv_cmds = self.agid.outgoing_user_set_features(
+            agi_channel='test',
+            variables=variables
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_CALLOPTIONS'] == 'T'
+        assert recv_vars['CHANNEL(musicclass)'] == 'default'
+        assert recv_vars['XIVO_INTERFACE0'] == 'PJSIP'
+        assert recv_vars['XIVO_TRUNKEXTEN0'] == f'{extension["exten"]}@{sip["name"]}'
+        assert recv_vars['XIVO_TRUNKSUFFIX0'] == ''
+        assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'
+        assert recv_vars['XIVO_HANGUPRINGTIME'] == '10'
+        assert recv_vars['XIVO_OUTCALLID'] == str(call['id'])
+        assert recv_vars['XIVO_PATH'] == 'outcall'
+        assert recv_vars['XIVO_PATH_ID'] == str(call['id'])
+        assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
+        assert recv_vars['CALLERID(name-pres)'] == 'prohib'
+        assert recv_vars['CALLERID(num-pres)'] == 'prohib'
 
     def test_meeting_user(self):
         with self.db.queries() as queries:
@@ -692,7 +928,7 @@ class TestHandlers(IntegrationTest):
             variables=variables,
         )
 
-        self.calld.verify_calls_record_start_called(1)
+        assert self.calld.verify_calls_record_start_called(1) is True
         self.calld.clear()
 
         assert recv_cmds['FAILURE'] is False
@@ -772,22 +1008,22 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
 
     def test_user_set_call_rights(self):
-        # TODO Add test for deny. Requires inserting into `rightcallexten`
         with self.db.queries() as queries:
             context = 'test-context'
             user, line, extension = queries.insert_user_line_extension(context=context)
-            call_permission = queries.insert_call_permission()
-            queries.insert_user_call_permission(user_id=user['id'], call_permission_id=call_permission['id'])
+            call_permission = queries.insert_call_permission(passwd='test')
+            queries.insert_call_extension_permission(rightcallid=call_permission['id'], exten=extension['exten'])
+            queries.insert_user_call_permission(typeval=user['id'], rightcallid=call_permission['id'])
 
         variables = {
             'XIVO_USERID': user['id'],
-            'XIVO_DSTNUM': context,
+            'XIVO_DSTNUM': extension['exten'],
             'XIVO_OUTCALLID': context,
         }
         recv_vars, recv_cmds = self.agid.user_set_call_rights(extension['exten'], variables=variables)
 
         assert recv_cmds['FAILURE'] is False
-        assert recv_vars['XIVO_AUTHORIZATION'] == 'ALLOW'
+        assert recv_vars['XIVO_AUTHORIZATION'] == 'DENY'
 
     def test_vmbox_get_info(self):
         with self.db.queries() as queries:

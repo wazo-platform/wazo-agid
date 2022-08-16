@@ -8,6 +8,8 @@ import random
 from contextlib import contextmanager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
+from xivo_dao.alchemy.outcalltrunk import OutcallTrunk
+from xivo_dao.alchemy.rightcallexten import RightCallExten
 from xivo_dao.tests.test_dao import ItemInserter
 
 logger = logging.getLogger(__name__)
@@ -149,10 +151,21 @@ class DatabaseQueries(object):
             inserter.add_user_line(line_id=line_id, user_id=user_id, **kwargs)
             return {}
 
+    def insert_extension_line(self, extension_id, line_id, **kwargs):
+        with self.inserter() as inserter:
+            inserter.add_line_extension(line_id=line_id, extension_id=extension_id, **kwargs)
+            return {}
+
     def insert_call_permission(self, **kwargs):
         with self.inserter() as inserter:
             call_permission = inserter.add_call_permission(**kwargs)
             return {'id': call_permission.id, 'name': call_permission.name}
+
+    def insert_call_extension_permission(self, **kwargs):
+        with self.inserter() as inserter:
+            call_extension_permission = RightCallExten(**kwargs)
+            inserter.add_me(call_extension_permission)
+            return {'id': call_extension_permission.id}
 
     def insert_user_call_permission(self, **kwargs):
         with self.inserter() as inserter:
@@ -162,7 +175,7 @@ class DatabaseQueries(object):
     def insert_endpoint_sip(self, **kwargs):
         with self.inserter() as inserter:
             sip = inserter.add_endpoint_sip(**kwargs)
-            return {'uuid': sip.uuid}
+            return {'uuid': sip.uuid, 'name': sip.name}
 
     def insert_agent(self, **kwargs):
         with self.inserter() as inserter:
@@ -174,15 +187,32 @@ class DatabaseQueries(object):
                 'language': agent.language,
             }
 
+    def insert_agent_login_status(self, **kwargs):
+        with self.inserter() as inserter:
+            inserter.add_agent_login_status(**kwargs)
+            return {}
+
+    def insert_queue(self, **kwargs):
+        with self.inserter() as inserter:
+            queue = inserter.add_queue(**kwargs)
+            return {'id': queue.id, 'category': queue.category, 'name': queue.name}
+
     def insert_queue_feature(self, **kwargs):
         with self.inserter() as inserter:
             queue_feature = inserter.add_queuefeatures(**kwargs)
-            return {'id': queue_feature.id, 'name': queue_feature.name}
+            return {
+                'id': queue_feature.id,
+                'name': queue_feature.name,
+                'context': queue_feature.context,
+                'number': queue_feature.number,
+                'url': queue_feature.url,
+            }
 
     def insert_extension(self, **kwargs):
         with self.inserter() as inserter:
             extension = inserter.add_extension(**kwargs)
             return {
+                'id': extension.id,
                 'exten': extension.exten,
                 'context': extension.context,
             }
@@ -281,10 +311,31 @@ class DatabaseQueries(object):
                 'tenant_uuid': skill_rule.tenant_uuid,
             }
 
-    def insert_incall(self, **kwargs):
+    def insert_incoming_call(self, **kwargs):
         with self.inserter() as inserter:
-            incall = inserter.add_incall(**kwargs)
-            return {'id': incall.id, 'tenant_uuid': incall.tenant_uuid}
+            incoming_call = inserter.add_incall(**kwargs)
+            return {'id': incoming_call.id, 'tenant_uuid': incoming_call.tenant_uuid}
+
+    def insert_outgoing_call(self, **kwargs):
+        with self.inserter() as inserter:
+            outgoing_call = inserter.add_outcall(**kwargs)
+            return {'id': outgoing_call.id, 'tenant_uuid': outgoing_call.tenant_uuid}
+
+    def insert_dial_pattern(self, **kwargs):
+        with self.inserter() as inserter:
+            dial_pattern = inserter.add_dialpattern(**kwargs)
+            return {'id': dial_pattern.id}
+
+    def insert_trunk(self, **kwargs):
+        with self.inserter() as inserter:
+            trunk = inserter.add_trunk(**kwargs)
+            return {'id': trunk.id}
+
+    def insert_outgoing_call_trunk(self, **kwargs):
+        with self.inserter() as inserter:
+            outgoing_call_trunk = OutcallTrunk(**kwargs)
+            inserter.add_me(outgoing_call_trunk)
+            return {'priority': outgoing_call_trunk.priority}
 
     def insert_call_filter(self, **kwargs):
         with self.inserter() as inserter:
@@ -296,3 +347,12 @@ class DatabaseQueries(object):
             call_filter_member = inserter.add_call_filter_member(**kwargs)
             return {'id': call_filter_member.id}
 
+    def insert_group(self, **kwargs):
+        with self.inserter() as inserter:
+            group = inserter.add_group(**kwargs)
+            return {'id': group.id, 'tenant_uuid': group.tenant_uuid, 'name': group.name}
+
+    def insert_dial_action(self, **kwargs):
+        with self.inserter() as inserter:
+            dial_action = inserter.add_dialaction(**kwargs)
+            return {'category': dial_action.category, 'categoryval': dial_action.categoryval}

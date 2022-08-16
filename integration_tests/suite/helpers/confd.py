@@ -43,3 +43,10 @@ class ConfdMockClient(MockServerClient):
 
     def verify_lines_devices_called(self, line_id, device_id):
         return self.verify_called('PUT', f'/lines/{line_id}/devices/{device_id}').status_code == 202
+
+    def expect_groups_get(self, group_id, group):
+        self.simple_expectation('GET', f'/groups/{group_id}', 200, group)
+
+    def verify_groups_get_called(self, group_id):
+        return self.verify_called('GET', f'/groups/{group_id}').status_code == 202
+
