@@ -474,9 +474,28 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_cmds['EXEC RemoveQueueMember'] == 'test-group,Local/user-uuid@usersharedlines'
 
-    @pytest.mark.skip('NotImplemented')
-    def test_handler_fax(self):
-        pass
+    def test_handle_fax(self):
+        variables = {
+            'XIVO_DSTNUM': 'default',
+        }
+        recv_vars, recv_cmds = self.agid.handle_fax(
+            '/var/lib/wazo-agid/blank.tiff',
+            'test@localhost',
+            variables=variables
+        )
+        assert recv_cmds['FAILURE'] is False
+
+        assert self.filesystem.read_file('/tmp/last_tiff2pdf_cmd.txt') == \
+            '-o /var/lib/wazo-agid/blank.pdf /var/lib/wazo-agid/blank.tiff'
+
+        assert self.filesystem.read_file('/tmp/last_mutt_cmd.txt') == (
+            '-e set copy=no '
+            '-e set from=no-reply+fax@wazo.community '
+            '-e set realname=\'Wazo Fax\' '
+            '-e set use_from=yes '
+            '-s Reception de FAX vers default '
+            '-a /var/lib/wazo-agid/blank.pdf -- test@localhost'
+        )
 
     def test_in_callerid(self):
         number = '+155555555555'
