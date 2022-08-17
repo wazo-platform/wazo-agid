@@ -286,7 +286,7 @@ class TestHandlers(IntegrationTest):
     def test_check_diversion_hold_time(self):
         queue_name = 'queue-wait-time'
         with self.db.queries() as queries:
-            queue = queries.insert_queue_feature(name=queue_name, waittime=5)
+            queue = queries.insert_queue(name=queue_name, waittime=5)
 
         variables = {
             'XIVO_DSTID': queue['id'],
@@ -303,7 +303,7 @@ class TestHandlers(IntegrationTest):
     def test_check_diversion_wait_ratio(self):
         queue_name = 'queue-wait-ratio'
         with self.db.queries() as queries:
-            queue = queries.insert_queue_feature(name=queue_name, waitratio=1.2)
+            queue = queries.insert_queue(name=queue_name, waitratio=1.2)
 
         variables = {
             'XIVO_DSTID': queue['id'],
@@ -615,7 +615,7 @@ class TestHandlers(IntegrationTest):
 
     def test_incoming_queue_set_features(self):
         with self.db.queries() as queries:
-            queue = queries.insert_queue_feature(
+            queue = queries.insert_queue(
                 number='1234',
                 context='default',
                 timeout=25,

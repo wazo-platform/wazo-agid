@@ -194,11 +194,6 @@ class DatabaseQueries(object):
 
     def insert_queue(self, **kwargs):
         with self.inserter() as inserter:
-            queue = inserter.add_queue(**kwargs)
-            return {'id': queue.id, 'category': queue.category, 'name': queue.name}
-
-    def insert_queue_feature(self, **kwargs):
-        with self.inserter() as inserter:
             queue_feature = inserter.add_queuefeatures(**kwargs)
             return {
                 'id': queue_feature.id,
