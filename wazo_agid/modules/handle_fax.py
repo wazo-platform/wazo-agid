@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -7,7 +6,7 @@ import os
 import subprocess
 import ftplib
 
-from ConfigParser import RawConfigParser
+from configparser import RawConfigParser
 from wazo_agid import agid
 
 logger = logging.getLogger(__name__)
@@ -226,8 +225,7 @@ def setup_handle_fax(cursor):
     # 3. create backends
     backends = {}
     for backend_prefix, backend_factory in _BACKENDS_FACTORY:
-        for section in filter(lambda s: s.startswith(backend_prefix),
-                              config.sections()):
+        for section in [s for s in config.sections() if s.startswith(backend_prefix)]:
             backend_factory_args = dict(config.items(section))
             logger.debug("Creating backend, name %s, factory %s", section,
                          backend_factory)
@@ -237,9 +235,9 @@ def setup_handle_fax(cursor):
     # 4. creation destinations
     global DESTINATIONS
     DESTINATIONS = {}
-    for section in filter(lambda s: s.startswith("dstnum_"), config.sections()):
+    for section in [s for s in config.sections() if s.startswith("dstnum_")]:
         cur_destination = section[7:]  # 6 == len("dstnum_")
-        cur_backend_ids = map(lambda s: s.strip(), config.get(section, "dest").split(","))
+        cur_backend_ids = [s.strip() for s in config.get(section, "dest").split(",")]
         cur_backends = _build_backends_list(backends, cur_backend_ids, cur_destination)
         logger.debug('Creating destination, dstnum %s, backends %s', cur_destination,
                      cur_backend_ids)

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-# Copyright 2008-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2008-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import signal
 import logging
-import SocketServer
+import socketserver
 
 from threading import Lock
 
@@ -22,7 +21,7 @@ _server = None
 _handlers = {}
 
 
-class DBConnectionPool(object):
+class DBConnectionPool:
     def __init__(self):
         self.conns = []
         self.size = 0
@@ -34,7 +33,7 @@ class DBConnectionPool(object):
             for conn in self.conns:
                 conn.close()
 
-            self.conns = [anysql.connect_by_uri(db_uri) for _ in xrange(size)]
+            self.conns = [anysql.connect_by_uri(db_uri) for _ in range(size)]
 
             self.size = size
             self.db_uri = db_uri
@@ -61,7 +60,7 @@ class DBConnectionPool(object):
                 logger.debug("releasing connection: pool full, connection closed")
 
 
-class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
+class FastAGIRequestHandler(socketserver.StreamRequestHandler):
 
     def handle(self):
         try:
@@ -114,7 +113,7 @@ class FastAGIRequestHandler(SocketServer.StreamRequestHandler):
                 pass
 
 
-class AGID(SocketServer.ThreadingTCPServer):
+class AGID(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     initialized = False
     request_queue_size = 20
@@ -129,9 +128,11 @@ class AGID(SocketServer.ThreadingTCPServer):
         self.setup()
 
         FastAGIRequestHandler.config = config
-        SocketServer.ThreadingTCPServer.__init__(self,
-                                                 (self.listen_addr, self.listen_port),
-                                                 FastAGIRequestHandler)
+        socketserver.ThreadingTCPServer.__init__(
+            self,
+            (self.listen_addr, self.listen_port),
+            FastAGIRequestHandler
+        )
 
         self.initialized = True
 
@@ -149,7 +150,7 @@ class AGID(SocketServer.ThreadingTCPServer):
         self.db_conn_pool.reload(conn_pool_size, db_uri)
 
 
-class Handler(object):
+class Handler:
     def __init__(self, handler_name, setup_fn, handle_fn):
         self.handler_name = handler_name
         self.setup_fn = setup_fn
@@ -199,7 +200,7 @@ def sighup_handle(signum, frame):
         cursor = conn.cursor()
 
         logger.debug("reloading handlers")
-        for handler in _handlers.itervalues():
+        for handler in list(_handlers.values()):
             handler.reload(cursor)
 
         conn.commit()
@@ -213,9 +214,9 @@ def run():
     try:
         cursor = conn.cursor()
 
-        logger.debug("list of handlers: %s", ', '.join(sorted(_handlers.iterkeys())))
+        logger.debug("list of handlers: %s", ', '.join(sorted(_handlers.keys())))
 
-        for handler in _handlers.itervalues():
+        for handler in list(_handlers.values()):
             handler.setup(cursor)
 
         conn.commit()

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2007-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2007-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -16,7 +15,7 @@ class DBUpdateException(Exception):
     pass
 
 
-class ExtenFeatures(object):
+class ExtenFeatures:
     FEATURES = {
         'agents': (
             'agentstaticlogin',
@@ -47,7 +46,7 @@ class ExtenFeatures(object):
 
         featureslist = []
 
-        for xtype in self.FEATURES.itervalues():
+        for xtype in list(self.FEATURES.values()):
             for x in xtype:
                 featureslist.append(x)
 
@@ -103,7 +102,7 @@ class ExtenFeatures(object):
         return res['exten']
 
 
-class VMBox(object):
+class VMBox:
     def __init__(self, agi, cursor, xid=None, mailbox=None, context=None, commentcond=True):
         self.agi = agi
         self.cursor = cursor
@@ -164,7 +163,7 @@ class VMBox(object):
             self.commented = enabled
 
 
-class Meeting(object):
+class Meeting:
 
     def __init__(self, agi, cursor, tenant_uuid, uuid=None, number=None):
         self.agi = agi
@@ -195,7 +194,7 @@ class Meeting(object):
         self.name = res['name']
 
 
-class MOH(object):
+class MOH:
 
     def __init__(self, agi, cursor, uuid):
         self.agi = agi
@@ -217,7 +216,7 @@ class MOH(object):
         self.name = res['name']
 
 
-class Paging(object):
+class Paging:
 
     def __init__(self, agi, cursor, number, userid):
         self.agi = agi
@@ -300,7 +299,7 @@ class Paging(object):
             self.lines.add(line)
 
 
-class User(object):
+class User:
 
     def __init__(self, agi, cursor, xid=None, exten=None, context=None, agent_id=None):
         self.agi = agi
@@ -409,7 +408,7 @@ class User(object):
             raise DBUpdateException("Unable to perform the requested update")
 
 
-class Queue(object):
+class Queue:
     def __init__(self, agi, cursor, queue_id):
         self.agi = agi
         self.cursor = cursor
@@ -501,7 +500,7 @@ class Queue(object):
         return [str(row[0]) for row in res]
 
 
-class Agent(object):
+class Agent:
     def __init__(self, agi, cursor, xid=None, number=None):
         self.agi = agi
         self.cursor = cursor
@@ -536,7 +535,7 @@ class Agent(object):
         self.preprocess_subroutine = res['preprocess_subroutine']
 
 
-class DialAction(object):
+class DialAction:
 
     @staticmethod
     def set_agi_variables(agi, event, category, action, actionarg1, actionarg2, isda=True):
@@ -601,7 +600,7 @@ class DialAction(object):
                                      (self.category not in category_no_isda))
 
 
-class Trunk(object):
+class Trunk:
     def __init__(self, agi, cursor, xid):
         self.agi = agi
         self.cursor = cursor
@@ -630,7 +629,7 @@ class Trunk(object):
             raise ValueError("Unknown protocol for trunk {}".format(xid))
 
 
-class DID(object):
+class DID:
     def __init__(self, agi, cursor, incall_id):
         self.agi = agi
         self.cursor = cursor
@@ -674,7 +673,7 @@ class DID(object):
         CallerID(self.agi, self.cursor, "incall", self.id).rewrite(force_rewrite=True)
 
 
-class Outcall(object):
+class Outcall:
     def __init__(self, agi, cursor):
         self.agi = agi
         self.cursor = cursor
@@ -733,7 +732,7 @@ class Outcall(object):
             self.trunks.append(trunk)
 
 
-class ScheduleDataMapper(object):
+class ScheduleDataMapper:
     @classmethod
     def get_from_path(cls, cursor, path, path_id):
         # fetch schedule info
@@ -791,7 +790,7 @@ class ScheduleDataMapper(object):
         return Schedule(opened_periods, closed_periods, default_action, timezone)
 
 
-class Context(object):
+class Context:
     # TODO: Recursive inclusion
     def __init__(self, agi, cursor, context):
         self.agi = agi
@@ -831,7 +830,7 @@ CALLERID_MATCHER = re.compile('^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<
 CALLERIDNUM_MATCHER = re.compile('^\+?[0-9\*#]+$').match
 
 
-class CallerID(object):
+class CallerID:
     @staticmethod
     def parse(callerid):
         logger.debug('caller_id parse: parsing "%s"', callerid)
@@ -961,7 +960,7 @@ class CallerID(object):
                 self.agi.set_variable('XIVO_CID_REWRITTEN', 1)
 
 
-class ChanSIP(object):
+class ChanSIP:
 
     @staticmethod
     def get_intf_and_suffix(cursor, xid):
@@ -978,7 +977,7 @@ class ChanSIP(object):
         return 'PJSIP/{}'.format(res['name']), None
 
 
-class ChanIAX2(object):
+class ChanIAX2:
 
     @staticmethod
     def get_intf_and_suffix(cursor, xid):
@@ -996,7 +995,7 @@ class ChanIAX2(object):
         return ("IAX2/%s" % res['name'], None)
 
 
-class ChanCustom(object):
+class ChanCustom:
 
     @staticmethod
     def get_intf_and_suffix(cursor, xid):

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
 import sys
 import logging
-import ConfigParser
+import configparser
 
 from wazo_agid import agid
 
@@ -59,13 +58,13 @@ def setup(cursor):
     global config
 
     re_objs.clear()
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.read([RULES_FILE])
 
     for section_name in config.sections():
         try:
             regexp = config.get(section_name, 'callerid')
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             log.error("option 'callerid' not found in section %r", section_name)
             sys.exit(1)
 

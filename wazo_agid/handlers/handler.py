@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid import dialplan_variables
 
 
-class Handler(object):
+class Handler:
     def __init__(self, agi, cursor, args):
         self._agi = agi
         self._cursor = cursor

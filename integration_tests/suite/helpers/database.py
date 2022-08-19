@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 TENANT_UUID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee1'
 
 
-class DbHelper(object):
+class DbHelper:
 
     TEMPLATE = "xivotemplate"
 
@@ -82,7 +82,7 @@ class DbHelper(object):
             yield DatabaseQueries(connection)
 
 
-class DatabaseQueries(object):
+class DatabaseQueries:
     def __init__(self, connection):
         self.connection = connection
         self.Session = sessionmaker(bind=connection)

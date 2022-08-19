@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from uuid import uuid4
@@ -115,7 +114,7 @@ def holdtime_announce(agi, cursor, args):
         return
 
     holdtime = agi.get_variable('QUEUEHOLDTIME')
-    holdtime = max(1, (int(holdtime) + 59) / 60)
+    holdtime = max(1, (int(holdtime) + 59) // 60)
 
     gender = 'f' if holdtime == 1 else ''
 

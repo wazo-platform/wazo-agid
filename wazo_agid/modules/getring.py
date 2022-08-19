@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import ConfigParser
+import configparser
 import logging
 
 from wazo_agid import agid
@@ -42,7 +41,7 @@ def getring(agi, cursor, args):
         if section is None:
             try:
                 section = CONFIG_PARSER.get('number', "@%s" % context)
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 return
 
         if section == 'number':
@@ -60,7 +59,7 @@ def getring(agi, cursor, args):
             ringtype = CONFIG_PARSER.get(section, origin)
 
         phonetype = CONFIG_PARSER.get(section, 'phonetype')
-    except (ConfigParser.NoOptionError, ValueError):
+    except (configparser.NoOptionError, ValueError):
         logger.debug('Ring type exception', exc_info=True)
         agi.verbose("Using the native phone ring tone")
     else:
@@ -73,7 +72,7 @@ def setup(cursor):
     global CONFIG_PARSER
 
     # This module is often called, keep this object alive.
-    CONFIG_PARSER = ConfigParser.RawConfigParser()
+    CONFIG_PARSER = configparser.RawConfigParser()
     CONFIG_PARSER.readfp(open(CONFIG_FILE))
 
 

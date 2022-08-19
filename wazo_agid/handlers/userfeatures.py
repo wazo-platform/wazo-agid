@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -155,7 +154,7 @@ class UserFeatures(Handler):
 
     def _set_xivo_user_name(self):
         if self._user:
-            wazo_dst_name = u'{firstname} {lastname}'.format(
+            wazo_dst_name = '{firstname} {lastname}'.format(
                 firstname=self._user.firstname if self._user.firstname else '',
                 lastname=self._user.lastname if self._user.lastname else '',
             )

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2004-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -45,8 +44,8 @@ class FastAGIAppError(FastAGIError):
     pass
 
 
-# there are several different types of hangups we can detect
-# they all are derrived from FastAGIHangup
+# there are several types of hangups we can detect
+# they all are derived from FastAGIHangup
 class FastAGIHangup(FastAGIAppError):
     pass
 
@@ -75,7 +74,7 @@ class FastAGIDialPlanBreak(FastAGIException):
     pass
 
 
-class FastAGI(object):
+class FastAGI:
     """
     This class encapsulates communication between Asterisk and a python
     program (typically a daemon).
@@ -110,15 +109,15 @@ class FastAGI(object):
 
     def _get_agi_args(self):
         i = 1
-        while "agi_arg_%d" % i in self.env:
-            self.args.append(self.env["agi_arg_%d" % i])
+        while f"agi_arg_{i:d}" in self.env:
+            self.args.append(self.env[f"agi_arg_{i:d}"])
             i += 1
 
     @staticmethod
     def _quote(string):
         if string is None:
             string = ''
-        elif not isinstance(string, unicode):
+        elif not isinstance(string, str):
             string = str(string)
         else:
             string = string.encode('utf8')
@@ -142,7 +141,7 @@ class FastAGI(object):
 
     def send_command(self, command, *args):
         """Send a command to Asterisk"""
-        command = ' '.join([command.strip()] + map(str, args)).strip() + "\n"
+        command = ' '.join([command.strip()] + list(map(str, args))).strip() + "\n"
         self.outf.write(command)
         self.outf.flush()
 

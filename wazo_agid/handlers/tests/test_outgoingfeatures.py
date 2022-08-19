@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2013-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -11,7 +10,7 @@ from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 from wazo_agid import objects
 
 
-class OutCallBuilder(object):
+class OutCallBuilder:
 
     def __init__(self):
         self._internal = 0
@@ -36,7 +35,7 @@ class OutCallBuilder(object):
         return outcall
 
 
-class UserBuilder(object):
+class UserBuilder:
 
     def __init__(self):
         self._caller_id = '"John"'

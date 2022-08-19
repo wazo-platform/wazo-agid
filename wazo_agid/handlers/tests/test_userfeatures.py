@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
-# Copyright 2013-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
-from hamcrest import (assert_that, contains, equal_to)
+from hamcrest import (assert_that, equal_to, contains_exactly)
 from mock import (Mock, call, patch, sentinel)
 
 from wazo_agid.handlers.userfeatures import UserFeatures
 from wazo_agid import objects
 
 
-class NotEmptyStringMatcher(object):
+class NotEmptyStringMatcher:
     def __eq__(self, other):
-        return isinstance(other, basestring) and bool(other)
+        return isinstance(other, str) and bool(other)
 
 
 class _BaseTestCase(unittest.TestCase):
@@ -369,7 +368,7 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         enabled = user_features._set_rna_from_dialaction()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
+        assert_that(self._agi.set_variable.call_args_list, contains_exactly(
             call('XIVO_FWD_USER_NOANSWER_ACTION', 'user'),
             call('XIVO_FWD_USER_NOANSWER_ISDA', '1'),
             call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '5'),
@@ -392,7 +391,7 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         enabled = user_features._set_rna_from_exten()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
+        assert_that(self._agi.set_variable.call_args_list, contains_exactly(
             call('XIVO_FWD_USER_NOANSWER_ACTION', 'extension'),
             call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '555'),
             call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', sentinel.context),
@@ -435,7 +434,7 @@ class TestSetForwardBusy(_BaseTestCase):
         enabled = user_features._set_rbusy_from_dialaction()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
+        assert_that(self._agi.set_variable.call_args_list, contains_exactly(
             call('XIVO_FWD_USER_BUSY_ACTION', 'user'),
             call('XIVO_FWD_USER_BUSY_ISDA', '1'),
             call('XIVO_FWD_USER_BUSY_ACTIONARG1', '5'),
@@ -458,7 +457,7 @@ class TestSetForwardBusy(_BaseTestCase):
         enabled = user_features._set_rbusy_from_exten()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
+        assert_that(self._agi.set_variable.call_args_list, contains_exactly(
             call('XIVO_FWD_USER_BUSY_ACTION', 'extension'),
             call('XIVO_FWD_USER_BUSY_ACTIONARG1', '666'),
             call('XIVO_FWD_USER_BUSY_ACTIONARG2', sentinel.context),
