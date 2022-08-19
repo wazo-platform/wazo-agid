@@ -186,9 +186,7 @@ class Meeting:
 
         res = cursor.fetchone()
         if not res:
-            raise LookupError(
-                'Unable to find Meeting {} in tenant {}'.format(uuid, tenant_uuid)
-            )
+            raise LookupError(f'Unable to find Meeting {uuid} in tenant {tenant_uuid}')
 
         self.uuid = res['uuid']
         self.name = res['name']
@@ -211,7 +209,7 @@ class MOH:
 
         res = cursor.fetchone()
         if not res:
-            raise LookupError('Unable to find MOH {}'.format(uuid))
+            raise LookupError(f'Unable to find MOH {uuid}')
 
         self.name = res['name']
 
@@ -288,13 +286,13 @@ class Paging:
 
         for line in res:
             if line['endpoint_sip_uuid']:
-                line = 'PJSIP/{}'.format(line['name'])
+                line = f'PJSIP/{line["name"]}'
             elif line['endpoint_sccp_id']:
-                line = 'SCCP/{}/autoanswer'.format(line['name'])
+                line = f'SCCP/{line["name"]}/autoanswer'
             elif line['endpoint_custom_id']:
-                line = 'CUSTOM/{}'.format(line['name'])
+                line = f'CUSTOM/{line["name"]}'
             else:
-                raise LookupError("Unable to find protocol for user (id: %s)" % (id,))
+                raise LookupError(f"Unable to find protocol for user (id: {id})")
 
             self.lines.add(line)
 
@@ -612,7 +610,7 @@ class Trunk:
                      columns,
                      (xid,))
         res = cursor.fetchone()
-        self.agi.verbose('res {}'.format(res))
+        self.agi.verbose(f'res {res}')
 
         if not res:
             raise LookupError("Unable to find trunk (id: %d)" % xid)
@@ -626,7 +624,7 @@ class Trunk:
         elif res['endpoint_custom_id']:
             (self.interface, self.intfsuffix) = ChanCustom.get_intf_and_suffix(cursor, res['endpoint_custom_id'])
         else:
-            raise ValueError("Unknown protocol for trunk {}".format(xid))
+            raise ValueError(f"Unknown protocol for trunk {xid}")
 
 
 class DID:
@@ -972,9 +970,9 @@ class ChanSIP:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find usersip entry (id: {})".format(xid))
+            raise LookupError(f"Unable to find usersip entry (id: {xid})")
 
-        return 'PJSIP/{}'.format(res['name']), None
+        return f'PJSIP/{res["name"]}', None
 
 
 class ChanIAX2:
@@ -990,9 +988,9 @@ class ChanIAX2:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find useriax entry (id: {})".format(xid))
+            raise LookupError(f'Unable to find useriax entry (id: {xid})')
 
-        return ("IAX2/%s" % res['name'], None)
+        return f'IAX2/{res["name"]}', None
 
 
 class ChanCustom:
@@ -1008,10 +1006,10 @@ class ChanCustom:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find usercustom entry (id: {})".format(xid))
+            raise LookupError(f"Unable to find usercustom entry (id: {xid})")
 
         # In case the suffix is the integer 0, bool(intfsuffix)
         # returns False though there is a suffix. Casting it to
         # a string prevents such an error.
 
-        return (res['interface'], str(res['intfsuffix']))
+        return res['interface'], str(res['intfsuffix'])

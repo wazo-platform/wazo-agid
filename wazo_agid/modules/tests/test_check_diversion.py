@@ -26,7 +26,7 @@ class TestCheckDiversion(unittest.TestCase):
         waiting_calls = 2
 
         self.assertTrue(check_diversion._is_agent_ratio_overrun(self.agi, self.queue, waiting_calls))
-        self.agi.get_variable.assert_called_once_with('QUEUE_MEMBER({},logged)'.format(self.queue.name))
+        self.agi.get_variable.assert_called_once_with(f'QUEUE_MEMBER({self.queue.name},logged)')
 
     def test_is_agent_ratio_overrun_over(self):
         self.queue.waitratio = 0.70

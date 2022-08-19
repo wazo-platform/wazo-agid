@@ -22,10 +22,7 @@ class TestAnswerHandler(TestCase):
         extension = '1001'
         context = 'here'
 
-        chan_name = 'Local/{extension}@{context}-0000000a1;1'.format(
-            extension=extension,
-            context=context,
-        )
+        chan_name = f'Local/{extension}@{context}-0000000a1;1'
         self.agi.env = {
             'agi_channel': chan_name,
         }
@@ -43,9 +40,7 @@ class TestAnswerHandler(TestCase):
     @patch('wazo_agid.handlers.group.objects.User')
     def test_get_user_user_member(self, User):
         user_uuid = 'e15b4765-719d-40d4-8bdd-ff578e2bef47'
-        chan_name = 'Local/{user_uuid}@usersharedlines-00000001;1'.format(
-            user_uuid=user_uuid,
-        )
+        chan_name = f'Local/{user_uuid}@usersharedlines-00000001;1'
 
         self.agi.env = {
             'agi_channel': chan_name,

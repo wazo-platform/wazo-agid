@@ -47,7 +47,7 @@ def in_callerid(agi, cursor, args):
                 callerid_num = add + callerid_num
 
         if same_cid:
-            agi.set_variable('CALLERID(all)', '"{num}" <{num}>'.format(num=callerid_num))
+            agi.set_variable('CALLERID(all)', f'"{callerid_num}" <{callerid_num}>')
         else:
             agi.set_variable('CALLERID(num)', callerid_num)
 

@@ -72,7 +72,7 @@ class UserFeatures(Handler):
             try:
                 self._moh = objects.MOH(self._agi, self._cursor, self._moh_uuid)
             except LookupError:
-                msg = 'expected MOH with UUID {} but could not find it'.format(self._moh_uuid)
+                msg = f'expected MOH with UUID {self._moh_uuid} but could not find it'
                 self._agi.verbose(msg)
 
     def _set_members(self):
@@ -147,7 +147,7 @@ class UserFeatures(Handler):
         return line.name
 
     def _build_default_interface(self, line):
-        return '{}/{}'.format(line.protocol.upper(), line.name)
+        return f'{line.protocol.upper()}/{line.name}'
 
     def _build_sip_interface(self, line):
         return build_sip_interface(self._agi, self._user.uuid, line.name)
@@ -340,14 +340,14 @@ class UserFeatures(Handler):
         if self._user.incallfilter:
             options += "p"
         if self._moh:
-            options += 'm({})'.format(self._moh.name)
+            options += f'm({self._moh.name})'
         self._agi.set_variable('XIVO_CALLOPTIONS', options)
 
     def _set_ringseconds(self):
         self._set_not_zero_or_empty('XIVO_RINGSECONDS', self._user.ringseconds)
 
     def _set_callfilter_ringseconds(self, name, value):
-        self._set_not_zero_or_empty('XIVO_CALLFILTER_%s' % name, value)
+        self._set_not_zero_or_empty(f'XIVO_CALLFILTER_{name}', value)
 
     def _set_not_zero_or_empty(self, name, value):
         if value and value > 0:

@@ -38,7 +38,7 @@ class AnswerHandler(handler.Handler):
         if search_params:
             return objects.User(self._agi, self._cursor, **search_params)
 
-        raise LookupError('Failed to find a matching user from {}'.format(channel_name))
+        raise LookupError(f'Failed to find a matching user from {channel_name}')
 
     def record_call(self, callee):
         recording_is_on = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'

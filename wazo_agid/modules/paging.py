@@ -56,7 +56,7 @@ def build_options(paging):
             paging.announcement_file,
         )
 
-        paging_opts = paging_opts + 'A({file_name})'.format(file_name=announcement_file_name)
+        paging_opts = paging_opts + f'A({announcement_file_name})'
 
     if paging.announcement_caller:
         paging_opts = paging_opts + 'n'

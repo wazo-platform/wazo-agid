@@ -23,13 +23,13 @@ def convert_pre_dial_handler(agi, cursor, args):
     to_remove = match.group(0)
     to_stack = match.group(1)
 
-    agi.verbose('WARNING: deprecated dialplan option detected {}'.format(to_stack))
+    agi.verbose(f'WARNING: deprecated dialplan option detected {to_stack}')
     agi.verbose('Wazo pre-dial handlers should be used instead')
 
     pruned_call_options = call_options.replace(to_remove, '')
     agi.set_variable(CALL_OPTIONS, pruned_call_options)
 
-    new_handler = '{},s,1'.format(to_stack)
+    new_handler = f'{to_stack},s,1'
     agi.set_variable('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', new_handler)
 
 

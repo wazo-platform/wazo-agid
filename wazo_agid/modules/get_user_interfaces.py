@@ -15,7 +15,7 @@ class _UserLine:
         self._agi = agi
         self._user_uuid = user_uuid
         self.interfaces = []
-        hint = agi.get_variable('HINT({}@usersharedlines)'.format(user_uuid))
+        hint = agi.get_variable(f'HINT({user_uuid}@usersharedlines)')
         if not hint:
             raise UnknownUser()
 

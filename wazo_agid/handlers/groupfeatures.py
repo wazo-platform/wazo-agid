@@ -43,7 +43,7 @@ class GroupFeatures(Handler):
 
     def _display_queue(self):
         self._agi.verbose(
-            'Calling group "{}" from tenant "{}"'.format(self._label, self._tenant_uuid),
+            f'Calling group "{self._label}" from tenant "{self._tenant_uuid}"',
         )
 
     def _needs_rewrite_cid(self):

@@ -89,17 +89,17 @@ class OutgoingFeatures(Handler):
         for i, trunk in enumerate(self.outcall.trunks):
             if trunk.interface.startswith('PJSIP'):
                 name = trunk.interface.replace('PJSIP/', '')
-                exten = '{exten}@{name}'.format(exten=self.dstnum, name=name)
-                self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), 'PJSIP')
-                self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), exten)
+                exten = f'{self.dstnum}@{name}'
+                self._agi.set_variable(f'{dialplan_variables.INTERFACE}{i:d}', 'PJSIP')
+                self._agi.set_variable(f'{dialplan_variables.TRUNK_EXTEN}{i:d}', exten)
             else:
-                self._agi.set_variable('%s%d' % (dialplan_variables.INTERFACE, i), trunk.interface)
-                self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_EXTEN, i), self.dstnum)
+                self._agi.set_variable(f'{dialplan_variables.INTERFACE}{i:d}', trunk.interface)
+                self._agi.set_variable(f'{dialplan_variables.TRUNK_EXTEN}{i:d}', self.dstnum)
             if trunk.intfsuffix:
                 intfsuffix = trunk.intfsuffix
             else:
                 intfsuffix = ""
-            self._agi.set_variable('%s%d' % (dialplan_variables.TRUNK_SUFFIX, i), intfsuffix)
+            self._agi.set_variable(f'{dialplan_variables.TRUNK_SUFFIX}{i:d}', intfsuffix)
 
     def _set_preprocess_subroutine(self):
         if self.outcall.preprocess_subroutine:

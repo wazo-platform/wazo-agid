@@ -20,7 +20,7 @@ class TestAnswerHandler(TestCase):
     @patch('wazo_agid.handlers.queue.objects.User')
     def test_get_user_agent(self, User):
         agent_id = 42
-        chan_name = 'Local/id-{}@agentcallback-0000000a1;1'.format(agent_id)
+        chan_name = f'Local/id-{agent_id}@agentcallback-0000000a1;1'
         self.agi.env = {
             'agi_channel': chan_name,
         }
