@@ -154,7 +154,7 @@ class TestHandlers(IntegrationTest):
         assert self.agentd.verify_agent_logoff_called(agent['id']) is True
 
     def test_callback(self):
-        pytest.xfail("Will fail until Wazo-578 is fixed")
+        pytest.xfail('Will fail until WAZO-578 is fixed')
 
         with self.db.queries() as queries:
             extension = queries.insert_extension()
@@ -164,7 +164,7 @@ class TestHandlers(IntegrationTest):
             'XIVO_SRCNUM': extension_number,
             'AST_CONFIG(asterisk.conf,directories,astspooldir)': '/var/spool/asterisk',
         }
-        chown = f"asterisk:asterisk"
+        chown = 'asterisk:asterisk'
         self.filesystem.create_path('/var/spool/asterisk/tmp', chown=chown)
         self.filesystem.create_path('/var/spool/asterisk/outgoing', chown=chown)
 
@@ -173,7 +173,7 @@ class TestHandlers(IntegrationTest):
 
         file_name = self.filesystem.find_file('/var/spool/asterisk/outgoing/', f'{extension_number}-*.call')
         assert file_name
-        assert self.filesystem.read_file(file_name) == dedent(f"""\
+        assert self.filesystem.read_file(file_name) == dedent(f'''\
             Channel: Local/{extension_number}@{context}
             MaxRetries: 0
             RetryTime: 30
@@ -182,7 +182,7 @@ class TestHandlers(IntegrationTest):
             Set: XIVO_DISACONTEXT={context}
             Context: xivo-callbackdisa
             Extension: s
-        """).strip('\n')
+        ''').strip('\n')
 
     def test_callerid_extend(self):
         recv_vars, recv_cmds = self.agid.callerid_extend('en')
@@ -278,10 +278,13 @@ class TestHandlers(IntegrationTest):
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['WAZO_CALL_RECORD_ACTIVE'] == '1'
-        assert re.match(
-            rf'/var/lib/wazo/sounds/tenants/{agent["tenant_uuid"]}/monitor/[a-f0-9\-]{{36}}.wav,mix-options',
+        tenant_uuid = agent['tenant_uuid']
+        uuid_reg = r'[a-f0-9\-]{36}'
+        matches = re.match(
+            f'/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{uuid_reg}.wav,mix-options',
             recv_cmds['EXEC MixMonitor'],
-        ) is not None
+        )
+        assert matches is not None
 
     def test_check_diversion_hold_time(self):
         queue_name = 'queue-wait-time'
@@ -439,7 +442,8 @@ class TestHandlers(IntegrationTest):
         self.confd.clear()
 
         assert recv_cmds['FAILURE'] is False
-        assert recv_cmds['EXEC AddQueueMember'] == 'test-group,Local/user-uuid@usersharedlines,,,,hint:user-uuid@usersharedlines'
+        peer = 'user-uuid@usersharedlines'
+        assert recv_cmds['EXEC AddQueueMember'] == f'test-group,Local/{peer},,,,hint:{peer}'
 
     def test_group_member_present(self):
         self.confd.expect_groups_get(2, {'name': 'test-group'})
@@ -485,17 +489,18 @@ class TestHandlers(IntegrationTest):
         )
         assert recv_cmds['FAILURE'] is False
 
-        assert self.filesystem.read_file('/tmp/last_tiff2pdf_cmd.txt') == \
-            '-o /var/lib/wazo-agid/blank.pdf /var/lib/wazo-agid/blank.tiff'
+        expected = '-o /var/lib/wazo-agid/blank.pdf /var/lib/wazo-agid/blank.tiff'
+        assert self.filesystem.read_file('/tmp/last_tiff2pdf_cmd.txt') == expected
 
-        assert self.filesystem.read_file('/tmp/last_mutt_cmd.txt') == (
-            '-e set copy=no '
-            '-e set from=no-reply+fax@wazo.community '
-            '-e set realname=\'Wazo Fax\' '
-            '-e set use_from=yes '
-            '-s Reception de FAX vers default '
-            '-a /var/lib/wazo-agid/blank.pdf -- test@localhost'
-        )
+        expected = [
+            '-e set copy=no',
+            '-e set from=no-reply+fax@wazo.community',
+            '-e set realname=\'Wazo Fax\'',
+            '-e set use_from=yes',
+            '-s Reception de FAX vers default',
+            '-a /var/lib/wazo-agid/blank.pdf -- test@localhost',
+        ]
+        assert self.filesystem.read_file('/tmp/last_mutt_cmd.txt') == ' '.join(expected)
 
     def test_in_callerid(self):
         number = '+155555555555'
@@ -786,10 +791,10 @@ class TestHandlers(IntegrationTest):
         assert f'PJSIP/{line_1["name"]}' in recv_vars['XIVO_PAGING_LINES']
         assert f'PJSIP/{line_2["name"]}' in recv_vars['XIVO_PAGING_LINES']
         assert recv_vars['XIVO_PAGING_TIMEOUT'] == '25'
-        assert recv_vars['XIVO_PAGING_OPTS'] == (
-            f'sb(paging^add-sip-headers^1)dqri'
-            f'A(/var/lib/wazo/sounds/tenants/{paging["tenant_uuid"]}/playback/sounds.wav)'
-        )
+        tenant_uuid = paging['tenant_uuid']
+        opts_part_1 = 'sb(paging^add-sip-headers^1)dqri'
+        opts_part_2 = f'A(/var/lib/wazo/sounds/tenants/{tenant_uuid}/playback/sounds.wav)'
+        assert recv_vars['XIVO_PAGING_OPTS'] == f'{opts_part_1}{opts_part_2}'
 
     def test_phone_get_features(self):
         with self.db.queries() as queries:
@@ -811,17 +816,17 @@ class TestHandlers(IntegrationTest):
         }
         # Lookup by UUID
         self.confd.expect_forwards(user['id'], {
-            "busy": {
-                "destination": "dest-busy",
-                "enabled": True
+            'busy': {
+                'destination': 'dest-busy',
+                'enabled': True
             },
-            "noanswer": {
-                "destination": "dest-noanswer",
-                "enabled": True
+            'noanswer': {
+                'destination': 'dest-noanswer',
+                'enabled': True
             },
-            "unconditional": {
-                "destination": "dest-unconditional",
-                "enabled": False
+            'unconditional': {
+                'destination': 'dest-unconditional',
+                'enabled': False
             }
         })
         recv_vars, recv_cmds = self.agid.phone_get_features(variables=variables)
@@ -874,15 +879,12 @@ class TestHandlers(IntegrationTest):
         )
 
         assert recv_cmds['FAILURE'] is False
-        assert recv_vars['XIVO_PHONE_PROGFUNCKEY'] == extension["exten"]
+        assert recv_vars['XIVO_PHONE_PROGFUNCKEY'] == extension['exten']
         assert recv_vars['XIVO_PHONE_PROGFUNCKEY_FEATURE'] == 'fwdbusy'
 
     def test_provision_autoprov(self):
         self.confd.expect_devices({
-            'items': [{
-                "ip": "192.168.1.1",
-                "id": 1,
-            }],
+            'items': [{'ip': '192.168.1.1', 'id': 1}],
             'total': 1,
         })
         self.confd.expect_devices_autoprov(1)
@@ -897,20 +899,16 @@ class TestHandlers(IntegrationTest):
         assert self.confd.verify_devices_autoprov_called(1) is True
         assert self.confd.verify_devices_synchronize_called(1) is True
         self.confd.clear()
-
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_PROV_OK'] == '1'
 
     def test_provision_add_device(self):
         self.confd.expect_devices({
-            'items': [{
-                "ip": "192.168.1.2",
-                "id": 2,
-            }],
+            'items': [{'ip': '192.168.1.2', 'id': 2}],
             'total': 1,
         })
         self.confd.expect_lines({
-            'items': [{"id": 1}],
+            'items': [{'id': 1}],
             'total': 1,
         })
         self.confd.expect_lines_devices(1, 2)

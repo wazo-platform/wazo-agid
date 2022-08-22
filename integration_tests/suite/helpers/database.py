@@ -234,7 +234,7 @@ class DatabaseQueries(object):
             user = inserter.add_user(
                 firstname=kwargs.get('firstname', 'unittest'),
                 lastname=kwargs.get('lastname', 'unittest'),
-                callerid=kwargs.get('callerid', 'unittest test'),
+                callerid=kwargs.get('callerid', '"unittest" <1234>'),
                 musiconhold=kwargs.get('musiconhold', 'default'),
                 **kwargs,
             )

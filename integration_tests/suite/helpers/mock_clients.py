@@ -10,7 +10,7 @@ class MockServerClient:
 
     def simple_expectation(self, method, path, expected_status, expected_body, headers=None):
         expectation = {
-            'httpRequest': {'method': method, "path": f'/{self.version}{path}'},
+            'httpRequest': {'method': method, 'path': f'/{self.version}{path}'},
             'httpResponse': {
                 'statusCode': expected_status,
                 'body': expected_body,
