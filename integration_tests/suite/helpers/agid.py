@@ -1,6 +1,6 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
-
+import contextlib
 import re
 import socket
 import time
@@ -28,16 +28,12 @@ class _BaseAgidClient:
         self._port = port
         self._socket = None
 
-    def wait_until_ready(self, timeout=30):
-        for _ in range(timeout):
-            try:
-                with self._connect():
-                    self._send_handler('monitoring')
-                    commands = self._process_communicate()[1]
-                    assert commands.get('FAILURE') is False
-                    break
-            except (ConnectionError, AGIFailException, AssertionError):
-                time.sleep(1)
+    def is_ready(self):
+        with contextlib.suppress(ConnectionError, AGIFailException):
+            with self._connect():
+                self._send_handler('monitoring')
+                return self._process_communicate()[1].get('FAILURE') is False
+        return False
 
     @contextmanager
     def _connect(self):

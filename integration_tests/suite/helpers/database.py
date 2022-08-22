@@ -194,6 +194,14 @@ class DatabaseQueries(object):
 
     def insert_queue(self, **kwargs):
         with self.inserter() as inserter:
+            queue_kwargs = kwargs.pop('queue_kwargs', None)
+            if queue_kwargs:
+                if 'name' in kwargs:
+                    queue_kwargs['name'] = kwargs['name']
+                queue_kwargs.setdefault('category', 'queue')
+                queue = inserter.add_queue(**queue_kwargs)
+                kwargs['_queue'] = queue
+                kwargs.setdefault('name', queue.name)
             queue_feature = inserter.add_queuefeatures(**kwargs)
             return {
                 'id': queue_feature.id,
@@ -201,6 +209,7 @@ class DatabaseQueries(object):
                 'context': queue_feature.context,
                 'number': queue_feature.number,
                 'url': queue_feature.url,
+                'tenant_uuid': queue_feature.tenant_uuid,
             }
 
     def insert_extension(self, **kwargs):
@@ -241,6 +250,7 @@ class DatabaseQueries(object):
             return {
                 'id': user.id,
                 'uuid': user.uuid,
+                'tenant_uuid': user.tenant_uuid,
             }
 
     def insert_voicemail(self, **kwargs):
@@ -320,6 +330,16 @@ class DatabaseQueries(object):
         with self.inserter() as inserter:
             dial_pattern = inserter.add_dialpattern(**kwargs)
             return {'id': dial_pattern.id}
+
+    def insert_pickup(self, **kwargs):
+        with self.inserter() as inserter:
+            pickup = inserter.add_pickup(**kwargs)
+            return {'id': pickup.id}
+
+    def insert_pickup_member(self, **kwargs):
+        with self.inserter() as inserter:
+            inserter.add_pickup_member(**kwargs)
+            return {}
 
     def insert_trunk(self, **kwargs):
         with self.inserter() as inserter:

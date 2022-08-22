@@ -216,7 +216,7 @@ class TestHandlers(IntegrationTest):
 
     def test_call_recording_start(self):
         with self.db.queries() as queries:
-            agent = queries.insert_agent()
+            user = queries.insert_user()
 
         variables = {
             'WAZO_CALL_RECORD_ACTIVE': '0',
@@ -225,7 +225,7 @@ class TestHandlers(IntegrationTest):
         self.calld.expect_calls_record_start(1)
 
         recv_vars, recv_cmds = self.agid.call_recording(
-            agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
+            agi_channel=f'Local/id-{user["id"]}@default-0000000a1;1',
             agi_uniqueid='1',
             variables=variables,
         )
@@ -237,7 +237,7 @@ class TestHandlers(IntegrationTest):
 
     def test_call_recording_stop(self):
         with self.db.queries() as queries:
-            agent = queries.insert_agent()
+            user = queries.insert_user()
 
         variables = {
             'WAZO_CALL_RECORD_ACTIVE': '1',
@@ -246,7 +246,7 @@ class TestHandlers(IntegrationTest):
         self.calld.expect_calls_record_stop(1)
 
         recv_vars, recv_cmds = self.agid.call_recording(
-            agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
+            agi_channel=f'Local/id-{user["id"]}@default-0000000a1;1',
             agi_uniqueid='1',
             variables=variables,
         )
@@ -258,27 +258,26 @@ class TestHandlers(IntegrationTest):
 
     def test_call_record_caller(self):
         with self.db.queries() as queries:
-            agent = queries.insert_agent()
-            user = queries.insert_user(agent_id=agent['id'], call_record_outgoing_internal_enabled=1)
+            user = queries.insert_user(call_record_outgoing_internal_enabled=1)
 
         variables = {
             'WAZO_CALL_RECORD_ACTIVE': '0',
             'WAZO_USERUUID': user['uuid'],
-            'WAZO_TENANT_UUID': agent['tenant_uuid'],
+            'WAZO_TENANT_UUID': user['tenant_uuid'],
             'XIVO_CALLORIGIN': 'intern',
             'XIVO_OUTCALLID': '',
             'WAZO_MIXMONITOR_OPTIONS': 'mix-options',
         }
 
         recv_vars, recv_cmds = self.agid.record_caller(
-            agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
+            agi_channel=f'Local/id-{user["id"]}@default-0000000a1;1',
             agi_uniqueid='1',
             variables=variables,
         )
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['WAZO_CALL_RECORD_ACTIVE'] == '1'
-        tenant_uuid = agent['tenant_uuid']
+        tenant_uuid = user['tenant_uuid']
         uuid_reg = r'[a-f0-9\-]{36}'
         matches = re.match(
             f'/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{uuid_reg}.wav,mix-options',
@@ -325,7 +324,9 @@ class TestHandlers(IntegrationTest):
             user = queries.insert_user()
             schedule = queries.insert_schedule()
             schedule_path = queries.insert_schedule_path(schedule_id=schedule['id'], pathid=user['id'])
-            queries.insert_schedule_time(mode='closed', schedule_id=schedule['id'])
+            queries.insert_schedule_time(
+                mode='closed', schedule_id=schedule['id'], action='sound', actionid='1', actionargs='arg2',
+            )
 
         variables = {
             'XIVO_PATH': schedule_path['path'],
@@ -337,6 +338,9 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_SCHEDULE_STATUS'] == 'closed'
         assert recv_vars['XIVO_PATH'] == ''
+        assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTION'] == 'sound'
+        assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTIONARG1'] == '1'
+        assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTIONARG2'] == 'arg2'
 
     def test_convert_pre_dial_handler(self):
         variables = {
@@ -635,6 +639,10 @@ class TestHandlers(IntegrationTest):
                 write_calling=1,
                 ignore_forward=1,
                 mark_answered_elsewhere=1,
+                queue_kwargs={
+                    'wrapuptime': 20,
+                    'musicclass': 'test-music',
+                }
             )
             for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
                 queries.insert_dial_action(
@@ -645,6 +653,10 @@ class TestHandlers(IntegrationTest):
                     actionarg1=f'{event}-actionarg1',
                     actionarg2=f'{event}-actionarg2',
                 )
+            pickup = queries.insert_pickup(tenant_uuid=queue['tenant_uuid'])
+            queries.insert_pickup_member(
+                pickupid=pickup['id'], membertype='queue', category='member', memberid=queue['id']
+            )
 
         variables = {
             'XIVO_DSTID': queue['id'],
@@ -654,7 +666,7 @@ class TestHandlers(IntegrationTest):
         recv_vars, recv_cmds = self.agid.incoming_queue_set_features(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
-        assert recv_vars['XIVO_REAL_NUMBER'] == queue['number'] or None
+        assert recv_vars['XIVO_REAL_NUMBER'] == queue['number']
         assert recv_vars['XIVO_REAL_CONTEXT'] == 'default'
         assert recv_vars['XIVO_QUEUENAME'] == queue['name']
         assert recv_vars['XIVO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
@@ -684,8 +696,10 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_QUEUESTATUS'] == 'ok'
         assert recv_vars['XIVO_PATH'] == 'queue'
         assert recv_vars['XIVO_PATH_ID'] == str(queue['id'])
-        assert recv_vars['XIVO_PICKUPGROUP'] == ''
         assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
+        assert recv_vars['CHANNEL(musicclass)'] == 'test-music'
+        assert recv_vars['__QUEUEWRAPUPTIME'] == '20'
+        assert recv_vars['XIVO_PICKUPGROUP'] == str(pickup['id'])
         assert re.match(r'^[a-f0-9\-]{36}$', recv_vars['__WAZO_LOCAL_CHAN_MATCH_UUID']) is not None
 
     def test_outgoing_user_set_features(self):

@@ -17,6 +17,7 @@ from wazo_test_helpers.asset_launching_test_case import (
     NoSuchService,
     WrongClient,
 )
+from wazo_test_helpers import until
 
 use_asset = pytest.mark.usefixtures
 
@@ -70,7 +71,7 @@ class IntegrationTest(unittest.TestCase):
         cls.reset_clients()
         # Until a proper healthcheck is implemented we need to wait until agid
         # is functional before starting tests to avoid random failures.
-        cls.agid.wait_until_ready()
+        until.true(cls.agid.is_ready, timeout=30)
 
     @classmethod
     def reset_clients(cls):
