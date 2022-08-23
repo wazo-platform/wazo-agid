@@ -1,8 +1,9 @@
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
-
+import contextlib
 import re
 import socket
+import time
 from contextlib import contextmanager
 
 GET_VARIABLE_REGEX = r'^GET VARIABLE "(.*)"$'
@@ -26,6 +27,13 @@ class _BaseAgidClient:
         self._host = host
         self._port = port
         self._socket = None
+
+    def is_ready(self):
+        with contextlib.suppress(ConnectionError, AGIFailException):
+            with self._connect():
+                self._send_handler('monitoring')
+                return self._process_communicate()[1].get('FAILURE') is False
+        return False
 
     @contextmanager
     def _connect(self):
@@ -116,41 +124,6 @@ class _BaseAgidClient:
 
 
 class AgidClient(_BaseAgidClient):
-    def meeting_user(self, variables, meeting_uuid):
-        with self._connect():
-            self._send_handler('meeting_user', meeting_uuid)
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def monitoring(self):
-        with self._connect():
-            self._send_handler('monitoring')
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def incoming_conference_set_features(self, variables):
-        with self._connect():
-            self._send_handler('incoming_conference_set_features')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def incoming_user_set_features(self, variables):
-        with self._connect():
-            self._send_handler('incoming_user_set_features')
-            variables, commands = self._process_communicate(variables)
-        return variables, commands
-
-    def agent_get_options(self, tenant_uuid, number):
-        with self._connect():
-            self._send_handler('agent_get_options', tenant_uuid, number)
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def agent_get_status(self, tenant_uuid, agent_id):
-        with self._connect():
-            self._send_handler('agent_get_status', tenant_uuid, agent_id)
-            variables, commands = self._process_communicate()
-        return variables, commands
 
     def agent_login(self, tenant_uuid, agent_id, exten, context):
         with self._connect():
@@ -161,12 +134,6 @@ class AgidClient(_BaseAgidClient):
                 exten,
                 context
             )
-            variables, commands = self._process_communicate()
-        return variables, commands
-
-    def agent_logoff(self, tenant_uuid, agent_id):
-        with self._connect():
-            self._send_handler('agent_logoff', tenant_uuid, agent_id)
             variables, commands = self._process_communicate()
         return variables, commands
 
@@ -186,8 +153,10 @@ class AgidClient(_BaseAgidClient):
             variables, commands = self._process_communicate()
         return variables, commands
 
-    def switchboard_set_features(self, switchboard_uuid):
-        with self._connect():
-            self._send_handler('switchboard_set_features', switchboard_uuid)
-            variables, commands = self._process_communicate()
-        return variables, commands
+    def __getattr__(self, handler_name):
+        def generic_call_handler(*args, variables=None, **kwargs):
+            with self._connect():
+                self._send_handler(handler_name, *args, **kwargs)
+                variables, commands = self._process_communicate(variables)
+            return variables, commands
+        return generic_call_handler

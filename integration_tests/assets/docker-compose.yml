@@ -14,6 +14,10 @@ services:
     volumes:
       - "../..:/usr/src/wazo-agid"
       - "./etc/wazo-agid/conf.d/50-default.yml:/etc/wazo-agid/conf.d/50-default.yml"
+      - "./etc/xivo/asterisk/xivo_in_callerid.conf:/etc/xivo/asterisk/xivo_in_callerid.conf"
+      - "./etc/xivo/asterisk/xivo_ring.conf:/etc/xivo/asterisk/xivo_ring.conf"
+      - "./etc/xivo/asterisk/xivo_fax.conf:/etc/xivo/asterisk/xivo_fax.conf"
+      - "./etc/xivo/mail.txt:/etc/xivo/mail.txt"
       # - "${LOCAL_GIT_REPOS}/xivo-dao/xivo_dao:/opt/venv/lib/python2.7/site-packages/xivo_dao"
       # - "${LOCAL_GIT_REPOS}/xivo-lib-python/xivo:/opt/venv/lib/python2.7/site-packages/xivo"
 
@@ -21,6 +25,27 @@ services:
     image: wazoplatform/wazo-auth-mock
     ports:
       - '9497'
+
+  calld:
+    image: mockserver/mockserver
+    environment:
+      MOCKSERVER_SERVER_PORT: 9500
+    ports:
+      - "9500"
+
+  confd:
+    image: mockserver/mockserver
+    environment:
+      MOCKSERVER_SERVER_PORT: 9486
+    ports:
+      - "9486"
+
+  agentd:
+    image: mockserver/mockserver
+    environment:
+      MOCKSERVER_SERVER_PORT: 9493
+    ports:
+      - "9493"
 
   postgres:
     image: wazoplatform/wazo-confd-db-test:local
