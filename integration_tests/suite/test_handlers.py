@@ -633,6 +633,9 @@ class TestHandlers(IntegrationTest):
                 hitting_caller=1,
                 retries=1,
                 ring=1,
+                url='localhost',
+                announceoverride='override',
+                preprocess_subroutine='subroutine',
                 transfer_user=1,
                 transfer_call=1,
                 write_caller=1,
@@ -671,9 +674,9 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_QUEUENAME'] == queue['name']
         assert recv_vars['XIVO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
         assert recv_vars['XIVO_QUEUENEEDANSWER'] == '0'
-        assert recv_vars['XIVO_QUEUEURL'] == queue['url']
-        assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == queue['url']
-        assert recv_vars['XIVO_QUEUEPREPROCESS_SUBROUTINE'] == queue['url']
+        assert recv_vars['XIVO_QUEUEURL'] == 'localhost'
+        assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == 'override'
+        assert recv_vars['XIVO_QUEUEPREPROCESS_SUBROUTINE'] == 'subroutine'
         assert recv_vars['XIVO_QUEUETIMEOUT'] == '25'
 
         assert recv_vars['XIVO_FWD_QUEUE_NOANSWER_ACTION'] == 'queue'
