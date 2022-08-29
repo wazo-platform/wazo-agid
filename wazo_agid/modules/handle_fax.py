@@ -45,11 +45,8 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
     # called.
-    fobj = open(content_file)
-    try:
-        content = fobj.read()
-    finally:
-        fobj.close()
+    with open(content_file, 'r') as f:
+        content = f.read()
 
     def aux(faxfile, dstnum, args):
         # args[0] is the email address to send the fax to
@@ -59,7 +56,7 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
 
         pdffile = _convert_tiff_to_pdf(faxfile)
         try:
-            fmt_dict = {"dstnum": dstnum}
+            format_dict = {"dstnum": dstnum}
             p = subprocess.Popen(
                 [
                     MUTT_PATH,
@@ -67,14 +64,14 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
                     "-e", "set from=%s" % email_from,
                     "-e", "set realname='%s'" % email_realname,
                     "-e", "set use_from=yes",
-                    "-s", subject % fmt_dict,
+                    "-s", subject % format_dict,
                     "-a", pdffile, "--",
                     email
                 ],
                 stdin=subprocess.PIPE,
                 close_fds=True
             )
-            p.communicate(content % fmt_dict)
+            p.communicate((content % format_dict).encode('utf8'))
             if p.returncode:
                 raise Exception("mutt exit code was %s" % p.returncode)
         finally:
@@ -88,7 +85,7 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
 def _new_printer_backend(name=None, convert_to_pdf=None):
     # Return a backend taking no additional argument, which prints the fax
     # to the given printer when called.
-    # Note that if name is None, it use the default printer.
+    # Note that if name is None, it uses the default printer.
     convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
 
     def aux(faxfile, dstnum, args):
@@ -207,7 +204,7 @@ def setup_handle_fax(cursor):
     config = RawConfigParser()
     fobj = open(CONFIG_FILE)
     try:
-        config.readfp(fobj)
+        config.read_file(fobj)
     finally:
         fobj.close()
 

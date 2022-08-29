@@ -35,7 +35,7 @@ class OutgoingFeatures(Handler):
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
 
     def _set_destination_number(self):
-        if self.outcall.stripnum > 0:
+        if self.outcall.stripnum and self.outcall.stripnum > 0:
             self.dstnum = self.dstnum[self.outcall.stripnum:]
         if self.outcall.externprefix:
             self.dstnum = self.outcall.externprefix + self.dstnum

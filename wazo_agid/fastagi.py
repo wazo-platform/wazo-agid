@@ -95,7 +95,7 @@ class FastAGI:
 
     def _get_agi_env(self):
         while 1:
-            line = self.inf.readline().strip()
+            line = self.inf.readline().strip().decode('utf8')
             if line == '':
                 # blank line signals end
                 break
@@ -119,8 +119,8 @@ class FastAGI:
             string = ''
         elif not isinstance(string, str):
             string = str(string)
-        else:
-            string = string.encode('utf8')
+        elif isinstance(string, bytes):
+            string = string.decode('utf8')
 
         return '"%s"' % string.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
 
@@ -142,7 +142,7 @@ class FastAGI:
     def send_command(self, command, *args):
         """Send a command to Asterisk"""
         command = ' '.join([command.strip()] + list(map(str, args))).strip() + "\n"
-        self.outf.write(command)
+        self.outf.write(command.encode('utf8'))
         self.outf.flush()
 
     def fail(self):
@@ -161,7 +161,7 @@ class FastAGI:
         """Read the result of a command from Asterisk"""
         code = 0
         result = {'result': ('', '')}
-        line = self.inf.readline().strip()
+        line = self.inf.readline().strip().decode('utf8')
         m = re_code.search(line)
         if m:
             code, response = m.groups()
@@ -182,10 +182,10 @@ class FastAGI:
             raise FastAGIInvalidCommand(response)
         elif code == 520:
             usage = [line]
-            line = self.inf.readline().strip()
+            line = self.inf.readline().strip().decode('utf8')
             while line[:3] != '520':
                 usage.append(line)
-                line = self.inf.readline().strip()
+                line = self.inf.readline().strip().decode('utf8')
             usage.append(line)
             usage = '%s\n' % '\n'.join(usage)
             raise FastAGIUsageError(usage)
