@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright 2012-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
 
-from xivo_dao import callfilter_dao, user_line_dao as old_user_line_dao
+from xivo_dao import callfilter_dao
 
 from xivo_dao.resources.user_line import dao as user_line_dao
 from xivo_dao.resources.line import dao as line_dao
@@ -218,11 +218,8 @@ class UserFeatures(Handler):
 
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
 
-        boss_line = self.main_line
-        techno = boss_line.protocol.upper()
-        if techno == 'SIP':
-            techno = 'PJSIP'
-        boss_interface = '{}/{}'.format(techno, boss_line.name)
+        boss_user = self._user
+        boss_interface = 'Local/{}@usersharedlines'.format(boss_user.uuid)
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
@@ -233,7 +230,9 @@ class UserFeatures(Handler):
         for secretary in secretaries:
             secretary_callfiltermember, ringseconds = secretary
             if secretary_callfiltermember.active:
-                iface = old_user_line_dao.get_line_identity_by_user_id(secretary_callfiltermember.typeval)
+                secretary_user_id = secretary_callfiltermember.typeval
+                secretary_user = objects.User(self._agi, self._cursor, int(secretary_user_id))
+                iface = 'Local/{}@usersharedlines'.format(secretary_user.uuid)
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
