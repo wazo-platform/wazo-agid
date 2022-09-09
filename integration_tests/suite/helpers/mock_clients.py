@@ -8,7 +8,9 @@ class MockServerClient:
         self.version = version
         self._url = f'http://{host}:{port}'
 
-    def simple_expectation(self, method, path, expected_status, expected_body, headers=None):
+    def simple_expectation(
+        self, method, path, expected_status, expected_body, headers=None
+    ):
         expectation = {
             'httpRequest': {'method': method, 'path': f'/{self.version}{path}'},
             'httpResponse': {
@@ -39,7 +41,7 @@ class MockServerClient:
             'times': {
                 'atLeast': times_called,
                 'atMost': times_called,
-            }
+            },
         }
         verification.update(kwargs)
         return requests.put(f'{self._url}/verify', json=verification)

@@ -132,7 +132,9 @@ class DatabaseQueries(object):
 
     def insert_line(self, **kwargs):
         if 'name' not in kwargs:
-            kwargs['name'] = ''.join(random.choice('0123456789ABCDEF') for _ in range(6))
+            kwargs['name'] = ''.join(
+                random.choice('0123456789ABCDEF') for _ in range(6)
+            )
 
         with self.inserter() as inserter:
             line = inserter.add_line(
@@ -142,7 +144,7 @@ class DatabaseQueries(object):
                 commented=kwargs.get('commented_line', 0),
                 endpoint_sip_uuid=kwargs.get('endpoint_sip_uuid', None),
                 endpoint_sccp_id=kwargs.get('endpoint_sccp_id', None),
-                endpoint_custom_id=kwargs.get('endpoint_custom_id', None)
+                endpoint_custom_id=kwargs.get('endpoint_custom_id', None),
             )
             return {'id': line.id, 'name': line.name}
 
@@ -153,7 +155,9 @@ class DatabaseQueries(object):
 
     def insert_extension_line(self, extension_id, line_id, **kwargs):
         with self.inserter() as inserter:
-            inserter.add_line_extension(line_id=line_id, extension_id=extension_id, **kwargs)
+            inserter.add_line_extension(
+                line_id=line_id, extension_id=extension_id, **kwargs
+            )
             return {}
 
     def insert_call_permission(self, **kwargs):
@@ -365,9 +369,16 @@ class DatabaseQueries(object):
     def insert_group(self, **kwargs):
         with self.inserter() as inserter:
             group = inserter.add_group(**kwargs)
-            return {'id': group.id, 'tenant_uuid': group.tenant_uuid, 'name': group.name}
+            return {
+                'id': group.id,
+                'tenant_uuid': group.tenant_uuid,
+                'name': group.name,
+            }
 
     def insert_dial_action(self, **kwargs):
         with self.inserter() as inserter:
             dial_action = inserter.add_dialaction(**kwargs)
-            return {'category': dial_action.category, 'categoryval': dial_action.categoryval}
+            return {
+                'category': dial_action.category,
+                'categoryval': dial_action.categoryval,
+            }

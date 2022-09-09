@@ -35,7 +35,9 @@ class BaseAssetLaunchingTestCase(AssetLaunchingTestCase):
 
     @classmethod
     def make_confd(cls):
-        return ConfdMockClient('127.0.0.1', cls.service_port('9486', 'confd'), version='1.1')
+        return ConfdMockClient(
+            '127.0.0.1', cls.service_port('9486', 'confd'), version='1.1'
+        )
 
     @classmethod
     def make_agentd(cls):
@@ -84,4 +86,3 @@ class IntegrationTest(unittest.TestCase):
             execute=cls.asset_cls.docker_exec,
             service_name=cls.asset_cls.service,
         )
-
