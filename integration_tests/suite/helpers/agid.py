@@ -3,7 +3,6 @@
 import contextlib
 import re
 import socket
-import time
 from contextlib import contextmanager
 
 GET_VARIABLE_REGEX = r'^GET VARIABLE "(.*)"$'
@@ -124,16 +123,9 @@ class _BaseAgidClient:
 
 
 class AgidClient(_BaseAgidClient):
-
     def agent_login(self, tenant_uuid, agent_id, exten, context):
         with self._connect():
-            self._send_handler(
-                'agent_login',
-                tenant_uuid,
-                agent_id,
-                exten,
-                context
-            )
+            self._send_handler('agent_login', tenant_uuid, agent_id, exten, context)
             variables, commands = self._process_communicate()
         return variables, commands
 
@@ -159,4 +151,5 @@ class AgidClient(_BaseAgidClient):
                 self._send_handler(handler_name, *args, **kwargs)
                 variables, commands = self._process_communicate(variables)
             return variables, commands
+
         return generic_call_handler

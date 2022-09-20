@@ -42,10 +42,13 @@ class AgentdMockClient(MockServerClient):
         )
 
     def verify_agent_login_called(self, agent_id):
-        return self.verify_called('POST', f'/agents/by-id/{agent_id}/login').status_code == 202
+        response = self.verify_called('POST', f'/agents/by-id/{agent_id}/login')
+        return response.status_code == 202
 
     def verify_agent_logoff_called(self, agent_id):
-        return self.verify_called('POST', f'/agents/by-id/{agent_id}/logoff').status_code == 202
+        response = self.verify_called('POST', f'/agents/by-id/{agent_id}/logoff')
+        return response.status_code == 202
 
     def verify_get_agent_status_called(self, agent_id):
-        return self.verify_called('GET', f'/agents/by-id/{agent_id}').status_code == 202
+        response = self.verify_called('GET', f'/agents/by-id/{agent_id}')
+        return response.status_code == 202
