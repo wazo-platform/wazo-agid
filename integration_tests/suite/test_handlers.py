@@ -178,10 +178,8 @@ class TestHandlers(IntegrationTest):
             '/var/spool/asterisk/outgoing/', f'{extension_number}-*.call'
         )
         assert file_name
-        assert (
-            self.filesystem.read_file(file_name)
-            == dedent(
-                f'''\
+        expected_content = dedent(
+            f'''\
             Channel: Local/{extension_number}@{context}
             MaxRetries: 0
             RetryTime: 30
@@ -190,9 +188,9 @@ class TestHandlers(IntegrationTest):
             Set: XIVO_DISACONTEXT={context}
             Context: xivo-callbackdisa
             Extension: s
-        '''
-            ).strip('\n')
-        )
+            '''
+        ).strip('\n')
+        assert self.filesystem.read_file(file_name) == expected_content
 
     def test_callerid_extend(self):
         recv_vars, recv_cmds = self.agid.callerid_extend('en')
@@ -475,10 +473,8 @@ class TestHandlers(IntegrationTest):
 
         assert recv_cmds['FAILURE'] is False
         peer = 'user-uuid@usersharedlines'
-        assert (
-            recv_cmds['EXEC AddQueueMember']
-            == f'test-group,Local/{peer},,,,hint:{peer}'
-        )
+        expected_cmd = f'test-group,Local/{peer},,,,hint:{peer}'
+        assert recv_cmds['EXEC AddQueueMember'] == expected_cmd
 
     def test_group_member_present(self):
         self.confd.expect_groups_get(2, {'name': 'test-group'})
@@ -511,10 +507,8 @@ class TestHandlers(IntegrationTest):
         self.confd.clear()
 
         assert recv_cmds['FAILURE'] is False
-        assert (
-            recv_cmds['EXEC RemoveQueueMember']
-            == 'test-group,Local/user-uuid@usersharedlines'
-        )
+        expected_cmd = 'test-group,Local/user-uuid@usersharedlines'
+        assert recv_cmds['EXEC RemoveQueueMember'] == expected_cmd
 
     def test_handle_fax(self):
         variables = {
@@ -965,12 +959,8 @@ class TestHandlers(IntegrationTest):
         )
 
         assert recv_cmds['FAILURE'] is False
-        assert (
-            recv_vars[
-                f'DEVICE_STATE(Custom:*735{user["id"]}*{extension["exten"]}*dest)'
-            ]
-            == 'ONHOLD'
-        )
+        var = f'DEVICE_STATE(Custom:*735{user["id"]}*{extension["exten"]}*dest)'
+        assert recv_vars[var] == 'ONHOLD'
 
     def test_phone_progfunckey(self):
         with self.db.queries() as queries:

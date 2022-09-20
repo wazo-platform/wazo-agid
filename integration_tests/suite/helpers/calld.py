@@ -18,7 +18,5 @@ class CalldMockClient(MockServerClient):
         self.simple_expectation('PUT', f'/calls/{call_id}/record/stop', 200, {})
 
     def verify_calls_record_stop_called(self, call_id):
-        return (
-            self.verify_called('PUT', f'/calls/{call_id}/record/stop').status_code
-            == 202
-        )
+        response = self.verify_called('PUT', f'/calls/{call_id}/record/stop')
+        return response.status_code == 202
