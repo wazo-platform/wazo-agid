@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-# Copyright 2008-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2008-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import signal
 import logging
 import SocketServer
 
+from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 from threading import Lock
 
 from xivo import agitb
@@ -34,11 +35,26 @@ class DBConnectionPool(object):
             for conn in self.conns:
                 conn.close()
 
+            self._wait_is_ready(db_uri)
             self.conns = [anysql.connect_by_uri(db_uri) for _ in xrange(size)]
 
             self.size = size
             self.db_uri = db_uri
         logger.debug("reloaded db conn pool")
+
+    @retry(
+        stop=stop_after_attempt(60 * 5),
+        wait=wait_fixed(1),
+        before=before_log(logger, logging.INFO),
+        after=after_log(logger, logging.WARN),
+    )
+    def _wait_is_ready(self, db_uri):
+        try:
+            conn = anysql.connect_by_uri(db_uri)
+        except Exception as e:
+            logger.warning('fail to connect to the database: %s', e)
+            raise
+        conn.close()
 
     def acquire(self):
         with self.lock:
