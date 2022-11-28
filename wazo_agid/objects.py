@@ -75,12 +75,12 @@ class ExtenFeatures:
                           "    AND SUBSTR(exten, 2, %s) LIKE %s)) "
                           "AND commented = 0",
                           ('typeval',),
-                          self.featureslist + (exten, len(exten), "%s%%" % exten))
+                          self.featureslist + (exten, len(exten), f"{exten}%"))
 
         res = self.cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find feature by exten (exten = %r)" % exten)
+            raise LookupError(f"Unable to find feature by exten (exten = {exten!r})")
 
         return res['typeval']
 
@@ -97,7 +97,7 @@ class ExtenFeatures:
         res = self.cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find feature by name (name = %r)" % name)
+            raise LookupError(f"Unable to find feature by name (name = {name!r})")
 
         return res['exten']
 
@@ -135,7 +135,7 @@ class VMBox:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find voicemail box (id: %s, mailbox: %s, context: %s)" % (xid, mailbox, context))
+            raise LookupError(f"Unable to find voicemail box (id: {xid}, mailbox: {mailbox}, context: {context})")
 
         self.id = res['voicemail.uniqueid']
         self.mailbox = res['voicemail.mailbox']
@@ -244,7 +244,7 @@ class Paging:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find paging entry (number: %s)" % (number,))
+            raise LookupError(f"Unable to find paging entry (number: {number})")
 
         id = res['id']
         self.tenant_uuid = res['tenant_uuid']
@@ -268,7 +268,7 @@ class Paging:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find paging caller entry (userfeaturesid: %s)" % (userid,))
+            raise LookupError(f"Unable to find paging caller entry (userfeaturesid: {userid})")
 
         columns = ('endpoint_sip_uuid', 'endpoint_sccp_id', 'endpoint_custom_id', 'name')
 
@@ -282,7 +282,7 @@ class Paging:
         res = cursor.fetchall()
 
         if not res:
-            raise LookupError("Unable to find paging users entry (id: %s)" % (id,))
+            raise LookupError(f"Unable to find paging users entry (id: {id})")
 
         for line in res:
             if line['endpoint_sip_uuid']:
@@ -441,7 +441,7 @@ class Queue:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find queue (id: %s)" % (queue_id,))
+            raise LookupError(f"Unable to find queue (id: {queue_id})")
 
         self.id = res['queuefeatures.id']
         self.tenant_uuid = res['queuefeatures.tenant_uuid']
@@ -493,7 +493,7 @@ class Queue:
 
         res = self.cursor.fetchall()
         if res is None:
-            raise LookupError("Unable to fetch queue %s pickupgroups" % (self.id))
+            raise LookupError(f"Unable to fetch queue {self.id} pickupgroups")
 
         return [str(row[0]) for row in res]
 
@@ -521,7 +521,7 @@ class Agent:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find agent (id: %s, number: %s)" % (xid, number))
+            raise LookupError(f"Unable to find agent (id: {xid}, number: {number})")
 
         self.id = res['id']
         self.tenant_uuid = res['tenant_uuid']
@@ -537,28 +537,19 @@ class DialAction:
 
     @staticmethod
     def set_agi_variables(agi, event, category, action, actionarg1, actionarg2, isda=True):
-        xtype = ("%s_%s" % (category, event)).upper()
-        agi.set_variable("XIVO_FWD_%s_ACTION" % xtype, action)
+        xtype = f"{category}_{event}".upper()
+        agi.set_variable(f"XIVO_FWD_{xtype}_ACTION", action)
 
         # Sometimes, it's useful to know whether these variables were
         # set manually, or by this object.
         if isda:
-            agi.set_variable("XIVO_FWD_%s_ISDA" % xtype, "1")
+            agi.set_variable(f"XIVO_FWD_{xtype}_ISDA", "1")
 
-        if actionarg1:
-            actionarg1 = actionarg1.replace('|', ';')
-        else:
-            actionarg1 = ""
+        action_arg_1 = actionarg1.replace('|', ';') if actionarg1 else ""
+        action_arg_2 = actionarg2 or ""
 
-        if actionarg2:
-            actionarg2 = actionarg2
-        else:
-            actionarg2 = ""
-
-        agi.set_variable("XIVO_FWD_%s_ACTIONARG1" % xtype,
-                         actionarg1)
-        agi.set_variable("XIVO_FWD_%s_ACTIONARG2" % xtype,
-                         actionarg2)
+        agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG1", action_arg_1)
+        agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG2", action_arg_2)
 
     def __init__(self, agi, cursor, event, category, categoryval):
         self.agi = agi
@@ -613,7 +604,7 @@ class Trunk:
         self.agi.verbose(f'res {res}')
 
         if not res:
-            raise LookupError("Unable to find trunk (id: %d)" % xid)
+            raise LookupError(f"Unable to find trunk (id: {xid:d})")
 
         self.id = xid
 
@@ -656,7 +647,7 @@ class DID:
         res = cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find DID entry (id: %s)" % (incall_id,))
+            raise LookupError(f"Unable to find DID entry (id: {incall_id})")
 
         self.id = res['incall.id']
         self.exten = res['extensions.exten']
@@ -697,7 +688,7 @@ class Outcall:
         res = self.cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find outcall entry (id: %s)" % dialpattern_id)
+            raise LookupError(f"Unable to find outcall entry (id: {dialpattern_id})")
 
         self.id = res['outcall.id']
         self.exten = res['dialpattern.exten']
@@ -717,7 +708,7 @@ class Outcall:
         res = self.cursor.fetchall()
 
         if not res:
-            raise ValueError("No trunk associated with outcall (id: %d)" % dialpattern_id)
+            raise ValueError(f"No trunk associated with outcall (id: {dialpattern_id:d})")
 
         self.trunks = []
 
@@ -813,7 +804,7 @@ class Context:
         res = cursor.fetchall()
 
         if not res:
-            raise LookupError("Unable to find context entry (name: %s)" % (context,))
+            raise LookupError(f"Unable to find context entry (name: {context})")
 
         self.name = res[0]['context.name']
         self.displayname = res[0]['context.displayname']
@@ -824,8 +815,8 @@ class Context:
                 self.include.append(row['contextinclude.include'])
 
 
-CALLERID_MATCHER = re.compile('^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<(\+?[0-9\*#]+)>)?$').match
-CALLERIDNUM_MATCHER = re.compile('^\+?[0-9\*#]+$').match
+CALLERID_MATCHER = re.compile(r'^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<(\+?[0-9\*#]+)>)?$').match
+CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
 
 
 class CallerID:
@@ -873,7 +864,7 @@ class CallerID:
             agi.set_variable('CALLERID(name)', calleridname)
         else:
             logger.debug('caller_id set: applying callerid name and num: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
-            agi.set_variable('CALLERID(all)', '"%s" <%s>' % (calleridname, calleridnum))
+            agi.set_variable('CALLERID(all)', f'"{calleridname}" <{calleridnum}>')
 
         return True
 
@@ -942,17 +933,17 @@ class CallerID:
                     and calleridnum == calleridname:
                 name = calleridname
             elif self.mode == 'prepend':
-                name = "%s - %s" % (self.calleridname, calleridname)
+                name = f"{self.calleridname} - {calleridname}"
             elif self.mode == 'overwrite':
                 name = self.calleridname
             elif self.mode == 'append':
-                name = "%s - %s" % (calleridname, self.calleridname)
+                name = f"{calleridname} - {self.calleridname}"
             else:
-                raise RuntimeError("Unknown callerid mode: %r" % self.mode)
+                raise RuntimeError(f"Unknown callerid mode: {self.mode!r}")
 
             self.agi.set_variable('CALLERID(name-pres)', 'allowed')
             self.agi.set_variable('CALLERID(num-pres)', 'allowed')
-            self.agi.set_variable('CALLERID(all)', '"%s" <%s>' % (name, calleridnum))
+            self.agi.set_variable('CALLERID(all)', f'"{name}" <{calleridnum}>')
 
             if not force_rewrite:
                 self.agi.set_variable('XIVO_CID_REWRITTEN', 1)

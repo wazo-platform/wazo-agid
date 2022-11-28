@@ -117,12 +117,12 @@ class FastAGI:
     def _quote(string):
         if string is None:
             string = ''
-        elif not isinstance(string, str):
-            string = str(string)
         elif isinstance(string, bytes):
             string = string.decode('utf8')
+        elif not isinstance(string, str):
+            string = str(string)
 
-        return '"%s"' % string.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+        return '"{}"'.format(string.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' '))
 
     @staticmethod
     def dp_break(message):
@@ -187,7 +187,7 @@ class FastAGI:
                 usage.append(line)
                 line = self.inf.readline().strip().decode('utf8')
             usage.append(line)
-            usage = '%s\n' % '\n'.join(usage)
+            usage = '{}\n'.format('\n'.join(usage))
             raise FastAGIUsageError(usage)
         else:
             raise FastAGIUnknownError(code, 'Unhandled code or undefined response')
@@ -215,7 +215,7 @@ class FastAGI:
             try:
                 return chr(int(code))
             except (TypeError, ValueError):
-                raise FastAGIError('Unable to convert result to char: %s' % code)
+                raise FastAGIError(f'Unable to convert result to char: {code}')
 
     def wait_for_digit(self, timeout=DEFAULT_TIMEOUT):
         """agi.wait_for_digit(timeout=DEFAULT_TIMEOUT) --> digit
@@ -290,7 +290,7 @@ class FastAGI:
         """
         res = self.execute('SEND IMAGE', filename)['result'][0]
         if res != '0':
-            raise FastAGIAppError('Channel falure on channel %s' % self.env.get('agi_channel', 'UNKNOWN'))
+            raise FastAGIAppError(f'Channel failure on channel {self.env.get("agi_channel", "UNKNOWN")}')
 
     def say_digits(self, digits, escape_digits=''):
         """agi.say_digits(digits, escape_digits='') --> digit
@@ -460,7 +460,7 @@ class FastAGI:
         result = self.execute('EXEC', application, self._quote(options))
         res = result['result'][0]
         if res == '-2':
-            raise FastAGIAppError('Unable to find application: %s' % application)
+            raise FastAGIAppError(f'Unable to find application: {application}')
         return res
 
     def set_callerid(self, number):
@@ -547,11 +547,11 @@ class FastAGI:
         result = self.execute('DATABASE GET', self._quote(family), self._quote(key))
         res, value = result['result']
         if res == '0':
-            raise FastAGIDBError('Key not found in database: family=%s, key=%s' % (family, key))
+            raise FastAGIDBError(f'Key not found in database: family={family}, key={key}')
         elif res == '1':
             return value
         else:
-            raise FastAGIError('Unknown exception for : family=%s, key=%s, result=%s' % (family, key, pprint.pformat(result)))
+            raise FastAGIError(f'Unknown exception for : family={family}, key={key}, result={pprint.pformat(result)}')
 
     def database_put(self, family, key, value):
         """agi.database_put(family, key, value) --> None
@@ -561,7 +561,7 @@ class FastAGI:
         result = self.execute('DATABASE PUT', self._quote(family), self._quote(key), self._quote(value))
         res, value = result['result']
         if res == '0':
-            raise FastAGIDBError('Unable to put vaule in databale: family=%s, key=%s, value=%s' % (family, key, value))
+            raise FastAGIDBError(f'Unable to put value in database: family={family}, key={key}, value={value}')
 
     def database_del(self, family, key):
         """agi.database_del(family, key) --> None
@@ -571,7 +571,7 @@ class FastAGI:
         result = self.execute('DATABASE DEL', self._quote(family), self._quote(key))
         res, _ = result['result']
         if res == '0':
-            raise FastAGIDBError('Unable to delete from database: family=%s, key=%s' % (family, key))
+            raise FastAGIDBError(f'Unable to delete from database: family={family}, key={key}')
 
     def database_deltree(self, family, key=''):
         """agi.database_deltree(family, key='') --> None
@@ -581,7 +581,7 @@ class FastAGI:
         result = self.execute('DATABASE DELTREE', self._quote(family), self._quote(key))
         res, _ = result['result']
         if res == '0':
-            raise FastAGIDBError('Unable to delete tree from database: family=%s, key=%s' % (family, key))
+            raise FastAGIDBError(f'Unable to delete tree from database: family={family}, key={key}')
 
     def noop(self):
         """agi.noop() --> None

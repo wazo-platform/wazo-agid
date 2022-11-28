@@ -39,8 +39,7 @@ def deny(agi, password):
 def extension_matches(number, pattern):
     for (key, val) in rep:
         pattern = pattern.replace(key, val)
-
-    return bool(re.match("^%s$" % pattern, number))
+    return bool(re.match(rf"^{pattern}$", number))
 
 
 def apply_rules(agi, rules):

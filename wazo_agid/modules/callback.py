@@ -16,26 +16,26 @@ def callback(agi, cursor, args):
     spooldir = agi.get_variable('AST_CONFIG(asterisk.conf,directories,astspooldir)')
 
     if srcnum in (None, ''):
-        agi.dp_break("Unable to find srcnum, srcnum = %r" % srcnum)
+        agi.dp_break(f"Unable to find srcnum, srcnum = {srcnum!r}")
 
     if not spooldir:
         agi.dp_break("Unable to fetch AST_SPOOL_DIR")
 
     mtime = time.time() + 5
-    filepath = "%s/%%s/%s-%s.call" % (spooldir, srcnum, int(mtime))
+    filepath = f"{spooldir}/{{subdir}}/{srcnum}-{int(mtime)}.call"
 
-    tmpfile = filepath % "tmp"
-    realfile = filepath % "outgoing"
+    tmpfile = filepath.format(subdir="tmp")
+    realfile = filepath.format(subdir="outgoing")
 
     f = open(tmpfile, 'w')
-    f.write("Channel: Local/%s@%s\n"
+    f.write("Channel: Local/{}@{}\n"
             "MaxRetries: 0\n"
             "RetryTime: 30\n"
             "WaitTime: 30\n"
-            "CallerID: %s\n"
-            "Set: XIVO_DISACONTEXT=%s\n"
+            "CallerID: {}\n"
+            "Set: XIVO_DISACONTEXT={}\n"
             "Context: xivo-callbackdisa\n"
-            "Extension: s" % (srcnum, context, srcnum, context))
+            "Extension: s".format(srcnum, context, srcnum, context))
     f.close()
 
     os.utime(tmpfile, (mtime, mtime))

@@ -22,7 +22,7 @@ def paging(agi, cursor, args):
     except (ValueError, LookupError) as e:
         agi.answer()
         agi.stream_file('vm-incorrect')
-        agi.dp_break('Sorry you are not authorize to page this group : %s' % str(e))
+        agi.dp_break(f'Sorry you are not authorize to page this group : {str(e)}')
 
     paging_line = '&'.join(paging_entry.lines)
     agi.set_variable('XIVO_PAGING_LINES', paging_line)

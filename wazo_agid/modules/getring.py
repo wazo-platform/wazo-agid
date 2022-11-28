@@ -19,15 +19,15 @@ def getring(agi, cursor, args):
     referer = agi.get_variable('XIVO_FWD_REFERER').split(':', 1)[0]
     forwarded = agi.get_variable('XIVO_CALLFORWARDED')
     # TODO: maybe replace number@context with user id in conf file ?
-    dstnum_context = "%s@%s" % (dstnum, context)
-    referer_origin = "%s@%s" % (referer, origin)
-    origin_fwd = "%s&forwarded" % origin
-    referer_origin_fwd = "%s&forwarded" % referer_origin
+    dstnum_context = f"{dstnum}@{context}"
+    referer_origin = f"{referer}@{origin}"
+    origin_fwd = f"{origin}&forwarded"
+    referer_origin_fwd = f"{referer_origin}&forwarded"
     section = None
 
     agi.set_variable('XIVO_RINGTYPE', "")
 
-    if CONFIG_PARSER.has_option('number', "!%s" % dstnum_context):
+    if CONFIG_PARSER.has_option('number', f"!{dstnum_context}"):
         return
 
     if len(dstnum) > 0 and CONFIG_PARSER.has_option('number', dstnum_context):
@@ -40,7 +40,7 @@ def getring(agi, cursor, args):
     try:
         if section is None:
             try:
-                section = CONFIG_PARSER.get('number', "@%s" % context)
+                section = CONFIG_PARSER.get('number', f"@{context}")
             except configparser.NoOptionError:
                 return
 
@@ -65,7 +65,7 @@ def getring(agi, cursor, args):
     else:
         agi.set_variable('XIVO_RINGTYPE', ringtype)
         agi.set_variable('XIVO_PHONETYPE', phonetype)
-        agi.verbose("Using ring tone %s" % (ringtype,))
+        agi.verbose(f"Using ring tone {ringtype}")
 
 
 def setup(cursor):

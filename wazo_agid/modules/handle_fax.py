@@ -39,7 +39,7 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
 
 # A backend is a callable object taking 3 arguments, in this order:
 #   faxfile -- the path to the fax file (in TIFF format)
-#   dstnum -- the content of the the XIVO_DSTNUM dialplan variable
+#   dstnum -- the content of the XIVO_DSTNUM dialplan variable
 #   args -- args specific to the backend
 def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fax'):
     # Return a backend taking one additional argument, an email address,
@@ -52,7 +52,7 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
         # args[0] is the email address to send the fax to
         email = args[0]
         if not email:
-            raise ValueError("Invalid email value: %s" % email)
+            raise ValueError(f"Invalid email value: {email}")
 
         pdffile = _convert_tiff_to_pdf(faxfile)
         try:
@@ -61,8 +61,8 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
                 [
                     MUTT_PATH,
                     "-e", "set copy=no",
-                    "-e", "set from=%s" % email_from,
-                    "-e", "set realname='%s'" % email_realname,
+                    "-e", f"set from={email_from}",
+                    "-e", f"set realname='{email_realname}'",
                     "-e", "set use_from=yes",
                     "-s", subject % format_dict,
                     "-a", pdffile, "--",
@@ -73,7 +73,7 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
             )
             p.communicate((content % format_dict).encode('utf8'))
             if p.returncode:
-                raise Exception("mutt exit code was %s" % p.returncode)
+                raise Exception(f"mutt exit code was {p.returncode}")
         finally:
             try:
                 os.remove(pdffile)
@@ -140,7 +140,7 @@ def _new_ftp_backend(host, username, password, port=21, directory=None, convert_
                 try:
                     if directory:
                         ftp_serv.cwd(directory)
-                    stor_command = "STOR %s" % os.path.basename(filename)
+                    stor_command = f"STOR {os.path.basename(filename)}"
                     ftp_serv.storbinary(stor_command, fobj)
                 finally:
                     ftp_serv.close()
@@ -157,9 +157,9 @@ def _new_ftp_backend(host, username, password, port=21, directory=None, convert_
 def _do_handle_fax(faxfile, dstnum, args):
     logger.info('Handling fax for destination %s', dstnum)
     if not faxfile:
-        raise ValueError("Invalid faxfile value: %s" % faxfile)
+        raise ValueError(f"Invalid faxfile value: {faxfile}")
     if not dstnum:
-        raise ValueError("Invalid dstnum value: %s" % dstnum)
+        raise ValueError(f"Invalid dstnum value: {dstnum}")
 
     if dstnum in DESTINATIONS:
         logger.debug("Using backends for destination %s", dstnum)
@@ -169,7 +169,7 @@ def _do_handle_fax(faxfile, dstnum, args):
             logger.debug("Using backends for destination default")
             backends = DESTINATIONS["default"]
         else:
-            raise ValueError("No backends associated with dstnum %s" % dstnum)
+            raise ValueError(f"No backends associated with dstnum {dstnum}")
 
     for backend in backends:
         try:

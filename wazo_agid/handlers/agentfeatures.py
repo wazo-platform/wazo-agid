@@ -39,7 +39,7 @@ class AgentFeatures(Handler):
                            parameters=(self.agent_id,))
         res = self._cursor.fetchone()
         if not res:
-            raise LookupError('Unable to find agent (id: %s)' % self.agent_id)
+            raise LookupError(f'Unable to find agent (id: {self.agent_id})')
         device = res[0]
         return device
 

@@ -11,7 +11,7 @@ def phone_progfunckey(agi, cursor, args):
     xlen = len(args)
 
     if xlen != 1:
-        agi.dp_break("Invalid number of arguments (args: %r)" % args)
+        agi.dp_break(f"Invalid number of arguments (args: {args!r})")
 
     try:
         fklist = split_extension(args[0])
@@ -19,7 +19,7 @@ def phone_progfunckey(agi, cursor, args):
         agi.dp_break(str(e))
 
     if userid != fklist[0]:
-        agi.dp_break("Wrong userid. (userid: %r, excepted: %r)" % (fklist[0], userid))
+        agi.dp_break(f"Wrong userid. (userid: {fklist[0]!r}, excepted: {userid!r})")
 
     feature = ""
 

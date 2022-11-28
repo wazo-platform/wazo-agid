@@ -169,11 +169,11 @@ class HoursChecker:
         else:
             start_hour = int(m.group(1))
             if start_hour > 23:
-                raise ValueError('start hour: %s' % start_hour)
+                raise ValueError(f'start hour: {start_hour}')
             start_min = int(m.group(2))
             end_hour = int(m.group(3))
             if end_hour > 23:
-                raise ValueError('end hour: %s' % end_hour)
+                raise ValueError(f'end hour: {end_hour}')
             end_min = int(m.group(4))
             if (start_hour, start_min) > (end_hour, end_min):
                 raise ValueError('end hour before start hour')

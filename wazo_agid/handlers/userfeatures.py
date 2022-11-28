@@ -174,7 +174,7 @@ class UserFeatures(Handler):
             callerid_num = None
 
         if not callerid_name:
-            callerid_name = "%s %s" % (self._user.firstname, self._user.lastname)
+            callerid_name = f"{self._user.firstname} {self._user.lastname}"
         self._agi.set_variable('XIVO_DST_REDIRECTING_NAME', callerid_name)
 
         if not callerid_num:
@@ -235,8 +235,8 @@ class UserFeatures(Handler):
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
-                    self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_INTERFACE' % index, iface)
-                    self._set_callfilter_ringseconds('SECRETARY%d_TIMEOUT' % index, ringseconds)
+                    self._agi.set_variable(f'XIVO_CALLFILTER_SECRETARY{index:d}_INTERFACE', iface)
+                    self._set_callfilter_ringseconds(f'SECRETARY{index:d}_TIMEOUT', ringseconds)
                     index += 1
 
         if callfilter.bosssecretary in ("bossfirst-simult", "secretary-simult", "all"):

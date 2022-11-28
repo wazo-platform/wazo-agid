@@ -47,7 +47,7 @@ class GroupFeatures(Handler):
         )
 
     def _needs_rewrite_cid(self):
-        return self._referer == ("group:%s" % self._id)
+        return self._referer == (f"group:{self._id}")
 
     def _set_members(self):
         self._id = int(self._agi.get_variable(dialplan_variables.DESTINATION_ID))
@@ -80,7 +80,7 @@ class GroupFeatures(Handler):
         res = self._cursor.fetchone()
 
         if not res:
-            raise LookupError("Unable to find group (id: %s)" % (self._id))
+            raise LookupError(f"Unable to find group (id: {self._id})")
 
         self._exten = res['extensions.exten']
         self._context = res['extensions.context']

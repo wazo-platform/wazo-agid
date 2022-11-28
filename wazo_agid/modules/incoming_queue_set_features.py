@@ -79,7 +79,7 @@ def incoming_queue_set_features(agi, cursor, args):
 
     queue.set_dial_actions()
 
-    if referer == ("queue:%s" % queue.id):
+    if referer == f"queue:{queue.id}":
         queue.rewrite_cid()
 
     agi.set_variable('XIVO_QUEUESTATUS', 'ok')

@@ -15,11 +15,11 @@ def phone_set_feature(agi, cursor, args):
     except IndexError:
         agi.dp_break('Missing feature name argument')
 
-    function_name = '_phone_set_%s' % feature_name
+    function_name = f'_phone_set_{feature_name}'
     try:
         function = globals()[function_name]
     except KeyError:
-        agi.dp_break('Unknown feature name %r' % feature_name)
+        agi.dp_break(f'Unknown feature name {feature_name!r}')
 
     try:
         function(agi, cursor, args)
