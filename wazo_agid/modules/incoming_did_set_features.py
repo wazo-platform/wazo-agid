@@ -1,11 +1,14 @@
 # Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
+from psycopg2.extras import DictCursor
 
 from wazo_agid import agid
 from wazo_agid import objects
 
 
-def incoming_did_set_features(agi, cursor, args):
+def incoming_did_set_features(agi, cursor: DictCursor, args):
     incall_id = agi.get_variable('XIVO_INCALL_ID')
 
     did = objects.DID(agi, cursor, incall_id)

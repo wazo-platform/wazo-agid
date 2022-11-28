@@ -1,8 +1,14 @@
 # Copyright 2007-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
 import re
+from typing import Sequence
+
+from psycopg2.extras import DictCursor, DictRow
+from psycopg2.sql import SQL, Identifier
+
 from wazo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
     AlwaysOpenedSchedule
 
@@ -13,6 +19,16 @@ logger = logging.getLogger(__name__)
 
 class DBUpdateException(Exception):
     pass
+
+
+def join_column_names(fields: Sequence[str]) -> SQL:
+    """
+    Take a list of fields and join them together for insertion, safely, into SQL query.
+    """
+    return SQL(',').join(
+        SQL('.').join(map(Identifier, f.split('.'))) if '.' in f else Identifier(f)
+        for f in fields
+    )
 
 
 class ExtenFeatures:
@@ -40,7 +56,7 @@ class ExtenFeatures:
         )
     }
 
-    def __init__(self, agi, cursor):
+    def __init__(self, agi, cursor: DictCursor):
         self.agi = agi
         self.cursor = cursor
 
@@ -52,12 +68,13 @@ class ExtenFeatures:
 
         self.featureslist = tuple(featureslist)
 
-        self.cursor.query("SELECT ${columns} FROM extensions "
-                          "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
-                          "AND commented = 0",
-                          ('typeval',),
-                          self.featureslist)
-        res = self.cursor.fetchall()
+        self.cursor.execute(
+            "SELECT typeval FROM extensions "
+            "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
+            "AND commented = 0",
+            self.featureslist
+        )
+        res: list[DictRow] = self.cursor.fetchall()
 
         if not res:
             enabled_features = []
@@ -68,33 +85,31 @@ class ExtenFeatures:
             setattr(self, feature, (feature in enabled_features))
 
     def get_name_by_exten(self, exten):
-        self.cursor.query("SELECT ${columns} FROM extensions "
+        self.cursor.execute("SELECT typeval FROM extensions "
                           "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
                           "AND (exten = %s "
                           "OR (SUBSTR(exten,1,1) = '_' "
                           "    AND SUBSTR(exten, 2, %s) LIKE %s)) "
                           "AND commented = 0",
-                          ('typeval',),
                           self.featureslist + (exten, len(exten), f"{exten}%"))
 
-        res = self.cursor.fetchone()
-
+        res: DictRow = self.cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find feature by exten (exten = {exten!r})")
 
         return res['typeval']
 
     def get_exten_by_name(self, name, commented=None):
-        query = "SELECT ${columns} FROM extensions WHERE typeval = %s"
+        query = "SELECT exten FROM extensions WHERE typeval = %s"
         params = [name]
 
         if commented is not None:
             params.append(int(bool(commented)))
             query += " AND commented = %s"
 
-        self.cursor.query(query, ('exten',), params)
+        self.cursor.execute(query, params)
 
-        res = self.cursor.fetchone()
+        res: DictRow = self.cursor.fetchone()
 
         if not res:
             raise LookupError(f"Unable to find feature by name (name = {name!r})")
@@ -103,7 +118,7 @@ class ExtenFeatures:
 
 
 class VMBox:
-    def __init__(self, agi, cursor, xid=None, mailbox=None, context=None, commentcond=True):
+    def __init__(self, agi, cursor: DictCursor, xid=None, mailbox=None, context=None, commentcond=True):
         self.agi = agi
         self.cursor = cursor
 
@@ -116,35 +131,31 @@ class VMBox:
             where_comment = ""
 
         if xid:
-            cursor.query("SELECT ${columns} FROM voicemail "
-                         "WHERE voicemail.uniqueid = %s " +
-                         where_comment,
-                         columns,
-                         (xid,))
+            query = SQL("SELECT {columns} FROM voicemail WHERE voicemail.uniqueid = %s " + where_comment)
+            cursor.execute(query.format(columns=join_column_names(columns)), (xid,))
         elif mailbox and context:
             contextinclude = Context(agi, cursor, context).include
-            cursor.query("SELECT ${columns} FROM voicemail "
+            query = SQL("SELECT {columns} FROM voicemail "
                          "WHERE voicemail.mailbox = %s "
                          "AND voicemail.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") " +
-                         where_comment,
-                         columns,
-                         [mailbox] + contextinclude)
+                         where_comment)
+            cursor.execute(query.format(columns=join_column_names(columns)), [mailbox] + contextinclude)
         else:
             raise LookupError("id or mailbox@context must be provided to look up a voicemail entry")
 
-        res = cursor.fetchone()
+        res: DictRow = cursor.fetchone()
 
         if not res:
             raise LookupError(f"Unable to find voicemail box (id: {xid}, mailbox: {mailbox}, context: {context})")
 
-        self.id = res['voicemail.uniqueid']
-        self.mailbox = res['voicemail.mailbox']
-        self.context = res['voicemail.context']
-        self.password = res['voicemail.password']
-        self.email = res['voicemail.email']
-        self.commented = res['voicemail.commented']
-        self.language = res['voicemail.language']
-        self.skipcheckpass = res['voicemail.skipcheckpass']
+        self.id = res['uniqueid']
+        self.mailbox = res['mailbox']
+        self.context = res['context']
+        self.password = res['password']
+        self.email = res['email']
+        self.commented = res['commented']
+        self.language = res['language']
+        self.skipcheckpass = res['skipcheckpass']
 
     def toggle_enable(self, enabled=None):
         if enabled is None:
@@ -152,39 +163,38 @@ class VMBox:
         else:
             enabled = int(not bool(enabled))
 
-        self.cursor.query("UPDATE voicemail "
-                          "SET commented = %s "
-                          "WHERE uniqueid = %s",
-                          parameters=(enabled, self.id))
+        self.cursor.execute(
+            "UPDATE voicemail SET commented = %s WHERE uniqueid = %s",
+            (enabled, self.id),
+        )
 
         if self.cursor.rowcount != 1:
             raise DBUpdateException("Unable to perform the requested update")
-        else:
-            self.commented = enabled
+        self.commented = enabled
 
 
 class Meeting:
 
-    def __init__(self, agi, cursor, tenant_uuid, uuid=None, number=None):
+    def __init__(self, agi, cursor: DictCursor, tenant_uuid, uuid=None, number=None):
         self.agi = agi
         self.cursor = cursor
         self.uuid = uuid
         self.number = number
         self.tenant_uuid = tenant_uuid
 
-        columns = ('uuid', 'name')
+        query = SQL("SELECT uuid, name FROM meeting WHERE {field} = %s and tenant_uuid = %s")
         if uuid:
-            query = "SELECT ${columns} FROM meeting WHERE uuid = %s and tenant_uuid = %s"
+            field = 'uuid'
             arguments = (uuid, tenant_uuid)
         elif number:
-            query = "SELECT ${columns} FROM meeting WHERE number = %s and tenant_uuid = %s"
+            field = 'number'
             arguments = (number, tenant_uuid)
         else:
             raise Exception('Cannot find a meeting with no UUID or number')
 
-        cursor.query(query, columns, arguments)
+        cursor.execute(query.format(field=Identifier(field)), arguments)
 
-        res = cursor.fetchone()
+        res: DictRow = cursor.fetchone()
         if not res:
             raise LookupError(f'Unable to find Meeting {uuid} in tenant {tenant_uuid}')
 
@@ -199,15 +209,12 @@ class MOH:
         self.cursor = cursor
         self.name = None
 
-        columns = ('name',)
-
-        cursor.query(
-            "SELECT ${columns} FROM moh WHERE uuid = %s",
-            columns,
+        cursor.execute(
+            "SELECT name FROM moh WHERE uuid = %s",
             (uuid,),
         )
 
-        res = cursor.fetchone()
+        res: DictRow = cursor.fetchone()
         if not res:
             raise LookupError(f'Unable to find MOH {uuid}')
 
@@ -236,17 +243,15 @@ class Paging:
             'tenant_uuid',
         )
 
-        cursor.query("SELECT ${columns} FROM paging "
-                     "WHERE number = %s "
-                     "AND commented = 0",
-                     columns,
-                     (number,))
-        res = cursor.fetchone()
-
+        query = SQL("SELECT {columns} FROM paging "
+                    "WHERE number = %s "
+                    "AND commented = 0")
+        cursor.execute(query.format(columns=join_column_names(columns)), (number,))
+        res: DictRow = cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find paging entry (number: {number})")
 
-        id = res['id']
+        paging_id = res['id']
         self.tenant_uuid = res['tenant_uuid']
         self.number = res['number']
         self.duplex = res['duplex']
@@ -258,31 +263,30 @@ class Paging:
         self.announcement_play = res['announcement_play']
         self.announcement_caller = res['announcement_caller']
 
-        columns = ('userfeaturesid',)
+        cursor.execute(
+            "SELECT userfeaturesid FROM paginguser "
+            "WHERE userfeaturesid = %s AND pagingid = %s "
+            "AND caller = 1",
+            (userid, paging_id),
+        )
 
-        cursor.query("SELECT ${columns} FROM paginguser "
-                     "WHERE userfeaturesid = %s AND pagingid = %s "
-                     "AND caller = 1",
-                     columns,
-                     (userid, id))
-        res = cursor.fetchone()
-
+        res: DictRow = cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find paging caller entry (userfeaturesid: {userid})")
 
         columns = ('endpoint_sip_uuid', 'endpoint_sccp_id', 'endpoint_custom_id', 'name')
 
-        cursor.query("SELECT ${columns} FROM paginguser "
-                     "JOIN user_line ON paginguser.userfeaturesid = user_line.user_id "
-                     "JOIN linefeatures ON user_line.line_id = linefeatures.id "
-                     "WHERE paginguser.pagingid = %s "
-                     "AND paginguser.caller = 0",
-                     columns,
-                     (id,))
-        res = cursor.fetchall()
-
+        query = SQL(
+            "SELECT {columns} FROM paginguser "
+            "JOIN user_line ON paginguser.userfeaturesid = user_line.user_id "
+            "JOIN linefeatures ON user_line.line_id = linefeatures.id "
+            "WHERE paginguser.pagingid = %s "
+            "AND paginguser.caller = 0"
+        )
+        cursor.execute(query.format(columns=join_column_names(columns)), (paging_id,))
+        res: list[DictRow] = cursor.fetchall()
         if not res:
-            raise LookupError(f"Unable to find paging users entry (id: {id})")
+            raise LookupError(f"Unable to find paging users entry (id: {paging_id})")
 
         for line in res:
             if line['endpoint_sip_uuid']:
@@ -292,14 +296,14 @@ class Paging:
             elif line['endpoint_custom_id']:
                 line = f'CUSTOM/{line["name"]}'
             else:
-                raise LookupError(f"Unable to find protocol for user (id: {id})")
+                raise LookupError(f"Unable to find protocol for user (id: {paging_id})")
 
             self.lines.add(line)
 
 
 class User:
 
-    def __init__(self, agi, cursor, xid=None, exten=None, context=None, agent_id=None):
+    def __init__(self, agi, cursor: DictCursor, xid=None, exten=None, context=None, agent_id=None):
         self.agi = agi
         self.cursor = cursor
 
@@ -376,21 +380,21 @@ class User:
     def toggle_feature(self, feature):
         if feature == 'enablevoicemail':
             enabled = int(not self.enablevoicemail)
-            self.cursor.query(
+            self.cursor.execute(
                 "UPDATE userfeatures SET enablevoicemail = %s WHERE id = %s",
-                parameters=(enabled, self.id),
+                (enabled, self.id),
             )
             self.enablevoicemail = enabled
         elif feature == 'callrecord':
             enabled = not self.call_record_enabled
-            self.cursor.query(
+            self.cursor.execute(
                 "UPDATE userfeatures SET "
                 "call_record_outgoing_external_enabled = %s, "
                 "call_record_outgoing_internal_enabled = %s, "
                 "call_record_incoming_external_enabled = %s, "
                 "call_record_incoming_internal_enabled = %s "
                 "WHERE id = %s",
-                parameters=(
+                (
                     enabled,
                     enabled,
                     enabled,
@@ -407,7 +411,7 @@ class User:
 
 
 class Queue:
-    def __init__(self, agi, cursor, queue_id):
+    def __init__(self, agi, cursor: DictCursor, queue_id):
         self.agi = agi
         self.cursor = cursor
 
@@ -427,47 +431,46 @@ class Queue:
         if not queue_id:
             raise LookupError("id must be provided to look up a queue")
 
-        cursor.query(
-            "SELECT ${columns} FROM queuefeatures "
+        query = SQL(
+            "SELECT {columns} FROM queuefeatures "
             "INNER JOIN queue "
             "ON queuefeatures.name = queue.name "
             "WHERE queuefeatures.id = %s "
             "AND queue.commented = 0 "
-            "AND queue.category = 'queue'",
-            columns,
-            (queue_id,),
+            "AND queue.category = 'queue'"
         )
-
-        res = cursor.fetchone()
-
+        cursor.execute(
+            query.format(columns=join_column_names(columns)), (queue_id,),
+        )
+        res: DictRow = cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find queue (id: {queue_id})")
 
-        self.id = res['queuefeatures.id']
-        self.tenant_uuid = res['queuefeatures.tenant_uuid']
-        self.number = res['queuefeatures.number']
-        self.context = res['queuefeatures.context']
-        self.name = res['queuefeatures.name']
-        self.data_quality = res['queuefeatures.data_quality']
-        self.hitting_callee = res['queuefeatures.hitting_callee']
-        self.hitting_caller = res['queuefeatures.hitting_caller']
-        self.retries = res['queuefeatures.retries']
-        self.ring = res['queuefeatures.ring']
-        self.transfer_user = res['queuefeatures.transfer_user']
-        self.transfer_call = res['queuefeatures.transfer_call']
-        self.write_caller = res['queuefeatures.write_caller']
-        self.write_calling = res['queuefeatures.write_calling']
-        self.ignore_forward = res['queuefeatures.ignore_forward']
-        self.url = res['queuefeatures.url']
-        self.announceoverride = res['queuefeatures.announceoverride']
-        self.timeout = res['queuefeatures.timeout']
-        self.preprocess_subroutine = res['queuefeatures.preprocess_subroutine']
-        self.announce_holdtime = res['queuefeatures.announce_holdtime']
-        self.waittime = res['queuefeatures.waittime']
-        self.waitratio = res['queuefeatures.waitratio']
-        self.wrapuptime = res['queue.wrapuptime']
-        self.musiconhold = res['queue.musicclass']
-        self.mark_answered_elsewhere = res['queuefeatures.mark_answered_elsewhere']
+        self.id = res['id']
+        self.tenant_uuid = res['tenant_uuid']
+        self.number = res['number']
+        self.context = res['context']
+        self.name = res['name']
+        self.data_quality = res['data_quality']
+        self.hitting_callee = res['hitting_callee']
+        self.hitting_caller = res['hitting_caller']
+        self.retries = res['retries']
+        self.ring = res['ring']
+        self.transfer_user = res['transfer_user']
+        self.transfer_call = res['transfer_call']
+        self.write_caller = res['write_caller']
+        self.write_calling = res['write_calling']
+        self.ignore_forward = res['ignore_forward']
+        self.url = res['url']
+        self.announceoverride = res['announceoverride']
+        self.timeout = res['timeout']
+        self.preprocess_subroutine = res['preprocess_subroutine']
+        self.announce_holdtime = res['announce_holdtime']
+        self.waittime = res['waittime']
+        self.waitratio = res['waitratio']
+        self.wrapuptime = res['wrapuptime']
+        self.musiconhold = res['musicclass']
+        self.mark_answered_elsewhere = res['mark_answered_elsewhere']
 
     def set_dial_actions(self):
         for event in ['congestion', 'busy', 'chanunavail', 'qwaittime', 'qwaitratio']:
@@ -483,15 +486,15 @@ class Queue:
         CallerID(self.agi, self.cursor, "queue", self.id).rewrite(force_rewrite=False)
 
     def pickupgroups(self):
-        self.cursor.query(
-            "SELECT ${columns} FROM pickup p, pickupmember pm "
+        self.cursor.execute(
+            "SELECT p.id FROM pickup p, pickupmember pm "
             "WHERE p.commented = 0 AND p.id = pm.pickupid "
             "AND pm.category = 'member' AND pm.membertype = 'queue'"
             "AND pm.memberid = %s",
-            ('p.id',), (self.id,)
+            (self.id,)
         )
 
-        res = self.cursor.fetchall()
+        res: list[DictRow] = self.cursor.fetchall()
         if res is None:
             raise LookupError(f"Unable to fetch queue {self.id} pickupgroups")
 
@@ -499,26 +502,27 @@ class Queue:
 
 
 class Agent:
-    def __init__(self, agi, cursor, xid=None, number=None):
+    def __init__(self, agi, cursor: DictCursor, xid=None, number=None):
         self.agi = agi
         self.cursor = cursor
 
         columns = ('id', 'tenant_uuid', 'number', 'passwd', 'firstname', 'lastname', 'language', 'preprocess_subroutine')
 
+        query = SQL("SELECT {columns} FROM agentfeatures WHERE {field} = %s")
         if xid:
-            cursor.query("SELECT ${columns} FROM agentfeatures "
-                         "WHERE id = %s ",
-                         columns,
-                         (xid,))
+            cursor.execute(
+                query.format(columns=join_column_names(columns), field=Identifier('id')),
+                (xid,)
+            )
         elif number:
-            cursor.query("SELECT ${columns} FROM agentfeatures "
-                         "WHERE number = %s ",
-                         columns,
-                         (number,))
+            cursor.execute(
+                query.format(columns=join_column_names(columns), field=Identifier('number')),
+                (number,)
+            )
         else:
             raise LookupError("id or number must be provided to look up an agent")
 
-        res = cursor.fetchone()
+        res: DictRow = cursor.fetchone()
 
         if not res:
             raise LookupError(f"Unable to find agent (id: {xid}, number: {number})")
@@ -551,20 +555,20 @@ class DialAction:
         agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG1", action_arg_1)
         agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG2", action_arg_2)
 
-    def __init__(self, agi, cursor, event, category, categoryval):
+    def __init__(self, agi, cursor: DictCursor, event, category, categoryval):
         self.agi = agi
         self.cursor = cursor
         self.event = event
         self.category = category
 
-        cursor.query("SELECT ${columns} FROM dialaction "
-                     "WHERE event = %s "
-                     "AND category = %s "
-                     "AND " + cursor.cast('categoryval', 'int') + " = %s ",
-                     ('action', 'actionarg1', 'actionarg2'),
-                     (event, category, categoryval))
-        res = cursor.fetchone()
-
+        cursor.execute(
+            "SELECT action, actionarg1, actionarg2 FROM dialaction "
+            "WHERE event = %s "
+            "AND category = %s "
+            "AND categoryval::INTEGER = %s ",
+            (event, category, categoryval)
+        )
+        res: DictRow = cursor.fetchone()
         if not res:
             self.action = "none"
             self.actionarg1 = None
@@ -590,17 +594,16 @@ class DialAction:
 
 
 class Trunk:
-    def __init__(self, agi, cursor, xid):
+    def __init__(self, agi, cursor: DictCursor, xid):
         self.agi = agi
         self.cursor = cursor
-
-        columns = ('endpoint_sip_uuid', 'endpoint_iax_id', 'endpoint_custom_id')
-
-        cursor.query("SELECT ${columns} FROM trunkfeatures "
-                     "WHERE id = %s",
-                     columns,
-                     (xid,))
-        res = cursor.fetchone()
+        cursor.execute(
+            "SELECT endpoint_sip_uuid, endpoint_iax_id, endpoint_custom_id "
+            "FROM trunkfeatures "
+            "WHERE id = %s",
+             (xid,),
+        )
+        res: DictRow = cursor.fetchone()
         self.agi.verbose(f'res {res}')
 
         if not res:
@@ -619,7 +622,7 @@ class Trunk:
 
 
 class DID:
-    def __init__(self, agi, cursor, incall_id):
+    def __init__(self, agi, cursor: DictCursor, incall_id):
         self.agi = agi
         self.cursor = cursor
 
@@ -634,26 +637,27 @@ class DID:
             'extensions.context',
         )
 
-        cursor.query(
-            "SELECT ${columns} FROM incall "
+        query = SQL(
+            "SELECT {columns} FROM incall "
             "JOIN extensions ON extensions.type = 'incall' "
             "AND extensions.typeval = CAST(incall.id AS VARCHAR(255)) "
             "WHERE incall.id = %s "
-            "AND incall.commented = 0 AND extensions.commented = 0",
-            columns,
+            "AND incall.commented = 0 AND extensions.commented = 0"
+        )
+        cursor.execute(
+            query.format(columns=join_column_names(columns)),
             (incall_id,),
         )
-
-        res = cursor.fetchone()
+        res: DictRow = cursor.fetchone()
 
         if not res:
             raise LookupError(f"Unable to find DID entry (id: {incall_id})")
 
-        self.id = res['incall.id']
-        self.exten = res['extensions.exten']
-        self.context = res['extensions.context']
-        self.preprocess_subroutine = res['incall.preprocess_subroutine']
-        self.greeting_sound = res['incall.greeting_sound']
+        self.id = res['id']
+        self.exten = res['exten']
+        self.context = res['context']
+        self.preprocess_subroutine = res['preprocess_subroutine']
+        self.greeting_sound = res['greeting_sound']
 
     def set_dial_actions(self):
         DialAction(self.agi, self.cursor, "answer", "incall", self.id).set_variables()
@@ -663,7 +667,7 @@ class DID:
 
 
 class Outcall:
-    def __init__(self, agi, cursor):
+    def __init__(self, agi, cursor: DictCursor):
         self.agi = agi
         self.cursor = cursor
 
@@ -674,44 +678,42 @@ class Outcall:
                    'dialpattern.stripnum', 'dialpattern.externprefix',
                    'dialpattern.callerid', 'dialpattern.prefix')
 
-        if dialpattern_id:
-            self.cursor.query("SELECT ${columns} FROM outcall, dialpattern "
-                              "WHERE dialpattern.typeid = outcall.id "
-                              "AND dialpattern.type = 'outcall' "
-                              "AND dialpattern.id = %s"
-                              "AND outcall.commented = 0",
-                              columns,
-                              (dialpattern_id,))
-        else:
+        if not dialpattern_id:
             raise LookupError("id or exten@context must be provided to look up an outcall entry")
 
-        res = self.cursor.fetchone()
+        query = SQL(
+            "SELECT {columns} FROM outcall, dialpattern "
+            "WHERE dialpattern.typeid = outcall.id "
+            "AND dialpattern.type = 'outcall' "
+            "AND dialpattern.id = %s"
+            "AND outcall.commented = 0"
+        )
+        self.cursor.execute(query.format(columns=join_column_names(columns)), (dialpattern_id,))
 
+        res: DictRow = self.cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find outcall entry (id: {dialpattern_id})")
 
-        self.id = res['outcall.id']
-        self.exten = res['dialpattern.exten']
-        self.context = res['outcall.context']
-        self.externprefix = res['dialpattern.externprefix']
-        self.stripnum = res['dialpattern.stripnum']
-        self.callerid = res['dialpattern.callerid']
-        self.internal = res['outcall.internal']
-        self.preprocess_subroutine = res['outcall.preprocess_subroutine']
-        self.hangupringtime = res['outcall.hangupringtime']
+        self.id = res['id']
+        self.exten = res['exten']
+        self.context = res['context']
+        self.externprefix = res['externprefix']
+        self.stripnum = res['stripnum']
+        self.callerid = res['callerid']
+        self.internal = res['internal']
+        self.preprocess_subroutine = res['preprocess_subroutine']
+        self.hangupringtime = res['hangupringtime']
 
-        self.cursor.query("SELECT ${columns} FROM outcalltrunk "
-                          "WHERE outcallid = %s "
-                          "ORDER BY priority ASC",
-                          ('trunkfeaturesid',),
-                          (self.id,))
-        res = self.cursor.fetchall()
+        self.cursor.execute("SELECT trunkfeaturesid FROM outcalltrunk "
+                            "WHERE outcallid = %s "
+                            "ORDER BY priority ASC",
+                            (self.id,))
+        res: list[DictRow] = self.cursor.fetchall()
 
         if not res:
             raise ValueError(f"No trunk associated with outcall (id: {dialpattern_id:d})")
 
         self.trunks = []
-
         for row in res:
             try:
                 trunk = Trunk(self.agi, self.cursor, row['trunkfeaturesid'])
@@ -723,26 +725,26 @@ class Outcall:
 
 class ScheduleDataMapper:
     @classmethod
-    def get_from_path(cls, cursor, path, path_id):
+    def get_from_path(cls, cursor: DictCursor, path, path_id):
         # fetch schedule info
         columns = ('id', 'timezone', 'fallback_action', 'fallback_actionid', 'fallback_actionargs')
-        cursor.query("SELECT ${columns} FROM schedule_path p "
-                     "LEFT JOIN schedule s ON p.schedule_id = s.id "
-                     "WHERE p.path = %s "
-                     "AND p.pathid = %s "
-                     "AND s.commented = 0",
-                     columns,
-                     (path, path_id))
-        res = cursor.fetchone()
+        query = SQL(
+            "SELECT {columns} FROM schedule_path p "
+            "LEFT JOIN schedule s ON p.schedule_id = s.id "
+            "WHERE p.path = %s "
+            "AND p.pathid = %s "
+            "AND s.commented = 0"
+        )
+        cursor.execute(query.format(columns=join_column_names(columns)), (path, path_id))
 
+        res: DictRow = cursor.fetchone()
         if not res:
             return AlwaysOpenedSchedule()
 
         schedule_id = res['id']
         timezone = res['timezone']
         if not timezone:
-            columns = ('timezone',)
-            cursor.query("SELECT ${columns} FROM infos", columns)
+            cursor.execute("SELECT timezone FROM infos", columns)
             infos = cursor.fetchone()
             timezone = infos['timezone']
 
@@ -752,11 +754,9 @@ class ScheduleDataMapper:
 
         # fetch schedule periods
         columns = ('mode', 'hours', 'weekdays', 'monthdays', 'months', 'action', 'actionid', 'actionargs')
-        cursor.query("SELECT ${columns} FROM schedule_time "
-                     "WHERE schedule_id = %s",
-                     columns,
-                     (schedule_id,))
-        res = cursor.fetchall()
+        query = SQL("SELECT {columns} FROM schedule_time WHERE schedule_id = %s")
+        cursor.execute(query.format(columns=join_column_names(columns)), (schedule_id,))
+        res: list[DictRow] = cursor.fetchall()
 
         opened_periods = []
         closed_periods = []
@@ -781,38 +781,39 @@ class ScheduleDataMapper:
 
 class Context:
     # TODO: Recursive inclusion
-    def __init__(self, agi, cursor, context):
+    def __init__(self, agi, cursor: DictCursor, context):
         self.agi = agi
         self.cursor = cursor
 
         columns = ('context.name', 'context.displayname',
                    'contextinclude.include')
 
-        cursor.query("SELECT ${columns} FROM context "
-                     "LEFT JOIN contextinclude "
-                     "ON context.name = contextinclude.context "
-                     "LEFT JOIN context AS contextinc "
-                     "ON contextinclude.include = contextinc.name "
-                     "AND context.commented = contextinc.commented "
-                     "WHERE context.name = %s "
-                     "AND context.commented = 0 "
-                     "AND (contextinclude.include IS NULL "
-                     "     OR contextinc.name IS NOT NULL) "
-                     "ORDER BY contextinclude.priority ASC",
-                     columns,
-                     (context,))
-        res = cursor.fetchall()
+        query = SQL(
+            "SELECT {columns} FROM context "
+            "LEFT JOIN contextinclude "
+            "ON context.name = contextinclude.context "
+            "LEFT JOIN context AS contextinc "
+            "ON contextinclude.include = contextinc.name "
+            "AND context.commented = contextinc.commented "
+            "WHERE context.name = %s "
+            "AND context.commented = 0 "
+            "AND (contextinclude.include IS NULL "
+            "     OR contextinc.name IS NOT NULL) "
+            "ORDER BY contextinclude.priority ASC",
+        )
+        cursor.execute(query.format(columns=join_column_names(columns)), (context,))
 
+        res: list[DictRow] = cursor.fetchall()
         if not res:
             raise LookupError(f"Unable to find context entry (name: {context})")
 
-        self.name = res[0]['context.name']
-        self.displayname = res[0]['context.displayname']
+        self.name = res[0]['name']
+        self.displayname = res[0]['displayname']
         self.include = [self.name]
 
         for row in res:
-            if row['contextinclude.include']:
-                self.include.append(row['contextinclude.include'])
+            if row['include']:
+                self.include.append(row['include'])
 
 
 CALLERID_MATCHER = re.compile(r'^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<(\+?[0-9\*#]+)>)?$').match
@@ -841,7 +842,7 @@ class CallerID:
                 calleridnum = m.group(2)
                 logger.debug('caller_id parse: using fallback calleridnum: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
 
-        return (calleridname, calleridnum)
+        return calleridname, calleridnum
 
     @staticmethod
     def set(agi, callerid):
@@ -868,19 +869,20 @@ class CallerID:
 
         return True
 
-    def __init__(self, agi, cursor, xtype, typeval):
+    def __init__(self, agi, cursor: DictCursor, xtype, typeval):
         self.agi = agi
         self.cursor = cursor
         self.type = xtype
         self.typeval = typeval
 
-        cursor.query("SELECT ${columns} FROM callerid "
-                     "WHERE type = %s "
-                     "AND typeval = %s "
-                     "AND mode IS NOT NULL",
-                     ('mode', 'callerdisplay'),
-                     (xtype, typeval))
-        res = cursor.fetchone()
+        cursor.execute(
+            "SELECT mode, callerdisplay FROM callerid "
+            "WHERE type = %s "
+            "AND typeval = %s "
+            "AND mode IS NOT NULL",
+            (xtype, typeval)
+        )
+        res: DictRow = cursor.fetchone()
 
         self.mode = None
         self.calleridname = None
@@ -952,31 +954,27 @@ class CallerID:
 class ChanSIP:
 
     @staticmethod
-    def get_intf_and_suffix(cursor, xid):
-        cursor.query(
-            "SELECT ${columns} FROM endpoint_sip WHERE uuid = %s",
-            ('name',),
+    def get_intf_and_suffix(cursor: DictCursor, xid):
+        cursor.execute(
+            "SELECT name FROM endpoint_sip WHERE uuid = %s",
             (xid,),
         )
-        res = cursor.fetchone()
-
+        res: DictRow = cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find usersip entry (id: {xid})")
-
         return f'PJSIP/{res["name"]}', None
 
 
 class ChanIAX2:
 
     @staticmethod
-    def get_intf_and_suffix(cursor, xid):
+    def get_intf_and_suffix(cursor: DictCursor, xid):
 
-        cursor.query("SELECT ${columns} FROM useriax "
-                     "WHERE id = %s "
-                     "AND commented = 0",
-                     ('name',),
-                     (xid,))
-        res = cursor.fetchone()
+        cursor.execute(
+            "SELECT name FROM useriax WHERE id = %s AND commented = 0",
+             (xid,),
+        )
+        res: DictRow = cursor.fetchone()
 
         if not res:
             raise LookupError(f'Unable to find useriax entry (id: {xid})')
@@ -987,15 +985,14 @@ class ChanIAX2:
 class ChanCustom:
 
     @staticmethod
-    def get_intf_and_suffix(cursor, xid):
+    def get_intf_and_suffix(cursor: DictCursor, xid):
 
-        cursor.query("SELECT ${columns} FROM usercustom "
-                     "WHERE id = %s "
-                     "AND commented = 0",
-                     ('interface', 'intfsuffix'),
-                     (xid,))
-        res = cursor.fetchone()
+        cursor.execute(
+            "SELECT interface, intfsuffix FROM usercustom WHERE id = %s AND commented = 0",
+             (xid,),
+        )
 
+        res: DictRow = cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find usercustom entry (id: {xid})")
 

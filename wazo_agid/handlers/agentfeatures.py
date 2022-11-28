@@ -1,7 +1,10 @@
 # Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import re
+
+from psycopg2.extras import DictRow
 
 from wazo_agid import objects
 from wazo_agid.handlers.handler import Handler
@@ -35,9 +38,11 @@ class AgentFeatures(Handler):
         self._agi.set_variable('XIVO_AGENT_INTERFACE', device)
 
     def _get_agent_device(self):
-        self._cursor.query('SELECT state_interface FROM agent_login_status WHERE agent_id  = %s',
-                           parameters=(self.agent_id,))
-        res = self._cursor.fetchone()
+        self._cursor.execute(
+            'SELECT state_interface FROM agent_login_status WHERE agent_id  = %s',
+            (self.agent_id,)
+        )
+        res: DictRow = self._cursor.fetchone()
         if not res:
             raise LookupError(f'Unable to find agent (id: {self.agent_id})')
         device = res[0]

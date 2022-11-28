@@ -46,8 +46,9 @@ def apply_rules(agi, rules):
     if not rules:
         return
 
+    column_name = RIGHTCALL_AUTHORIZATION_COLNAME.split('.')[1]
     for rule in rules:
-        if rule[RIGHTCALL_AUTHORIZATION_COLNAME]:
+        if rule[column_name]:
             allow(agi)
 
-    deny(agi, rule[RIGHTCALL_PASSWD_COLNAME])
+    deny(agi, rule[RIGHTCALL_PASSWD_COLNAME.split('.')[1]])
