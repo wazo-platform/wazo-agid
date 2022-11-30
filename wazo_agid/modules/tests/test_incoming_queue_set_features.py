@@ -2,12 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from wazo_agid.modules import incoming_queue_set_features
 
 
 class TestHoldtimeAnnounce(unittest.TestCase):
-
     def setUp(self):
         self.agi = Mock()
         self.cursor = Mock()

@@ -11,7 +11,6 @@ from wazo_agid.handlers.handler import Handler
 
 
 class AgentFeatures(Handler):
-
     def __init__(self, agi, cursor, args):
         Handler.__init__(self, agi, cursor, args)
         self.agent_id = None
@@ -40,7 +39,7 @@ class AgentFeatures(Handler):
     def _get_agent_device(self):
         self._cursor.execute(
             'SELECT state_interface FROM agent_login_status WHERE agent_id  = %s',
-            (self.agent_id,)
+            (self.agent_id,),
         )
         res: DictRow = self._cursor.fetchone()
         if not res:

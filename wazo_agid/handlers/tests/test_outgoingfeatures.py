@@ -5,13 +5,12 @@ import unittest
 
 from hamcrest import assert_that
 from hamcrest.core import equal_to
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 from wazo_agid import objects
 
 
 class OutCallBuilder:
-
     def __init__(self):
         self._internal = 0
         self.callerId = ''
@@ -36,7 +35,6 @@ class OutCallBuilder:
 
 
 class UserBuilder:
-
     def __init__(self):
         self._caller_id = '"John"'
         self._out_caller_id = 'default'
@@ -85,13 +83,14 @@ def a_user():
 
 
 class TestOutgoingFeatures(unittest.TestCase):
-
     def setUp(self):
-        config = {'call_recording': {'filename_template': '{{ mock }}',
-                                     'filename_extension': 'wav'}}
-        agi_environment = {
-            'agi_channel': 'PJSIP/my-channel-0001'
+        config = {
+            'call_recording': {
+                'filename_template': '{{ mock }}',
+                'filename_extension': 'wav',
+            }
         }
+        agi_environment = {'agi_channel': 'PJSIP/my-channel-0001'}
         self._agi = Mock(config=config, env=agi_environment)
         self._cursor = Mock()
         self._args = Mock()
@@ -118,7 +117,9 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         self.outgoing_features._set_userfield()
 
-        assert_that(self._agi.set_variable.call_count, equal_to(0), 'Set variable call count')
+        assert_that(
+            self._agi.set_variable.call_count, equal_to(0), 'Set variable call count'
+        )
 
     def test_set_userfield_no_user_no_error(self):
         outcall = an_outcall().build()
@@ -148,7 +149,9 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         self.outgoing_features._set_user_music_on_hold()
 
-        assert_that(self._agi.set_variable.call_count, equal_to(0), 'Set variable call count')
+        assert_that(
+            self._agi.set_variable.call_count, equal_to(0), 'Set variable call count'
+        )
 
     def test_set_user_music_on_hold_no_user_no_error(self):
         outcall = an_outcall().build()
@@ -159,11 +162,8 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_outcall_internal(self, mock_set_caller_id):
-        user = (a_user()
-                .build())
-        outcall = (an_outcall()
-                   .internal()
-                   .build())
+        user = a_user().build()
+        outcall = an_outcall().internal().build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -175,9 +175,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_no_user_and_outcall_external(self, mock_set_caller_id):
         user = None
-        outcall = (an_outcall()
-                   .external()
-                   .build())
+        outcall = an_outcall().external().build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -187,12 +185,11 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('wazo_agid.objects.CallerID.set')
-    def test_set_caller_id_no_user_and_outcall_external_caller_id(self, mock_set_caller_id):
+    def test_set_caller_id_no_user_and_outcall_external_caller_id(
+        self, mock_set_caller_id
+    ):
         user = None
-        outcall = (an_outcall()
-                   .external()
-                   .withCallerId('27857218')
-                   .build())
+        outcall = an_outcall().external().withCallerId('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -203,12 +200,8 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_default_and_outcall_external(self, mock_set_caller_id):
-        user = (a_user()
-                .withDefaultOutCallerId()
-                .build())
-        outcall = (an_outcall()
-                   .external()
-                   .build())
+        user = a_user().withDefaultOutCallerId().build()
+        outcall = an_outcall().external().build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -218,14 +211,11 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('wazo_agid.objects.CallerID.set')
-    def test_set_caller_id_user_default_and_outcall_external_caller_id(self, mock_set_caller_id):
-        user = (a_user()
-                .withDefaultOutCallerId()
-                .build())
-        outcall = (an_outcall()
-                   .external()
-                   .withCallerId('27857218')
-                   .build())
+    def test_set_caller_id_user_default_and_outcall_external_caller_id(
+        self, mock_set_caller_id
+    ):
+        user = a_user().withDefaultOutCallerId().build()
+        outcall = an_outcall().external().withCallerId('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -235,13 +225,11 @@ class TestOutgoingFeatures(unittest.TestCase):
         mock_set_caller_id.assert_called_once_with(self._agi, '27857218')
 
     @patch('wazo_agid.objects.CallerID.set')
-    def test_set_caller_id_user_anonymous_and_outcall_external(self, mock_set_caller_id):
-        user = (a_user()
-                .withAnonymousOutCallerId()
-                .build())
-        outcall = (an_outcall()
-                   .external()
-                   .build())
+    def test_set_caller_id_user_anonymous_and_outcall_external(
+        self, mock_set_caller_id
+    ):
+        user = a_user().withAnonymousOutCallerId().build()
+        outcall = an_outcall().external().build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -256,14 +244,11 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.assertFalse(mock_set_caller_id.called)
 
     @patch('wazo_agid.objects.CallerID.set')
-    def test_set_caller_id_user_anonymous_and_outcall_external_caller_id(self, mock_set_caller_id):
-        user = (a_user()
-                .withAnonymousOutCallerId()
-                .build())
-        outcall = (an_outcall()
-                   .external()
-                   .withCallerId('27857218')
-                   .build())
+    def test_set_caller_id_user_anonymous_and_outcall_external_caller_id(
+        self, mock_set_caller_id
+    ):
+        user = a_user().withAnonymousOutCallerId().build()
+        outcall = an_outcall().external().withCallerId('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -279,12 +264,8 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_custom_and_outcall_external(self, mock_set_caller_id):
-        user = (a_user()
-                .withCustomOutCallerId('"Custom1"')
-                .build())
-        outcall = (an_outcall()
-                   .external()
-                   .build())
+        user = a_user().withCustomOutCallerId('"Custom1"').build()
+        outcall = an_outcall().external().build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -294,14 +275,11 @@ class TestOutgoingFeatures(unittest.TestCase):
         mock_set_caller_id.assert_called_once_with(self._agi, '"Custom1"')
 
     @patch('wazo_agid.objects.CallerID.set')
-    def test_set_caller_id_user_custom_and_outcall_external_caller_id(self, mock_set_caller_id):
-        user = (a_user()
-                .withCustomOutCallerId('"Custom1"')
-                .build())
-        outcall = (an_outcall()
-                   .external()
-                   .withCallerId('27857218')
-                   .build())
+    def test_set_caller_id_user_custom_and_outcall_external_caller_id(
+        self, mock_set_caller_id
+    ):
+        user = a_user().withCustomOutCallerId('"Custom1"').build()
+        outcall = an_outcall().external().withCallerId('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user

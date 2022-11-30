@@ -6,7 +6,7 @@ import configparser
 import io
 
 from hamcrest import assert_that, calling, not_, raises
-from mock import Mock
+from unittest.mock import Mock
 
 from .. import getring
 

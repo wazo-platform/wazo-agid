@@ -91,10 +91,12 @@ class ScheduleBuilder:
         return self
 
     def build(self):
-        return Schedule(self._opened_periods,
-                        self._closed_periods,
-                        self._default_action,
-                        self._timezone_name)
+        return Schedule(
+            self._opened_periods,
+            self._closed_periods,
+            self._default_action,
+            self._timezone_name,
+        )
 
 
 class SchedulePeriod:

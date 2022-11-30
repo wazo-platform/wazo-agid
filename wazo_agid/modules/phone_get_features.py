@@ -42,8 +42,12 @@ def _set_current_forwards(agi, user_id):
     agi.set_variable('XIVO_ENABLERNA', _extract_and_format_enabled(noanswer_forward))
     agi.set_variable('XIVO_DESTRNA', _extract_and_format_destination(noanswer_forward))
     unconditional_forward = forwards['unconditional']
-    agi.set_variable('XIVO_ENABLEUNC', _extract_and_format_enabled(unconditional_forward))
-    agi.set_variable('XIVO_DESTUNC', _extract_and_format_destination(unconditional_forward))
+    agi.set_variable(
+        'XIVO_ENABLEUNC', _extract_and_format_enabled(unconditional_forward)
+    )
+    agi.set_variable(
+        'XIVO_DESTUNC', _extract_and_format_destination(unconditional_forward)
+    )
 
 
 def _extract_and_format_enabled(forward):
@@ -60,9 +64,11 @@ def _get_forwards(agi, user_id):
         return confd_client.users(user_id).list_forwards()
     except Exception as e:
         logger.error('Error during getting forwards: %s', e)
-        return {'busy': {'enabled': False, 'destination': None},
-                'noanswer': {'enabled': False, 'destination': None},
-                'unconditional': {'enabled': False, 'destination': None}}
+        return {
+            'busy': {'enabled': False, 'destination': None},
+            'noanswer': {'enabled': False, 'destination': None},
+            'unconditional': {'enabled': False, 'destination': None},
+        }
 
 
 agid.register(phone_get_features)

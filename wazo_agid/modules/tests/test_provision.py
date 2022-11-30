@@ -1,10 +1,9 @@
-# -*- coding: UTF-8 -*-
-# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
-from mock import Mock
+from unittest.mock import Mock
 
 from wazo_agid.modules import provision
 
@@ -31,7 +30,9 @@ class TestDoProvision(unittest.TestCase):
 
         self.assertRaises(Exception, self.provision, "123456", "127.0.0.1")
 
-    def test_given_line_and_device_exist_when_provisioning_then_line_and_device_associated(self):
+    def test_given_line_and_device_exist_when_provisioning_then_line_and_device_associated(
+        self,
+    ):
         device = {'id': '1234abcd', 'ip': '127.0.0.1'}
         line = {'id': 1234, 'provisioning_code': "123456"}
         self.client.devices.list.return_value = {'total': 1, 'items': [device]}
@@ -40,7 +41,9 @@ class TestDoProvision(unittest.TestCase):
         self.provision("123456", "127.0.0.1")
 
         self.client.devices.list.assert_called_once_with(ip="127.0.0.1", recurse=True)
-        self.client.lines.list.assert_called_once_with(provisioning_code="123456", recurse=True)
+        self.client.lines.list.assert_called_once_with(
+            provisioning_code="123456", recurse=True
+        )
         self.client.devices.synchronize.assert_called_once_with(device['id'])
 
         association = self.client.lines

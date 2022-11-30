@@ -59,17 +59,24 @@ class GroupFeatures(Handler):
         self._referer = self._agi.get_variable(dialplan_variables.FWD_REFERER)
 
         groupfeatures_columns = (
-            'id', 'name', 'label', 'timeout', 'transfer_user', 'transfer_call', 'write_caller',
-            'write_calling', 'ignore_forward', 'preprocess_subroutine', 'mark_answered_elsewhere',
+            'id',
+            'name',
+            'label',
+            'timeout',
+            'transfer_user',
+            'transfer_call',
+            'write_caller',
+            'write_calling',
+            'ignore_forward',
+            'preprocess_subroutine',
+            'mark_answered_elsewhere',
             'tenant_uuid',
         )
         queue_columns = ('musicclass',)
         extensions_columns = ('exten', 'context')
-        columns = (
-            [f"groupfeatures.{c}" for c in groupfeatures_columns] +
-            [f"queue.{c}" for c in queue_columns] +
-            [f"extensions.{c}" for c in extensions_columns]
-        )
+        columns = [f"groupfeatures.{c}" for c in groupfeatures_columns]
+        columns += [f"queue.{c}" for c in queue_columns]
+        columns += [f"extensions.{c}" for c in extensions_columns]
 
         query = SQL(
             "SELECT {columns} FROM groupfeatures "
@@ -82,7 +89,9 @@ class GroupFeatures(Handler):
             "AND queue.category = 'group' "
             "AND queue.commented = 0"
         )
-        self._cursor.execute(query.format(columns=join_column_names(columns)), (self._id,))
+        self._cursor.execute(
+            query.format(columns=join_column_names(columns)), (self._id,)
+        )
         res: DictRow = self._cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find group (id: {self._id})")
@@ -140,7 +149,9 @@ class GroupFeatures(Handler):
 
     def _set_preprocess_subroutine(self):
         if self._preprocess_subroutine:
-            self._agi.set_variable('XIVO_GROUPPREPROCESS_SUBROUTINE', self._preprocess_subroutine)
+            self._agi.set_variable(
+                'XIVO_GROUPPREPROCESS_SUBROUTINE', self._preprocess_subroutine
+            )
 
     def _set_timeout(self):
         if self._timeout:
@@ -150,10 +161,14 @@ class GroupFeatures(Handler):
 
     def _set_dial_action(self):
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
-            objects.DialAction(self._agi, self._cursor, event, "group", self._id).set_variables()
+            objects.DialAction(
+                self._agi, self._cursor, event, "group", self._id
+            ).set_variables()
 
     def _set_rewrite_cid(self):
-        objects.CallerID(self._agi, self._cursor, 'group', self._id).rewrite(force_rewrite=False)
+        objects.CallerID(self._agi, self._cursor, 'group', self._id).rewrite(
+            force_rewrite=False
+        )
 
     def _set_schedule(self):
         path = self._agi.get_variable('XIVO_PATH')

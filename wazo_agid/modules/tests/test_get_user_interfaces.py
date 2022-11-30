@@ -3,7 +3,7 @@
 
 from unittest import TestCase
 
-from mock import Mock
+from unittest.mock import Mock
 from hamcrest import (
     assert_that,
     calling,
@@ -51,11 +51,14 @@ class TestUserLine(TestCase):
     def test_many_interfaces(self):
         user_line = UserLine(self.agi, 'abc')
 
-        assert_that(user_line.interfaces, contains_inanyorder(
-            'sccp/two',
-            'dahdi/i1/55555555',
-            'one-1',
-            'one-2',
-            'two-1',
-            'PJSIP/three',
-        ))
+        assert_that(
+            user_line.interfaces,
+            contains_inanyorder(
+                'sccp/two',
+                'dahdi/i1/55555555',
+                'one-1',
+                'one-2',
+                'two-1',
+                'PJSIP/three',
+            ),
+        )

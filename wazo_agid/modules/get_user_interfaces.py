@@ -10,7 +10,6 @@ class UnknownUser(Exception):
 
 
 class _UserLine:
-
     def __init__(self, agi, user_uuid):
         self._agi = agi
         self._user_uuid = user_uuid

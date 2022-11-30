@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
-from mock import Mock
+from unittest.mock import Mock
 from hamcrest import assert_that, equal_to
 
 from ..paging import build_options
 
-class TestPagingOptions(TestCase):
 
+class TestPagingOptions(TestCase):
     def test_build_options_nothing_set(self):
         paging = Mock(
             duplex=False,
@@ -40,7 +40,10 @@ class TestPagingOptions(TestCase):
 
         assert_that(
             options,
-            equal_to('sb(paging^add-sip-headers^1)dqriA(/var/lib/wazo/sounds/tenants/<tenant_uuid>/playback/filename)n'),
+            equal_to(
+                'sb(paging^add-sip-headers^1)dqriA'
+                '(/var/lib/wazo/sounds/tenants/<tenant_uuid>/playback/filename)n'
+            ),
         )
 
     def test_build_options_announcement_play_no_file(self):

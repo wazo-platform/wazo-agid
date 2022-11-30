@@ -3,18 +3,13 @@
 
 import unittest
 
-from hamcrest import assert_that
-from hamcrest import contains_string
-from hamcrest import equal_to
-from mock import Mock
-from mock import patch
-from mock import sentinel
+from hamcrest import assert_that, contains_string, equal_to
+from unittest.mock import Mock, patch, sentinel
 from wazo_agid.fastagi import FastAGI
 from wazo_agid.modules.callerid_forphones import callerid_forphones, FAKE_XIVO_USER_UUID
 
 
 class TestCallerIdForPhone(unittest.TestCase):
-
     def setUp(self):
         self.agi = Mock(FastAGI)
         self.dird_client = Mock()
@@ -75,8 +70,10 @@ class TestCallerIdForPhone(unittest.TestCase):
         }
 
         lookup_result = {'number': '415', 'firstname': 'Bob', 'lastname': 'wonderland'}
-        self.dird_client.directories.reverse.return_value = {'display': b'Bob',
-                                                             'fields': lookup_result}
+        self.dird_client.directories.reverse.return_value = {
+            'display': b'Bob',
+            'fields': lookup_result,
+        }
         mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'user_uuid'
 
         self.agi.get_variable.side_effect = [0, sentinel.agi_variable]
@@ -94,7 +91,9 @@ class TestCallerIdForPhone(unittest.TestCase):
         self.agi.set_callerid.assert_called_once_with(expected_callerid)
         _, set_var_result = self.agi.set_variable.call_args[0]
         for key, value in lookup_result.items():
-            assert_that(set_var_result.decode('utf8'), contains_string(f'{key}: {value}'))
+            assert_that(
+                set_var_result.decode('utf8'), contains_string(f'{key}: {value}')
+            )
 
     @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_when_dao_return_none(self, mock_dao):
@@ -123,6 +122,8 @@ class TestCallerIdForPhone(unittest.TestCase):
             'agi_calleridname': '5555551234',
             'agi_callerid': '5555551234',
         }
-        self.dird_client.directories.reverse.side_effect = AssertionError('Should not raise')
+        self.dird_client.directories.reverse.side_effect = AssertionError(
+            'Should not raise'
+        )
 
         callerid_forphones(self.agi, Mock(), Mock())

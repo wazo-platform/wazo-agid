@@ -7,7 +7,7 @@ from hamcrest import (
     assert_that,
     equal_to,
 )
-from mock import (Mock, patch, sentinel as s)
+from unittest.mock import Mock, patch, sentinel as s
 
 from ..helpers import (
     build_sip_interface,
@@ -16,17 +16,21 @@ from ..helpers import (
     _has_mobile_connection as has_mobile_connection,
 )
 
-ABCD_INTERFACE = 'PJSIP/ycetqvtr/sip:n753iqfr@127.0.0.1:44530;transport=ws&PJSIP/ycetqvtr/sip:b6405ov4@127.0.0.1:44396;transport=ws'
+ABCD_INTERFACE = (
+    'PJSIP/ycetqvtr/sip:n753iqfr@127.0.0.1:44530;transport=ws&'
+    'PJSIP/ycetqvtr/sip:b6405ov4@127.0.0.1:44396;transport=ws'
+)
 
 
 class TestBuildSIPInterface(unittest.TestCase):
-
     def setUp(self):
         self.agi = Mock()
         self.auth_client = Mock()
         self.agi.config = {'auth': {'client': self.auth_client}}
         self.channel_variables = {}
-        self.agi.get_variable.side_effect = lambda var: self.channel_variables.get(var, '')
+        self.agi.get_variable.side_effect = lambda var: self.channel_variables.get(
+            var, ''
+        )
 
     @patch('wazo_agid.helpers._is_webrtc', Mock(return_value=False))
     @patch('wazo_agid.helpers._has_mobile_connection', Mock(return_value=False))
@@ -80,7 +84,6 @@ class TestBuildSIPInterface(unittest.TestCase):
 
 
 class TestIsRegisteredAndMobile(unittest.TestCase):
-
     def test_no_registered_contacts(self):
         agi = Mock()
         agi.get_variable.return_value = ''
@@ -137,7 +140,6 @@ class TestIsRegisteredAndMobile(unittest.TestCase):
 
 
 class TestHasMobileConnection(unittest.TestCase):
-
     def setUp(self):
         self.agi = Mock()
         self.auth_client = Mock()
@@ -153,8 +155,14 @@ class TestHasMobileConnection(unittest.TestCase):
         self.agi.set_variable.assert_not_called()
 
     def test_no_mobile_connections_no_session(self):
-        self.auth_client.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
-        self.auth_client.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': False}]}
+        self.auth_client.token.list.return_value = {
+            'items': [],
+            'filtered': 0,
+            'total': 42,
+        }
+        self.auth_client.users.get_sessions.return_value = {
+            'items': [{'mobile': False}, {'mobile': False}]
+        }
 
         result = has_mobile_connection(self.agi, s.user_uuid)
 
@@ -174,8 +182,14 @@ class TestHasMobileConnection(unittest.TestCase):
         self.agi.set_variable.called_once_with('WAZO_MOBILE_CONNECTION', True)
 
     def test_mobile_session_only(self):
-        self.auth_client.token.list.return_value = {'items': [], 'filtered': 0, 'total': 42}
-        self.auth_client.users.get_sessions.return_value = {'items': [{'mobile': False}, {'mobile': True}]}
+        self.auth_client.token.list.return_value = {
+            'items': [],
+            'filtered': 0,
+            'total': 42,
+        }
+        self.auth_client.users.get_sessions.return_value = {
+            'items': [{'mobile': False}, {'mobile': True}]
+        }
 
         result = has_mobile_connection(self.agi, s.user_uuid)
 

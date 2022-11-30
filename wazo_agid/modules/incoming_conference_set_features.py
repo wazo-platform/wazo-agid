@@ -28,15 +28,21 @@ def incoming_conference_set_features(agi, cursor, args):
             else:
                 agi.stream_file('conf-invalidpin')
         else:
-            agi.dp_break('Unable to join the conference room, wrong pin'
-                         f'(conference_id: {conference.id}, name: {conference.name})')
+            agi.dp_break(
+                'Unable to join the conference room, wrong pin'
+                f'(conference_id: {conference.id}, name: {conference.name})'
+            )
 
     agi.set_variable('WAZO_CONFBRIDGE_ID', conference.id)
     agi.set_variable('WAZO_CONFBRIDGE_TENANT_UUID', conference.tenant_uuid)
-    agi.set_variable('WAZO_CONFBRIDGE_BRIDGE_PROFILE', f'xivo-bridge-profile-{conference.id}')
+    agi.set_variable(
+        'WAZO_CONFBRIDGE_BRIDGE_PROFILE', f'xivo-bridge-profile-{conference.id}'
+    )
     agi.set_variable('WAZO_CONFBRIDGE_USER_PROFILE', user_profile)
     agi.set_variable('WAZO_CONFBRIDGE_MENU', menu)
-    agi.set_variable('WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or '')
+    agi.set_variable(
+        'WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or ''
+    )
     agi.appexec('CELGenUserEvent', f'WAZO_CONFERENCE, NAME: {conference.name or ""}')
 
 

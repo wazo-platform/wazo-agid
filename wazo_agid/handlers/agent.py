@@ -10,7 +10,9 @@ AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 def login_agent(agi, agent_id, extension, context, tenant_uuid):
     agentd_client = agi.config['agentd']['client']
     try:
-        agentd_client.agents.login_agent(agent_id, extension, context, tenant_uuid=tenant_uuid)
+        agentd_client.agents.login_agent(
+            agent_id, extension, context, tenant_uuid=tenant_uuid
+        )
     except AgentdClientError as e:
         if e.error == error.ALREADY_LOGGED:
             agi.set_variable(AGENTSTATUS_VAR, 'already_logged')

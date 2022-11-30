@@ -27,9 +27,11 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
     if pdffile is None:
         pdffile = _pdffile_from_file(tifffile)
     try:
-        subprocess.check_output([TIFF2PDF_PATH, "-o", pdffile, tifffile],
-                                close_fds=True,
-                                stderr=subprocess.STDOUT)
+        subprocess.check_output(
+            [TIFF2PDF_PATH, "-o", pdffile, tifffile],
+            close_fds=True,
+            stderr=subprocess.STDOUT,
+        )
     except subprocess.CalledProcessError as e:
         logger.error('Command: "%s"', e.cmd)
         logger.error('Command output: "%s"', e.output)
@@ -60,16 +62,23 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
             p = subprocess.Popen(
                 [
                     MUTT_PATH,
-                    "-e", "set copy=no",
-                    "-e", f"set from={email_from}",
-                    "-e", f"set realname='{email_realname}'",
-                    "-e", "set use_from=yes",
-                    "-s", subject % format_dict,
-                    "-a", pdffile, "--",
-                    email
+                    "-e",
+                    "set copy=no",
+                    "-e",
+                    f"set from={email_from}",
+                    "-e",
+                    f"set realname='{email_realname}'",
+                    "-e",
+                    "set use_from=yes",
+                    "-s",
+                    subject % format_dict,
+                    "-a",
+                    pdffile,
+                    "--",
+                    email,
                 ],
                 stdin=subprocess.PIPE,
-                close_fds=True
+                close_fds=True,
             )
             p.communicate((content % format_dict).encode('utf8'))
             if p.returncode:
@@ -79,6 +88,7 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
                 os.remove(pdffile)
             except OSError as e:
                 logger.info("Could not remove pdffile %s: %s", pdffile, e)
+
     return aux
 
 
@@ -86,7 +96,9 @@ def _new_printer_backend(name=None, convert_to_pdf=None):
     # Return a backend taking no additional argument, which prints the fax
     # to the given printer when called.
     # Note that if name is None, it uses the default printer.
-    convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
+    convert_to_pdf = _convert_config_value_to_bool(
+        convert_to_pdf, True, 'convert_to_pdf'
+    )
 
     def aux(faxfile, dstnum, args):
         lp_cmd = [LP_PATH, '-s']
@@ -105,6 +117,7 @@ def _new_printer_backend(name=None, convert_to_pdf=None):
                     os.remove(pdffile)
                 except OSError as e:
                     logger.info('Could not remove pdffile %s: %s', pdffile, e)
+
     return aux
 
 
@@ -120,11 +133,15 @@ def _convert_config_value_to_bool(config_value, default, param_name):
         return default
 
 
-def _new_ftp_backend(host, username, password, port=21, directory=None, convert_to_pdf=None):
+def _new_ftp_backend(
+    host, username, password, port=21, directory=None, convert_to_pdf=None
+):
     # Return a backend taking no argument, which transfers the fax,
     # in its original format, to the given FTP server when called.
     # Note that a connection is made every time the backend is called.
-    convert_to_pdf = _convert_config_value_to_bool(convert_to_pdf, True, 'convert_to_pdf')
+    convert_to_pdf = _convert_config_value_to_bool(
+        convert_to_pdf, True, 'convert_to_pdf'
+    )
     port = int(port)
 
     def aux(faxfile, dstnum, args):
@@ -193,9 +210,11 @@ def handle_fax(agi, cursor, args):
         agi.dp_break(e)
 
 
-_BACKENDS_FACTORY = [("mail", _new_mail_backend),
-                     ("printer", _new_printer_backend),
-                     ("ftp", _new_ftp_backend)]
+_BACKENDS_FACTORY = [
+    ("mail", _new_mail_backend),
+    ("printer", _new_printer_backend),
+    ("ftp", _new_ftp_backend),
+]
 
 
 def setup_handle_fax(cursor):
@@ -224,8 +243,9 @@ def setup_handle_fax(cursor):
     for backend_prefix, backend_factory in _BACKENDS_FACTORY:
         for section in [s for s in config.sections() if s.startswith(backend_prefix)]:
             backend_factory_args = dict(config.items(section))
-            logger.debug("Creating backend, name %s, factory %s", section,
-                         backend_factory)
+            logger.debug(
+                "Creating backend, name %s, factory %s", section, backend_factory
+            )
             backends[section] = backend_factory(**backend_factory_args)
     logger.debug("Created %s backends", len(backends))
 
@@ -236,8 +256,11 @@ def setup_handle_fax(cursor):
         cur_destination = section[7:]  # 6 == len("dstnum_")
         cur_backend_ids = [s.strip() for s in config.get(section, "dest").split(",")]
         cur_backends = _build_backends_list(backends, cur_backend_ids, cur_destination)
-        logger.debug('Creating destination, dstnum %s, backends %s', cur_destination,
-                     cur_backend_ids)
+        logger.debug(
+            'Creating destination, dstnum %s, backends %s',
+            cur_destination,
+            cur_backend_ids,
+        )
         DESTINATIONS[cur_destination] = cur_backends
     logger.debug("Created %s destinations", len(DESTINATIONS))
 
@@ -248,8 +271,11 @@ def _build_backends_list(available_backends, backend_ids, destination):
         if backend_id in available_backends:
             backends.append(available_backends[backend_id])
         else:
-            logger.warning('Destination %s is referencing unknown backend "%s" in xivo_fax.conf',
-                           destination, backend_id)
+            logger.warning(
+                'Destination %s is referencing unknown backend "%s" in xivo_fax.conf',
+                destination,
+                backend_id,
+            )
     return backends
 
 

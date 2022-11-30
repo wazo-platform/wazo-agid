@@ -9,8 +9,12 @@ from typing import Sequence
 from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Identifier
 
-from wazo_agid.schedule import ScheduleAction, SchedulePeriodBuilder, Schedule, \
-    AlwaysOpenedSchedule
+from wazo_agid.schedule import (
+    ScheduleAction,
+    SchedulePeriodBuilder,
+    Schedule,
+    AlwaysOpenedSchedule,
+)
 
 from xivo_dao import user_dao
 
@@ -53,7 +57,7 @@ class ExtenFeatures:
             'callrecord',
             'incallfilter',
             'enablednd',
-        )
+        ),
     }
 
     def __init__(self, agi, cursor: DictCursor):
@@ -72,7 +76,7 @@ class ExtenFeatures:
             "SELECT typeval FROM extensions "
             "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
             "AND commented = 0",
-            self.featureslist
+            self.featureslist,
         )
         res: list[DictRow] = self.cursor.fetchall()
 
@@ -85,13 +89,15 @@ class ExtenFeatures:
             setattr(self, feature, (feature in enabled_features))
 
     def get_name_by_exten(self, exten):
-        self.cursor.execute("SELECT typeval FROM extensions "
-                          "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
-                          "AND (exten = %s "
-                          "OR (SUBSTR(exten,1,1) = '_' "
-                          "    AND SUBSTR(exten, 2, %s) LIKE %s)) "
-                          "AND commented = 0",
-                          self.featureslist + (exten, len(exten), f"{exten}%"))
+        self.cursor.execute(
+            "SELECT typeval FROM extensions "
+            "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
+            "AND (exten = %s "
+            "OR (SUBSTR(exten,1,1) = '_' "
+            "    AND SUBSTR(exten, 2, %s) LIKE %s)) "
+            "AND commented = 0",
+            self.featureslist + (exten, len(exten), f"{exten}%"),
+        )
 
         res: DictRow = self.cursor.fetchone()
         if not res:
@@ -118,11 +124,28 @@ class ExtenFeatures:
 
 
 class VMBox:
-    def __init__(self, agi, cursor: DictCursor, xid=None, mailbox=None, context=None, commentcond=True):
+    def __init__(
+        self,
+        agi,
+        cursor: DictCursor,
+        xid=None,
+        mailbox=None,
+        context=None,
+        commentcond=True,
+    ):
         self.agi = agi
         self.cursor = cursor
 
-        vm_columns = ('uniqueid', 'mailbox', 'context', 'password', 'email', 'commented', 'language', 'skipcheckpass')
+        vm_columns = (
+            'uniqueid',
+            'mailbox',
+            'context',
+            'password',
+            'email',
+            'commented',
+            'language',
+            'skipcheckpass',
+        )
         columns = ["voicemail." + c for c in vm_columns]
 
         if commentcond:
@@ -131,22 +154,36 @@ class VMBox:
             where_comment = ""
 
         if xid:
-            query = SQL("SELECT {columns} FROM voicemail WHERE voicemail.uniqueid = %s " + where_comment)
+            query = SQL(
+                "SELECT {columns} FROM voicemail WHERE voicemail.uniqueid = %s "
+                + where_comment
+            )
             cursor.execute(query.format(columns=join_column_names(columns)), (xid,))
         elif mailbox and context:
             contextinclude = Context(agi, cursor, context).include
-            query = SQL("SELECT {columns} FROM voicemail "
-                         "WHERE voicemail.mailbox = %s "
-                         "AND voicemail.context IN (" + ", ".join(["%s"] * len(contextinclude)) + ") " +
-                         where_comment)
-            cursor.execute(query.format(columns=join_column_names(columns)), [mailbox] + contextinclude)
+            query = SQL(
+                "SELECT {columns} FROM voicemail "
+                "WHERE voicemail.mailbox = %s "
+                "AND voicemail.context IN ("
+                + ", ".join(["%s"] * len(contextinclude))
+                + ") "
+                + where_comment
+            )
+            cursor.execute(
+                query.format(columns=join_column_names(columns)),
+                [mailbox] + contextinclude,
+            )
         else:
-            raise LookupError("id or mailbox@context must be provided to look up a voicemail entry")
+            raise LookupError(
+                "id or mailbox@context must be provided to look up a voicemail entry"
+            )
 
         res: DictRow = cursor.fetchone()
 
         if not res:
-            raise LookupError(f"Unable to find voicemail box (id: {xid}, mailbox: {mailbox}, context: {context})")
+            raise LookupError(
+                f"Unable to find voicemail box (id: {xid}, mailbox: {mailbox}, context: {context})"
+            )
 
         self.id = res['uniqueid']
         self.mailbox = res['mailbox']
@@ -174,7 +211,6 @@ class VMBox:
 
 
 class Meeting:
-
     def __init__(self, agi, cursor: DictCursor, tenant_uuid, uuid=None, number=None):
         self.agi = agi
         self.cursor = cursor
@@ -182,7 +218,9 @@ class Meeting:
         self.number = number
         self.tenant_uuid = tenant_uuid
 
-        query = SQL("SELECT uuid, name FROM meeting WHERE {field} = %s and tenant_uuid = %s")
+        query = SQL(
+            "SELECT uuid, name FROM meeting WHERE {field} = %s and tenant_uuid = %s"
+        )
         if uuid:
             field = 'uuid'
             arguments = (uuid, tenant_uuid)
@@ -203,7 +241,6 @@ class Meeting:
 
 
 class MOH:
-
     def __init__(self, agi, cursor, uuid):
         self.agi = agi
         self.cursor = cursor
@@ -222,7 +259,6 @@ class MOH:
 
 
 class Paging:
-
     def __init__(self, agi, cursor, number, userid):
         self.agi = agi
         self.cursor = cursor
@@ -243,9 +279,7 @@ class Paging:
             'tenant_uuid',
         )
 
-        query = SQL("SELECT {columns} FROM paging "
-                    "WHERE number = %s "
-                    "AND commented = 0")
+        query = SQL("SELECT {columns} FROM paging WHERE number = %s AND commented = 0")
         cursor.execute(query.format(columns=join_column_names(columns)), (number,))
         res: DictRow = cursor.fetchone()
         if not res:
@@ -272,9 +306,16 @@ class Paging:
 
         res: DictRow = cursor.fetchone()
         if not res:
-            raise LookupError(f"Unable to find paging caller entry (userfeaturesid: {userid})")
+            raise LookupError(
+                f"Unable to find paging caller entry (userfeaturesid: {userid})"
+            )
 
-        columns = ('endpoint_sip_uuid', 'endpoint_sccp_id', 'endpoint_custom_id', 'name')
+        columns = (
+            'endpoint_sip_uuid',
+            'endpoint_sccp_id',
+            'endpoint_custom_id',
+            'name',
+        )
 
         query = SQL(
             "SELECT {columns} FROM paginguser "
@@ -302,8 +343,9 @@ class Paging:
 
 
 class User:
-
-    def __init__(self, agi, cursor: DictCursor, xid=None, exten=None, context=None, agent_id=None):
+    def __init__(
+        self, agi, cursor: DictCursor, xid=None, exten=None, context=None, agent_id=None
+    ):
         self.agi = agi
         self.cursor = cursor
 
@@ -347,16 +389,26 @@ class User:
         self.preprocess_subroutine = user_row.preprocess_subroutine
         self.bsfilter = user_row.bsfilter
         self.rightcallcode = user_row.rightcallcode
-        self.call_record_outgoing_external_enabled = user_row.call_record_outgoing_external_enabled
-        self.call_record_outgoing_internal_enabled = user_row.call_record_outgoing_internal_enabled
-        self.call_record_incoming_external_enabled = user_row.call_record_incoming_external_enabled
-        self.call_record_incoming_internal_enabled = user_row.call_record_incoming_internal_enabled
-        self.call_record_enabled = all((
-            self.call_record_outgoing_external_enabled,
-            self.call_record_outgoing_internal_enabled,
-            self.call_record_incoming_external_enabled,
-            self.call_record_incoming_internal_enabled,
-        ))
+        self.call_record_outgoing_external_enabled = (
+            user_row.call_record_outgoing_external_enabled
+        )
+        self.call_record_outgoing_internal_enabled = (
+            user_row.call_record_outgoing_internal_enabled
+        )
+        self.call_record_incoming_external_enabled = (
+            user_row.call_record_incoming_external_enabled
+        )
+        self.call_record_incoming_internal_enabled = (
+            user_row.call_record_incoming_internal_enabled
+        )
+        self.call_record_enabled = all(
+            (
+                self.call_record_outgoing_external_enabled,
+                self.call_record_outgoing_internal_enabled,
+                self.call_record_incoming_external_enabled,
+                self.call_record_incoming_internal_enabled,
+            )
+        )
 
         if self.destunc == '':
             self.enableunc = 0
@@ -394,13 +446,7 @@ class User:
                 "call_record_incoming_external_enabled = %s, "
                 "call_record_incoming_internal_enabled = %s "
                 "WHERE id = %s",
-                (
-                    enabled,
-                    enabled,
-                    enabled,
-                    enabled,
-                    self.id
-                ),
+                (enabled, enabled, enabled, enabled, self.id),
             )
             self.call_record_enabled = enabled
         else:
@@ -416,12 +462,29 @@ class Queue:
         self.cursor = cursor
 
         queuefeatures_columns = [
-            'id', 'tenant_uuid', 'number', 'context', 'name', 'data_quality',
-            'hitting_callee', 'hitting_caller', 'retries', 'ring',
-            'transfer_user', 'transfer_call', 'write_caller',
-            'write_calling', 'ignore_forward', 'url', 'announceoverride', 'timeout',
-            'preprocess_subroutine', 'announce_holdtime', 'waittime',
-            'waitratio', 'mark_answered_elsewhere'
+            'id',
+            'tenant_uuid',
+            'number',
+            'context',
+            'name',
+            'data_quality',
+            'hitting_callee',
+            'hitting_caller',
+            'retries',
+            'ring',
+            'transfer_user',
+            'transfer_call',
+            'write_caller',
+            'write_calling',
+            'ignore_forward',
+            'url',
+            'announceoverride',
+            'timeout',
+            'preprocess_subroutine',
+            'announce_holdtime',
+            'waittime',
+            'waitratio',
+            'mark_answered_elsewhere',
         ]
         queuefeatures_columns = ["queuefeatures." + c for c in queuefeatures_columns]
         queue_columns = ['queue.wrapuptime', 'queue.musicclass']
@@ -440,7 +503,8 @@ class Queue:
             "AND queue.category = 'queue'"
         )
         cursor.execute(
-            query.format(columns=join_column_names(columns)), (queue_id,),
+            query.format(columns=join_column_names(columns)),
+            (queue_id,),
         )
         res: DictRow = cursor.fetchone()
         if not res:
@@ -491,7 +555,7 @@ class Queue:
             "WHERE p.commented = 0 AND p.id = pm.pickupid "
             "AND pm.category = 'member' AND pm.membertype = 'queue'"
             "AND pm.memberid = %s",
-            (self.id,)
+            (self.id,),
         )
 
         res: list[DictRow] = self.cursor.fetchall()
@@ -506,18 +570,31 @@ class Agent:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('id', 'tenant_uuid', 'number', 'passwd', 'firstname', 'lastname', 'language', 'preprocess_subroutine')
+        columns = (
+            'id',
+            'tenant_uuid',
+            'number',
+            'passwd',
+            'firstname',
+            'lastname',
+            'language',
+            'preprocess_subroutine',
+        )
 
         query = SQL("SELECT {columns} FROM agentfeatures WHERE {field} = %s")
         if xid:
             cursor.execute(
-                query.format(columns=join_column_names(columns), field=Identifier('id')),
-                (xid,)
+                query.format(
+                    columns=join_column_names(columns), field=Identifier('id')
+                ),
+                (xid,),
             )
         elif number:
             cursor.execute(
-                query.format(columns=join_column_names(columns), field=Identifier('number')),
-                (number,)
+                query.format(
+                    columns=join_column_names(columns), field=Identifier('number')
+                ),
+                (number,),
             )
         else:
             raise LookupError("id or number must be provided to look up an agent")
@@ -538,9 +615,10 @@ class Agent:
 
 
 class DialAction:
-
     @staticmethod
-    def set_agi_variables(agi, event, category, action, actionarg1, actionarg2, isda=True):
+    def set_agi_variables(
+        agi, event, category, action, actionarg1, actionarg2, isda=True
+    ):
         xtype = f"{category}_{event}".upper()
         agi.set_variable(f"XIVO_FWD_{xtype}_ACTION", action)
 
@@ -566,7 +644,7 @@ class DialAction:
             "WHERE event = %s "
             "AND category = %s "
             "AND categoryval::INTEGER = %s ",
-            (event, category, categoryval)
+            (event, category, categoryval),
         )
         res: DictRow = cursor.fetchone()
         if not res:
@@ -579,18 +657,22 @@ class DialAction:
             self.actionarg2 = res['actionarg2']
 
     def set_variables(self):
-        category_no_isda = ('none',
-                            'endcall:busy',
-                            'endcall:congestion',
-                            'endcall:hangup')
+        category_no_isda = (
+            'none',
+            'endcall:busy',
+            'endcall:congestion',
+            'endcall:hangup',
+        )
 
-        DialAction.set_agi_variables(self.agi,
-                                     self.event,
-                                     self.category,
-                                     self.action,
-                                     self.actionarg1,
-                                     self.actionarg2,
-                                     (self.category not in category_no_isda))
+        DialAction.set_agi_variables(
+            self.agi,
+            self.event,
+            self.category,
+            self.action,
+            self.actionarg1,
+            self.actionarg2,
+            (self.category not in category_no_isda),
+        )
 
 
 class Trunk:
@@ -601,7 +683,7 @@ class Trunk:
             "SELECT endpoint_sip_uuid, endpoint_iax_id, endpoint_custom_id "
             "FROM trunkfeatures "
             "WHERE id = %s",
-             (xid,),
+            (xid,),
         )
         res: DictRow = cursor.fetchone()
         self.agi.verbose(f'res {res}')
@@ -612,11 +694,17 @@ class Trunk:
         self.id = xid
 
         if res['endpoint_sip_uuid']:
-            (self.interface, self.intfsuffix) = ChanSIP.get_intf_and_suffix(cursor, res['endpoint_sip_uuid'])
+            (self.interface, self.intfsuffix) = ChanSIP.get_intf_and_suffix(
+                cursor, res['endpoint_sip_uuid']
+            )
         elif res['endpoint_iax_id']:
-            (self.interface, self.intfsuffix) = ChanIAX2.get_intf_and_suffix(cursor, res['endpoint_iax_id'])
+            (self.interface, self.intfsuffix) = ChanIAX2.get_intf_and_suffix(
+                cursor, res['endpoint_iax_id']
+            )
         elif res['endpoint_custom_id']:
-            (self.interface, self.intfsuffix) = ChanCustom.get_intf_and_suffix(cursor, res['endpoint_custom_id'])
+            (self.interface, self.intfsuffix) = ChanCustom.get_intf_and_suffix(
+                cursor, res['endpoint_custom_id']
+            )
         else:
             raise ValueError(f"Unknown protocol for trunk {xid}")
 
@@ -672,14 +760,27 @@ class Outcall:
         self.cursor = cursor
 
     def retrieve_values(self, dialpattern_id):
-        columns = ('outcall.name', 'outcall.context', 'outcall.internal',
-                   'outcall.preprocess_subroutine', 'outcall.hangupringtime', 'outcall.commented',
-                   'outcall.id', 'dialpattern.typeid', 'dialpattern.type', 'dialpattern.exten',
-                   'dialpattern.stripnum', 'dialpattern.externprefix',
-                   'dialpattern.callerid', 'dialpattern.prefix')
+        columns = (
+            'outcall.name',
+            'outcall.context',
+            'outcall.internal',
+            'outcall.preprocess_subroutine',
+            'outcall.hangupringtime',
+            'outcall.commented',
+            'outcall.id',
+            'dialpattern.typeid',
+            'dialpattern.type',
+            'dialpattern.exten',
+            'dialpattern.stripnum',
+            'dialpattern.externprefix',
+            'dialpattern.callerid',
+            'dialpattern.prefix',
+        )
 
         if not dialpattern_id:
-            raise LookupError("id or exten@context must be provided to look up an outcall entry")
+            raise LookupError(
+                "id or exten@context must be provided to look up an outcall entry"
+            )
 
         query = SQL(
             "SELECT {columns} FROM outcall, dialpattern "
@@ -688,7 +789,9 @@ class Outcall:
             "AND dialpattern.id = %s"
             "AND outcall.commented = 0"
         )
-        self.cursor.execute(query.format(columns=join_column_names(columns)), (dialpattern_id,))
+        self.cursor.execute(
+            query.format(columns=join_column_names(columns)), (dialpattern_id,)
+        )
 
         res: DictRow = self.cursor.fetchone()
         if not res:
@@ -704,14 +807,18 @@ class Outcall:
         self.preprocess_subroutine = res['preprocess_subroutine']
         self.hangupringtime = res['hangupringtime']
 
-        self.cursor.execute("SELECT trunkfeaturesid FROM outcalltrunk "
-                            "WHERE outcallid = %s "
-                            "ORDER BY priority ASC",
-                            (self.id,))
+        self.cursor.execute(
+            "SELECT trunkfeaturesid FROM outcalltrunk "
+            "WHERE outcallid = %s "
+            "ORDER BY priority ASC",
+            (self.id,),
+        )
         res: list[DictRow] = self.cursor.fetchall()
 
         if not res:
-            raise ValueError(f"No trunk associated with outcall (id: {dialpattern_id:d})")
+            raise ValueError(
+                f"No trunk associated with outcall (id: {dialpattern_id:d})"
+            )
 
         self.trunks = []
         for row in res:
@@ -727,7 +834,13 @@ class ScheduleDataMapper:
     @classmethod
     def get_from_path(cls, cursor: DictCursor, path, path_id):
         # fetch schedule info
-        columns = ('id', 'timezone', 'fallback_action', 'fallback_actionid', 'fallback_actionargs')
+        columns = (
+            'id',
+            'timezone',
+            'fallback_action',
+            'fallback_actionid',
+            'fallback_actionargs',
+        )
         query = SQL(
             "SELECT {columns} FROM schedule_path p "
             "LEFT JOIN schedule s ON p.schedule_id = s.id "
@@ -735,7 +848,9 @@ class ScheduleDataMapper:
             "AND p.pathid = %s "
             "AND s.commented = 0"
         )
-        cursor.execute(query.format(columns=join_column_names(columns)), (path, path_id))
+        cursor.execute(
+            query.format(columns=join_column_names(columns)), (path, path_id)
+        )
 
         res: DictRow = cursor.fetchone()
         if not res:
@@ -748,12 +863,21 @@ class ScheduleDataMapper:
             infos = cursor.fetchone()
             timezone = infos['timezone']
 
-        default_action = ScheduleAction(res['fallback_action'],
-                                        res['fallback_actionid'],
-                                        res['fallback_actionargs'])
+        default_action = ScheduleAction(
+            res['fallback_action'], res['fallback_actionid'], res['fallback_actionargs']
+        )
 
         # fetch schedule periods
-        columns = ('mode', 'hours', 'weekdays', 'monthdays', 'months', 'action', 'actionid', 'actionargs')
+        columns = (
+            'mode',
+            'hours',
+            'weekdays',
+            'monthdays',
+            'months',
+            'action',
+            'actionid',
+            'actionargs',
+        )
         query = SQL("SELECT {columns} FROM schedule_time WHERE schedule_id = %s")
         cursor.execute(query.format(columns=join_column_names(columns)), (schedule_id,))
         res: list[DictRow] = cursor.fetchall()
@@ -770,9 +894,11 @@ class ScheduleDataMapper:
             if res_period['mode'] == 'opened':
                 opened_periods.append(period_builder.build())
             else:
-                action = ScheduleAction(res_period['action'],
-                                        res_period['actionid'],
-                                        res_period['actionargs'])
+                action = ScheduleAction(
+                    res_period['action'],
+                    res_period['actionid'],
+                    res_period['actionargs'],
+                )
                 period_builder.action(action)
                 closed_periods.append(period_builder.build())
 
@@ -785,9 +911,7 @@ class Context:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('context.name', 'context.displayname',
-                   'contextinclude.include')
-
+        columns = ('context.name', 'context.displayname', 'contextinclude.include')
         query = SQL(
             "SELECT {columns} FROM context "
             "LEFT JOIN contextinclude "
@@ -816,7 +940,9 @@ class Context:
                 self.include.append(row['include'])
 
 
-CALLERID_MATCHER = re.compile(r'^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<(\+?[0-9\*#]+)>)?$').match
+CALLERID_MATCHER = re.compile(
+    r'^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<(\+?[0-9\*#]+)>)?$'
+).match
 CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
 
 
@@ -832,15 +958,29 @@ class CallerID:
 
         calleridname = m.group(1)
         calleridnum = m.group(3)
-        logger.debug('caller_id parse: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
+        logger.debug(
+            'caller_id parse: calleridname: "%s", calleridnum: "%s"',
+            calleridname,
+            calleridnum,
+        )
 
         if calleridname is None:
             calleridname = m.group(2)
-            logger.debug('caller_id parse: using fallback calleridname: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
+            logger.debug(
+                'caller_id parse: using fallback calleridname: '
+                'calleridname: "%s", calleridnum: "%s"',
+                calleridname,
+                calleridnum,
+            )
 
             if calleridnum is None and CALLERIDNUM_MATCHER(calleridname):
                 calleridnum = m.group(2)
-                logger.debug('caller_id parse: using fallback calleridnum: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
+                logger.debug(
+                    'caller_id parse: using fallback calleridnum: '
+                    'calleridname: "%s", calleridnum: "%s"',
+                    calleridname,
+                    calleridnum,
+                )
 
         return calleridname, calleridnum
 
@@ -854,17 +994,30 @@ class CallerID:
             return
 
         calleridname, calleridnum = cid_parsed
-        logger.debug('caller_id set: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
+        logger.debug(
+            'caller_id set: calleridname: "%s", calleridnum: "%s"',
+            calleridname,
+            calleridnum,
+        )
 
         if calleridname is None and calleridnum is not None:
             calleridname = calleridnum
-            logger.debug('caller_id set: using calleridnum as calleridname: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
+            logger.debug(
+                'caller_id set: using calleridnum as calleridname: '
+                f'calleridname: "{calleridname}", calleridnum: "{calleridnum}"',
+            )
 
         if calleridname is not None and calleridnum is None:
-            logger.debug('caller_id set: applying calleridname only: calleridname: "%s"', calleridname)
+            logger.debug(
+                'caller_id set: applying calleridname only: calleridname: "%s"',
+                calleridname,
+            )
             agi.set_variable('CALLERID(name)', calleridname)
         else:
-            logger.debug('caller_id set: applying callerid name and num: calleridname: "%s", calleridnum: "%s"', calleridname, calleridnum)
+            logger.debug(
+                'caller_id set: applying callerid name and num: '
+                f'calleridname: "{calleridname}", calleridnum: "{calleridnum}"',
+            )
             agi.set_variable('CALLERID(all)', f'"{calleridname}" <{calleridnum}>')
 
         return True
@@ -880,7 +1033,7 @@ class CallerID:
             "WHERE type = %s "
             "AND typeval = %s "
             "AND mode IS NOT NULL",
-            (xtype, typeval)
+            (xtype, typeval),
         )
         res: DictRow = cursor.fetchone()
 
@@ -930,9 +1083,11 @@ class CallerID:
             elif calleridname[0] == '"' and calleridname[-1] == '"':
                 calleridname = calleridname[1:-1]
 
-            if self.mode in ('prepend', 'append') \
-                    and self.calleridname == calleridname \
-                    and calleridnum == calleridname:
+            if (
+                self.mode in ('prepend', 'append')
+                and self.calleridname == calleridname
+                and calleridnum == calleridname
+            ):
                 name = calleridname
             elif self.mode == 'prepend':
                 name = f"{self.calleridname} - {calleridname}"
@@ -952,7 +1107,6 @@ class CallerID:
 
 
 class ChanSIP:
-
     @staticmethod
     def get_intf_and_suffix(cursor: DictCursor, xid):
         cursor.execute(
@@ -966,13 +1120,12 @@ class ChanSIP:
 
 
 class ChanIAX2:
-
     @staticmethod
     def get_intf_and_suffix(cursor: DictCursor, xid):
 
         cursor.execute(
             "SELECT name FROM useriax WHERE id = %s AND commented = 0",
-             (xid,),
+            (xid,),
         )
         res: DictRow = cursor.fetchone()
 
@@ -983,13 +1136,12 @@ class ChanIAX2:
 
 
 class ChanCustom:
-
     @staticmethod
     def get_intf_and_suffix(cursor: DictCursor, xid):
 
         cursor.execute(
             "SELECT interface, intfsuffix FROM usercustom WHERE id = %s AND commented = 0",
-             (xid,),
+            (xid,),
         )
 
         res: DictRow = cursor.fetchone()

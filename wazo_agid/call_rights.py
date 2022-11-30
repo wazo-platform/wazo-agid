@@ -9,14 +9,16 @@ logger = logging.getLogger(__name__)
 RIGHTCALL_AUTHORIZATION_COLNAME = "rightcall.authorization"
 RIGHTCALL_PASSWD_COLNAME = "rightcall.passwd"
 
-rep = (('_', ''),
-       ('*', '\*'),
-       ('+', '\+'),
-       ('X', '[0-9]'),
-       ('Z', '[1-9]'),
-       ('N', '[2-9]'),
-       ('.', '[0-9#\*]+'),
-       ('!', '[0-9#\*]*'))
+rep = (
+    ('_', r''),
+    ('*', r'\*'),
+    ('+', r'\+'),
+    ('X', r'[0-9]'),
+    ('Z', r'[1-9]'),
+    ('N', r'[2-9]'),
+    ('.', r'[0-9#\*]+'),
+    ('!', r'[0-9#\*]*'),
+)
 
 
 class RuleAppliedException(Exception):

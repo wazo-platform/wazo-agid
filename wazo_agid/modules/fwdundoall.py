@@ -21,9 +21,7 @@ def _user_disable_all_forwards(agi, user_id):
     try:
         confd_client = agi.config['confd']['client']
         disabled = {'enabled': False}
-        body = {'busy': disabled,
-                'noanswer': disabled,
-                'unconditional': disabled}
+        body = {'busy': disabled, 'noanswer': disabled, 'unconditional': disabled}
         confd_client.users(user_id).update_forwards(body)
     except Exception as e:
         logger.error('Error during disabling all forwards: %s', e)

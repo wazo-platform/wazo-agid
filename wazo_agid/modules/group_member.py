@@ -26,7 +26,9 @@ def group_member_add(agi, cursor, args):
     try:
         group_name = confd_client.groups.get(group_id, tenant_uuid=tenant_uuid)['name']
     except RequestException as e:
-        logger.error('Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e)
+        logger.error(
+            'Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e
+        )
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
         return
 
@@ -52,7 +54,9 @@ def group_member_remove(agi, cursor, args):
     try:
         group_name = confd_client.groups.get(group_id, tenant_uuid=tenant_uuid)['name']
     except RequestException as e:
-        logger.error('Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e)
+        logger.error(
+            'Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e
+        )
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
         return
 
@@ -75,7 +79,9 @@ def group_member_present(agi, cursors, args):
     try:
         group_name = confd_client.groups.get(group_id, tenant_uuid=tenant_uuid)['name']
     except RequestException as e:
-        logger.error('Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e)
+        logger.error(
+            'Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e
+        )
         agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
         return
 

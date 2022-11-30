@@ -3,7 +3,7 @@
 
 import unittest
 
-from mock import Mock
+from unittest.mock import Mock
 from wazo_agid import objects
 from wazo_agid import fastagi
 from wazo_agid.modules import incoming_queue_set_features
@@ -12,7 +12,6 @@ QUEUE_WRAPUP_TIME = '__QUEUEWRAPUPTIME'
 
 
 class TestQueue(unittest.TestCase):
-
     def test_set_wrapup_time(self):
         queue = Mock(objects.Queue)
         agi = Mock(fastagi.FastAGI)

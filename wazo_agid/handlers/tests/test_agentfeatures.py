@@ -2,16 +2,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-from hamcrest import assert_that
-from hamcrest import equal_to
+from hamcrest import assert_that, equal_to
 
-from mock import Mock
+from unittest.mock import Mock
 
 from wazo_agid.handlers.agentfeatures import AgentFeatures
 
 
 class TestAgentFeatures(unittest.TestCase):
-
     def setUp(self):
         self._agi = Mock()
         self._cursor = Mock()

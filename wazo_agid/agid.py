@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 SetupFunction = Callable[[DictCursor], None]
 HandleFunction = Callable[[FastAGI, DictCursor, list], None]
 
-_server: AGID = None  # type: ignore
+_server: AGID | None = None
 _handlers: dict[str, Handler] = {}
 
 
@@ -67,14 +67,15 @@ class DBConnectionPool:
         with self.lock:
             if len(self.conns) < self.size:
                 self.conns.append(conn)
-                logger.debug("releasing connection: pool not full, refilled with connection")
+                logger.debug(
+                    "releasing connection: pool not full, refilled with connection"
+                )
             else:
                 conn.close()
                 logger.debug("releasing connection: pool full, connection closed")
 
 
 class FastAGIRequestHandler(socketserver.StreamRequestHandler):
-
     def handle(self):
         try:
             logger.debug("handling request")
@@ -112,7 +113,7 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
                 fagi.fail()
             except Exception:
                 pass
-        except:
+        except Exception:
             logger.exception("unexpected exception")
             try:
                 except_hook.handle()
@@ -142,9 +143,7 @@ class AGID(socketserver.ThreadingTCPServer):
 
         FastAGIRequestHandler.config = config
         socketserver.ThreadingTCPServer.__init__(
-            self,
-            (self.listen_addr, self.listen_port),
-            FastAGIRequestHandler
+            self, (self.listen_addr, self.listen_port), FastAGIRequestHandler
         )
 
         self.initialized = True
@@ -164,7 +163,12 @@ class AGID(socketserver.ThreadingTCPServer):
 
 
 class Handler:
-    def __init__(self, handler_name: str, setup_fn: SetupFunction | None, handle_fn: HandleFunction):
+    def __init__(
+        self,
+        handler_name: str,
+        setup_fn: SetupFunction | None,
+        handle_fn: HandleFunction,
+    ):
         self.handler_name = handler_name
         self.setup_fn = setup_fn
         self.handle_fn = handle_fn

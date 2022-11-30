@@ -15,10 +15,7 @@ def paging(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
 
     try:
-        paging_entry = objects.Paging(agi,
-                                      cursor,
-                                      args[0],
-                                      userid)
+        paging_entry = objects.Paging(agi, cursor, args[0], userid)
     except (ValueError, LookupError) as e:
         agi.answer()
         agi.stream_file('vm-incorrect')
@@ -48,7 +45,7 @@ def build_options(paging):
         paging_opts = paging_opts + 'i'
 
     if paging.announcement_play and paging.announcement_file:
-        sound_file_directory='/var/lib/wazo/sounds/tenants'
+        sound_file_directory = '/var/lib/wazo/sounds/tenants'
         announcement_file_name = os.path.join(
             sound_file_directory,
             paging.tenant_uuid,

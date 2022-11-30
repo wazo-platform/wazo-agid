@@ -9,7 +9,9 @@ def callfilter(agi, cursor, args):
     callfiltermember_id = args[0]
 
     if not callfiltermember_id.isdigit():
-        agi.dp_break(f'This id "{callfiltermember_id}" is not a valid callfiltermember_id id.')
+        agi.dp_break(
+            f'This id "{callfiltermember_id}" is not a valid callfiltermember_id id.'
+        )
 
     caller_user_id = agi.get_variable(dialplan_variables.USERID)
     callfiltermember = callfilter_dao.get_by_callfiltermember_id(callfiltermember_id)

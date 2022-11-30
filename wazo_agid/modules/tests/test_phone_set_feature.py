@@ -3,16 +3,17 @@
 
 import unittest
 
-from mock import call, Mock
-from wazo_agid.modules.phone_set_feature import (_phone_set_busy,
-                                                 _phone_set_dnd,
-                                                 _phone_set_incallfilter,
-                                                 _phone_set_rna,
-                                                 _phone_set_unc)
+from unittest.mock import call, Mock
+from wazo_agid.modules.phone_set_feature import (
+    _phone_set_busy,
+    _phone_set_dnd,
+    _phone_set_incallfilter,
+    _phone_set_rna,
+    _phone_set_unc,
+)
 
 
 class TestPhoneSetFeature(unittest.TestCase):
-
     def setUp(self):
         self._user_id = 2
         self._client = Mock().return_value
@@ -26,7 +27,9 @@ class TestPhoneSetFeature(unittest.TestCase):
         _phone_set_dnd(self._agi, None, None)
 
         self._client.users(self._user_id).get_service.assert_called_once_with('dnd')
-        self._client.users(self._user_id).update_service.assert_called_once_with('dnd', {'enabled': False})
+        self._client.users(self._user_id).update_service.assert_called_once_with(
+            'dnd', {'enabled': False}
+        )
         expected_calls = [
             call('XIVO_DNDENABLED', False),
             call('XIVO_USERID_OWNER', self._user_id),
@@ -38,8 +41,12 @@ class TestPhoneSetFeature(unittest.TestCase):
 
         _phone_set_incallfilter(self._agi, None, None)
 
-        self._client.users(self._user_id).get_service.assert_called_once_with('incallfilter')
-        self._client.users(self._user_id).update_service.assert_called_once_with('incallfilter', {'enabled': True})
+        self._client.users(self._user_id).get_service.assert_called_once_with(
+            'incallfilter'
+        )
+        self._client.users(self._user_id).update_service.assert_called_once_with(
+            'incallfilter', {'enabled': True}
+        )
         expected_calls = [
             call('XIVO_INCALLFILTERENABLED', True),
             call('XIVO_USERID_OWNER', self._user_id),
@@ -51,8 +58,9 @@ class TestPhoneSetFeature(unittest.TestCase):
 
         _phone_set_busy(self._agi, None, args)
 
-        self._client.users(self._user_id).update_forward.assert_called_once_with('busy', {'enabled': True,
-                                                                                          'destination': '123'})
+        self._client.users(self._user_id).update_forward.assert_called_once_with(
+            'busy', {'enabled': True, 'destination': '123'}
+        )
         expected_calls = [
             call('XIVO_USERID_OWNER', self._user_id),
             call('XIVO_BUSYENABLED', 1),
@@ -72,7 +80,9 @@ class TestPhoneSetFeature(unittest.TestCase):
 
         _phone_set_rna(self._agi, None, args)
 
-        self._client.users(self._user_id).update_forward.assert_called_once_with('noanswer', {'enabled': False})
+        self._client.users(self._user_id).update_forward.assert_called_once_with(
+            'noanswer', {'enabled': False}
+        )
         expected_calls = [
             call('XIVO_USERID_OWNER', self._user_id),
             call('XIVO_RNAENABLED', 0),
@@ -93,8 +103,8 @@ class TestPhoneSetFeature(unittest.TestCase):
         _phone_set_unc(self._agi, None, args)
 
         self._client.users(self._user_id).update_forward.assert_called_once_with(
-            'unconditional', {'enabled': True,
-                              'destination': '123'})
+            'unconditional', {'enabled': True, 'destination': '123'}
+        )
         expected_calls = [
             call('XIVO_USERID_OWNER', self._user_id),
             call('XIVO_UNCENABLED', 1),

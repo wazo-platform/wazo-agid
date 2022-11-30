@@ -85,7 +85,7 @@ def _phone_set_vm(agi, cursor, args):
 def _user_set_service(agi, user_id, service_name):
     confd_client = agi.config['confd']['client']
     response = confd_client.users(user_id).get_service(service_name)
-    new_value = {'enabled': not(response['enabled'])}
+    new_value = {'enabled': not response['enabled']}
     confd_client.users(user_id).update_service(service_name, new_value)
     return new_value
 

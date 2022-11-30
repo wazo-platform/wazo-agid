@@ -17,7 +17,9 @@ def callerid_forphones(agi, cursor, args):
         cid_name = agi.env['agi_calleridname']
         cid_number = agi.env['agi_callerid']
 
-        logger.debug('Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number)
+        logger.debug(
+            'Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number
+        )
         if not _should_reverse_lookup(cid_name, cid_number):
             return
 
@@ -60,9 +62,7 @@ def _set_reverse_lookup_variable(agi, fields):
 
 
 def _create_reverse_lookup_variable(fields):
-    variable_content = [
-        f'db-{key}: {value}' for key, value in fields.items()
-    ]
+    variable_content = [f'db-{key}: {value}' for key, value in fields.items()]
     return ','.join(variable_content).encode('utf8')
 
 

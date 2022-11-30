@@ -22,10 +22,19 @@ DEFAULT_RECORD = 20000  # 20sec record time
 re_code = re.compile(r'(^\d*)\s*(.*)')
 re_kv = re.compile(r'(?P<key>\w+)=(?P<value>[^\s]+)\s*(?:\((?P<data>.*)\))*')
 
-__all__ = ['FastAGIException', 'FastAGIError', 'FastAGIUnknownError',
-           'FastAGIAppError', 'FastAGIHangup', 'FastAGISIGPIPEHangup',
-           'FastAGIResultHangup', 'FastAGIDBError', 'FastAGIUsageError',
-           'FastAGIInvalidCommand', 'FastAGI']
+__all__ = [
+    'FastAGIException',
+    'FastAGIError',
+    'FastAGIUnknownError',
+    'FastAGIAppError',
+    'FastAGIHangup',
+    'FastAGISIGPIPEHangup',
+    'FastAGIResultHangup',
+    'FastAGIDBError',
+    'FastAGIUsageError',
+    'FastAGIInvalidCommand',
+    'FastAGI',
+]
 
 
 class FastAGIException(Exception):
@@ -122,7 +131,9 @@ class FastAGI:
         elif not isinstance(string, str):
             string = str(string)
 
-        return '"{}"'.format(string.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' '))
+        return '"{}"'.format(
+            string.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+        )
 
     @staticmethod
     def dp_break(message):
@@ -267,7 +278,9 @@ class FastAGI:
         res = response['result'][0]
         return self.code_to_char(res)
 
-    def control_stream_file(self, filename, escape_digits='', skipms=3000, fwd='', rew='', pause=''):
+    def control_stream_file(
+        self, filename, escape_digits='', skipms=3000, fwd='', rew='', pause=''
+    ):
         """
         Send the given file, allowing playback to be interrupted by the given
         digits, if any.  escape_digits is a string '12345' or a list  of
@@ -278,7 +291,15 @@ class FastAGI:
         extension must not be included in the filename.
         """
         escape_digits = self._process_digit_list(escape_digits)
-        response = self.execute('CONTROL STREAM FILE', self._quote(filename), escape_digits, self._quote(skipms), self._quote(fwd), self._quote(rew), self._quote(pause))
+        response = self.execute(
+            'CONTROL STREAM FILE',
+            self._quote(filename),
+            escape_digits,
+            self._quote(skipms),
+            self._quote(fwd),
+            self._quote(rew),
+            self._quote(pause),
+        )
         res = response['result'][0]
         return self.code_to_char(res)
 
@@ -290,7 +311,9 @@ class FastAGI:
         """
         res = self.execute('SEND IMAGE', filename)['result'][0]
         if res != '0':
-            raise FastAGIAppError(f'Channel failure on channel {self.env.get("agi_channel", "UNKNOWN")}')
+            raise FastAGIAppError(
+                f'Channel failure on channel {self.env.get("agi_channel", "UNKNOWN")}'
+            )
 
     def say_digits(self, digits, escape_digits=''):
         """agi.say_digits(digits, escape_digits='') --> digit
@@ -363,7 +386,9 @@ class FastAGI:
         escape_digits = self._process_digit_list(escape_digits)
         if format:
             format = self._quote(format)
-        res = self.execute('SAY DATETIME', seconds, escape_digits, format, zone)['result'][0]
+        res = self.execute('SAY DATETIME', seconds, escape_digits, format, zone)[
+            'result'
+        ][0]
         return self.code_to_char(res)
 
     def get_data(self, filename, timeout=DEFAULT_TIMEOUT, max_digits=255):
@@ -424,8 +449,16 @@ class FastAGI:
         self.set_extension(extension)
         self.set_priority(priority)
 
-    def record_file(self, filename, format='gsm', escape_digits='#', timeout=DEFAULT_RECORD, offset=0, beep='beep'):
-        """agi.record_file(filename, format, escape_digits, timeout=DEFAULT_TIMEOUT, offset=0, beep='beep') --> None
+    def record_file(
+        self,
+        filename: str,
+        format: str = 'gsm',
+        escape_digits: str = '#',
+        timeout: int = DEFAULT_RECORD,
+        offset: int = 0,
+        beep: str = 'beep',
+    ) -> None:
+        """
         Record to a file until a given dtmf digit in the sequence is received
         The format will specify what kind of file will be recorded.  The timeout
         is the maximum record time in milliseconds, or -1 for no timeout. Offset
@@ -433,7 +466,15 @@ class FastAGI:
         exceeding the end of the file
         """
         escape_digits = self._process_digit_list(escape_digits)
-        res = self.execute('RECORD FILE', self._quote(filename), format, escape_digits, timeout, offset, beep)['result'][0]
+        res = self.execute(
+            'RECORD FILE',
+            self._quote(filename),
+            format,
+            escape_digits,
+            timeout,
+            offset,
+            beep,
+        )['result'][0]
         return self.code_to_char(res)
 
     def set_autohangup(self, secs):
@@ -494,8 +535,7 @@ class FastAGI:
         return int(result['result'][0])
 
     def set_variable(self, name, value):
-        """Set a channel variable.
-        """
+        """Set a channel variable."""
         self.execute('SET VARIABLE', self._quote(name), self._quote(value))
 
     def get_variable(self, name):
@@ -520,7 +560,9 @@ class FastAGI:
         """
         try:
             if channel:
-                result = self.execute('GET FULL VARIABLE', self._quote(name), self._quote(channel))
+                result = self.execute(
+                    'GET FULL VARIABLE', self._quote(name), self._quote(channel)
+                )
             else:
                 result = self.execute('GET FULL VARIABLE', self._quote(name))
 
@@ -547,21 +589,28 @@ class FastAGI:
         result = self.execute('DATABASE GET', self._quote(family), self._quote(key))
         res, value = result['result']
         if res == '0':
-            raise FastAGIDBError(f'Key not found in database: family={family}, key={key}')
-        elif res == '1':
+            raise FastAGIDBError(
+                f'Key not found in database: family={family}, key={key}'
+            )
+        if res == '1':
             return value
-        else:
-            raise FastAGIError(f'Unknown exception for : family={family}, key={key}, result={pprint.pformat(result)}')
+        raise FastAGIError(
+            f'Unknown exception for : family={family}, key={key}, result={pprint.pformat(result)}'
+        )
 
     def database_put(self, family, key, value):
         """agi.database_put(family, key, value) --> None
         Adds or updates an entry in the Asterisk database for a
         given family, key, and value.
         """
-        result = self.execute('DATABASE PUT', self._quote(family), self._quote(key), self._quote(value))
+        result = self.execute(
+            'DATABASE PUT', self._quote(family), self._quote(key), self._quote(value)
+        )
         res, value = result['result']
         if res == '0':
-            raise FastAGIDBError(f'Unable to put value in database: family={family}, key={key}, value={value}')
+            raise FastAGIDBError(
+                f'Unable to put value in database: family={family}, key={key}, value={value}'
+            )
 
     def database_del(self, family, key):
         """agi.database_del(family, key) --> None
@@ -571,7 +620,9 @@ class FastAGI:
         result = self.execute('DATABASE DEL', self._quote(family), self._quote(key))
         res, _ = result['result']
         if res == '0':
-            raise FastAGIDBError(f'Unable to delete from database: family={family}, key={key}')
+            raise FastAGIDBError(
+                f'Unable to delete from database: family={family}, key={key}'
+            )
 
     def database_deltree(self, family, key=''):
         """agi.database_deltree(family, key='') --> None
@@ -581,7 +632,9 @@ class FastAGI:
         result = self.execute('DATABASE DELTREE', self._quote(family), self._quote(key))
         res, _ = result['result']
         if res == '0':
-            raise FastAGIDBError(f'Unable to delete tree from database: family={family}, key={key}')
+            raise FastAGIDBError(
+                f'Unable to delete tree from database: family={family}, key={key}'
+            )
 
     def noop(self):
         """agi.noop() --> None

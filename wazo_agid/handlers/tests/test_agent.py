@@ -3,7 +3,7 @@
 
 import unittest
 
-from mock import ANY, Mock
+from unittest.mock import ANY, Mock
 from wazo_agentd_client import error
 from wazo_agentd_client.error import AgentdClientError
 from wazo_agid.fastagi import FastAGI
@@ -11,7 +11,6 @@ from wazo_agid.handlers import agent
 
 
 class TestAgent(unittest.TestCase):
-
     def setUp(self):
         self.agi = Mock(FastAGI)
         self.agentd_client = Mock()
@@ -22,50 +21,95 @@ class TestAgent(unittest.TestCase):
         self.tenant = 'eeeeeeee-eeee--eeee-eeee-eeeeeeeeeeee'
 
     def test_login_agent(self):
-        agent.login_agent(self.agi, self.agent_id, self.extension, self.context, tenant_uuid=self.tenant)
+        agent.login_agent(
+            self.agi,
+            self.agent_id,
+            self.extension,
+            self.context,
+            tenant_uuid=self.tenant,
+        )
 
-        self.agentd_client.agents.login_agent.assert_called_once_with(self.agent_id,
-                                                                      self.extension,
-                                                                      self.context,
-                                                                      tenant_uuid=self.tenant)
+        self.agentd_client.agents.login_agent.assert_called_once_with(
+            self.agent_id, self.extension, self.context, tenant_uuid=self.tenant
+        )
         self.agi.set_variable.assert_called_once_with(agent.AGENTSTATUS_VAR, 'logged')
 
     def test_login_agent_on_already_logged(self):
-        self.agentd_client.agents.login_agent.side_effect = AgentdClientError(error.ALREADY_LOGGED)
+        self.agentd_client.agents.login_agent.side_effect = AgentdClientError(
+            error.ALREADY_LOGGED
+        )
 
-        agent.login_agent(self.agi, self.agent_id, self.extension, self.context, tenant_uuid=self.tenant)
+        agent.login_agent(
+            self.agi,
+            self.agent_id,
+            self.extension,
+            self.context,
+            tenant_uuid=self.tenant,
+        )
 
-        self.agi.set_variable.assert_called_once_with(agent.AGENTSTATUS_VAR, 'already_logged')
+        self.agi.set_variable.assert_called_once_with(
+            agent.AGENTSTATUS_VAR, 'already_logged'
+        )
 
     def test_login_agent_on_already_in_use(self):
-        self.agentd_client.agents.login_agent.side_effect = AgentdClientError(error.ALREADY_IN_USE)
+        self.agentd_client.agents.login_agent.side_effect = AgentdClientError(
+            error.ALREADY_IN_USE
+        )
 
-        agent.login_agent(self.agi, self.agent_id, self.extension, self.context, tenant_uuid=self.tenant)
+        agent.login_agent(
+            self.agi,
+            self.agent_id,
+            self.extension,
+            self.context,
+            tenant_uuid=self.tenant,
+        )
 
-        self.agi.set_variable.assert_called_once_with(agent.AGENTSTATUS_VAR, 'already_in_use')
+        self.agi.set_variable.assert_called_once_with(
+            agent.AGENTSTATUS_VAR, 'already_in_use'
+        )
 
     def test_login_agent_on_other_error(self):
         self.agentd_client.agents.login_agent.side_effect = AgentdClientError('foobar')
 
-        self.assertRaises(AgentdClientError, agent.login_agent, self.agi, self.agent_id, self.extension, self.context, tenant_uuid=self.tenant)
+        self.assertRaises(
+            AgentdClientError,
+            agent.login_agent,
+            self.agi,
+            self.agent_id,
+            self.extension,
+            self.context,
+            tenant_uuid=self.tenant,
+        )
 
     def test_logoff_agent(self):
         agent.logoff_agent(self.agi, self.agent_id, tenant_uuid=self.tenant)
 
-        self.agentd_client.agents.logoff_agent.assert_called_once_with(self.agent_id, tenant_uuid=self.tenant)
+        self.agentd_client.agents.logoff_agent.assert_called_once_with(
+            self.agent_id, tenant_uuid=self.tenant
+        )
 
     def test_logoff_agent_on_not_logged(self):
-        self.agentd_client.agents.logoff_agent.side_effect = AgentdClientError(error.NOT_LOGGED)
+        self.agentd_client.agents.logoff_agent.side_effect = AgentdClientError(
+            error.NOT_LOGGED
+        )
 
         agent.logoff_agent(self.agi, self.agent_id, tenant_uuid=self.tenant)
 
     def test_logoff_agent_on_other_error(self):
         self.agentd_client.agents.logoff_agent.side_effect = AgentdClientError('foobar')
 
-        self.assertRaises(AgentdClientError, agent.logoff_agent, self.agi, self.agent_id, tenant_uuid=self.tenant)
+        self.assertRaises(
+            AgentdClientError,
+            agent.logoff_agent,
+            self.agi,
+            self.agent_id,
+            tenant_uuid=self.tenant,
+        )
 
     def test_get_agent_status(self):
         agent.get_agent_status(self.agi, self.agent_id, tenant_uuid=self.tenant)
 
-        self.agentd_client.agents.get_agent_status.assert_called_once_with(self.agent_id, tenant_uuid=self.tenant)
+        self.agentd_client.agents.get_agent_status.assert_called_once_with(
+            self.agent_id, tenant_uuid=self.tenant
+        )
         self.agi.set_variable.assert_called_once_with('XIVO_AGENT_LOGIN_STATUS', ANY)

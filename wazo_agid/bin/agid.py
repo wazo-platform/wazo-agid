@@ -18,7 +18,7 @@ from xivo.xivo_logging import setup_logging, silence_loggers
 from wazo_agentd_client import Client as AgentdClient
 
 from wazo_agid import agid
-from wazo_agid.modules import *
+from wazo_agid.modules import *  # noqa
 
 _DEFAULT_CONFIG = {
     'agentd': {
@@ -97,6 +97,7 @@ def main():
         config['confd']['client'].set_token(token_id)
         config['dird']['client'].set_token(token_id)
         config['auth']['client'].set_token(token_id)
+
     token_renewer.subscribe_to_token_change(on_token_change)
 
     agid.init(config)
@@ -106,9 +107,12 @@ def main():
 
 def _parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config-file', action='store', help='The path to the config file')
-    parser.add_argument('-d', action='store_true', dest='debug',
-                        help='increase verbosity')
+    parser.add_argument(
+        '-c', '--config-file', action='store', help='The path to the config file'
+    )
+    parser.add_argument(
+        '-d', action='store_true', dest='debug', help='increase verbosity'
+    )
     parser.add_argument('-u', '--user', action='store', help='User to run the daemon')
 
     parsed_args = parser.parse_args()
@@ -128,8 +132,12 @@ def _load_key_file(config):
     key_file = parse_config_file(config['auth']['key_file'])
     if not key_file:
         return {}
-    return {'auth': {'username': key_file['service_id'],
-                     'password': key_file['service_key']}}
+    return {
+        'auth': {
+            'username': key_file['service_id'],
+            'password': key_file['service_key'],
+        }
+    }
 
 
 if __name__ == '__main__':

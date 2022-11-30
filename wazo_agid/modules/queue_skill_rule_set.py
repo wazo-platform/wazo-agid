@@ -42,7 +42,9 @@ def queue_skill_rule_set(agi, cursor, args):
         if skill_rule_variables:
             skill_rule_variables = skill_rule_variables.replace('|', ',')
             skill_rule_variables = json.loads(skill_rule_variables)
-            skill_rule_kwargs = [f'{key}={value}' for key, value in skill_rule_variables.items()]
+            skill_rule_kwargs = [
+                f'{key}={value}' for key, value in skill_rule_variables.items()
+            ]
         call = f'{skill_rule_function}({",".join(skill_rule_kwargs)})'
 
     _set_variables(agi, call, timeout)

@@ -15,15 +15,17 @@ def phone_progfunckey_devstate(agi, cursor, args):
 
     devstate = args[1]
 
-    if devstate not in ('BUSY',
-                        'INUSE',
-                        'INVALID',
-                        'NOT_INUSE',
-                        'ONHOLD',
-                        'RINGING',
-                        'RINGINUSE',
-                        'UNAVAILABLE',
-                        'UNKNOWN'):
+    if devstate not in (
+        'BUSY',
+        'INUSE',
+        'INVALID',
+        'NOT_INUSE',
+        'ONHOLD',
+        'RINGING',
+        'RINGINUSE',
+        'UNAVAILABLE',
+        'UNKNOWN',
+    ):
         agi.dp_break(f"Invalid device state: {devstate!r}")
 
     try:

@@ -3,12 +3,11 @@
 
 import unittest
 
-from mock import Mock
+from unittest.mock import Mock
 from wazo_agid.modules.fwdundoall import fwdundoall
 
 
 class TestFwdUndoAll(unittest.TestCase):
-
     def test_that_fwdundoall_call_confd(self):
         self._client = Mock().return_value
         user_id = 2
@@ -19,8 +18,12 @@ class TestFwdUndoAll(unittest.TestCase):
         fwdundoall(agi, None, None)
 
         disabled = {'enabled': False}
-        expected_body = {'busy': disabled,
-                         'noanswer': disabled,
-                         'unconditional': disabled}
+        expected_body = {
+            'busy': disabled,
+            'noanswer': disabled,
+            'unconditional': disabled,
+        }
 
-        self._client.users(user_id).update_forwards.assert_called_once_with(expected_body)
+        self._client.users(user_id).update_forwards.assert_called_once_with(
+            expected_body
+        )

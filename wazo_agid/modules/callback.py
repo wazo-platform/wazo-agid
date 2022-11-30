@@ -28,14 +28,16 @@ def callback(agi, cursor, args):
     realfile = filepath.format(subdir="outgoing")
 
     f = open(tmpfile, 'w')
-    f.write("Channel: Local/{}@{}\n"
-            "MaxRetries: 0\n"
-            "RetryTime: 30\n"
-            "WaitTime: 30\n"
-            "CallerID: {}\n"
-            "Set: XIVO_DISACONTEXT={}\n"
-            "Context: xivo-callbackdisa\n"
-            "Extension: s".format(srcnum, context, srcnum, context))
+    f.write(
+        f"Channel: Local/{srcnum}@{context}\n"
+        "MaxRetries: 0\n"
+        "RetryTime: 30\n"
+        "WaitTime: 30\n"
+        f"CallerID: {srcnum}\n"
+        f"Set: XIVO_DISACONTEXT={context}\n"
+        "Context: xivo-callbackdisa\n"
+        "Extension: s"
+    )
     f.close()
 
     os.utime(tmpfile, (mtime, mtime))

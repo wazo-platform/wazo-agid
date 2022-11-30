@@ -2,14 +2,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from hamcrest import assert_that, calling, equal_to, raises
 
 from ..queue import AnswerHandler
 
 
 class TestAnswerHandler(TestCase):
-
     def setUp(self):
         self.agi = Mock()
         self.cursor = Mock()

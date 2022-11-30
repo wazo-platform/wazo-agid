@@ -8,7 +8,9 @@ from wazo_agid import agid, dialplan_variables, objects
 
 logger = logging.getLogger(__name__)
 
-CALL_RECORDING_FILENAME_TEMPLATE = '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
+CALL_RECORDING_FILENAME_TEMPLATE = (
+    '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
+)
 
 
 def call_recording(agi, cursor, args):
@@ -41,9 +43,8 @@ def record_caller(agi, cursor, args):
 
     is_external = agi.get_variable(dialplan_variables.OUTCALL_ID) != ''
     should_record = (
-        (not is_external and caller.call_record_outgoing_internal_enabled)
-        or (is_external and caller.call_record_outgoing_external_enabled)
-    )
+        not is_external and caller.call_record_outgoing_internal_enabled
+    ) or (is_external and caller.call_record_outgoing_external_enabled)
     if not should_record:
         return
 
