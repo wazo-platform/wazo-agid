@@ -12,7 +12,7 @@ RUN pip3 install -r requirements.txt
 COPY setup.py /usr/local/src/wazo-agid/
 COPY bin /usr/local/src/wazo-agid/bin
 COPY wazo_agid /usr/local/src/wazo-agid/wazo_agid
-RUN python setup.py install
+RUN python3 setup.py install
 
 FROM python:3.7-slim-buster AS build-image
 COPY --from=compile-image /opt/venv /opt/venv

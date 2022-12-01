@@ -921,8 +921,7 @@ class Context:
             "AND context.commented = contextinc.commented "
             "WHERE context.name = %s "
             "AND context.commented = 0 "
-            "AND (contextinclude.include IS NULL "
-            "     OR contextinc.name IS NOT NULL) "
+            "AND (contextinclude.include IS NULL OR contextinc.name IS NOT NULL) "
             "ORDER BY contextinclude.priority ASC",
         )
         cursor.execute(query.format(columns=join_column_names(columns)), (context,))
@@ -1151,5 +1150,4 @@ class ChanCustom:
         # In case the suffix is the integer 0, bool(intfsuffix)
         # returns False though there is a suffix. Casting it to
         # a string prevents such an error.
-
         return res['interface'], str(res['intfsuffix'])
