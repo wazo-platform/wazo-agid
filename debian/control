@@ -23,7 +23,7 @@ Depends: ${python3:Depends},
          wazo-confd-client-python3,
          wazo-confd-client-python3,
          wazo-dird-client-python3,
-         xivo-lib-python-python3
+         xivo-lib-python-python3,
          xivo-libdao
 Provides: xivo-agid
 Conflicts: xivo-utils (<= 18.09~20180808.174753.0834260.deb9), xivo-agid
