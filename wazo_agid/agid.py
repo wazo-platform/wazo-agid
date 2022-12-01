@@ -5,6 +5,7 @@ from __future__ import annotations
 import signal
 import logging
 import socketserver
+import time
 
 from threading import Lock
 from typing import Callable
@@ -23,6 +24,8 @@ logger = logging.getLogger(__name__)
 
 SetupFunction = Callable[[DictCursor], None]
 HandleFunction = Callable[[FastAGI, DictCursor, list], None]
+
+CONNECTION_TIMEOUT = 60
 
 _server: AGID | None = None
 _handlers: dict[str, Handler] = {}
@@ -159,7 +162,17 @@ class AGID(socketserver.ThreadingTCPServer):
         conn_pool_size = int(self.config["connection_pool_size"])
 
         db_uri = self.config["db_uri"]
-        self.db_conn_pool.reload(conn_pool_size, db_uri)
+
+        for i in range(1, CONNECTION_TIMEOUT + 1):
+            try:
+                self.db_conn_pool.reload(conn_pool_size, db_uri)
+                break
+            except psycopg2.OperationalError:
+                if i < CONNECTION_TIMEOUT:
+                    time.sleep(1)
+                    continue
+                logger.error('Connecting to database timed out. Giving up.')
+                raise
 
 
 class Handler:
