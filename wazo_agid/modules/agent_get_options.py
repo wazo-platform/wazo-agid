@@ -1,14 +1,19 @@
 # Copyright 2008-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+
+from psycopg2.extras import DictCursor
+
 from wazo_agid import agid
 from wazo_agid import objects
+from wazo_agid.fastagi import FastAGI
 
 logger = logging.getLogger(__name__)
 
 
-def agent_get_options(agi, cursor, args):
+def agent_get_options(agi: FastAGI, cursor: DictCursor, args):
     agi.set_variable('XIVO_AGENTEXISTS', 0)
 
     try:

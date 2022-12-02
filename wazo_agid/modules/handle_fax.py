@@ -1,5 +1,6 @@
 # Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
 import os
@@ -7,28 +8,34 @@ import subprocess
 import ftplib
 
 from configparser import RawConfigParser
+from typing import Callable
+
+from psycopg2.extras import DictCursor
+
 from wazo_agid import agid
+from wazo_agid.fastagi import FastAGI
 
 logger = logging.getLogger(__name__)
+Backend = Callable[[str, str, list], None]
 
 CONFIG_FILE = "/etc/xivo/asterisk/xivo_fax.conf"
 TIFF2PDF_PATH = "/usr/bin/tiff2pdf"
 MUTT_PATH = "/usr/bin/mutt"
 LP_PATH = "/usr/bin/lp"
-DESTINATIONS = {}
+DESTINATIONS: dict[str, list[Backend]] = {}
 
 
-def _pdffile_from_file(fileobj):
-    return fileobj.rsplit(".", 1)[0] + ".pdf"
+def _pdffile_from_file(file_name: str) -> str:
+    return file_name.rsplit(".", 1)[0] + ".pdf"
 
 
-def _convert_tiff_to_pdf(tifffile, pdffile=None):
-    # Convert tifffile to pdffile and return the name of the pdf file.
-    if pdffile is None:
-        pdffile = _pdffile_from_file(tifffile)
+def _convert_tiff_to_pdf(tiff_file: str, pdf_file: str = None) -> str:
+    # Convert tiff_file into pdf_file and return the name of the pdf file.
+    if pdf_file is None:
+        pdf_file = _pdffile_from_file(tiff_file)
     try:
         subprocess.check_output(
-            [TIFF2PDF_PATH, "-o", pdffile, tifffile],
+            [TIFF2PDF_PATH, "-o", pdf_file, tiff_file],
             close_fds=True,
             stderr=subprocess.STDOUT,
         )
@@ -36,21 +43,23 @@ def _convert_tiff_to_pdf(tifffile, pdffile=None):
         logger.error('Command: "%s"', e.cmd)
         logger.error('Command output: "%s"', e.output)
         raise
-    return pdffile
+    return pdf_file
 
 
 # A backend is a callable object taking 3 arguments, in this order:
 #   faxfile -- the path to the fax file (in TIFF format)
 #   dstnum -- the content of the XIVO_DSTNUM dialplan variable
 #   args -- args specific to the backend
-def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fax'):
+def _new_mail_backend(
+    subject: str, content_file: str, email_from: str, email_realname: str = 'Wazo Fax'
+) -> Backend:
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
     # called.
     with open(content_file, 'r') as f:
         content = f.read()
 
-    def aux(faxfile, dstnum, args):
+    def aux(faxfile: str, dstnum: str, args: list) -> None:
         # args[0] is the email address to send the fax to
         email = args[0]
         if not email:
@@ -92,7 +101,7 @@ def _new_mail_backend(subject, content_file, email_from, email_realname='Wazo Fa
     return aux
 
 
-def _new_printer_backend(name=None, convert_to_pdf=None):
+def _new_printer_backend(name: str = None, convert_to_pdf: str = None) -> Backend:
     # Return a backend taking no additional argument, which prints the fax
     # to the given printer when called.
     # Note that if name is None, it uses the default printer.
@@ -100,7 +109,7 @@ def _new_printer_backend(name=None, convert_to_pdf=None):
         convert_to_pdf, True, 'convert_to_pdf'
     )
 
-    def aux(faxfile, dstnum, args):
+    def aux(faxfile: str, dstnum: str, args: list) -> None:
         lp_cmd = [LP_PATH, '-s']
         if name:
             lp_cmd.extend(['-d', name])
@@ -121,7 +130,9 @@ def _new_printer_backend(name=None, convert_to_pdf=None):
     return aux
 
 
-def _convert_config_value_to_bool(config_value, default, param_name):
+def _convert_config_value_to_bool(
+    config_value: str | None, default: bool, param_name: str
+) -> bool:
     if config_value is None:
         return default
     elif config_value == '0':
@@ -134,8 +145,13 @@ def _convert_config_value_to_bool(config_value, default, param_name):
 
 
 def _new_ftp_backend(
-    host, username, password, port=21, directory=None, convert_to_pdf=None
-):
+    host: str,
+    username: str,
+    password: str,
+    port: int = 21,
+    directory: str = None,
+    convert_to_pdf: str = None,
+) -> Backend:
     # Return a backend taking no argument, which transfers the fax,
     # in its original format, to the given FTP server when called.
     # Note that a connection is made every time the backend is called.
@@ -144,7 +160,7 @@ def _new_ftp_backend(
     )
     port = int(port)
 
-    def aux(faxfile, dstnum, args):
+    def aux(faxfile: str, dstnum: str, args: list) -> None:
         if convert_to_pdf:
             filename = _convert_tiff_to_pdf(faxfile)
         else:
@@ -171,10 +187,10 @@ def _new_ftp_backend(
     return aux
 
 
-def _do_handle_fax(faxfile, dstnum, args):
+def _do_handle_fax(fax_file: str, dstnum: str, args: list):
     logger.info('Handling fax for destination %s', dstnum)
-    if not faxfile:
-        raise ValueError(f"Invalid faxfile value: {faxfile}")
+    if not fax_file:
+        raise ValueError(f"Invalid faxfile value: {fax_file}")
     if not dstnum:
         raise ValueError(f"Invalid dstnum value: {dstnum}")
 
@@ -190,18 +206,18 @@ def _do_handle_fax(faxfile, dstnum, args):
 
     for backend in backends:
         try:
-            backend(faxfile, dstnum, args)
+            backend(fax_file, dstnum, args)
         except Exception:
             logger.error("Fax backend %s failed to handle fax", backend, exc_info=True)
             raise
 
     try:
-        os.remove(faxfile)
+        os.remove(fax_file)
     except OSError as e:
-        logger.info("Could not remove faxfile %s: %s", faxfile, e)
+        logger.info("Could not remove faxfile %s: %s", fax_file, e)
 
 
-def handle_fax(agi, cursor, args):
+def handle_fax(agi: FastAGI, cursor: DictCursor, args: list):
     try:
         faxfile = args[0]
         dstnum = agi.get_variable("XIVO_DSTNUM")
@@ -217,15 +233,12 @@ _BACKENDS_FACTORY = [
 ]
 
 
-def setup_handle_fax(cursor):
+def setup_handle_fax(cursor: DictCursor):
     # Raise an error if a backend creation failed, etc.
     # 1. read config
     config = RawConfigParser()
-    fobj = open(CONFIG_FILE)
-    try:
-        config.read_file(fobj)
-    finally:
-        fobj.close()
+    with open(CONFIG_FILE) as f:
+        config.read_file(f)
 
     # 2. read general section...
     global TIFF2PDF_PATH
@@ -239,7 +252,7 @@ def setup_handle_fax(cursor):
         LP_PATH = config.get("general", "lp")
 
     # 3. create backends
-    backends = {}
+    backends: dict[str, Backend] = {}
     for backend_prefix, backend_factory in _BACKENDS_FACTORY:
         for section in [s for s in config.sections() if s.startswith(backend_prefix)]:
             backend_factory_args = dict(config.items(section))
@@ -265,7 +278,9 @@ def setup_handle_fax(cursor):
     logger.debug("Created %s destinations", len(DESTINATIONS))
 
 
-def _build_backends_list(available_backends, backend_ids, destination):
+def _build_backends_list(
+    available_backends: dict[str, Backend], backend_ids: list[str], destination: str
+) -> list[Backend]:
     backends = []
     for backend_id in backend_ids:
         if backend_id in available_backends:
