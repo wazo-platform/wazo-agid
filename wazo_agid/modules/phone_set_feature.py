@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -16,11 +15,11 @@ def phone_set_feature(agi, cursor, args):
     except IndexError:
         agi.dp_break('Missing feature name argument')
 
-    function_name = '_phone_set_%s' % feature_name
+    function_name = f'_phone_set_{feature_name}'
     try:
         function = globals()[function_name]
     except KeyError:
-        agi.dp_break('Unknown feature name %r' % feature_name)
+        agi.dp_break(f'Unknown feature name {feature_name!r}')
 
     try:
         function(agi, cursor, args)
@@ -86,7 +85,7 @@ def _phone_set_vm(agi, cursor, args):
 def _user_set_service(agi, user_id, service_name):
     confd_client = agi.config['confd']['client']
     response = confd_client.users(user_id).get_service(service_name)
-    new_value = {'enabled': not(response['enabled'])}
+    new_value = {'enabled': not response['enabled']}
     confd_client.users(user_id).update_service(service_name, new_value)
     return new_value
 

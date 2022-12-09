@@ -21,7 +21,7 @@ update-db-build:
 	docker build --no-cache -t wazoplatform/wazo-confd-db-test:local -f $(POSTGRES_DOCKER) $(MANAGE_DB_DIR)
 
 egg-info:
-	cd .. && python setup.py egg_info
+	cd .. && python3 setup.py egg_info
 
 test:
 	pytest

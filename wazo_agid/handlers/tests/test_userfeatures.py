@@ -1,23 +1,21 @@
-# -*- coding: utf-8 -*-
-# Copyright 2013-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
-from hamcrest import (assert_that, contains, equal_to)
-from mock import (Mock, call, patch, sentinel)
+from hamcrest import assert_that, equal_to, contains_exactly
+from unittest.mock import Mock, call, patch, sentinel
 
 from wazo_agid.handlers.userfeatures import UserFeatures
 from wazo_agid import objects
 
 
-class NotEmptyStringMatcher(object):
+class NotEmptyStringMatcher:
     def __eq__(self, other):
-        return isinstance(other, basestring) and bool(other)
+        return isinstance(other, str) and bool(other)
 
 
 class _BaseTestCase(unittest.TestCase):
-
     def setUp(self):
         self._auth_mock = Mock()
         config = {
@@ -33,7 +31,6 @@ class _BaseTestCase(unittest.TestCase):
 
 
 class TestUserFeatures(_BaseTestCase):
-
     def setUp(self):
         super(TestUserFeatures, self).setUp()
         self._variables = {
@@ -45,7 +42,7 @@ class TestUserFeatures(_BaseTestCase):
             'XIVO_DST_EXTEN_ID': '983274',
             'XIVO_BASE_CONTEXT': 'default',
             'WAZO_CALL_RECORD_ACTIVE': '0',
-            'WAZO_USER_MOH_UUID': '00000000-feed-dada-1ced-c0ffee000000'
+            'WAZO_USER_MOH_UUID': '00000000-feed-dada-1ced-c0ffee000000',
         }
 
         self._agi.get_variable = lambda name: self._variables.get(name, '')
@@ -56,8 +53,6 @@ class TestUserFeatures(_BaseTestCase):
         self.assertEqual(userfeatures._agi, self._agi)
         self.assertEqual(userfeatures._cursor, self._cursor)
         self.assertEqual(userfeatures._args, self._args)
-
-
 
     def test_set_members(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -94,7 +89,9 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_options()
 
-        self._agi.set_variable.assert_called_once_with('XIVO_CALLOPTIONS', 'm(my-music-class)')
+        self._agi.set_variable.assert_called_once_with(
+            'XIVO_CALLOPTIONS', 'm(my-music-class)'
+        )
 
     def test_set_caller(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -110,7 +107,9 @@ class TestUserFeatures(_BaseTestCase):
 
             userfeatures._set_caller()
 
-            user_init.assert_called_with(self._agi, self._cursor, int(self._variables['XIVO_USERID']))
+            user_init.assert_called_with(
+                self._agi, self._cursor, int(self._variables['XIVO_USERID'])
+            )
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
 
@@ -356,25 +355,29 @@ class TestUserFeatures(_BaseTestCase):
 
 
 class TestSetForwardNoAnswer(_BaseTestCase):
-
     def test_forward_no_answer_to_a_user_dialaction(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._user = Mock(objects.User, id=sentinel.userid)
-        self._cursor.fetchone = Mock(return_value={
-            'action': 'user',
-            'actionarg1': '5',
-            'actionarg2': '',
-        })
+        self._cursor.fetchone = Mock(
+            return_value={
+                'action': 'user',
+                'actionarg1': '5',
+                'actionarg2': '',
+            }
+        )
 
         enabled = user_features._set_rna_from_dialaction()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
-            call('XIVO_FWD_USER_NOANSWER_ACTION', 'user'),
-            call('XIVO_FWD_USER_NOANSWER_ISDA', '1'),
-            call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '5'),
-            call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', ''),
-        ))
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_FWD_USER_NOANSWER_ACTION', 'user'),
+                call('XIVO_FWD_USER_NOANSWER_ISDA', '1'),
+                call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '5'),
+                call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', ''),
+            ),
+        )
 
     def test_forward_no_answer_to_a_user_from_exten_fwdrna_disabled_on_user(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
@@ -392,11 +395,14 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         enabled = user_features._set_rna_from_exten()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
-            call('XIVO_FWD_USER_NOANSWER_ACTION', 'extension'),
-            call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '555'),
-            call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', sentinel.context),
-        ))
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_FWD_USER_NOANSWER_ACTION', 'extension'),
+                call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '555'),
+                call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', sentinel.context),
+            ),
+        )
 
     def test_setrna_exten_disabled_noanswer_enabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
@@ -422,25 +428,29 @@ class TestSetForwardNoAnswer(_BaseTestCase):
 
 
 class TestSetForwardBusy(_BaseTestCase):
-
     def test_forward_busy_to_a_user_dialaction(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
         user_features._user = Mock(objects.User, id=sentinel.userid)
-        self._cursor.fetchone = Mock(return_value={
-            'action': 'user',
-            'actionarg1': '5',
-            'actionarg2': '',
-        })
+        self._cursor.fetchone = Mock(
+            return_value={
+                'action': 'user',
+                'actionarg1': '5',
+                'actionarg2': '',
+            }
+        )
 
         enabled = user_features._set_rbusy_from_dialaction()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
-            call('XIVO_FWD_USER_BUSY_ACTION', 'user'),
-            call('XIVO_FWD_USER_BUSY_ISDA', '1'),
-            call('XIVO_FWD_USER_BUSY_ACTIONARG1', '5'),
-            call('XIVO_FWD_USER_BUSY_ACTIONARG2', ''),
-        ))
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_FWD_USER_BUSY_ACTION', 'user'),
+                call('XIVO_FWD_USER_BUSY_ISDA', '1'),
+                call('XIVO_FWD_USER_BUSY_ACTIONARG1', '5'),
+                call('XIVO_FWD_USER_BUSY_ACTIONARG2', ''),
+            ),
+        )
 
     def test_forward_busy_to_a_user_from_exten_fwdbusy_disabled_on_user(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
@@ -458,11 +468,14 @@ class TestSetForwardBusy(_BaseTestCase):
         enabled = user_features._set_rbusy_from_exten()
 
         assert_that(enabled, equal_to(True))
-        assert_that(self._agi.set_variable.call_args_list, contains(
-            call('XIVO_FWD_USER_BUSY_ACTION', 'extension'),
-            call('XIVO_FWD_USER_BUSY_ACTIONARG1', '666'),
-            call('XIVO_FWD_USER_BUSY_ACTIONARG2', sentinel.context),
-        ))
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_FWD_USER_BUSY_ACTION', 'extension'),
+                call('XIVO_FWD_USER_BUSY_ACTIONARG1', '666'),
+                call('XIVO_FWD_USER_BUSY_ACTIONARG2', sentinel.context),
+            ),
+        )
 
     def test_set_rbusy_exten_disabled_noanswer_enabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)

@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-# Copyright 2016-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
-from mock import call, Mock
+from unittest.mock import call, Mock
 from wazo_agid.modules.phone_get_features import _set_current_forwards
 
 
 class TestGetFeatures(unittest.TestCase):
-
     def setUp(self):
         self._user_id = 2
         self._client = Mock().return_value
@@ -21,7 +19,8 @@ class TestGetFeatures(unittest.TestCase):
         self._client.users(self._user_id).list_forwards.return_value = {
             'busy': {'enabled': True, 'destination': '1234'},
             'noanswer': {'enabled': False, 'destination': '5678'},
-            'unconditional': {'enabled': False, 'destination': None}}
+            'unconditional': {'enabled': False, 'destination': None},
+        }
 
         _set_current_forwards(self._agi, self._user_id)
 

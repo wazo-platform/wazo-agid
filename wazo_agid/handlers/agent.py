@@ -1,17 +1,23 @@
-# -*- coding: utf-8 -*-
-# Copyright 2012-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 from wazo_agentd_client import error
 from wazo_agentd_client.error import AgentdClientError
 
+from wazo_agid.fastagi import FastAGI
+
 AGENTSTATUS_VAR = 'XIVO_AGENTSTATUS'
 
 
-def login_agent(agi, agent_id, extension, context, tenant_uuid):
+def login_agent(
+    agi: FastAGI, agent_id: int, extension: str, context: str, tenant_uuid: str
+) -> None:
     agentd_client = agi.config['agentd']['client']
     try:
-        agentd_client.agents.login_agent(agent_id, extension, context, tenant_uuid=tenant_uuid)
+        agentd_client.agents.login_agent(
+            agent_id, extension, context, tenant_uuid=tenant_uuid
+        )
     except AgentdClientError as e:
         if e.error == error.ALREADY_LOGGED:
             agi.set_variable(AGENTSTATUS_VAR, 'already_logged')
@@ -23,7 +29,7 @@ def login_agent(agi, agent_id, extension, context, tenant_uuid):
         agi.set_variable(AGENTSTATUS_VAR, 'logged')
 
 
-def logoff_agent(agi, agent_id, tenant_uuid):
+def logoff_agent(agi: FastAGI, agent_id: int, tenant_uuid: str) -> None:
     agentd_client = agi.config['agentd']['client']
     try:
         agentd_client.agents.logoff_agent(agent_id, tenant_uuid=tenant_uuid)
@@ -32,7 +38,7 @@ def logoff_agent(agi, agent_id, tenant_uuid):
             raise
 
 
-def get_agent_status(agi, agent_id, tenant_uuid):
+def get_agent_status(agi: FastAGI, agent_id: int, tenant_uuid: str) -> None:
     agentd_client = agi.config['agentd']['client']
     status = agentd_client.agents.get_agent_status(agent_id, tenant_uuid=tenant_uuid)
     login_status = 'logged_in' if status.logged else 'logged_out'

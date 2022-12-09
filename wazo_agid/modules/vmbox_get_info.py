@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -24,16 +23,16 @@ def vmbox_get_info(agi, cursor, args):
 
             vmbox = objects.VMBox(agi, cursor, mailbox=args[0], context=context)
         except (ValueError, LookupError) as e:
-            logger.error('Error while retrieving vmbox from number and context',
-                         exc_info=True)
+            logger.error(
+                'Error while retrieving vmbox from number and context', exc_info=True
+            )
             agi.dp_break(str(e))
     else:
         try:
             vmboxid = int(agi.get_variable('XIVO_VMBOXID'))
             vmbox = objects.VMBox(agi, cursor, vmboxid)
         except (ValueError, LookupError) as e:
-            logger.error('Error while retrieving vmbox from id',
-                         exc_info=True)
+            logger.error('Error while retrieving vmbox from id', exc_info=True)
             agi.dp_break(str(e))
 
     if vmbox.skipcheckpass:

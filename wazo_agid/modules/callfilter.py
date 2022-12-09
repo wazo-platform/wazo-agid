@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid import agid, dialplan_variables
@@ -10,7 +9,9 @@ def callfilter(agi, cursor, args):
     callfiltermember_id = args[0]
 
     if not callfiltermember_id.isdigit():
-        agi.dp_break('This id "%s" is not a valid callfiltermember_id id.' % callfiltermember_id)
+        agi.dp_break(
+            f'This id "{callfiltermember_id}" is not a valid callfiltermember_id id.'
+        )
 
     caller_user_id = agi.get_variable(dialplan_variables.USERID)
     callfiltermember = callfilter_dao.get_by_callfiltermember_id(callfiltermember_id)

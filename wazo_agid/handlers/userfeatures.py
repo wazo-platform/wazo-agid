@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -73,13 +72,15 @@ class UserFeatures(Handler):
             try:
                 self._moh = objects.MOH(self._agi, self._cursor, self._moh_uuid)
             except LookupError:
-                msg = 'expected MOH with UUID {} but could not find it'.format(self._moh_uuid)
+                msg = f'expected MOH with UUID {self._moh_uuid} but could not find it'
                 self._agi.verbose(msg)
 
     def _set_members(self):
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
-        self._destination_extension_id = self._agi.get_variable(dialplan_variables.DESTINATION_EXTENSION_ID)
+        self._destination_extension_id = self._agi.get_variable(
+            dialplan_variables.DESTINATION_EXTENSION_ID
+        )
         self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
         self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
         self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
@@ -99,27 +100,39 @@ class UserFeatures(Handler):
     def _set_line(self):
         if self._dstid:
             try:
-                user_main_line = user_line_dao.get_by(user_id=self._dstid, main_line=True)
-                self.main_line = line_dao.find_by(id=user_main_line.line_id)  # XXX Should use get_by
+                user_main_line = user_line_dao.get_by(
+                    user_id=self._dstid, main_line=True
+                )
+                # XXX Should use get_by
+                self.main_line = line_dao.find_by(id=user_main_line.line_id)
 
                 # destination_extension_id may be unset (e.g. incoming call)
                 # In this case, only the main extension of the main line should be rung
                 if not self._destination_extension_id:
-                    line_extension = line_extension_dao.get_by(line_id=self.main_line.id)  # main_extension=True
+                    line_extension = line_extension_dao.get_by(
+                        line_id=self.main_line.id
+                    )  # main_extension=True
                     self._destination_extension_id = line_extension.extension_id
 
-                self.main_extension = extension_dao.get_by(id=self._destination_extension_id)
+                self.main_extension = extension_dao.get_by(
+                    id=self._destination_extension_id
+                )
 
-                line_extensions = line_extension_dao.find_all_by(extension_id=self.main_extension.id)
+                line_extensions = line_extension_dao.find_all_by(
+                    extension_id=self.main_extension.id
+                )
                 for line_extension in line_extensions:
-                    line = line_dao.find_by(id=line_extension.line_id)  # XXX Should use get_by
+                    # XXX Should use get_by
+                    line = line_dao.find_by(id=line_extension.line_id)
                     self.lines.append(line)
 
             except (ValueError, LookupError) as e:
                 self._agi.dp_break(str(e))
             else:
                 self._agi.set_variable('XIVO_DST_USERNUM', self.main_extension.exten)
-                self._agi.set_variable('WAZO_DST_USER_CONTEXT', self.main_extension.context)
+                self._agi.set_variable(
+                    'WAZO_DST_USER_CONTEXT', self.main_extension.context
+                )
 
     def _set_user(self):
         if self._dstid:
@@ -148,14 +161,14 @@ class UserFeatures(Handler):
         return line.name
 
     def _build_default_interface(self, line):
-        return '{}/{}'.format(line.protocol.upper(), line.name)
+        return f'{line.protocol.upper()}/{line.name}'
 
     def _build_sip_interface(self, line):
         return build_sip_interface(self._agi, self._user.uuid, line.name)
 
     def _set_xivo_user_name(self):
         if self._user:
-            wazo_dst_name = u'{firstname} {lastname}'.format(
+            wazo_dst_name = '{firstname} {lastname}'.format(
                 firstname=self._user.firstname if self._user.firstname else '',
                 lastname=self._user.lastname if self._user.lastname else '',
             )
@@ -175,7 +188,7 @@ class UserFeatures(Handler):
             callerid_num = None
 
         if not callerid_name:
-            callerid_name = "%s %s" % (self._user.firstname, self._user.lastname)
+            callerid_name = f"{self._user.firstname} {self._user.lastname}"
         self._agi.set_variable('XIVO_DST_REDIRECTING_NAME', callerid_name)
 
         if not callerid_num:
@@ -195,17 +208,24 @@ class UserFeatures(Handler):
             return False
 
         if caller is not None:
-            secretary_can_call_boss = callfilter_dao.does_secretary_filter_boss(called.id, caller.id)
+            secretary_can_call_boss = callfilter_dao.does_secretary_filter_boss(
+                called.id, caller.id
+            )
             if secretary_can_call_boss:
                 logger.debug('Ignoring callfilter: secretary can call boss')
                 return False
 
         callfilter = callfilter_dao.find(boss_callfiltermember.callfilterid)
         if not callfilter:
-            logger.debug('Ignoring callfilter: no such callfilter: "%s"', boss_callfiltermember.callfilterid)
+            logger.debug(
+                'Ignoring callfilter: no such callfilter: "%s"',
+                boss_callfiltermember.callfilterid,
+            )
             return False
 
-        callfilter_active = callfilter_dao.is_activated_by_callfilter_id(boss_callfiltermember.callfilterid)
+        callfilter_active = callfilter_dao.is_activated_by_callfilter_id(
+            boss_callfiltermember.callfilterid
+        )
 
         if callfilter_active == 0:
             logger.debug('Ignoring callfilter: callfilter is not active')
@@ -216,14 +236,18 @@ class UserFeatures(Handler):
             logger.debug('Ignoring callfilter: call not in zone')
             return False
 
-        secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(boss_callfiltermember.callfilterid)
+        secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(
+            boss_callfiltermember.callfilterid
+        )
 
         boss_user = self._user
         boss_interface = 'Local/{}@usersharedlines'.format(boss_user.uuid)
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
-            self._set_callfilter_ringseconds('BOSS_TIMEOUT', boss_callfiltermember.ringseconds)
+            self._set_callfilter_ringseconds(
+                'BOSS_TIMEOUT', boss_callfiltermember.ringseconds
+            )
 
         index = 0
         ifaces = []
@@ -231,21 +255,31 @@ class UserFeatures(Handler):
             secretary_callfiltermember, ringseconds = secretary
             if secretary_callfiltermember.active:
                 secretary_user_id = secretary_callfiltermember.typeval
-                secretary_user = objects.User(self._agi, self._cursor, int(secretary_user_id))
+                secretary_user = objects.User(
+                    self._agi, self._cursor, int(secretary_user_id)
+                )
                 iface = 'Local/{}@usersharedlines'.format(secretary_user.uuid)
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
-                    self._agi.set_variable('XIVO_CALLFILTER_SECRETARY%d_INTERFACE' % index, iface)
-                    self._set_callfilter_ringseconds('SECRETARY%d_TIMEOUT' % index, ringseconds)
+                    self._agi.set_variable(
+                        f'XIVO_CALLFILTER_SECRETARY{index:d}_INTERFACE', iface
+                    )
+                    self._set_callfilter_ringseconds(
+                        f'SECRETARY{index:d}_TIMEOUT', ringseconds
+                    )
                     index += 1
 
         if callfilter.bosssecretary in ("bossfirst-simult", "secretary-simult", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_INTERFACE', '&'.join(ifaces))
             self._set_callfilter_ringseconds('TIMEOUT', callfilter.ringseconds)
 
-        DialAction(self._agi, self._cursor, "noanswer", "callfilter", callfilter.id).set_variables()
-        CallerID(self._agi, self._cursor, "callfilter", callfilter.id).rewrite(force_rewrite=True)
+        DialAction(
+            self._agi, self._cursor, "noanswer", "callfilter", callfilter.id
+        ).set_variables()
+        CallerID(self._agi, self._cursor, "callfilter", callfilter.id).rewrite(
+            force_rewrite=True
+        )
         self._agi.set_variable('XIVO_CALLFILTER', '1')
         self._agi.set_variable('XIVO_CALLFILTER_MODE', callfilter.bosssecretary)
 
@@ -311,9 +345,8 @@ class UserFeatures(Handler):
 
         is_internal = self._zone == 'intern'
         should_record = (
-            (is_internal and self._user.call_record_incoming_internal_enabled)
-            or (not is_internal and self._user.call_record_incoming_external_enabled)
-        )
+            is_internal and self._user.call_record_incoming_internal_enabled
+        ) or (not is_internal and self._user.call_record_incoming_external_enabled)
         if should_record:
             self._agi.set_variable('__WAZO_PEER_CALL_RECORD_ENABLED', '1')
 
@@ -341,14 +374,14 @@ class UserFeatures(Handler):
         if self._user.incallfilter:
             options += "p"
         if self._moh:
-            options += 'm({})'.format(self._moh.name)
+            options += f'm({self._moh.name})'
         self._agi.set_variable('XIVO_CALLOPTIONS', options)
 
     def _set_ringseconds(self):
         self._set_not_zero_or_empty('XIVO_RINGSECONDS', self._user.ringseconds)
 
     def _set_callfilter_ringseconds(self, name, value):
-        self._set_not_zero_or_empty('XIVO_CALLFILTER_%s' % name, value)
+        self._set_not_zero_or_empty(f'XIVO_CALLFILTER_{name}', value)
 
     def _set_not_zero_or_empty(self, name, value):
         if value and value > 0:
@@ -384,13 +417,17 @@ class UserFeatures(Handler):
         if not self._user.enablerna:
             return False
 
-        return self._set_fwd_from_exten('noanswer', self.main_extension.context, self._user.destrna)
+        return self._set_fwd_from_exten(
+            'noanswer', self.main_extension.context, self._user.destrna
+        )
 
     def _set_rbusy_from_exten(self):
         if not self._user.enablebusy:
             return False
 
-        return self._set_fwd_from_exten('busy', self.main_extension.context, self._user.destbusy)
+        return self._set_fwd_from_exten(
+            'busy', self.main_extension.context, self._user.destbusy
+        )
 
     def _set_fwd_from_exten(self, fwd_type, context, dest):
         objects.DialAction.set_agi_variables(
@@ -423,7 +460,9 @@ class UserFeatures(Handler):
             unc_actionarg1 = ""
             unc_actionarg2 = ""
         self._agi.set_variable('XIVO_ENABLEUNC', self._user.enableunc)
-        objects.DialAction.set_agi_variables(self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False)
+        objects.DialAction.set_agi_variables(
+            self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False
+        )
 
     def _set_call_forwards(self):
         self._set_enableunc()
@@ -431,10 +470,14 @@ class UserFeatures(Handler):
         self._setrna()
 
     def _set_dial_action_congestion(self):
-        objects.DialAction(self._agi, self._cursor, 'congestion', 'user', self._user.id).set_variables()
+        objects.DialAction(
+            self._agi, self._cursor, 'congestion', 'user', self._user.id
+        ).set_variables()
 
     def _set_dial_action_chanunavail(self):
-        objects.DialAction(self._agi, self._cursor, 'chanunavail', 'user', self._user.id).set_variables()
+        objects.DialAction(
+            self._agi, self._cursor, 'chanunavail', 'user', self._user.id
+        ).set_variables()
 
     def _set_video_enabled(self):
         native_video_format = self._agi.get_variable('CHANNEL(videonativeformat)')

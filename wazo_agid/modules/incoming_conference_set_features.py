@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,7 +14,7 @@ def incoming_conference_set_features(agi, cursor, args):
         agi.dp_break(str(e))
 
     menu = 'xivo-default-user-menu'
-    user_profile = 'xivo-user-profile-{}'.format(conference.id)
+    user_profile = f'xivo-user-profile-{conference.id}'
     if conference.pin:
         for _ in range(4):
             agi.answer()
@@ -24,21 +23,27 @@ def incoming_conference_set_features(agi, cursor, args):
                 break
             elif pin == conference.admin_pin:
                 menu = 'xivo-default-admin-menu'
-                user_profile = 'xivo-admin-profile-{}'.format(conference.id)
+                user_profile = f'xivo-admin-profile-{conference.id}'
                 break
             else:
                 agi.stream_file('conf-invalidpin')
         else:
-            agi.dp_break("Unable to join the conference room, wrong pin"
-                         "(conference_id: {}, name: {})".format(conference.id, conference.name))
+            agi.dp_break(
+                'Unable to join the conference room, wrong pin'
+                f'(conference_id: {conference.id}, name: {conference.name})'
+            )
 
     agi.set_variable('WAZO_CONFBRIDGE_ID', conference.id)
     agi.set_variable('WAZO_CONFBRIDGE_TENANT_UUID', conference.tenant_uuid)
-    agi.set_variable('WAZO_CONFBRIDGE_BRIDGE_PROFILE', 'xivo-bridge-profile-{}'.format(conference.id))
+    agi.set_variable(
+        'WAZO_CONFBRIDGE_BRIDGE_PROFILE', f'xivo-bridge-profile-{conference.id}'
+    )
     agi.set_variable('WAZO_CONFBRIDGE_USER_PROFILE', user_profile)
     agi.set_variable('WAZO_CONFBRIDGE_MENU', menu)
-    agi.set_variable('WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or '')
-    agi.appexec('CELGenUserEvent', u'WAZO_CONFERENCE, NAME: {}'.format(conference.name or ''))
+    agi.set_variable(
+        'WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE', conference.preprocess_subroutine or ''
+    )
+    agi.appexec('CELGenUserEvent', f'WAZO_CONFERENCE, NAME: {conference.name or ""}')
 
 
 agid.register(incoming_conference_set_features)

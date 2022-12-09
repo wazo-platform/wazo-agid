@@ -829,7 +829,7 @@ class TestHandlers(IntegrationTest):
 
         # Lookup by UUID
         recv_vars, recv_cmds = self.agid.meeting_user(
-            'wazo-meeting-{uuid}'.format(**meeting),
+            f'wazo-meeting-{meeting["uuid"]}',
             variables=variables,
         )
 

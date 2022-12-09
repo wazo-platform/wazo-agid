@@ -1,6 +1,6 @@
 - project:
     templates:
-      - wazo-tox-py27
-      - wazo-tox-integration
       - wazo-tox-linters
+      - wazo-tox-py37
+      - wazo-tox-integration
       - debian-packaging-template

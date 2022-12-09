@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-# Copyright 2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2019-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-import ConfigParser
-import StringIO
+import configparser
+import io
 
 from hamcrest import assert_that, calling, not_, raises
-from mock import Mock
+from unittest.mock import Mock
 
 from .. import getring
 
@@ -39,7 +38,7 @@ class TestGetRing(unittest.TestCase):
         )
 
     def _set_config(self, content):
-        file_ = StringIO.StringIO(content)
+        file_ = io.StringIO(content)
 
-        getring.CONFIG_PARSER = ConfigParser.RawConfigParser()
-        getring.CONFIG_PARSER.readfp(file_)
+        getring.CONFIG_PARSER = configparser.RawConfigParser()
+        getring.CONFIG_PARSER.read_file(file_)

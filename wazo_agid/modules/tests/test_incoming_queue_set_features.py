@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-# Copyright 2015-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2015-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from wazo_agid.modules import incoming_queue_set_features
 
 
 class TestHoldtimeAnnounce(unittest.TestCase):
-
     def setUp(self):
         self.agi = Mock()
         self.cursor = Mock()

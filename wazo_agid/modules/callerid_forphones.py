@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2012-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -18,7 +17,9 @@ def callerid_forphones(agi, cursor, args):
         cid_name = agi.env['agi_calleridname']
         cid_number = agi.env['agi_callerid']
 
-        logger.debug('Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number)
+        logger.debug(
+            'Resolving caller ID: incoming caller ID=%s %s', cid_name, cid_number
+        )
         if not _should_reverse_lookup(cid_name, cid_number):
             return
 
@@ -30,7 +31,7 @@ def callerid_forphones(agi, cursor, args):
             user_uuid = callee_infos.xivo_user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
-        # It is not possible to associate a profile to a reverse configuration in the webi
+        # It is not possible to associate a profile to a reverse configuration in the web
         lookup_result = dird_client.directories.reverse(
             profile='default',
             user_uuid=user_uuid,
@@ -39,10 +40,10 @@ def callerid_forphones(agi, cursor, args):
         )
         logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
         if lookup_result['display'] is not None:
-            _set_new_caller_id(agi, lookup_result['display'], cid_number)
+            _set_new_caller_id(agi, lookup_result['display'].decode('utf8'), cid_number)
             _set_reverse_lookup_variable(agi, lookup_result['fields'])
     except Exception as e:
-        msg = 'Reverse lookup failed: {}'.format(e)
+        msg = f'Reverse lookup failed: {e}'
         logger.info(msg)
         agi.verbose(msg)
 
@@ -52,7 +53,7 @@ def _should_reverse_lookup(cid_name, cid_number):
 
 
 def _set_new_caller_id(agi, display_name, cid_number):
-    new_caller_id = u'"{}" <{}>'.format(display_name, cid_number)
+    new_caller_id = f'"{display_name}" <{cid_number}>'
     agi.set_callerid(new_caller_id.encode('utf8'))
 
 
@@ -61,11 +62,8 @@ def _set_reverse_lookup_variable(agi, fields):
 
 
 def _create_reverse_lookup_variable(fields):
-    variable_content = []
-    for key, value in fields.iteritems():
-        variable_content.append(u'db-{}: {}'.format(key, value))
-
-    return u','.join(variable_content).encode('utf8')
+    variable_content = [f'db-{key}: {value}' for key, value in fields.items()]
+    return ','.join(variable_content).encode('utf8')
 
 
 agid.register(callerid_forphones)

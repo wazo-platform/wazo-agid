@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from hamcrest import assert_that, calling, equal_to, raises
 
 from ..queue import AnswerHandler
 
 
 class TestAnswerHandler(TestCase):
-
     def setUp(self):
         self.agi = Mock()
         self.cursor = Mock()
@@ -21,7 +19,7 @@ class TestAnswerHandler(TestCase):
     @patch('wazo_agid.handlers.queue.objects.User')
     def test_get_user_agent(self, User):
         agent_id = 42
-        chan_name = 'Local/id-{}@agentcallback-0000000a1;1'.format(agent_id)
+        chan_name = f'Local/id-{agent_id}@agentcallback-0000000a1;1'
         self.agi.env = {
             'agi_channel': chan_name,
         }

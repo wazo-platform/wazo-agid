@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import ConfigParser
+import configparser
 import logging
 
 from wazo_agid import agid
@@ -20,15 +19,15 @@ def getring(agi, cursor, args):
     referer = agi.get_variable('XIVO_FWD_REFERER').split(':', 1)[0]
     forwarded = agi.get_variable('XIVO_CALLFORWARDED')
     # TODO: maybe replace number@context with user id in conf file ?
-    dstnum_context = "%s@%s" % (dstnum, context)
-    referer_origin = "%s@%s" % (referer, origin)
-    origin_fwd = "%s&forwarded" % origin
-    referer_origin_fwd = "%s&forwarded" % referer_origin
+    dstnum_context = f"{dstnum}@{context}"
+    referer_origin = f"{referer}@{origin}"
+    origin_fwd = f"{origin}&forwarded"
+    referer_origin_fwd = f"{referer_origin}&forwarded"
     section = None
 
     agi.set_variable('XIVO_RINGTYPE', "")
 
-    if CONFIG_PARSER.has_option('number', "!%s" % dstnum_context):
+    if CONFIG_PARSER.has_option('number', f"!{dstnum_context}"):
         return
 
     if len(dstnum) > 0 and CONFIG_PARSER.has_option('number', dstnum_context):
@@ -41,8 +40,8 @@ def getring(agi, cursor, args):
     try:
         if section is None:
             try:
-                section = CONFIG_PARSER.get('number', "@%s" % context)
-            except ConfigParser.NoOptionError:
+                section = CONFIG_PARSER.get('number', f"@{context}")
+            except configparser.NoOptionError:
                 return
 
         if section == 'number':
@@ -60,20 +59,20 @@ def getring(agi, cursor, args):
             ringtype = CONFIG_PARSER.get(section, origin)
 
         phonetype = CONFIG_PARSER.get(section, 'phonetype')
-    except (ConfigParser.NoOptionError, ValueError):
+    except (configparser.NoOptionError, ValueError):
         logger.debug('Ring type exception', exc_info=True)
         agi.verbose("Using the native phone ring tone")
     else:
         agi.set_variable('XIVO_RINGTYPE', ringtype)
         agi.set_variable('XIVO_PHONETYPE', phonetype)
-        agi.verbose("Using ring tone %s" % (ringtype,))
+        agi.verbose(f"Using ring tone {ringtype}")
 
 
 def setup(cursor):
     global CONFIG_PARSER
 
     # This module is often called, keep this object alive.
-    CONFIG_PARSER = ConfigParser.RawConfigParser()
+    CONFIG_PARSER = configparser.RawConfigParser()
     CONFIG_PARSER.readfp(open(CONFIG_FILE))
 
 

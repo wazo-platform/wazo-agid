@@ -1,13 +1,15 @@
-# -*- coding: utf-8 -*-
-# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 
-from mock import patch, sentinel
+from unittest.mock import patch, sentinel
 from hamcrest import assert_that, equal_to
 
-from wazo_agid.modules.handle_fax import _convert_config_value_to_bool, _build_backends_list
+from wazo_agid.modules.handle_fax import (
+    _convert_config_value_to_bool,
+    _build_backends_list,
+)
 
 
 class TestConvertConfigValue(unittest.TestCase):
@@ -42,10 +44,11 @@ class TestConvertConfigValue(unittest.TestCase):
 
 
 class TestBuildBackendList(unittest.TestCase):
-
     def setUp(self):
-        self.available_backends = {'foo': sentinel.foo_backend,
-                                   'bar': sentinel.bar_backend}
+        self.available_backends = {
+            'foo': sentinel.foo_backend,
+            'bar': sentinel.bar_backend,
+        }
 
     def test_build_backends_list(self):
         backend_ids = ['foo']

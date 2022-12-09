@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2012-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -16,14 +15,11 @@ def paging(agi, cursor, args):
     userid = agi.get_variable('XIVO_USERID')
 
     try:
-        paging_entry = objects.Paging(agi,
-                                      cursor,
-                                      args[0],
-                                      userid)
+        paging_entry = objects.Paging(agi, cursor, args[0], userid)
     except (ValueError, LookupError) as e:
         agi.answer()
         agi.stream_file('vm-incorrect')
-        agi.dp_break('Sorry you are not authorize to page this group : %s' % str(e))
+        agi.dp_break(f'Sorry you are not authorize to page this group : {str(e)}')
 
     paging_line = '&'.join(paging_entry.lines)
     agi.set_variable('XIVO_PAGING_LINES', paging_line)
@@ -49,7 +45,7 @@ def build_options(paging):
         paging_opts = paging_opts + 'i'
 
     if paging.announcement_play and paging.announcement_file:
-        sound_file_directory='/var/lib/wazo/sounds/tenants'
+        sound_file_directory = '/var/lib/wazo/sounds/tenants'
         announcement_file_name = os.path.join(
             sound_file_directory,
             paging.tenant_uuid,
@@ -57,7 +53,7 @@ def build_options(paging):
             paging.announcement_file,
         )
 
-        paging_opts = paging_opts + u'A({file_name})'.format(file_name=announcement_file_name)
+        paging_opts = paging_opts + f'A({announcement_file_name})'
 
     if paging.announcement_caller:
         paging_opts = paging_opts + 'n'

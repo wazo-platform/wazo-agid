@@ -1,31 +1,28 @@
 Source: wazo-agid
 Section: python
-Priority: extra
+Priority: optional
 Maintainer: Wazo Maintainers <dev@wazo.community>
-Build-Depends: debhelper (>= 9), dh-python, dh-systemd (>= 1.5), python-all (>= 2.7), python-setuptools
+Build-Depends: debhelper (>= 9), dh-python, dh-systemd (>= 1.5), python3-all (>= 3.7), python3-setuptools
 Standards-Version: 3.9.6
-X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.7, << 3.8
 
 Package: wazo-agid
 Architecture: all
 Section: python
-Depends: ${python:Depends},
+Depends: ${python3:Depends},
          ${misc:Depends},
-         python3,
-         wazo-auth-client-python3,
-         xivo-lib-python-python3,
          adduser,
          asterisk | asterisk-virtual,
          python-tz,
-         python-unidecode,
+         python3-unidecode,
          rename,
-         wazo-agentd-client,
-         wazo-auth-client,
-         wazo-calld-client,
-         wazo-confd-client,
+         wazo-agentd-client-python3,
+         wazo-auth-client-python3,
+         wazo-calld-client-python3,
          wazo-confd-client-python3,
-         wazo-dird-client,
-         xivo-lib-python,
+         wazo-confd-client-python3,
+         wazo-dird-client-python3,
+         xivo-lib-python-python3,
          xivo-libdao
 Provides: xivo-agid
 Conflicts: xivo-utils (<= 18.09~20180808.174753.0834260.deb9), xivo-agid

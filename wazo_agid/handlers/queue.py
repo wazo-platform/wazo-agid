@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
@@ -39,7 +38,7 @@ class AnswerHandler(handler.Handler):
         if search_params:
             return objects.User(self._agi, self._cursor, **search_params)
 
-        raise LookupError('Failed to find a matching user from {}'.format(channel_name))
+        raise LookupError(f'Failed to find a matching user from {channel_name}')
 
     def record_call(self, callee):
         recording_is_on = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
@@ -48,10 +47,12 @@ class AnswerHandler(handler.Handler):
 
         external = self._agi.get_variable('XIVO_CALLORIGIN') == 'extern'
         internal = not external
-        should_record = any([
-            internal and callee.call_record_incoming_internal_enabled,
-            external and callee.call_record_incoming_external_enabled,
-        ])
+        should_record = any(
+            [
+                internal and callee.call_record_incoming_internal_enabled,
+                external and callee.call_record_incoming_external_enabled,
+            ]
+        )
         if not should_record:
             return
 

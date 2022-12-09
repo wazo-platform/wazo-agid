@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
@@ -17,10 +16,10 @@ def meeting_user(agi, cursor, args):
     try:
         meeting = _find_meeting(agi, cursor, tenant_uuid, args)
     except (AttributeError, LookupError, TypeError) as e:
-        agi.verbose('Failed to find meeting {}'.format(e))
+        agi.verbose(f'Failed to find meeting {e}')
         agi.answer()
         agi.stream_file('invalid')
-        return agi.dp_break('Could not find meeting matching {}'.format(args))
+        return agi.dp_break(f'Could not find meeting matching {args}')
 
     agi.set_variable('WAZO_MEETING_UUID', meeting.uuid)
     agi.set_variable('WAZO_MEETING_NAME', meeting.name)

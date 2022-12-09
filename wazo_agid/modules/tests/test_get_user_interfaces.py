@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-# Copyright 2019-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2019-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
 
-from mock import Mock
+from unittest.mock import Mock
 from hamcrest import (
     assert_that,
     calling,
@@ -52,11 +51,14 @@ class TestUserLine(TestCase):
     def test_many_interfaces(self):
         user_line = UserLine(self.agi, 'abc')
 
-        assert_that(user_line.interfaces, contains_inanyorder(
-            'sccp/two',
-            'dahdi/i1/55555555',
-            'one-1',
-            'one-2',
-            'two-1',
-            'PJSIP/three',
-        ))
+        assert_that(
+            user_line.interfaces,
+            contains_inanyorder(
+                'sccp/two',
+                'dahdi/i1/55555555',
+                'one-1',
+                'one-2',
+                'two-1',
+                'PJSIP/three',
+            ),
+        )

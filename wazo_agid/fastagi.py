@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2004-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,12 +9,20 @@
 #     - replaced a reference to old style ListType with a call to isinstance(..., list)
 
 # Adapted for FastAGI by Proformatique :
-#     - replaced references to sys.std{in,out} to cutstom file objects.
+#     - replaced references to sys.std{in,out} to custom file objects.
 #     - added args attribute to replace sys.argv.
 #     - added Fast prefix for coherency.
+from __future__ import annotations
 
 import re
 import pprint
+from typing import TYPE_CHECKING, Union, List
+
+if TYPE_CHECKING:
+    from typing import Literal
+
+
+DigitList = Union[List[Union[str, int]], str]
 
 DEFAULT_TIMEOUT = 2000  # 2sec timeout used as default for functions that take timeouts
 DEFAULT_RECORD = 20000  # 20sec record time
@@ -23,10 +30,19 @@ DEFAULT_RECORD = 20000  # 20sec record time
 re_code = re.compile(r'(^\d*)\s*(.*)')
 re_kv = re.compile(r'(?P<key>\w+)=(?P<value>[^\s]+)\s*(?:\((?P<data>.*)\))*')
 
-__all__ = ['FastAGIException', 'FastAGIError', 'FastAGIUnknownError',
-           'FastAGIAppError', 'FastAGIHangup', 'FastAGISIGPIPEHangup',
-           'FastAGIResultHangup', 'FastAGIDBError', 'FastAGIUsageError',
-           'FastAGIInvalidCommand', 'FastAGI']
+__all__ = [
+    'FastAGIException',
+    'FastAGIError',
+    'FastAGIUnknownError',
+    'FastAGIAppError',
+    'FastAGIHangup',
+    'FastAGISIGPIPEHangup',
+    'FastAGIResultHangup',
+    'FastAGIDBError',
+    'FastAGIUsageError',
+    'FastAGIInvalidCommand',
+    'FastAGI',
+]
 
 
 class FastAGIException(Exception):
@@ -45,8 +61,8 @@ class FastAGIAppError(FastAGIError):
     pass
 
 
-# there are several different types of hangups we can detect
-# they all are derrived from FastAGIHangup
+# there are several types of hangups we can detect
+# they all are derived from FastAGIHangup
 class FastAGIHangup(FastAGIAppError):
     pass
 
@@ -75,7 +91,7 @@ class FastAGIDialPlanBreak(FastAGIException):
     pass
 
 
-class FastAGI(object):
+class FastAGI:
     """
     This class encapsulates communication between Asterisk and a python
     program (typically a daemon).
@@ -96,7 +112,7 @@ class FastAGI(object):
 
     def _get_agi_env(self):
         while 1:
-            line = self.inf.readline().strip()
+            line = self.inf.readline().strip().decode('utf8')
             if line == '':
                 # blank line signals end
                 break
@@ -110,26 +126,28 @@ class FastAGI(object):
 
     def _get_agi_args(self):
         i = 1
-        while "agi_arg_%d" % i in self.env:
-            self.args.append(self.env["agi_arg_%d" % i])
+        while f"agi_arg_{i:d}" in self.env:
+            self.args.append(self.env[f"agi_arg_{i:d}"])
             i += 1
 
     @staticmethod
-    def _quote(string):
+    def _quote(string: str | bytes | None) -> str:
         if string is None:
             string = ''
-        elif not isinstance(string, unicode):
+        elif isinstance(string, bytes):
+            string = string.decode('utf8')
+        elif not isinstance(string, str):
             string = str(string)
-        else:
-            string = string.encode('utf8')
 
-        return '"%s"' % string.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+        return '"{}"'.format(
+            string.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+        )
 
     @staticmethod
-    def dp_break(message):
+    def dp_break(message: str) -> None:
         raise FastAGIDialPlanBreak(message)
 
-    def execute(self, command, *args):
+    def execute(self, command: str, *args):
         try:
             self.send_command(command, *args)
             return self.get_result()
@@ -140,13 +158,13 @@ class FastAGI(object):
             else:
                 raise
 
-    def send_command(self, command, *args):
+    def send_command(self, command: str, *args) -> None:
         """Send a command to Asterisk"""
-        command = ' '.join([command.strip()] + map(str, args)).strip() + "\n"
-        self.outf.write(command)
+        command = ' '.join([command.strip()] + list(map(str, args))).strip() + "\n"
+        self.outf.write(command.encode('utf8'))
         self.outf.flush()
 
-    def fail(self):
+    def fail(self) -> None:
         """Force Asterisk to change the result state of the AGI to
         AGI_RESULT_FAILURE so that it will abort the AGI.
         This function catches internal EPIPE IOError and does not report them
@@ -161,8 +179,9 @@ class FastAGI(object):
     def get_result(self):
         """Read the result of a command from Asterisk"""
         code = 0
+        response = ''
         result = {'result': ('', '')}
-        line = self.inf.readline().strip()
+        line = self.inf.readline().strip().decode('utf8')
         m = re_code.search(line)
         if m:
             code, response = m.groups()
@@ -179,64 +198,63 @@ class FastAGI(object):
                 if key == 'result' and value == '-1':
                     raise FastAGIAppError("Error executing application, or hangup")
             return result
-        elif code == 510:
+        if code == 510:
             raise FastAGIInvalidCommand(response)
-        elif code == 520:
+        if code == 520:
             usage = [line]
-            line = self.inf.readline().strip()
+            line = self.inf.readline().strip().decode('utf8')
             while line[:3] != '520':
                 usage.append(line)
-                line = self.inf.readline().strip()
+                line = self.inf.readline().strip().decode('utf8')
             usage.append(line)
-            usage = '%s\n' % '\n'.join(usage)
+            usage = '{}\n'.format('\n'.join(usage))
             raise FastAGIUsageError(usage)
-        else:
-            raise FastAGIUnknownError(code, 'Unhandled code or undefined response')
 
-    def _process_digit_list(self, digits):
+        raise FastAGIUnknownError(code, 'Unhandled code or undefined response')
+
+    def _process_digit_list(self, digits: DigitList) -> str:
         if isinstance(digits, list):
             digits = ''.join(map(str, digits))
         return self._quote(digits)
 
-    def answer(self):
-        """agi.answer() --> None
-        Answer channel if not already in answer state.
+    def answer(self) -> None:
+        """
+        Answer channel if not already in answered state.
         """
         self.execute('ANSWER')['result'][0]
 
     @staticmethod
-    def code_to_char(code):
+    def code_to_char(code: str) -> str:
         """
         Return chr(int(code))
         Raise FastAGIError on error
         """
         if code == '0':
             return ''
-        else:
-            try:
-                return chr(int(code))
-            except (TypeError, ValueError):
-                raise FastAGIError('Unable to convert result to char: %s' % code)
+        try:
+            return chr(int(code))
+        except (TypeError, ValueError):
+            raise FastAGIError(f'Unable to convert result to char: {code}')
 
-    def wait_for_digit(self, timeout=DEFAULT_TIMEOUT):
-        """agi.wait_for_digit(timeout=DEFAULT_TIMEOUT) --> digit
+    def wait_for_digit(self, timeout: int = DEFAULT_TIMEOUT) -> str:
+        """
         Waits for up to 'timeout' milliseconds for a channel to receive a DTMF
         digit.  Returns digit dialed
-        Throws FastAGIError on channel falure
+        Throws FastAGIError on channel failure
         """
         res = self.execute('WAIT FOR DIGIT', timeout)['result'][0]
         return self.code_to_char(res)
 
     def send_text(self, text=''):
-        """agi.send_text(text='') --> None
+        """
         Sends the given text on a channel.  Most channels do not support the
         transmission of text.
         Throws FastAGIError on error/hangup
         """
         self.execute('SEND TEXT', self._quote(text))['result'][0]
 
-    def receive_char(self, timeout=DEFAULT_TIMEOUT):
-        """agi.receive_char(timeout=DEFAULT_TIMEOUT) --> chr
+    def receive_char(self, timeout: int = DEFAULT_TIMEOUT) -> str:
+        """
         Receives a character of text on a channel.  Specify timeout to be the
         maximum time to wait for input in milliseconds, or 0 for infinite. Most channels
         do not support the reception of text.
@@ -244,8 +262,8 @@ class FastAGI(object):
         res = self.execute('RECEIVE CHAR', timeout)['result'][0]
         return self.code_to_char(res)
 
-    def tdd_mode(self, mode='off'):
-        """agi.tdd_mode(mode='on'|'off') --> None
+    def tdd_mode(self, mode: Literal['off', 'on'] = 'off'):
+        """
         Enable/Disable TDD transmission/reception on a channel.
         Throws FastAGIAppError if channel is not TDD-capable.
         """
@@ -253,11 +271,11 @@ class FastAGI(object):
         if res == '0':
             raise FastAGIAppError('Channel %s is not TDD-capable')
 
-    def stream_file(self, filename, escape_digits='', sample_offset=0):
-        """agi.stream_file(filename, escape_digits='', sample_offset=0) --> digit
-        Send the given file, allowing playback to be interrupted by the given
-        digits, if any.  escape_digits is a string '12345' or a list  of
-        ints [1,2,3,4,5] or strings ['1','2','3'] or mixed [1,'2',3,'4']
+    def stream_file(
+        self, filename: str, escape_digits: DigitList = '', sample_offset: int = 0
+    ) -> str:
+        """
+        Send the given file, allowing playback to be interrupted by the given digits, if any.
         If sample offset is provided then the audio will seek to sample
         offset before play starts.  Returns  digit if one was pressed.
         Throws FastAGIError if the channel was disconnected.  Remember, the file
@@ -268,33 +286,49 @@ class FastAGI(object):
         res = response['result'][0]
         return self.code_to_char(res)
 
-    def control_stream_file(self, filename, escape_digits='', skipms=3000, fwd='', rew='', pause=''):
+    def control_stream_file(
+        self,
+        filename: str,
+        escape_digits: DigitList = '',
+        skipms=3000,
+        fwd='',
+        rew='',
+        pause='',
+    ):
         """
-        Send the given file, allowing playback to be interrupted by the given
-        digits, if any.  escape_digits is a string '12345' or a list  of
-        ints [1,2,3,4,5] or strings ['1','2','3'] or mixed [1,'2',3,'4']
+        Send the given file, allowing playback to be interrupted by the given digits, if any.
         If sample offset is provided then the audio will seek to sample
         offset before play starts.  Returns  digit if one was pressed.
         Throws FastAGIError if the channel was disconnected.  Remember, the file
         extension must not be included in the filename.
         """
         escape_digits = self._process_digit_list(escape_digits)
-        response = self.execute('CONTROL STREAM FILE', self._quote(filename), escape_digits, self._quote(skipms), self._quote(fwd), self._quote(rew), self._quote(pause))
+        response = self.execute(
+            'CONTROL STREAM FILE',
+            self._quote(filename),
+            escape_digits,
+            self._quote(skipms),
+            self._quote(fwd),
+            self._quote(rew),
+            self._quote(pause),
+        )
         res = response['result'][0]
         return self.code_to_char(res)
 
-    def send_image(self, filename):
-        """agi.send_image(filename) --> None
+    def send_image(self, filename: str):
+        """
         Sends the given image on a channel.  Most channels do not support the
         transmission of images.   Image names should not include extensions.
         Throws FastAGIError on channel failure
         """
         res = self.execute('SEND IMAGE', filename)['result'][0]
         if res != '0':
-            raise FastAGIAppError('Channel falure on channel %s' % self.env.get('agi_channel', 'UNKNOWN'))
+            raise FastAGIAppError(
+                f'Channel failure on channel {self.env.get("agi_channel", "UNKNOWN")}'
+            )
 
-    def say_digits(self, digits, escape_digits=''):
-        """agi.say_digits(digits, escape_digits='') --> digit
+    def say_digits(self, digits: DigitList, escape_digits: DigitList = '') -> str:
+        """
         Say a given digit string, returning early if any of the given DTMF digits
         are received on the channel.
         Throws FastAGIError on channel failure
@@ -304,8 +338,10 @@ class FastAGI(object):
         res = self.execute('SAY DIGITS', digits, escape_digits)['result'][0]
         return self.code_to_char(res)
 
-    def say_number(self, number, escape_digits='', gender=''):
-        """agi.say_number(number, escape_digits='') --> digit
+    def say_number(
+        self, number: str, escape_digits: DigitList = '', gender: str = ''
+    ) -> str:
+        """
         Say a given digit string, returning early if any of the given DTMF digits
         are received on the channel.
         Throws FastAGIError on channel failure
@@ -315,8 +351,8 @@ class FastAGI(object):
         res = self.execute('SAY NUMBER', number, escape_digits, gender)['result'][0]
         return self.code_to_char(res)
 
-    def say_alpha(self, characters, escape_digits=''):
-        """agi.say_alpha(string, escape_digits='') --> digit
+    def say_alpha(self, characters: str, escape_digits: DigitList = '') -> str:
+        """
         Say a given character string, returning early if any of the given DTMF
         digits are received on the channel.
         Throws FastAGIError on channel failure
@@ -326,8 +362,8 @@ class FastAGI(object):
         res = self.execute('SAY ALPHA', characters, escape_digits)['result'][0]
         return self.code_to_char(res)
 
-    def say_phonetic(self, characters, escape_digits=''):
-        """agi.say_phonetic(string, escape_digits='') --> digit
+    def say_phonetic(self, characters, escape_digits='') -> str:
+        """
         Phonetically say a given character string, returning early if any of
         the given DTMF digits are received on the channel.
         Throws FastAGIError on channel failure
@@ -337,8 +373,8 @@ class FastAGI(object):
         res = self.execute('SAY PHONETIC', characters, escape_digits)['result'][0]
         return self.code_to_char(res)
 
-    def say_date(self, seconds, escape_digits=''):
-        """agi.say_date(seconds, escape_digits='') --> digit
+    def say_date(self, seconds, escape_digits='') -> str:
+        """
         Say a given date, returning early if any of the given DTMF digits are
         pressed.  The date should be in seconds since the UNIX Epoch (Jan 1, 1970 00:00:00)
         """
@@ -346,8 +382,8 @@ class FastAGI(object):
         res = self.execute('SAY DATE', seconds, escape_digits)['result'][0]
         return self.code_to_char(res)
 
-    def say_time(self, seconds, escape_digits=''):
-        """agi.say_time(seconds, escape_digits='') --> digit
+    def say_time(self, seconds, escape_digits='') -> str:
+        """
         Say a given time, returning early if any of the given DTMF digits are
         pressed.  The time should be in seconds since the UNIX Epoch (Jan 1, 1970 00:00:00)
         """
@@ -355,31 +391,35 @@ class FastAGI(object):
         res = self.execute('SAY TIME', seconds, escape_digits)['result'][0]
         return self.code_to_char(res)
 
-    def say_datetime(self, seconds, escape_digits='', format='', zone=''):
-        """agi.say_datetime(seconds, escape_digits='', format='', zone='') --> digit
-        Say a given date in the format specfied (see voicemail.conf), returning
+    def say_datetime(self, seconds, escape_digits='', format='', zone='') -> str:
+        """
+        Say a given date in the format specified (see voicemail.conf), returning
         early if any of the given DTMF digits are pressed.  The date should be
         in seconds since the UNIX Epoch (Jan 1, 1970 00:00:00).
         """
         escape_digits = self._process_digit_list(escape_digits)
         if format:
             format = self._quote(format)
-        res = self.execute('SAY DATETIME', seconds, escape_digits, format, zone)['result'][0]
+        res = self.execute('SAY DATETIME', seconds, escape_digits, format, zone)[
+            'result'
+        ][0]
         return self.code_to_char(res)
 
-    def get_data(self, filename, timeout=DEFAULT_TIMEOUT, max_digits=255):
-        """agi.get_data(filename, timeout=DEFAULT_TIMEOUT, max_digits=255) --> digits
+    def get_data(
+        self, filename: str, timeout: int = DEFAULT_TIMEOUT, max_digits: int = 255
+    ) -> str:
+        """
         Stream the given file and receive dialed digits
         """
         result = self.execute('GET DATA', filename, timeout, max_digits)
         res, _ = result['result']
         return res
 
-    def get_option(self, filename, escape_digits='', timeout=0):
-        """agi.get_option(filename, escape_digits='', timeout=0) --> digit
-        Send the given file, allowing playback to be interrupted by the given
-        digits, if any.  escape_digits is a string '12345' or a list  of
-        ints [1,2,3,4,5] or strings ['1','2','3'] or mixed [1,'2',3,'4']
+    def get_option(
+        self, filename: str, escape_digits: DigitList = '', timeout: int = 0
+    ) -> str:
+        """
+        Send the given file, allowing playback to be interrupted by the given digits, if any.
         Returns  digit if one was pressed.
         Throws FastAGIError if the channel was disconnected.  Remember, the file
         extension must not be included in the filename.
@@ -394,7 +434,7 @@ class FastAGI(object):
         return self.code_to_char(res)
 
     def set_context(self, context):
-        """agi.set_context(context)
+        """
         Sets the context for continuation upon exiting the application.
         No error appears to be produced.  Does not set exten or priority
         Use at your own risk.  Ensure that you specify a valid context.
@@ -402,7 +442,7 @@ class FastAGI(object):
         self.execute('SET CONTEXT', context)
 
     def set_extension(self, extension):
-        """agi.set_extension(extension)
+        """
         Sets the extension for continuation upon exiting the application.
         No error appears to be produced.  Does not set context or priority
         Use at your own risk.  Ensure that you specify a valid extension.
@@ -410,7 +450,7 @@ class FastAGI(object):
         self.execute('SET EXTENSION', extension)
 
     def set_priority(self, priority):
-        """agi.set_priority(priority)
+        """
         Sets the priority for continuation upon exiting the application.
         No error appears to be produced.  Does not set exten or context
         Use at your own risk.  Ensure that you specify a valid priority.
@@ -425,8 +465,16 @@ class FastAGI(object):
         self.set_extension(extension)
         self.set_priority(priority)
 
-    def record_file(self, filename, format='gsm', escape_digits='#', timeout=DEFAULT_RECORD, offset=0, beep='beep'):
-        """agi.record_file(filename, format, escape_digits, timeout=DEFAULT_TIMEOUT, offset=0, beep='beep') --> None
+    def record_file(
+        self,
+        filename: str,
+        format: str = 'gsm',
+        escape_digits: str = '#',
+        timeout: int = DEFAULT_RECORD,
+        offset: int = 0,
+        beep: str = 'beep',
+    ) -> None:
+        """
         Record to a file until a given dtmf digit in the sequence is received
         The format will specify what kind of file will be recorded.  The timeout
         is the maximum record time in milliseconds, or -1 for no timeout. Offset
@@ -434,26 +482,34 @@ class FastAGI(object):
         exceeding the end of the file
         """
         escape_digits = self._process_digit_list(escape_digits)
-        res = self.execute('RECORD FILE', self._quote(filename), format, escape_digits, timeout, offset, beep)['result'][0]
+        res = self.execute(
+            'RECORD FILE',
+            self._quote(filename),
+            format,
+            escape_digits,
+            timeout,
+            offset,
+            beep,
+        )['result'][0]
         return self.code_to_char(res)
 
     def set_autohangup(self, secs):
-        """agi.set_autohangup(secs) --> None
+        """
         Cause the channel to automatically hangup at <time> seconds in the
-        future.  Of course it can be hungup before then as well.   Setting to
-        0 will cause the autohangup feature to be disabled on this channel.
+        future.  Of course, it can be hung up before then as well.   Setting to
+        0 will cause the auto-hangup feature to be disabled on this channel.
         """
         self.execute('SET AUTOHANGUP', secs)
 
     def hangup(self, channel=''):
-        """agi.hangup(channel='')
+        """
         Hangs up the specified channel.
         If no channel name is given, hangs up the current channel
         """
         self.execute('HANGUP', channel)
 
     def appexec(self, application, options=''):
-        """agi.appexec(application, options='')
+        """
         Executes <application> with given <options>.
         Returns whatever the application returns, or -2 on failure to find
         application
@@ -461,17 +517,17 @@ class FastAGI(object):
         result = self.execute('EXEC', application, self._quote(options))
         res = result['result'][0]
         if res == '-2':
-            raise FastAGIAppError('Unable to find application: %s' % application)
+            raise FastAGIAppError(f'Unable to find application: {application}')
         return res
 
     def set_callerid(self, number):
-        """agi.set_callerid(number) --> None
-        Changes the callerid of the current channel.
+        """
+        Changes the caller id of the current channel.
         """
         self.execute('SET CALLERID', self._quote(number))
 
-    def channel_status(self, channel=''):
-        """agi.channel_status(channel='') --> int
+    def channel_status(self, channel: str = '') -> int:
+        """
         Returns the status of the specified channel.  If no channel name is
         given the returns the status of the current channel.
 
@@ -494,12 +550,11 @@ class FastAGI(object):
 
         return int(result['result'][0])
 
-    def set_variable(self, name, value):
-        """Set a channel variable.
-        """
+    def set_variable(self, name: str, value) -> None:
+        """Set a channel variable."""
         self.execute('SET VARIABLE', self._quote(name), self._quote(value))
 
-    def get_variable(self, name):
+    def get_variable(self, name: str) -> str:
         """Get a channel variable.
 
         This function returns the value of the indicated channel variable.  If
@@ -513,7 +568,7 @@ class FastAGI(object):
         _, value = result['result']
         return value
 
-    def get_full_variable(self, name, channel=None):
+    def get_full_variable(self, name: str, channel: str = None):
         """Get a channel variable.
 
         This function returns the value of the indicated channel variable.  If
@@ -521,71 +576,83 @@ class FastAGI(object):
         """
         try:
             if channel:
-                result = self.execute('GET FULL VARIABLE', self._quote(name), self._quote(channel))
+                result = self.execute(
+                    'GET FULL VARIABLE', self._quote(name), self._quote(channel)
+                )
             else:
                 result = self.execute('GET FULL VARIABLE', self._quote(name))
-
         except FastAGIResultHangup:
             result = {'result': ('1', 'hangup')}
 
         _, value = result['result']
         return value
 
-    def verbose(self, message, level=1):
-        """agi.verbose(message='', level=1) --> None
+    def verbose(self, message: str, level: int = 1) -> None:
+        """
         Sends <message> to the console via verbose message system.
         <level> is the the verbose level (1-4)
         """
         self.execute('VERBOSE', self._quote(message), level)
 
-    def database_get(self, family, key):
-        """agi.database_get(family, key) --> str
+    def database_get(self, family: str, key: str) -> str:
+        """
         Retrieves an entry in the Asterisk database for a given family and key.
         Returns 0 if <key> is not set.  Returns 1 if <key>
-        is set and returns the variable in parenthesis
+        is set and returns the variable in parentheses
         example return code: 200 result=1 (testvariable)
         """
         result = self.execute('DATABASE GET', self._quote(family), self._quote(key))
         res, value = result['result']
         if res == '0':
-            raise FastAGIDBError('Key not found in database: family=%s, key=%s' % (family, key))
-        elif res == '1':
+            raise FastAGIDBError(
+                f'Key not found in database: family={family}, key={key}'
+            )
+        if res == '1':
             return value
-        else:
-            raise FastAGIError('Unknown exception for : family=%s, key=%s, result=%s' % (family, key, pprint.pformat(result)))
+        raise FastAGIError(
+            f'Unknown exception for : family={family}, key={key}, result={pprint.pformat(result)}'
+        )
 
-    def database_put(self, family, key, value):
-        """agi.database_put(family, key, value) --> None
+    def database_put(self, family: str, key: str, value: str) -> None:
+        """
         Adds or updates an entry in the Asterisk database for a
         given family, key, and value.
         """
-        result = self.execute('DATABASE PUT', self._quote(family), self._quote(key), self._quote(value))
+        result = self.execute(
+            'DATABASE PUT', self._quote(family), self._quote(key), self._quote(value)
+        )
         res, value = result['result']
         if res == '0':
-            raise FastAGIDBError('Unable to put vaule in databale: family=%s, key=%s, value=%s' % (family, key, value))
+            raise FastAGIDBError(
+                f'Unable to put value in database: family={family}, key={key}, value={value}'
+            )
 
-    def database_del(self, family, key):
-        """agi.database_del(family, key) --> None
+    def database_del(self, family: str, key: str) -> None:
+        """
         Deletes an entry in the Asterisk database for a
         given family and key.
         """
         result = self.execute('DATABASE DEL', self._quote(family), self._quote(key))
         res, _ = result['result']
         if res == '0':
-            raise FastAGIDBError('Unable to delete from database: family=%s, key=%s' % (family, key))
+            raise FastAGIDBError(
+                f'Unable to delete from database: family={family}, key={key}'
+            )
 
-    def database_deltree(self, family, key=''):
-        """agi.database_deltree(family, key='') --> None
+    def database_deltree(self, family: str, key: str = '') -> None:
+        """
         Deletes a family or specific keytree with in a family
         in the Asterisk database.
         """
         result = self.execute('DATABASE DELTREE', self._quote(family), self._quote(key))
         res, _ = result['result']
         if res == '0':
-            raise FastAGIDBError('Unable to delete tree from database: family=%s, key=%s' % (family, key))
+            raise FastAGIDBError(
+                f'Unable to delete tree from database: family={family}, key={key}'
+            )
 
-    def noop(self):
-        """agi.noop() --> None
+    def noop(self) -> None:
+        """
         Does nothing
         """
         self.execute('NOOP')

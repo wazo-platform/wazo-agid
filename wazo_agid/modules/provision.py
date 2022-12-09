@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2011-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -23,14 +22,14 @@ def _do_provision(client, provcode, ip):
 def _get_device(client, ip):
     response = client.devices.list(ip=ip, recurse=True)
     if response['total'] != 1:
-        raise Exception("Device with ip {} not found".format(ip))
+        raise Exception(f"Device with ip {ip} not found")
     return response['items'][0]
 
 
 def _get_line(client, provcode):
     response = client.lines.list(provisioning_code=provcode, recurse=True)
     if response['total'] != 1:
-        raise Exception("Line with provisioning code {} not found".format(provcode))
+        raise Exception(f"Line with provisioning code {provcode} not found")
     return response['items'][0]
 
 

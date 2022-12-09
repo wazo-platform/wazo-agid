@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2018-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
@@ -38,13 +37,15 @@ def queue_skill_rule_set(agi, cursor, args):
             _set_variables(agi, call, timeout)
             return
 
-        skill_rule_function = 'skillrule-{}'.format(skill_rule.id)
+        skill_rule_function = f'skillrule-{skill_rule.id}'
         skill_rule_kwargs = []
         if skill_rule_variables:
             skill_rule_variables = skill_rule_variables.replace('|', ',')
             skill_rule_variables = json.loads(skill_rule_variables)
-            skill_rule_kwargs = ['{}={}'.format(key, value) for key, value in skill_rule_variables.items()]
-        call = '{function}({kwargs})'.format(function=skill_rule_function, kwargs=','.join(skill_rule_kwargs))
+            skill_rule_kwargs = [
+                f'{key}={value}' for key, value in skill_rule_variables.items()
+            ]
+        call = f'{skill_rule_function}({",".join(skill_rule_kwargs)})'
 
     _set_variables(agi, call, timeout)
 

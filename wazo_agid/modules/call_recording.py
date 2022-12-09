@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,7 +8,9 @@ from wazo_agid import agid, dialplan_variables, objects
 
 logger = logging.getLogger(__name__)
 
-CALL_RECORDING_FILENAME_TEMPLATE = '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
+CALL_RECORDING_FILENAME_TEMPLATE = (
+    '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
+)
 
 
 def call_recording(agi, cursor, args):
@@ -42,9 +43,8 @@ def record_caller(agi, cursor, args):
 
     is_external = agi.get_variable(dialplan_variables.OUTCALL_ID) != ''
     should_record = (
-        (not is_external and caller.call_record_outgoing_internal_enabled)
-        or (is_external and caller.call_record_outgoing_external_enabled)
-    )
+        not is_external and caller.call_record_outgoing_internal_enabled
+    ) or (is_external and caller.call_record_outgoing_external_enabled)
     if not should_record:
         return
 
@@ -78,7 +78,7 @@ def _start_mix_monitor(agi):
     )
     mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
 
-    agi.appexec('MixMonitor', '{},{}'.format(filename, mix_monitor_options))
+    agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}')
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
 

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2006-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid import agid, objects
@@ -26,7 +25,7 @@ def user_get_vmbox(agi, cursor, args):
             agi.dp_break(str(e))
 
     if not user.vmbox:
-        agi.dp_break("User has no voicemail box (id: %d)" % user.id)
+        agi.dp_break(f"User has no voicemail box (id: {user.id:d})")
 
     if user.vmbox.skipcheckpass:
         vmmain_options = "s"

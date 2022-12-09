@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (C) 2006-2014 Avencall
+# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -10,14 +9,16 @@ logger = logging.getLogger(__name__)
 RIGHTCALL_AUTHORIZATION_COLNAME = "rightcall.authorization"
 RIGHTCALL_PASSWD_COLNAME = "rightcall.passwd"
 
-rep = (('_', ''),
-       ('*', '\*'),
-       ('+', '\+'),
-       ('X', '[0-9]'),
-       ('Z', '[1-9]'),
-       ('N', '[2-9]'),
-       ('.', '[0-9#\*]+'),
-       ('!', '[0-9#\*]*'))
+rep = (
+    ('_', r''),
+    ('*', r'\*'),
+    ('+', r'\+'),
+    ('X', r'[0-9]'),
+    ('Z', r'[1-9]'),
+    ('N', r'[2-9]'),
+    ('.', r'[0-9#\*]+'),
+    ('!', r'[0-9#\*]*'),
+)
 
 
 class RuleAppliedException(Exception):
@@ -40,16 +41,16 @@ def deny(agi, password):
 def extension_matches(number, pattern):
     for (key, val) in rep:
         pattern = pattern.replace(key, val)
-
-    return bool(re.match("^%s$" % pattern, number))
+    return bool(re.match(rf"^{pattern}$", number))
 
 
 def apply_rules(agi, rules):
     if not rules:
         return
 
+    column_name = RIGHTCALL_AUTHORIZATION_COLNAME.split('.')[1]
     for rule in rules:
-        if rule[RIGHTCALL_AUTHORIZATION_COLNAME]:
+        if rule[column_name]:
             allow(agi)
 
-    deny(agi, rule[RIGHTCALL_PASSWD_COLNAME])
+    deny(agi, rule[RIGHTCALL_PASSWD_COLNAME.split('.')[1]])

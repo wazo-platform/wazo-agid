@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-# Copyright 2012-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 from wazo_agid.handlers.groupfeatures import GroupFeatures
-from mock import Mock, patch, call
+from unittest.mock import Mock, patch, call
 
 
 class TestGroupFeatures(unittest.TestCase):
-
     def setUp(self):
         self._agi = Mock()
         self._cursor = Mock()
@@ -25,17 +23,19 @@ class TestGroupFeatures(unittest.TestCase):
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._needs_rewrite_cid')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_rewrite_cid')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_call_record_side')
-    def test_execute(self,
-                     _set_rewrite_cid,
-                     _needs_rewrite_cid,
-                     _set_schedule,
-                     _set_dial_action,
-                     _set_timeout,
-                     _set_preprocess_subroutine,
-                     _set_vars,
-                     _set_options,
-                     _set_members,
-                     _set_call_record_side):
+    def test_execute(
+        self,
+        _set_rewrite_cid,
+        _needs_rewrite_cid,
+        _set_schedule,
+        _set_dial_action,
+        _set_timeout,
+        _set_preprocess_subroutine,
+        _set_vars,
+        _set_options,
+        _set_members,
+        _set_call_record_side,
+    ):
         _needs_rewrite_cid.return_value = True
 
         self.group_features.execute()

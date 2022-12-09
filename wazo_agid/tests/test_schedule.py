@@ -1,13 +1,19 @@
-# -*- coding: utf-8 -*-
-# Copyright 2013-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import datetime
 import unittest
-from mock import Mock, call
-from wazo_agid.schedule import ScheduleBuilder, SchedulePeriodBuilder, \
-    HoursChecker, WeekdaysChecker, DaysChecker, MonthsChecker, SchedulePeriod, \
-    ScheduleAction
+from unittest.mock import Mock, call
+from wazo_agid.schedule import (
+    ScheduleBuilder,
+    SchedulePeriodBuilder,
+    HoursChecker,
+    WeekdaysChecker,
+    DaysChecker,
+    MonthsChecker,
+    SchedulePeriod,
+    ScheduleAction,
+)
 
 
 class TestHoursChecker(unittest.TestCase):
@@ -176,13 +182,10 @@ class TestSchedulePeriod(unittest.TestCase):
 
 class TestSchedule(unittest.TestCase):
     def test_schedule_is_opened_when_hours_is_in_open_period(self):
-        schedule = (_a_schedule()
-                    .opened(_a_period()
-                            .hours('18:00-18:10').build())
-                    .build())
-        current_time = (_a_time()
-                        .hour('18:05')
-                        .build())
+        schedule = (
+            _a_schedule().opened(_a_period().hours('18:00-18:10').build()).build()
+        )
+        current_time = _a_time().hour('18:05').build()
 
         self._assert_schedule_is_in_state(schedule, current_time, 'opened')
 
@@ -193,64 +196,40 @@ class TestSchedule(unittest.TestCase):
             self.assertEqual(action, schedule_state.action)
 
     def test_simple_schedule_is_closed_when_hours_not_in_open_period(self):
-        schedule = (_a_schedule()
-                    .opened(_a_period()
-                            .hours('18:00-18:10').build())
-                    .build())
-        current_time = (_a_time()
-                        .hour('18:15')
-                        .build())
+        schedule = (
+            _a_schedule().opened(_a_period().hours('18:00-18:10').build()).build()
+        )
+        current_time = _a_time().hour('18:15').build()
 
         self._assert_schedule_is_in_state(schedule, current_time, 'closed')
 
     def test_schedule_is_closed_when_day_doesnt_match(self):
-        schedule = (_a_schedule()
-                    .opened(_a_period()
-                            .days('22').build())
-                    .build())
-        current_time = (_a_time()
-                        .day('23')
-                        .build())
+        schedule = _a_schedule().opened(_a_period().days('22').build()).build()
+        current_time = _a_time().day('23').build()
 
         self._assert_schedule_is_in_state(schedule, current_time, 'closed')
 
     def test_schedule_is_closed_when_weekday_doesnt_match(self):
-        schedule = (_a_schedule()
-                    .opened(_a_period()
-                            .weekdays('6').build())
-                    .build())
-        current_time = (_a_time()
-                        .weekday('7')
-                        .build())
+        schedule = _a_schedule().opened(_a_period().weekdays('6').build()).build()
+        current_time = _a_time().weekday('7').build()
 
         self._assert_schedule_is_in_state(schedule, current_time, 'closed')
 
     def test_schedule_is_closed_when_month_doesnt_match(self):
-        schedule = (_a_schedule()
-                    .opened(_a_period()
-                            .months('3').build())
-                    .build())
-        current_time = (_a_time()
-                        .month('4')
-                        .build())
+        schedule = _a_schedule().opened(_a_period().months('3').build()).build()
+        current_time = _a_time().month('4').build()
 
         self._assert_schedule_is_in_state(schedule, current_time, 'closed')
 
     def test_complex_schedule(self):
-        schedule = (_a_schedule()
-                    .opened(_a_period()
-                            .hours('16:00-17:00').build())
-                    .closed(_a_period()
-                            .hours('16:05-16:07')
-                            .days('5')
-                            .action(1).build())
-                    .closed(_a_period()
-                            .hours('16:05-16:07')
-                            .days('6')
-                            .action(2).build())
-                    .build())
-        current_time_builder = (_a_time()
-                                .hour('16:06'))
+        schedule = (
+            _a_schedule()
+            .opened(_a_period().hours('16:00-17:00').build())
+            .closed(_a_period().hours('16:05-16:07').days('5').action(1).build())
+            .closed(_a_period().hours('16:05-16:07').days('6').action(2).build())
+            .build()
+        )
+        current_time_builder = _a_time().hour('16:06')
 
         current_time = current_time_builder.day('5').build()
         self._assert_schedule_is_in_state(schedule, current_time, 'closed', action=1)
@@ -272,7 +251,7 @@ def _a_time():
     return _DatetimeBuilder()
 
 
-class _DatetimeBuilder(object):
+class _DatetimeBuilder:
     def __init__(self):
         self._year = 1970
         self._month = 1
@@ -303,17 +282,20 @@ class _DatetimeBuilder(object):
         return self
 
     def build(self):
-        return datetime.datetime(self._year, self._month, self._day, self._hour, self._minute)
+        return datetime.datetime(
+            self._year, self._month, self._day, self._hour, self._minute
+        )
 
 
 class TestScheduleAction(unittest.TestCase):
-
     def test_action_arg2_is_not_set_if_none(self):
         action = ScheduleAction('foo', 'bar', None)
         agi = Mock()
 
         action.set_variables_in_agi(agi)
 
-        expected_call_args = [call('XIVO_FWD_SCHEDULE_OUT_ACTION', 'foo'),
-                              call('XIVO_FWD_SCHEDULE_OUT_ACTIONARG1', 'bar')]
+        expected_call_args = [
+            call('XIVO_FWD_SCHEDULE_OUT_ACTION', 'foo'),
+            call('XIVO_FWD_SCHEDULE_OUT_ACTIONARG1', 'bar'),
+        ]
         self.assertEqual(expected_call_args, agi.set_variable.call_args_list)

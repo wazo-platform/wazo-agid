@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright 2018-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 from wazo_agid import agid
@@ -11,12 +10,11 @@ class UnknownUser(Exception):
 
 
 class _UserLine:
-
     def __init__(self, agi, user_uuid):
         self._agi = agi
         self._user_uuid = user_uuid
         self.interfaces = []
-        hint = agi.get_variable('HINT({}@usersharedlines)'.format(user_uuid))
+        hint = agi.get_variable(f'HINT({user_uuid}@usersharedlines)')
         if not hint:
             raise UnknownUser()
 

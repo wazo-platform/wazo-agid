@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (C) 2010-2014 Avencall
+# Copyright 2010-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import datetime
@@ -7,7 +6,7 @@ import pytz
 import re
 
 
-class Schedule(object):
+class Schedule:
     def __init__(self, opened_periods, closed_periods, default_action, timezone_name):
         self._opened_periods = opened_periods
         self._closed_periods = closed_periods
@@ -33,7 +32,7 @@ class Schedule(object):
         return utc_now.astimezone(timezone)
 
 
-class AlwaysOpenedSchedule(object):
+class AlwaysOpenedSchedule:
     def compute_state(self, current_datetime):
         return ScheduleState.new_opened_state()
 
@@ -41,7 +40,7 @@ class AlwaysOpenedSchedule(object):
         return ScheduleState.new_opened_state()
 
 
-class ScheduleState(object):
+class ScheduleState:
     def __init__(self, state, action):
         self.state = state
         self.action = action
@@ -55,7 +54,7 @@ class ScheduleState(object):
         return cls('closed', action)
 
 
-class ScheduleAction(object):
+class ScheduleAction:
     def __init__(self, action, actionarg1, actionarg2):
         self.action = action
         self.actionarg1 = actionarg1
@@ -68,7 +67,7 @@ class ScheduleAction(object):
             agi.set_variable('XIVO_FWD_SCHEDULE_OUT_ACTIONARG2', self.actionarg2)
 
 
-class ScheduleBuilder(object):
+class ScheduleBuilder:
     def __init__(self):
         self._opened_periods = []
         self._closed_periods = []
@@ -92,13 +91,15 @@ class ScheduleBuilder(object):
         return self
 
     def build(self):
-        return Schedule(self._opened_periods,
-                        self._closed_periods,
-                        self._default_action,
-                        self._timezone_name)
+        return Schedule(
+            self._opened_periods,
+            self._closed_periods,
+            self._default_action,
+            self._timezone_name,
+        )
 
 
-class SchedulePeriod(object):
+class SchedulePeriod:
     def __init__(self, checkers, action):
         self._checkers = list(checkers)
         self.action = action
@@ -110,7 +111,7 @@ class SchedulePeriod(object):
         return True
 
 
-class SchedulePeriodBuilder(object):
+class SchedulePeriodBuilder:
     def __init__(self):
         self._hours = None
         self._weekdays = None
@@ -151,7 +152,7 @@ class SchedulePeriodBuilder(object):
         return SchedulePeriod(checkers, self._action)
 
 
-class HoursChecker(object):
+class HoursChecker:
     def __init__(self, start_hour, start_minute, end_hour, end_minute):
         self._start_time = (start_hour, start_minute)
         self._end_time = (end_hour, end_minute)
@@ -170,18 +171,18 @@ class HoursChecker(object):
         else:
             start_hour = int(m.group(1))
             if start_hour > 23:
-                raise ValueError('start hour: %s' % start_hour)
+                raise ValueError(f'start hour: {start_hour}')
             start_min = int(m.group(2))
             end_hour = int(m.group(3))
             if end_hour > 23:
-                raise ValueError('end hour: %s' % end_hour)
+                raise ValueError(f'end hour: {end_hour}')
             end_min = int(m.group(4))
             if (start_hour, start_min) > (end_hour, end_min):
                 raise ValueError('end hour before start hour')
             return cls(start_hour, start_min, end_hour, end_min)
 
 
-class _SimpleChecker(object):
+class _SimpleChecker:
     def __init__(self, accepted_values):
         self._accepted_values = accepted_values
 
@@ -199,7 +200,7 @@ class _SimpleChecker(object):
         for token in tokens:
             if '-' in token:
                 low, high = token.split('-')
-                accepted_values.update(xrange(int(low), int(high) + 1))
+                accepted_values.update(list(range(int(low), int(high) + 1)))
             else:
                 accepted_values.add(int(token))
         return cls(accepted_values)
