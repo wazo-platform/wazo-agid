@@ -859,7 +859,7 @@ class ScheduleDataMapper:
         schedule_id = res['id']
         timezone = res['timezone']
         if not timezone:
-            cursor.execute("SELECT timezone FROM infos", columns)
+            cursor.execute("SELECT timezone FROM infos")
             infos = cursor.fetchone()
             timezone = infos['timezone']
 
