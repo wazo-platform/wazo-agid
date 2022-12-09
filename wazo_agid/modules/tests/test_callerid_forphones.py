@@ -71,7 +71,7 @@ class TestCallerIdForPhone(unittest.TestCase):
 
         lookup_result = {'number': '415', 'firstname': 'Bob', 'lastname': 'wonderland'}
         self.dird_client.directories.reverse.return_value = {
-            'display': b'Bob',
+            'display': 'Bob',
             'fields': lookup_result,
         }
         mock_dao.find_by_incall_id.return_value.xivo_user_uuid = 'user_uuid'
@@ -87,13 +87,11 @@ class TestCallerIdForPhone(unittest.TestCase):
             tenant_uuid=sentinel.agi_variable,
         )
 
-        expected_callerid = b'"Bob" <5555551234>'
+        expected_callerid = '"Bob" <5555551234>'
         self.agi.set_callerid.assert_called_once_with(expected_callerid)
         _, set_var_result = self.agi.set_variable.call_args[0]
         for key, value in lookup_result.items():
-            assert_that(
-                set_var_result.decode('utf8'), contains_string(f'{key}: {value}')
-            )
+            assert_that(set_var_result, contains_string(f'{key}: {value}'))
 
     @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
     def test_callerid_forphones_when_dao_return_none(self, mock_dao):

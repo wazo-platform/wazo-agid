@@ -40,7 +40,7 @@ def callerid_forphones(agi, cursor, args):
         )
         logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
         if lookup_result['display'] is not None:
-            _set_new_caller_id(agi, lookup_result['display'].decode('utf8'), cid_number)
+            _set_new_caller_id(agi, lookup_result['display'], cid_number)
             _set_reverse_lookup_variable(agi, lookup_result['fields'])
     except Exception as e:
         msg = f'Reverse lookup failed: {e}'
@@ -54,7 +54,7 @@ def _should_reverse_lookup(cid_name, cid_number):
 
 def _set_new_caller_id(agi, display_name, cid_number):
     new_caller_id = f'"{display_name}" <{cid_number}>'
-    agi.set_callerid(new_caller_id.encode('utf8'))
+    agi.set_callerid(new_caller_id)
 
 
 def _set_reverse_lookup_variable(agi, fields):
@@ -63,7 +63,7 @@ def _set_reverse_lookup_variable(agi, fields):
 
 def _create_reverse_lookup_variable(fields):
     variable_content = [f'db-{key}: {value}' for key, value in fields.items()]
-    return ','.join(variable_content).encode('utf8')
+    return ','.join(variable_content)
 
 
 agid.register(callerid_forphones)
