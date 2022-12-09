@@ -103,9 +103,8 @@ class UserFeatures(Handler):
                 user_main_line = user_line_dao.get_by(
                     user_id=self._dstid, main_line=True
                 )
-                self.main_line = line_dao.find_by(
-                    id=user_main_line.line_id
-                )  # XXX Should use get_by
+                # XXX Should use get_by
+                self.main_line = line_dao.find_by(id=user_main_line.line_id)
 
                 # destination_extension_id may be unset (e.g. incoming call)
                 # In this case, only the main extension of the main line should be rung
@@ -123,9 +122,8 @@ class UserFeatures(Handler):
                     extension_id=self.main_extension.id
                 )
                 for line_extension in line_extensions:
-                    line = line_dao.find_by(
-                        id=line_extension.line_id
-                    )  # XXX Should use get_by
+                    # XXX Should use get_by
+                    line = line_dao.find_by(id=line_extension.line_id)
                     self.lines.append(line)
 
             except (ValueError, LookupError) as e:

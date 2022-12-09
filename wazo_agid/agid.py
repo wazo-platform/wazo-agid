@@ -246,7 +246,7 @@ def run():
 
         logger.debug("list of handlers: %s", ', '.join(sorted(_handlers)))
 
-        for handler in list(_handlers.values()):
+        for handler in _handlers.values():
             handler.setup(cursor)
 
         conn.commit()

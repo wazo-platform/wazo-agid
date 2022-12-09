@@ -66,7 +66,7 @@ class ExtenFeatures:
 
         featureslist = []
 
-        for xtype in list(self.FEATURES.values()):
+        for xtype in self.FEATURES.values():
             for x in xtype:
                 featureslist.append(x)
 
