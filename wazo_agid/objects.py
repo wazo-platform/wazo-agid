@@ -1046,7 +1046,6 @@ class CallerID:
             if cid_parsed:
                 self.mode = res['mode']
                 self.calleridname, self.calleridnum = cid_parsed
-                self.calleridname = self.calleridname.encode('UTF-8')
 
     def rewrite(self, force_rewrite):
         """
