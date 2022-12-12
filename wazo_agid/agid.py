@@ -97,6 +97,7 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
                     _handlers[handler_name].handle(fagi, cursor, fagi.args)
                     conn.commit()
                 except psycopg2.DatabaseError:
+                    logger.debug("Database error encountered. Rolling back.")
                     conn.rollback()
                     raise
 
