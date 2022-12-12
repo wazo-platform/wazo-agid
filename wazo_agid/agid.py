@@ -93,12 +93,12 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
                 handler_name = fagi.env['agi_network_script']
                 logger.debug("delegating request handling %r", handler_name)
 
-                _handlers[handler_name].handle(fagi, cursor, fagi.args)
-
                 try:
+                    _handlers[handler_name].handle(fagi, cursor, fagi.args)
                     conn.commit()
                 except psycopg2.DatabaseError:
                     conn.rollback()
+                    raise
 
                 fagi.verbose(f'AGI handler {handler_name!r} successfully executed')
                 logger.debug("request successfully handled")
