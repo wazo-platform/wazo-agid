@@ -95,7 +95,10 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
 
                 _handlers[handler_name].handle(fagi, cursor, fagi.args)
 
-                conn.commit()
+                try:
+                    conn.commit()
+                except psycopg2.DatabaseError:
+                    conn.rollback()
 
                 fagi.verbose(f'AGI handler {handler_name!r} successfully executed')
                 logger.debug("request successfully handled")

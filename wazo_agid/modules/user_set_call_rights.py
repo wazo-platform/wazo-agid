@@ -107,7 +107,7 @@ def _user_set_call_rights(agi, cursor: DictCursor, args):
                     typeval_choices=SQL(',').join(Placeholder() * len(res)),
                     rightcall_ids=rightcall_ids,
                 ),
-                groupids,
+                [str(g) for g in groupids],
             )
             res = cursor.fetchall()
             call_rights.apply_rules(agi, res)
