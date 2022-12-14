@@ -3,9 +3,8 @@
 
 import logging
 
-from wazo_agid import dialplan_variables
+from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
-from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
 

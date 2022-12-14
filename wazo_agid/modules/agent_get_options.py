@@ -6,8 +6,7 @@ import logging
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid
-from wazo_agid import objects
+from wazo_agid import agid, objects
 from wazo_agid.fastagi import FastAGI
 
 logger = logging.getLogger(__name__)

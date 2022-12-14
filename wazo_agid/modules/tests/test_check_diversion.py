@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-from hamcrest import assert_that, equal_to
 from unittest.mock import ANY, Mock, call, patch
+
+from hamcrest import assert_that, equal_to
+
 from wazo_agid.modules import check_diversion
 
 

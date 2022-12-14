@@ -1,8 +1,9 @@
 # Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from wazo_agid import agid, dialplan_variables
 from xivo_dao import callfilter_dao
+
+from wazo_agid import agid, dialplan_variables
 
 
 def callfilter(agi, cursor, args):

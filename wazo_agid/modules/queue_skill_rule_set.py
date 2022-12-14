@@ -5,6 +5,7 @@ import json
 
 from xivo_dao.alchemy.queueskillrule import QueueSkillRule
 from xivo_dao.helpers.db_utils import session_scope
+
 from wazo_agid import agid
 
 

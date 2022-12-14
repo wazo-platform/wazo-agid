@@ -5,7 +5,6 @@ import re
 
 from wazo_agid import agid, objects
 
-
 MEETING_RE = re.compile(
     r'^wazo-meeting-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$'
 )

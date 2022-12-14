@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-
 from unittest.mock import ANY, Mock
+
 from wazo_agentd_client import error
 from wazo_agentd_client.error import AgentdClientError
+
 from wazo_agid.fastagi import FastAGI
 from wazo_agid.handlers import agent
 

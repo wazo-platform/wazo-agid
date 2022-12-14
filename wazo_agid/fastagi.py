@@ -14,9 +14,9 @@
 #     - added Fast prefix for coherency.
 from __future__ import annotations
 
-import re
 import pprint
-from typing import TYPE_CHECKING, Union, List
+import re
+from typing import TYPE_CHECKING, List, Union
 
 if TYPE_CHECKING:
     from typing import Literal

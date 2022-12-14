@@ -1,11 +1,14 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+
 import re
-import pytest
 from textwrap import dedent
+
+import pytest
 from hamcrest import assert_that, calling, raises
-from .helpers.base import IntegrationTest, use_asset
+
 from .helpers.agid import AGIFailException
+from .helpers.base import IntegrationTest, use_asset
 
 
 @use_asset('base')
@@ -1148,6 +1151,30 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
 
     def test_user_set_call_rights(self):
+        with self.db.queries() as queries:
+            context = 'test-context'
+            user, line, extension = queries.insert_user_line_extension(context=context)
+            call_permission = queries.insert_call_permission(passwd='test')
+            queries.insert_call_extension_permission(
+                rightcallid=call_permission['id'], exten=extension['exten']
+            )
+            queries.insert_user_call_permission(
+                typeval=user['id'], rightcallid=call_permission['id']
+            )
+
+        variables = {
+            'XIVO_USERID': user['id'],
+            'XIVO_DSTNUM': extension['exten'],
+            'XIVO_OUTCALLID': context,
+        }
+        recv_vars, recv_cmds = self.agid.user_set_call_rights(
+            extension['exten'], variables=variables
+        )
+
+        assert recv_cmds['FAILURE'] is False
+        assert recv_vars['XIVO_AUTHORIZATION'] == 'DENY'
+
+    def test_user_set_call_rights_allowed(self):
         with self.db.queries() as queries:
             context = 'test-context'
             user, line, extension = queries.insert_user_line_extension(context=context)

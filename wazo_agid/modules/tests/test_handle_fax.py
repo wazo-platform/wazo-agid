@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-
 from unittest.mock import patch, sentinel
+
 from hamcrest import assert_that, equal_to
 
 from wazo_agid.modules.handle_fax import (
-    _convert_config_value_to_bool,
     _build_backends_list,
+    _convert_config_value_to_bool,
 )
 
 

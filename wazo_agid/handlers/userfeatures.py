@@ -4,17 +4,15 @@
 import logging
 
 from xivo_dao import callfilter_dao
-
-from xivo_dao.resources.user_line import dao as user_line_dao
+from xivo_dao.resources.extension import dao as extension_dao
 from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
-from xivo_dao.resources.extension import dao as extension_dao
+from xivo_dao.resources.user_line import dao as user_line_dao
 
-from wazo_agid.objects import DialAction, CallerID
+from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
-from wazo_agid import objects
-from wazo_agid import dialplan_variables
 from wazo_agid.helpers import build_sip_interface
+from wazo_agid.objects import CallerID, DialAction
 
 logger = logging.getLogger(__name__)
 

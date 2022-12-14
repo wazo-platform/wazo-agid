@@ -1,8 +1,9 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from xivo_dao.resources.switchboard import dao as switchboard_dao
 from xivo_dao.helpers.exception import NotFoundError
+from xivo_dao.resources.switchboard import dao as switchboard_dao
+
 from wazo_agid.handlers.handler import Handler
 
 
