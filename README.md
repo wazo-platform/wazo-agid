@@ -16,6 +16,15 @@ pip install tox
 tox --recreate -e py37
 ```
 
+## Linting / Type checking with Pre-commit
+```shell
+pip install pre-commit
+# To automatically run on commit:
+pre-commit install
+# or run manually
+pre-commit run --all-files
+```
+
 ## Integration tests
 
 To add feature to AGI mock server:
