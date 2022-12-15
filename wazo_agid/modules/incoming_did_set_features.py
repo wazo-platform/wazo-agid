@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid
-from wazo_agid import objects
+from wazo_agid import agid, objects
 
 
 def incoming_did_set_features(

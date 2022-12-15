@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid
 from xivo_dao.resources.conference import dao as conference_dao
+
+from wazo_agid import agid
 
 
 def incoming_conference_set_features(

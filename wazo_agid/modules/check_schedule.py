@@ -5,8 +5,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from wazo_agid import agid
-from wazo_agid import objects
+from wazo_agid import agid, objects
 
 if TYPE_CHECKING:
     from wazo_agid.agid import FastAGI

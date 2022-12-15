@@ -1,8 +1,8 @@
 # Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import re as _re
 import os as _os
+import re as _re
 
 
 def _package_path():

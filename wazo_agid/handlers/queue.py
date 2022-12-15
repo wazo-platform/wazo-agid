@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
-import re
 import logging
+import re
 
 from wazo_agid import objects
 from wazo_agid.handlers import handler

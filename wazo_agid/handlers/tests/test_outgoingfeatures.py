@@ -2,12 +2,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
+from unittest.mock import Mock, call, patch
 
 from hamcrest import assert_that
 from hamcrest.core import equal_to
-from unittest.mock import Mock, call, patch
-from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
+
 from wazo_agid import objects
+from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 
 class OutCallBuilder:

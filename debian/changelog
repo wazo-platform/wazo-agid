@@ -48,13 +48,13 @@ xivo-agid (13.09~20130508.171443.10a2b83-2) squeeze-xivo-skaro-dev; urgency=low
 
 xivo-agid (13.04~20130221.181709.8f1a7e6-5) squeeze-xivo-skaro-dev; urgency=low
 
-  * revert init script 
+  * revert init script
 
  -- Nicolas HICHER <nhicher@avencall.com>  Sat, 23 Feb 2013 08:51:58 -0500
 
 xivo-agid (13.04~20130221.181709.8f1a7e6-3) squeeze-xivo-skaro-dev; urgency=low
 
-  * add depends on asterisk11 
+  * add depends on asterisk11
 
  -- Nicolas HICHER <nhicher@avencall.com>  Fri, 22 Feb 2013 13:00:27 -0500
 
@@ -102,25 +102,25 @@ xivo-agid (12.22~20121106.183540.4b0a57f-2) squeeze-xivo-skaro-dev; urgency=low
 
 xivo-agid (12.18~20120913.171254.9dd735f-4) squeeze-xivo-skaro-dev; urgency=low
 
-  * move config file delete to xivo-upgrade 
+  * move config file delete to xivo-upgrade
 
  -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 13:49:33 -0400
 
 xivo-agid (12.18~20120913.171254.9dd735f-3) squeeze-xivo-skaro-dev; urgency=low
 
-  * fix test to remove symlink insteat regular file 
+  * fix test to remove symlink insteat regular file
 
  -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 13:38:25 -0400
 
 xivo-agid (12.18~20120913.171254.9dd735f-2) squeeze-xivo-skaro-dev; urgency=low
 
-  * remove /etc/init.d/pf-xivo-agid and /etc/pf-xivo-agid.conf 
+  * remove /etc/init.d/pf-xivo-agid and /etc/pf-xivo-agid.conf
 
  -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 13:16:13 -0400
 
 xivo-agid (12.18~20120913.135446.44cc02d-2) squeeze-xivo-skaro-dev; urgency=low
 
-  * add postinst script to remove /etc/monit/conf.d/pf-xivo-agid 
+  * add postinst script to remove /etc/monit/conf.d/pf-xivo-agid
 
  -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Thu, 13 Sep 2012 12:48:36 -0400
 
@@ -132,13 +132,13 @@ xivo-agid (12.17~20120912.194029.c30dcef-1) squeeze-xivo-skaro-dev; urgency=low
 
 pf-xivo-agid (7:1.2.11~20120620.194029.c30dcef-2) squeeze-xivo-skaro-dev; urgency=low
 
-  * move python depends in pre-depends 
+  * move python depends in pre-depends
 
  -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Wed, 20 Jun 2012 16:04:58 -0400
 
 pf-xivo-agid (7:1.2.10~20120604.184903.8a94fb0-1) squeeze-xivo-skaro-dev; urgency=low
 
-  * fix path in init file 
+  * fix path in init file
 
  -- Nicolas HICHER (atarakt) <nhicher@proformatique.com>  Tue, 12 Jun 2012 12:20:00 -0400
 
@@ -243,15 +243,15 @@ pf-xivo-agid (0.4~svn3638-2) etch-xivo-k-9-dev; urgency=low
 
 pf-xivo-agid (0.4~svn3542-0) etch-xivo-k-9-dev; urgency=low
 
-  * Added ${python:Versions} ${python:Depends} and ${python:Provides} 
+  * Added ${python:Versions} ${python:Depends} and ${python:Provides}
 
  -- Guillaume Knispel <gknispel@proformatique.com>  Thu, 10 Jul 2008 15:26:27 +0200
 
 pf-xivo-agid (0.4~svn3419-0) etch-xivo-k-9-dev; urgency=low
 
   * Removed prerm that was used to work around a bug where
-    update-python-modules was called to soon, because we now have a cleaner 
-    work around that lets debhelpers generate the buggy file which is fixed 
+    update-python-modules was called to soon, because we now have a cleaner
+    work around that lets debhelpers generate the buggy file which is fixed
     just after.
 
  -- Guillaume Knispel <gknispel@proformatique.com>  Fri, 27 Jun 2008 12:47:29 +0200
@@ -264,7 +264,7 @@ pf-xivo-agid (0.4~svn3190-0) etch-xivo-k-9-dev; urgency=low
 
 pf-xivo-agid (0.4~svn3116-0) etch-xivo-k-9-dev; urgency=low
 
-  * simple-patchsys.mk not used, removed. 
+  * simple-patchsys.mk not used, removed.
 
  -- Guillaume Knispel <gknispel@proformatique.com>  Tue, 27 May 2008 19:03:30 +0200
 

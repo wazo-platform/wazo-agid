@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import unittest
 from unittest.mock import Mock, patch
+
 from wazo_agid.modules import incoming_queue_set_features
 
 

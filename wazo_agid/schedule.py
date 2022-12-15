@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import datetime
-import pytz
 import re
+
+import pytz
 
 
 class Schedule:

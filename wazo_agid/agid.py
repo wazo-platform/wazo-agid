@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
-import signal
 import logging
+import signal
 import socketserver
 import time
 from contextlib import contextmanager
@@ -14,9 +14,7 @@ from typing import Callable, Any
 import psycopg2
 from psycopg2.extras import DictCursor
 from sqlalchemy.engine.url import make_url
-
-from xivo import agitb
-from xivo import moresynchro
+from xivo import agitb, moresynchro
 from xivo_dao.helpers.db_utils import session_scope
 
 from wazo_agid.fastagi import FastAGI, FastAGIDialPlanBreak

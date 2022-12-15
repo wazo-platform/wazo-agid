@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import unittest
-
 from unittest.mock import Mock
+
 from wazo_agid.modules.fwdundoall import fwdundoall
 
 

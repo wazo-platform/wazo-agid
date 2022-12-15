@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import Mock, call
 
 from hamcrest import assert_that, contains_inanyorder
-from unittest.mock import Mock, call
 
 from wazo_agid.fastagi import FastAGI
 

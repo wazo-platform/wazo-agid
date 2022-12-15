@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import Mock, call
 
-from unittest.mock import call, Mock
 from wazo_agid.modules.phone_set_feature import (
     _phone_set_busy,
     _phone_set_dnd,

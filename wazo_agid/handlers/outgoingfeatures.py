@@ -5,9 +5,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from wazo_agid import dialplan_variables
+from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
-from wazo_agid import objects
 
 if TYPE_CHECKING:
     from wazo_agid.agid import FastAGI
