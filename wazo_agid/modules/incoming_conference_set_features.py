@@ -1,8 +1,9 @@
 # Copyright 2016-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from wazo_agid import agid
 from xivo_dao.resources.conference import dao as conference_dao
+
+from wazo_agid import agid
 
 
 def incoming_conference_set_features(agi, cursor, args):

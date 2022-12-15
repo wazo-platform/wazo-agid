@@ -1,8 +1,7 @@
 # Copyright 2010-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from wazo_agid import agid
-from wazo_agid import objects
+from wazo_agid import agid, objects
 
 
 def check_diversion(agi, cursor, args):

@@ -8,15 +8,14 @@ from typing import Sequence
 
 from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Identifier
+from xivo_dao import user_dao
 
 from wazo_agid.schedule import (
+    AlwaysOpenedSchedule,
+    Schedule,
     ScheduleAction,
     SchedulePeriodBuilder,
-    Schedule,
-    AlwaysOpenedSchedule,
 )
-
-from xivo_dao import user_dao
 
 logger = logging.getLogger(__name__)
 

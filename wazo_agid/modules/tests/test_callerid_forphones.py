@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
+from unittest.mock import Mock, patch, sentinel
 
 from hamcrest import assert_that, contains_string, equal_to
-from unittest.mock import Mock, patch, sentinel
+
 from wazo_agid.fastagi import FastAGI
-from wazo_agid.modules.callerid_forphones import callerid_forphones, FAKE_XIVO_USER_UUID
+from wazo_agid.modules.callerid_forphones import FAKE_XIVO_USER_UUID, callerid_forphones
 
 
 class TestCallerIdForPhone(unittest.TestCase):

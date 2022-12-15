@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import logging
-from psycopg2.extras import DictCursor, DictRow
-from psycopg2.sql import SQL, Placeholder, Literal
 
-from wazo_agid import agid
-from wazo_agid import objects
-from wazo_agid import call_rights
+from psycopg2.extras import DictCursor, DictRow
+from psycopg2.sql import SQL, Literal, Placeholder
+
+from wazo_agid import agid, call_rights, objects
 from wazo_agid.objects import join_column_names
 
 logger = logging.getLogger(__name__)

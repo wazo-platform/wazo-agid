@@ -12,11 +12,12 @@
 #     - replaced references to sys.std{in,out} to custom file objects.
 #     - added args attribute to replace sys.argv.
 #     - added Fast prefix for coherency.
+
 from __future__ import annotations
 
-import re
 import pprint
-from typing import TYPE_CHECKING, Union, List
+import re
+from typing import TYPE_CHECKING, List, Union
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -151,7 +152,7 @@ class FastAGI:
         try:
             self.send_command(command, *args)
             return self.get_result()
-        except IOError as e:
+        except OSError as e:
             if e.errno == 32:
                 # Broken Pipe * let us go
                 raise FastAGISIGPIPEHangup("Received SIGPIPE")
@@ -172,7 +173,7 @@ class FastAGI:
         """
         try:
             self.send_command("failure to have pure code")
-        except IOError as e:
+        except OSError as e:
             if e.errno != 32:
                 raise
 
@@ -184,8 +185,8 @@ class FastAGI:
         line = self.inf.readline().strip().decode('utf8')
         m = re_code.search(line)
         if m:
-            code, response = m.groups()
-            code = int(code)
+            response = m.group(1)
+            code = int(m.group(2))
 
         if code == 200:
             for key, value, data in re_kv.findall(response):

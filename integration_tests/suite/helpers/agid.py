@@ -1,5 +1,7 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
 import contextlib
 import re
 import socket
@@ -69,7 +71,10 @@ class _BaseAgidClient:
 
     def _process_communicate(self, variables=None):
         received_variables = {}
-        received_commands = {'VERBOSE': [], 'FAILURE': False}
+        received_commands: dict[str, list[str] | bool] = {
+            'VERBOSE': [],
+            'FAILURE': False,
+        }
         while True:
             data = self._socket.recv(1024).decode('utf-8')
             if not data:

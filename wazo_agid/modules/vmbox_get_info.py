@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-from wazo_agid import agid
-from wazo_agid import objects
+
+from wazo_agid import agid, objects
 
 logger = logging.getLogger(__name__)
 

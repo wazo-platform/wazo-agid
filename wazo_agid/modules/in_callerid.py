@@ -1,10 +1,10 @@
 # Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import configparser
+import logging
 import re
 import sys
-import logging
-import configparser
 
 from wazo_agid import agid
 

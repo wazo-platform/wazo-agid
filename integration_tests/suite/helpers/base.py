@@ -1,23 +1,24 @@
 # Copyright 2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import pytest
 import os
 import unittest
 
-from .agentd import AgentdMockClient
-from .agid import AgidClient
-from .confd import ConfdMockClient
-from .calld import CalldMockClient
-from .database import DbHelper
-from .filesystem import FileSystemClient
+import pytest
+from wazo_test_helpers import until
 from wazo_test_helpers.asset_launching_test_case import (
     AssetLaunchingTestCase,
     NoSuchPort,
     NoSuchService,
     WrongClient,
 )
-from wazo_test_helpers import until
+
+from .agentd import AgentdMockClient
+from .agid import AgidClient
+from .calld import CalldMockClient
+from .confd import ConfdMockClient
+from .database import DbHelper
+from .filesystem import FileSystemClient
 
 use_asset = pytest.mark.usefixtures
 
@@ -65,6 +66,13 @@ class BaseAssetLaunchingTestCase(AssetLaunchingTestCase):
 
 
 class IntegrationTest(unittest.TestCase):
+    agid: AgidClient
+    db: DbHelper
+    calld: CalldMockClient
+    confd: ConfdMockClient
+    agentd: AgentdMockClient
+    filesystem: FileSystemClient
+
     asset_cls = BaseAssetLaunchingTestCase
 
     @classmethod

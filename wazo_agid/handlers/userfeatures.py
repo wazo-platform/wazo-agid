@@ -4,17 +4,15 @@
 import logging
 
 from xivo_dao import callfilter_dao
-
-from xivo_dao.resources.user_line import dao as user_line_dao
+from xivo_dao.resources.extension import dao as extension_dao
 from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
-from xivo_dao.resources.extension import dao as extension_dao
+from xivo_dao.resources.user_line import dao as user_line_dao
 
-from wazo_agid.objects import DialAction, CallerID
+from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
-from wazo_agid import objects
-from wazo_agid import dialplan_variables
 from wazo_agid.helpers import build_sip_interface
+from wazo_agid.objects import CallerID, DialAction
 
 logger = logging.getLogger(__name__)
 
@@ -241,7 +239,7 @@ class UserFeatures(Handler):
         )
 
         boss_user = self._user
-        boss_interface = 'Local/{}@usersharedlines'.format(boss_user.uuid)
+        boss_interface = f'Local/{boss_user.uuid}@usersharedlines'
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
@@ -258,7 +256,7 @@ class UserFeatures(Handler):
                 secretary_user = objects.User(
                     self._agi, self._cursor, int(secretary_user_id)
                 )
-                iface = 'Local/{}@usersharedlines'.format(secretary_user.uuid)
+                iface = f'Local/{secretary_user.uuid}@usersharedlines'
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):

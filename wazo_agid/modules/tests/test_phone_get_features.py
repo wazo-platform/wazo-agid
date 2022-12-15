@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
+from unittest.mock import Mock, call
 
-from unittest.mock import call, Mock
 from wazo_agid.modules.phone_get_features import _set_current_forwards
 
 

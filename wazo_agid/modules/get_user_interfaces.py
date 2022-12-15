@@ -29,8 +29,7 @@ class _UserLine:
         protocol, name = endpoint.split('/', 1)
         if protocol == 'pjsip':
             contacts = build_sip_interface(self._agi, self._user_uuid, name)
-            for contact in contacts.split('&'):
-                yield contact
+            yield from contacts.split('&')
         else:
             yield endpoint
 

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
+
 from wazo_agid import agid
 from wazo_agid.handlers import agent
 

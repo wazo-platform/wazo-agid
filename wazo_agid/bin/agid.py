@@ -3,19 +3,18 @@
 
 import argparse
 import logging
-import xivo_dao
 
+import xivo_dao
+from wazo_agentd_client import Client as AgentdClient
 from wazo_auth_client import Client as AuthClient
 from wazo_calld_client import Client as CalldClient
 from wazo_confd_client import Client as ConfdClient
 from wazo_dird_client import Client as DirdClient
 from xivo.chain_map import ChainMap
-from xivo.config_helper import parse_config_file
-from xivo.config_helper import read_config_file_hierarchy
+from xivo.config_helper import parse_config_file, read_config_file_hierarchy
 from xivo.token_renewer import TokenRenewer
 from xivo.user_rights import change_user
 from xivo.xivo_logging import setup_logging, silence_loggers
-from wazo_agentd_client import Client as AgentdClient
 
 from wazo_agid import agid
 from wazo_agid.modules import *  # noqa

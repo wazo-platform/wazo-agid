@@ -2,11 +2,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
+import ftplib
 import logging
 import os
 import subprocess
-import ftplib
-
 from configparser import RawConfigParser
 from typing import Callable
 
@@ -56,7 +55,7 @@ def _new_mail_backend(
     # Return a backend taking one additional argument, an email address,
     # which sends the fax file as a pdf to the given email address when
     # called.
-    with open(content_file, 'r') as f:
+    with open(content_file) as f:
         content = f.read()
 
     def aux(faxfile: str, dstnum: str, args: list) -> None:

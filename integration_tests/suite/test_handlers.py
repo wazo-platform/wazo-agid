@@ -1,11 +1,14 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+
 import re
-import pytest
 from textwrap import dedent
+
+import pytest
 from hamcrest import assert_that, calling, raises
-from .helpers.base import IntegrationTest, use_asset
+
 from .helpers.agid import AGIFailException
+from .helpers.base import IntegrationTest, use_asset
 
 
 @use_asset('base')
@@ -560,7 +563,7 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_QUEUECALLOPTIONS'] == 'hitwxk'
 
     def test_incoming_conference_set_features(self):
-        name = u'My Conférence'
+        name = 'My Conférence'
         with self.db.queries() as queries:
             conference = queries.insert_conference(name=name)
 
