@@ -49,6 +49,17 @@ class Database:
         with psycopg2.connect(**self.connection_info) as connection:
             yield connection
 
+    @contextmanager
+    def transaction(self, connection: psycopg2.connection) -> DictCursor:
+        try:
+            with connection.cursor(cursor_factory=DictCursor) as cursor:
+                yield cursor
+                connection.commit()
+        except psycopg2.DatabaseError:
+            logger.debug("Database error encountered. Rolling back.")
+            connection.rollback()
+            raise
+
 
 class FastAGIRequestHandler(socketserver.StreamRequestHandler):
     def handle(self):
@@ -61,14 +72,8 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
             handler_name = fagi.env['agi_network_script']
             logger.debug("delegating request handling %r", handler_name)
             with _server.database.connection() as conn:
-                with conn.cursor(cursor_factory=DictCursor) as cursor:
-                    try:
-                        _handlers[handler_name].handle(fagi, cursor, fagi.args)
-                        conn.commit()
-                    except psycopg2.DatabaseError:
-                        logger.debug("Database error encountered. Rolling back.")
-                        conn.rollback()
-                        raise
+                with _server.database.transaction(conn) as cursor:
+                    _handlers[handler_name].handle(fagi, cursor, fagi.args)
 
                 fagi.verbose(f'AGI handler {handler_name!r} successfully executed')
                 logger.debug("request successfully handled")
@@ -202,32 +207,19 @@ def sighup_handle(signum, frame):
 
     logger.debug("reloading handlers")
     with _server.database.connection() as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            try:
-                for handler in _handlers.values():
-                    handler.reload(cursor)
-
-                conn.commit()
-                logger.debug("finished reload")
-            except psycopg2.DatabaseError:
-                logger.debug("Database error encountered. Rolling back.")
-                conn.rollback()
-                raise
+        with _server.database.transaction(conn) as cursor:
+            for handler in _handlers.values():
+                handler.reload(cursor)
+            logger.debug("finished reload")
 
 
 def run():
     logger.critical('Testing cursor cleanup')
     logger.debug("list of handlers: %s", ', '.join(sorted(_handlers)))
     with _server.database.connection() as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            try:
-                for handler in _handlers.values():
-                    handler.setup(cursor)
-                conn.commit()
-            except psycopg2.DatabaseError:
-                logger.debug("Database error encountered. Rolling back.")
-                conn.rollback()
-                raise
+        with _server.database.transaction(conn) as cursor:
+            for handler in _handlers.values():
+                handler.setup(cursor)
 
     _server.serve_forever()
 
