@@ -2,6 +2,8 @@ FROM wazoplatform/wazo-agid
 
 ENV PYTHONDONTWRITEBYTECODE='true'
 
+RUN apt-get update && apt-get install -y htop
+
 COPY integration_tests/docker/mock_cmd.sh /usr/bin/tiff2pdf
 COPY integration_tests/docker/mock_cmd.sh /usr/bin/mutt
 
