@@ -199,13 +199,12 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_SRCTON'] == 'en'
 
     def test_callerid_forphones_without_reverse_lookup(self):
-        for i in range(100000):
-            recv_vars, recv_cmds = self.agid.callerid_forphones(
-                calleridname='name',
-                callerid='numero',
-            )
+        recv_vars, recv_cmds = self.agid.callerid_forphones(
+            calleridname='name',
+            callerid='numero',
+        )
 
-            assert recv_cmds['FAILURE'] is False
+        assert recv_cmds['FAILURE'] is False
 
     def test_callfilter(self):
         with self.db.queries() as queries:
