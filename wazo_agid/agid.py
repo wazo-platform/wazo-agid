@@ -6,8 +6,8 @@ import signal
 import logging
 import socketserver
 import time
+from contextlib import contextmanager
 
-from threading import Lock
 from typing import Callable
 
 import psycopg2
@@ -40,43 +40,14 @@ def info_from_db_uri(db_uri: str) -> dict[str, str | int]:
     }
 
 
-class DBConnectionPool:
-    def __init__(self):
-        self.conns: list[psycopg2.connection] = []
-        self.size = 0
-        self.connection_info: dict[str, str | int] = {}
-        self.lock = Lock()
+class Database:
+    def __init__(self, db_uri: str):
+        self.connection_info = info_from_db_uri(db_uri)
 
-    def reload(self, size: int, db_uri: str):
-        with self.lock:
-            for conn in self.conns:
-                conn.close()
-            self.connection_info = info_from_db_uri(db_uri)
-            # self.conns = [psycopg2.connect(**self.connection_info) for _ in range(size)]
-            self.conns = []
-            self.size = size
-        logger.debug("reloaded db conn pool")
-
-    def acquire(self) -> psycopg2.connection:
-        with self.lock:
-            try:
-                conn = self.conns.pop()
-                logger.debug("acquiring connection: got connection from pool")
-            except IndexError:
-                conn = psycopg2.connect(**self.connection_info)
-                logger.debug("acquiring connection: pool empty, created new connection")
-        return conn
-
-    def release(self, conn: psycopg2.connection):
-        with self.lock:
-            # if len(self.conns) < self.size:
-            #     self.conns.append(conn)
-            #     logger.debug(
-            #         "releasing connection: pool not full, refilled with connection"
-            #     )
-            # else:
-            conn.close()
-            logger.debug("releasing connection: pool full, connection closed")
+    @contextmanager
+    def connection(self):
+        with psycopg2.connect(**self.connection_info) as connection:
+            yield connection
 
 
 class FastAGIRequestHandler(socketserver.StreamRequestHandler):
@@ -87,11 +58,9 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
             fagi = FastAGI(self.rfile, self.wfile, self.config)
             except_hook = agitb.Hook(agi=fagi)
 
-            conn = self.server.db_conn_pool.acquire()
-            try:
-                handler_name = fagi.env['agi_network_script']
-                logger.debug("delegating request handling %r", handler_name)
-
+            handler_name = fagi.env['agi_network_script']
+            logger.debug("delegating request handling %r", handler_name)
+            with _server.database.connection() as conn:
                 with conn.cursor(cursor_factory=DictCursor) as cursor:
                     try:
                         _handlers[handler_name].handle(fagi, cursor, fagi.args)
@@ -103,8 +72,6 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
 
                 fagi.verbose(f'AGI handler {handler_name!r} successfully executed')
                 logger.debug("request successfully handled")
-            finally:
-                self.server.db_conn_pool.release(conn)
 
         # Attempt to relay errors to Asterisk, but if it fails, we
         # just give up.
@@ -145,7 +112,6 @@ class AGID(socketserver.ThreadingTCPServer):
     # https://salsa.debian.org/debian/python-prometheus-client/-/commit/5aa256d8aab3b81604b855dc03f260342fc391fb
     # Should be patched in later versions of Python so re-check after the upgrade to Bullseye
     daemon_threads = True
-    db_conn_pool: DBConnectionPool
 
     def __init__(self, config):
         logger.info('wazo-agid starting...')
@@ -153,7 +119,7 @@ class AGID(socketserver.ThreadingTCPServer):
         self.config = config
         signal.signal(signal.SIGHUP, sighup_handle)
 
-        self.db_conn_pool = DBConnectionPool()
+        self.database = Database(self.config["db_uri"])
         self.setup()
 
         FastAGIRequestHandler.config = config
@@ -171,13 +137,10 @@ class AGID(socketserver.ThreadingTCPServer):
             self.listen_port = int(self.config["listen_port"])
             logger.debug("listen_port: %d", self.listen_port)
 
-        conn_pool_size = int(self.config["connection_pool_size"])
-
-        db_uri = self.config["db_uri"]
-
         for i in range(1, CONNECTION_TIMEOUT + 1):
             try:
-                self.db_conn_pool.reload(conn_pool_size, db_uri)
+                with self.database.connection():
+                    pass
                 break
             except psycopg2.OperationalError:
                 if i < CONNECTION_TIMEOUT:
@@ -237,38 +200,34 @@ def sighup_handle(signum, frame):
     logger.debug("reloading core engine")
     _server.setup()
 
-    conn = _server.db_conn_pool.acquire()
     logger.debug("reloading handlers")
-    try:
+    with _server.database.connection() as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            for handler in _handlers.values():
-                handler.reload(cursor)
+            try:
+                for handler in _handlers.values():
+                    handler.reload(cursor)
 
-            conn.commit()
-            logger.debug("finished reload")
-    except psycopg2.DatabaseError:
-        logger.debug("Database error encountered. Rolling back.")
-        conn.rollback()
-        raise
-    finally:
-        _server.db_conn_pool.release(conn)
+                conn.commit()
+                logger.debug("finished reload")
+            except psycopg2.DatabaseError:
+                logger.debug("Database error encountered. Rolling back.")
+                conn.rollback()
+                raise
 
 
 def run():
-    conn = _server.db_conn_pool.acquire()
     logger.critical('Testing cursor cleanup')
     logger.debug("list of handlers: %s", ', '.join(sorted(_handlers)))
-    try:
+    with _server.database.connection() as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            for handler in _handlers.values():
-                handler.setup(cursor)
-            conn.commit()
-    except psycopg2.DatabaseError:
-        logger.debug("Database error encountered. Rolling back.")
-        conn.rollback()
-        raise
-    finally:
-        _server.db_conn_pool.release(conn)
+            try:
+                for handler in _handlers.values():
+                    handler.setup(cursor)
+                conn.commit()
+            except psycopg2.DatabaseError:
+                logger.debug("Database error encountered. Rolling back.")
+                conn.rollback()
+                raise
 
     _server.serve_forever()
 
