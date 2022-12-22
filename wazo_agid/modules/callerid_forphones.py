@@ -1,7 +1,11 @@
 # Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+
+from psycopg2.extras import DictCursor
+from wazo_dird_client.client import DirdClient
 
 from wazo_agid import agid
 from xivo_dao.resources.directory_profile import dao as directory_profile_dao
@@ -11,8 +15,8 @@ logger = logging.getLogger(__name__)
 FAKE_XIVO_USER_UUID = '00000000-0000-0000-0000-000000000000'
 
 
-def callerid_forphones(agi, cursor, args):
-    dird_client = agi.config['dird']['client']
+def callerid_forphones(agi, cursor: DictCursor, args: list):
+    dird_client: DirdClient = agi.config['dird']['client']
     try:
         cid_name = agi.env['agi_calleridname']
         cid_number = agi.env['agi_callerid']
@@ -24,11 +28,11 @@ def callerid_forphones(agi, cursor, args):
             return
 
         incall_id = int(agi.get_variable('XIVO_INCALL_ID'))
-        callee_infos = directory_profile_dao.find_by_incall_id(incall_id)
-        if callee_infos is None:
+        callee_info = directory_profile_dao.find_by_incall_id(incall_id)
+        if callee_info is None:
             user_uuid = FAKE_XIVO_USER_UUID
         else:
-            user_uuid = callee_infos.xivo_user_uuid
+            user_uuid = callee_info.xivo_user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
         # It is not possible to associate a profile to a reverse configuration in the web
