@@ -2,7 +2,6 @@ psycopg2-binary
 pyhamcrest
 pytest
 pyyaml  # from xivo-lib-python
-six  # from xivo-lib-python
 sqlalchemy==1.2.18
 
 https://github.com/wazo-platform/xivo-dao/archive/master.zip
