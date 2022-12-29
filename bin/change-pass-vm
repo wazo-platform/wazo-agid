@@ -39,7 +39,9 @@ _HARD_CODED_CONFIG = {
 
 def _load_config():
     file_config = read_config_file_hierarchy(_DEFAULT_CONFIG)
-    service_key = _load_key_file(ChainMap(_HARD_CODED_CONFIG, file_config, _DEFAULT_CONFIG))
+    service_key = _load_key_file(
+        ChainMap(_HARD_CODED_CONFIG, file_config, _DEFAULT_CONFIG)
+    )
     return ChainMap(_HARD_CODED_CONFIG, service_key, file_config, _DEFAULT_CONFIG)
 
 
@@ -62,7 +64,9 @@ def get_voicemail(client, number, context):
     found = [v for v in response['items'] if matches(v)]
 
     assert len(found) > 0, f'voicemail {number}@{context} not found!'
-    assert len(found) == 1, f'more than one voicemail found when searching for {number}@{context}'
+    assert (
+        len(found) == 1
+    ), f'more than one voicemail found when searching for {number}@{context}'
     return found[0]
 
 

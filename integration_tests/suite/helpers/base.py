@@ -66,6 +66,12 @@ class BaseAssetLaunchingTestCase(AssetLaunchingTestCase):
 
 class IntegrationTest(unittest.TestCase):
     asset_cls = BaseAssetLaunchingTestCase
+    agid: AgidClient
+    db: DbHelper
+    calld: CalldMockClient
+    confd: ConfdMockClient
+    agentd: AgentdMockClient
+    filesystem: FileSystemClient
 
     @classmethod
     def setUpClass(cls):

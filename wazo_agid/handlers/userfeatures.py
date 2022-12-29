@@ -1,5 +1,6 @@
 # Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
 
@@ -24,7 +25,7 @@ class UserFeatures(Handler):
     PATH_TYPE = 'user'
 
     def __init__(self, agi, cursor, args):
-        Handler.__init__(self, agi, cursor, args)
+        super().__init__(agi, cursor, args)
         self._userid = None
         self._dstid = None
         self._destination_extension_id = None
@@ -32,7 +33,7 @@ class UserFeatures(Handler):
         self._srcnum = None
         self._dstnum = None
         self._feature_list = None
-        self._caller = None
+        self._caller: objects.User | None = None
         self._user = None
         self._moh_uuid = None
         self._moh = None

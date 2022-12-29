@@ -15,10 +15,10 @@ from wazo_agid.objects import join_column_names
 
 class GroupFeatures(Handler):
     def __init__(self, agi, cursor: DictCursor, args):
-        Handler.__init__(self, agi, cursor, args)
-        self._id = None
-        self._referer = None
-        self._exten = None
+        super().__init__(agi, cursor, args)
+        self._id: int | None = None
+        self._referer: str | None = None
+        self._exten: str | None = None
         self._context = None
         self._name = None
         self._label = None

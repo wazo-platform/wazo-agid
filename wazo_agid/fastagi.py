@@ -184,8 +184,8 @@ class FastAGI:
         line = self.inf.readline().strip().decode('utf8')
         m = re_code.search(line)
         if m:
-            code, response = m.groups()
-            code = int(code)
+            code = int(m.group(1))
+            response = m.group(2)
 
         if code == 200:
             for key, value, data in re_kv.findall(response):
@@ -207,8 +207,7 @@ class FastAGI:
                 usage.append(line)
                 line = self.inf.readline().strip().decode('utf8')
             usage.append(line)
-            usage = '{}\n'.format('\n'.join(usage))
-            raise FastAGIUsageError(usage)
+            raise FastAGIUsageError('{}\n'.format('\n'.join(usage)))
 
         raise FastAGIUnknownError(code, 'Unhandled code or undefined response')
 
@@ -473,7 +472,7 @@ class FastAGI:
         timeout: int = DEFAULT_RECORD,
         offset: int = 0,
         beep: str = 'beep',
-    ) -> None:
+    ) -> str:
         """
         Record to a file until a given dtmf digit in the sequence is received
         The format will specify what kind of file will be recorded.  The timeout
@@ -565,10 +564,9 @@ class FastAGI:
         except FastAGIResultHangup:
             result = {'result': ('1', 'hangup')}
 
-        _, value = result['result']
-        return value
+        return result['result'][1]
 
-    def get_full_variable(self, name: str, channel: str = None):
+    def get_full_variable(self, name: str, channel: str | None = None):
         """Get a channel variable.
 
         This function returns the value of the indicated channel variable.  If
@@ -584,8 +582,7 @@ class FastAGI:
         except FastAGIResultHangup:
             result = {'result': ('1', 'hangup')}
 
-        _, value = result['result']
-        return value
+        return result['result'][1]
 
     def verbose(self, message: str, level: int = 1) -> None:
         """

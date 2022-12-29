@@ -29,7 +29,7 @@ def _pdffile_from_file(file_name: str) -> str:
     return file_name.rsplit(".", 1)[0] + ".pdf"
 
 
-def _convert_tiff_to_pdf(tiff_file: str, pdf_file: str = None) -> str:
+def _convert_tiff_to_pdf(tiff_file: str, pdf_file: str | None = None) -> str:
     # Convert tiff_file into pdf_file and return the name of the pdf file.
     if pdf_file is None:
         pdf_file = _pdffile_from_file(tiff_file)
@@ -59,7 +59,7 @@ def _new_mail_backend(
     with open(content_file, 'r') as f:
         content = f.read()
 
-    def aux(faxfile: str, dstnum: str, args: list) -> None:
+    def aux(faxfile: str, dstnum: str, args: list[str]) -> None:
         # args[0] is the email address to send the fax to
         email = args[0]
         if not email:
@@ -101,7 +101,9 @@ def _new_mail_backend(
     return aux
 
 
-def _new_printer_backend(name: str = None, convert_to_pdf: str = None) -> Backend:
+def _new_printer_backend(
+    name: str | None = None, convert_to_pdf: str | None = None
+) -> Backend:
     # Return a backend taking no additional argument, which prints the fax
     # to the given printer when called.
     # Note that if name is None, it uses the default printer.
@@ -109,7 +111,7 @@ def _new_printer_backend(name: str = None, convert_to_pdf: str = None) -> Backen
         convert_to_pdf, True, 'convert_to_pdf'
     )
 
-    def aux(faxfile: str, dstnum: str, args: list) -> None:
+    def aux(faxfile: str, dstnum: str, args: list[str]) -> None:
         lp_cmd = [LP_PATH, '-s']
         if name:
             lp_cmd.extend(['-d', name])
@@ -149,8 +151,8 @@ def _new_ftp_backend(
     username: str,
     password: str,
     port: int = 21,
-    directory: str = None,
-    convert_to_pdf: str = None,
+    directory: str | None = None,
+    convert_to_pdf: str | None = None,
 ) -> Backend:
     # Return a backend taking no argument, which transfers the fax,
     # in its original format, to the given FTP server when called.
@@ -160,7 +162,7 @@ def _new_ftp_backend(
     )
     port = int(port)
 
-    def aux(faxfile: str, dstnum: str, args: list) -> None:
+    def aux(faxfile: str, dstnum: str, args: list[str]) -> None:
         if convert_to_pdf:
             filename = _convert_tiff_to_pdf(faxfile)
         else:
@@ -187,7 +189,7 @@ def _new_ftp_backend(
     return aux
 
 
-def _do_handle_fax(fax_file: str, dstnum: str, args: list):
+def _do_handle_fax(fax_file: str, dstnum: str, args: list[str]) -> None:
     logger.info('Handling fax for destination %s', dstnum)
     if not fax_file:
         raise ValueError(f"Invalid faxfile value: {fax_file}")
@@ -217,7 +219,7 @@ def _do_handle_fax(fax_file: str, dstnum: str, args: list):
         logger.info("Could not remove faxfile %s: %s", fax_file, e)
 
 
-def handle_fax(agi: FastAGI, cursor: DictCursor, args: list):
+def handle_fax(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     try:
         faxfile = args[0]
         dstnum = agi.get_variable("XIVO_DSTNUM")
@@ -233,7 +235,7 @@ _BACKENDS_FACTORY = [
 ]
 
 
-def setup_handle_fax(cursor: DictCursor):
+def setup_handle_fax(cursor: DictCursor) -> None:
     # Raise an error if a backend creation failed, etc.
     # 1. read config
     config = RawConfigParser()

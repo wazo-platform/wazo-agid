@@ -1,5 +1,7 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
 import contextlib
 import re
 import socket
@@ -22,10 +24,10 @@ class UnknownCommandException(Exception):
 
 
 class _BaseAgidClient:
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int) -> None:
         self._host = host
         self._port = port
-        self._socket = None
+        self._socket: socket.socket | None = None
 
     def is_ready(self):
         with contextlib.suppress(ConnectionError, AGIFailException):
@@ -62,7 +64,7 @@ class _BaseAgidClient:
             message = f'200 result={result} ({data})'
         self._send_fragment(message)
 
-    def _send_fragment(self, fragment):
+    def _send_fragment(self, fragment: str) -> None:
         fragment = fragment + '\n'
         fragment = fragment.encode('utf-8')
         self._socket.send(fragment)

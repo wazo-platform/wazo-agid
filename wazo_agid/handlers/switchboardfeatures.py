@@ -1,6 +1,8 @@
 # Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
+from xivo_dao.alchemy import Switchboard
 from xivo_dao.resources.switchboard import dao as switchboard_dao
 from xivo_dao.helpers.exception import NotFoundError
 from wazo_agid.handlers.handler import Handler
@@ -8,9 +10,9 @@ from wazo_agid.handlers.handler import Handler
 
 class SwitchboardFeatures(Handler):
     def __init__(self, agi, cursor, args):
-        Handler.__init__(self, agi, cursor, args)
-        self.switchboard_uuid = None
-        self.switchboard = None
+        super().__init__(agi, cursor, args)
+        self.switchboard_uuid: str | None = None
+        self.switchboard: Switchboard = None  # type: ignore[assignment]
 
     def execute(self):
         self._extract_switchboard_uuid()

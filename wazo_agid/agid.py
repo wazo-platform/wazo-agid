@@ -192,7 +192,7 @@ class Handler:
             self.lock.release()
 
 
-def register(handle_fn: HandleFunction, setup_fn: SetupFunction = None):
+def register(handle_fn: HandleFunction, setup_fn: SetupFunction | None = None) -> None:
     handler_name = handle_fn.__name__
 
     if handler_name in _handlers:

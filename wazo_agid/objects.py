@@ -64,7 +64,7 @@ class ExtenFeatures:
         self.agi = agi
         self.cursor = cursor
 
-        featureslist = []
+        featureslist: list[str] = []
 
         for xtype in self.FEATURES.values():
             for x in xtype:
@@ -310,7 +310,7 @@ class Paging:
                 f"Unable to find paging caller entry (userfeaturesid: {userid})"
             )
 
-        columns = (
+        columns: tuple[str, ...] = (
             'endpoint_sip_uuid',
             'endpoint_sccp_id',
             'endpoint_custom_id',
@@ -868,7 +868,7 @@ class ScheduleDataMapper:
         )
 
         # fetch schedule periods
-        columns = (
+        columns: tuple[str, ...] = (
             'mode',
             'hours',
             'weekdays',
