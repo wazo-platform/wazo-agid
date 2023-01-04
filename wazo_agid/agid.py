@@ -1,4 +1,4 @@
-# Copyright 2008-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2008-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -214,7 +214,6 @@ def sighup_handle(signum, frame):
 
 
 def run():
-    logger.critical('Testing cursor cleanup')
     logger.debug("list of handlers: %s", ', '.join(sorted(_handlers)))
     with _server.database.connection() as conn:
         with _server.database.transaction(conn) as cursor:
