@@ -8,17 +8,17 @@ from unittest.mock import Mock, call
 
 from wazo_agid.fastagi import FastAGI
 
-from ..convert_pre_dial_handler import convert_pre_dial_handler
+from ..ignore_b_option import ignore_b_option
 
 
-class TestConvertPreDialHandler(unittest.TestCase):
+class TestIgnoreBOption(unittest.TestCase):
     def setUp(self):
         self.agi = Mock(FastAGI)
 
     def test_no_call_options(self):
         self.agi.get_variable.return_value = ''
 
-        convert_pre_dial_handler(self.agi, Mock(), Mock())
+        ignore_b_option(self.agi, Mock(), Mock())
 
         self.agi.set_variable.assert_not_called()
 
@@ -26,7 +26,7 @@ class TestConvertPreDialHandler(unittest.TestCase):
         variables = {'XIVO_CALLOPTIONS': 'XB(foobar^s^1)'}
         self.agi.get_variable.side_effect = variables.get
 
-        convert_pre_dial_handler(self.agi, Mock(), Mock())
+        ignore_b_option(self.agi, Mock(), Mock())
 
         self.agi.set_variable.assert_not_called()
 
@@ -36,12 +36,11 @@ class TestConvertPreDialHandler(unittest.TestCase):
         }
         self.agi.get_variable.side_effect = variables.get
 
-        convert_pre_dial_handler(self.agi, Mock(), Mock())
+        ignore_b_option(self.agi, Mock(), Mock())
 
         assert_that(
             self.agi.set_variable.call_args_list,
             contains_inanyorder(
                 call('XIVO_CALLOPTIONS', 'XB(foobar^s^1)'),
-                call('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', 'foobaz,s,1'),
             ),
         )

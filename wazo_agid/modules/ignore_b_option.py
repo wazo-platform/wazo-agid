@@ -9,9 +9,10 @@ from wazo_agid.dialplan_variables import CALL_OPTIONS
 B_REGEX = re.compile(r'b\(([\-_0-9A-Za-z]+)\^?.*?\)')
 
 
-# This AGI was added in 21.01 to avoid breaking user written dialplan
-# This AGI and all of it's calls should be deleted in a reasonable amount of time 22.01?
-def convert_pre_dial_handler(agi, cursor, args):
+def ignore_b_option(agi, cursor, args):
+    """
+    handler to detect and warn about usage of b option
+    """
     call_options = agi.get_variable(CALL_OPTIONS)
     if not call_options:
         return
@@ -23,14 +24,15 @@ def convert_pre_dial_handler(agi, cursor, args):
     to_remove = match.group(0)
     to_stack = match.group(1)
 
-    agi.verbose(f'WARNING: deprecated dialplan option detected {to_stack}')
-    agi.verbose('Wazo pre-dial handlers should be used instead')
+    agi.verbose(
+        f'WARNING: deprecated usage of dialplan b option detected with subroutine: {to_stack}'
+    )
+    agi.verbose(
+        'Option will be ignored. Wazo pre-dial handlers should be used instead.'
+    )
 
     pruned_call_options = call_options.replace(to_remove, '')
     agi.set_variable(CALL_OPTIONS, pruned_call_options)
 
-    new_handler = f'{to_stack},s,1'
-    agi.set_variable('PUSH(_WAZO_PRE_DIAL_HANDLERS,|)', new_handler)
 
-
-agid.register(convert_pre_dial_handler)
+agid.register(ignore_b_option)

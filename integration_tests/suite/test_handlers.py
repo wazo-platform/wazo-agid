@@ -1,4 +1,4 @@
-# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 import re
 import pytest
@@ -361,16 +361,15 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTIONARG1'] == '1'
         assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTIONARG2'] == 'arg2'
 
-    def test_convert_pre_dial_handler(self):
+    def test_ignore_b_option(self):
         variables = {
             'XIVO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
         }
 
-        recv_vars, recv_cmds = self.agid.convert_pre_dial_handler(variables=variables)
+        recv_vars, recv_cmds = self.agid.ignore_b_option(variables=variables)
 
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_CALLOPTIONS'] == 'XB(foobar^s^1)'
-        assert recv_vars['PUSH(_WAZO_PRE_DIAL_HANDLERS,|)'] == 'foobaz,s,1'
 
     def test_fwdundoall(self):
         with self.db.queries() as queries:
