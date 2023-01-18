@@ -1,5 +1,6 @@
-# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import unittest
 
@@ -20,7 +21,7 @@ class TestConvertConfigValue(unittest.TestCase):
         self.assertTrue(value is self._default)
 
     def _convert_to_bool(self, config_value):
-        return _convert_config_value_to_bool(config_value, self._default, 'test')
+        return _convert_config_value_to_bool(config_value, self._default, 'test')  # type: ignore
 
     def test_with_none_value(self):
         bool_value = self._convert_to_bool(None)

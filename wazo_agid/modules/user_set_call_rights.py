@@ -1,4 +1,4 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -14,7 +14,9 @@ from wazo_agid.objects import join_column_names
 logger = logging.getLogger(__name__)
 
 
-def _user_set_call_rights(agi, cursor: DictCursor, args):
+def _user_set_call_rights(
+    agi: agid.FastAGI, cursor: DictCursor, args: list[str]
+) -> None:
     userid = agi.get_variable('XIVO_USERID')
     dstnum = agi.get_variable('XIVO_DSTNUM')
     outcallid = agi.get_variable('XIVO_OUTCALLID')
@@ -61,14 +63,14 @@ def _user_set_call_rights(agi, cursor: DictCursor, args):
             ),
             (user.id,),
         )
-        res: list[DictCursor] = cursor.fetchall()
+        call_rights_res: list[DictCursor] = cursor.fetchall()
 
         if user.rightcallcode:
-            for i, value in enumerate(res):
+            for i, value in enumerate(call_rights_res):
                 if value[1]:
-                    res[i][1] = user.rightcallcode
+                    call_rights_res[i][1] = user.rightcallcode
 
-        call_rights.apply_rules(agi, res)
+        call_rights.apply_rules(agi, call_rights_res)
 
         cursor.execute(
             "SELECT groupfeatures.id FROM groupfeatures "
@@ -84,10 +86,10 @@ def _user_set_call_rights(agi, cursor: DictCursor, args):
             "AND queue.commented = 0",
             (user.id,),
         )
-        res: list[DictRow] = cursor.fetchall()
+        group_feature_res: list[DictRow] = cursor.fetchall()
 
         if res:
-            groupids = [row['id'] for row in res]
+            groupids = [row['id'] for row in group_feature_res]
             columns = (
                 call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
                 call_rights.RIGHTCALL_PASSWD_COLNAME,
@@ -104,13 +106,15 @@ def _user_set_call_rights(agi, cursor: DictCursor, args):
             cursor.execute(
                 query.format(
                     columns=join_column_names(columns),
-                    typeval_choices=SQL(',').join(Placeholder() * len(res)),
+                    typeval_choices=SQL(',').join(
+                        Placeholder() * len(group_feature_res)
+                    ),
                     rightcall_ids=rightcall_ids,
                 ),
                 [str(group_id) for group_id in groupids],
             )
-            res = cursor.fetchall()
-            call_rights.apply_rules(agi, res)
+            member_res = cursor.fetchall()
+            call_rights.apply_rules(agi, member_res)
 
     if outcallid:
         columns = (
@@ -134,13 +138,15 @@ def _user_set_call_rights(agi, cursor: DictCursor, args):
             ),
             (outcallid,),
         )
-        res = cursor.fetchall()
-        call_rights.apply_rules(agi, res)
+        call_rights_res = cursor.fetchall()
+        call_rights.apply_rules(agi, call_rights_res)
 
     call_rights.allow(agi)
 
 
-def user_set_call_rights(agi, cursor, args):
+def user_set_call_rights(
+    agi: agid.FastAGI, cursor: DictCursor, args: list[str]
+) -> None:
     try:
         _user_set_call_rights(agi, cursor, args)
     except call_rights.RuleAppliedException:

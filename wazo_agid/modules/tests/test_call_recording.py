@@ -1,5 +1,6 @@
-# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 from unittest import TestCase
 
@@ -20,7 +21,7 @@ class TestRecordCaller(TestCase):
     ):
         self.agi.get_variable.return_value = '1'
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         start_mix_monitor.assert_not_called()
 
@@ -35,7 +36,7 @@ class TestRecordCaller(TestCase):
         }
         self.agi.get_variable.side_effect = agi_variables.get
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
@@ -58,7 +59,7 @@ class TestRecordCaller(TestCase):
         }
         self.agi.get_variable.side_effect = agi_variables.get
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [call('WAZO_CALL_RECORD_ACTIVE'), call('WAZO_USERUUID')]
         self.agi.get_variable.assert_has_calls(calls)
@@ -81,7 +82,7 @@ class TestRecordCaller(TestCase):
             call_record_outgoing_external_enabled=False,
         )
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
@@ -108,7 +109,7 @@ class TestRecordCaller(TestCase):
             call_record_outgoing_external_enabled=False,
         )
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
@@ -135,7 +136,7 @@ class TestRecordCaller(TestCase):
             call_record_outgoing_external_enabled=True,
         )
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
@@ -162,7 +163,7 @@ class TestRecordCaller(TestCase):
             call_record_outgoing_external_enabled=False,
         )
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
@@ -189,7 +190,7 @@ class TestRecordCaller(TestCase):
             call_record_outgoing_external_enabled=False,
         )
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
@@ -216,7 +217,7 @@ class TestRecordCaller(TestCase):
             call_record_outgoing_external_enabled=True,
         )
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
@@ -243,7 +244,7 @@ class TestRecordCaller(TestCase):
             call_record_outgoing_external_enabled=True,
         )
 
-        record_caller(self.agi, self.cursor, None)
+        record_caller(self.agi, self.cursor, [])
 
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),

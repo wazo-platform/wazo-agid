@@ -1,16 +1,20 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+
+from psycopg2.extras import DictCursor
+
 from wazo_agid import agid
 from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
 
 
-def vmbox_get_info(agi, cursor, args):
-    caller = None
-    vmbox = None
+def vmbox_get_info(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
+    caller: objects.User = None  # type: ignore[assignment]
+    vmbox: objects.VMBox = None  # type: ignore[assignment]
     xlen = len(args)
     if xlen > 0 and args[0] != '':
         try:

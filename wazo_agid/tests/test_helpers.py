@@ -1,5 +1,6 @@
-# Copyright 2017-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2017-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import unittest
 
@@ -27,7 +28,7 @@ class TestBuildSIPInterface(unittest.TestCase):
         self.agi = Mock()
         self.auth_client = Mock()
         self.agi.config = {'auth': {'client': self.auth_client}}
-        self.channel_variables = {}
+        self.channel_variables: dict[str, str] = {}
         self.agi.get_variable.side_effect = lambda var: self.channel_variables.get(
             var, ''
         )

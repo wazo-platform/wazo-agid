@@ -7,8 +7,9 @@ import logging
 import socketserver
 import time
 from contextlib import contextmanager
+from types import FrameType
 
-from typing import Callable
+from typing import Callable, Any
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -62,6 +63,8 @@ class Database:
 
 
 class FastAGIRequestHandler(socketserver.StreamRequestHandler):
+    config: dict[str, Any]
+
     def handle(self):
         try:
             logger.debug("handling request")
@@ -118,7 +121,7 @@ class AGID(socketserver.ThreadingTCPServer):
     # Should be patched in later versions of Python so re-check after the upgrade to Bullseye
     daemon_threads = True
 
-    def __init__(self, config):
+    def __init__(self, config: dict[str, Any]) -> None:
         logger.info('wazo-agid starting...')
 
         self.config = config
@@ -134,7 +137,7 @@ class AGID(socketserver.ThreadingTCPServer):
 
         self.initialized = True
 
-    def setup(self):
+    def setup(self) -> None:
         if not self.initialized:
             self.listen_addr = self.config["listen_address"]
             logger.debug("listen_addr: %s", self.listen_addr)
@@ -161,17 +164,17 @@ class Handler:
         handler_name: str,
         setup_fn: SetupFunction | None,
         handle_fn: HandleFunction,
-    ):
+    ) -> None:
         self.handler_name = handler_name
         self.setup_fn = setup_fn
         self.handle_fn = handle_fn
         self.lock = moresynchro.RWLock()
 
-    def setup(self, cursor: DictCursor):
+    def setup(self, cursor: DictCursor) -> None:
         if self.setup_fn:
             self.setup_fn(cursor)
 
-    def reload(self, cursor: DictCursor):
+    def reload(self, cursor: DictCursor) -> None:
         if self.setup_fn:
             if not self.lock.acquire_write():
                 logger.error("deadlock detected and avoided for %r", self.handler_name)
@@ -183,7 +186,7 @@ class Handler:
             finally:
                 self.lock.release()
 
-    def handle(self, agi: FastAGI, cursor: DictCursor, args: list):
+    def handle(self, agi: FastAGI, cursor: DictCursor, args: list[str]):
         self.lock.acquire_read()
         try:
             with session_scope():
@@ -201,7 +204,7 @@ def register(handle_fn: HandleFunction, setup_fn: SetupFunction | None = None) -
     _handlers[handler_name] = Handler(handler_name, setup_fn, handle_fn)
 
 
-def sighup_handle(signum, frame):
+def sighup_handle(signum: int, frame: FrameType | None) -> None:
     logger.debug("reloading core engine")
     _server.setup()
 
@@ -213,7 +216,7 @@ def sighup_handle(signum, frame):
             logger.debug("finished reload")
 
 
-def run():
+def run() -> None:
     logger.debug("list of handlers: %s", ', '.join(sorted(_handlers)))
     with _server.database.connection() as conn:
         with _server.database.transaction(conn) as cursor:
@@ -223,6 +226,6 @@ def run():
     _server.serve_forever()
 
 
-def init(config):
+def init(config) -> None:
     global _server
     _server = AGID(config)

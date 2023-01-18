@@ -1,4 +1,4 @@
-# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 FAKE_XIVO_USER_UUID = '00000000-0000-0000-0000-000000000000'
 
 
-def callerid_forphones(agi, cursor: DictCursor, args: list):
+def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     dird_client: DirdClient = agi.config['dird']['client']
     try:
         cid_name = agi.env['agi_calleridname']
@@ -52,20 +52,20 @@ def callerid_forphones(agi, cursor: DictCursor, args: list):
         agi.verbose(msg)
 
 
-def _should_reverse_lookup(cid_name, cid_number):
+def _should_reverse_lookup(cid_name: str, cid_number: str) -> bool:
     return cid_name == cid_number or cid_name == 'unknown'
 
 
-def _set_new_caller_id(agi, display_name, cid_number):
+def _set_new_caller_id(agi: agid.FastAGI, display_name: str, cid_number: str) -> None:
     new_caller_id = f'"{display_name}" <{cid_number}>'
     agi.set_callerid(new_caller_id)
 
 
-def _set_reverse_lookup_variable(agi, fields):
+def _set_reverse_lookup_variable(agi: agid.FastAGI, fields: dict[str, str]) -> None:
     agi.set_variable("XIVO_REVERSE_LOOKUP", _create_reverse_lookup_variable(fields))
 
 
-def _create_reverse_lookup_variable(fields):
+def _create_reverse_lookup_variable(fields: dict[str, str]) -> str:
     variable_content = [f'db-{key}: {value}' for key, value in fields.items()]
     return ','.join(variable_content)
 

@@ -1,11 +1,18 @@
-# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid, dialplan_variables
 from xivo_dao import callfilter_dao
 
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
 
-def callfilter(agi, cursor, args):
+
+def callfilter(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     callfiltermember_id = args[0]
 
     if not callfiltermember_id.isdigit():

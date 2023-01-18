@@ -1,11 +1,18 @@
-# Copyright 2010-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2010-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid
 from wazo_agid import objects
 
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
 
-def check_diversion(agi, cursor, args):
+
+def check_diversion(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     queue_id = agi.get_variable('XIVO_DSTID')
     try:
         queue = objects.Queue(agi, cursor, int(queue_id))

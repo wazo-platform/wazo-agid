@@ -1,14 +1,17 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+
+from psycopg2.extras import DictCursor
 
 from wazo_agid import agid, objects
 
 logger = logging.getLogger(__name__)
 
 
-def phone_get_features(agi, cursor, args):
+def phone_get_features(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     userid = agi.get_variable('XIVO_USERID')
 
     try:

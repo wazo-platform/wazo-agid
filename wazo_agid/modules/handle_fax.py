@@ -1,4 +1,4 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -107,7 +107,7 @@ def _new_printer_backend(
     # Return a backend taking no additional argument, which prints the fax
     # to the given printer when called.
     # Note that if name is None, it uses the default printer.
-    convert_to_pdf = _convert_config_value_to_bool(
+    use_convert_to_pdf = _convert_config_value_to_bool(
         convert_to_pdf, True, 'convert_to_pdf'
     )
 
@@ -115,7 +115,7 @@ def _new_printer_backend(
         lp_cmd = [LP_PATH, '-s']
         if name:
             lp_cmd.extend(['-d', name])
-        if convert_to_pdf:
+        if use_convert_to_pdf:
             pdffile = _convert_tiff_to_pdf(faxfile)
             lp_cmd.append(pdffile)
         else:
@@ -123,7 +123,7 @@ def _new_printer_backend(
         try:
             subprocess.check_call(lp_cmd, close_fds=True)
         finally:
-            if convert_to_pdf:
+            if use_convert_to_pdf:
                 try:
                     os.remove(pdffile)
                 except OSError as e:
@@ -157,13 +157,13 @@ def _new_ftp_backend(
     # Return a backend taking no argument, which transfers the fax,
     # in its original format, to the given FTP server when called.
     # Note that a connection is made every time the backend is called.
-    convert_to_pdf = _convert_config_value_to_bool(
+    use_convert_to_pdf = _convert_config_value_to_bool(
         convert_to_pdf, True, 'convert_to_pdf'
     )
     port = int(port)
 
     def aux(faxfile: str, dstnum: str, args: list[str]) -> None:
-        if convert_to_pdf:
+        if use_convert_to_pdf:
             filename = _convert_tiff_to_pdf(faxfile)
         else:
             filename = faxfile
@@ -180,7 +180,7 @@ def _new_ftp_backend(
                 finally:
                     ftp_serv.close()
         finally:
-            if convert_to_pdf:
+            if use_convert_to_pdf:
                 try:
                     os.remove(filename)
                 except OSError as e:
@@ -228,7 +228,7 @@ def handle_fax(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         agi.dp_break(e)
 
 
-_BACKENDS_FACTORY = [
+_BACKENDS_FACTORY: list[tuple[str, Callable[..., Backend]]] = [
     ("mail", _new_mail_backend),
     ("printer", _new_printer_backend),
     ("ftp", _new_ftp_backend),

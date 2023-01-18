@@ -1,4 +1,4 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -6,6 +6,8 @@ import re
 import sys
 import logging
 from configparser import NoOptionError, RawConfigParser
+
+from psycopg2.extras import DictCursor
 
 from wazo_agid import agid
 
@@ -16,7 +18,7 @@ config: RawConfigParser = None  # type: ignore[assignment]
 re_objs: dict[str, re.Pattern] = {}
 
 
-def in_callerid(agi, cursor, args):
+def in_callerid(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     callerid_num = agi.env['agi_callerid']
     callerid_name = agi.env['agi_calleridname']
     same_cid = callerid_num == callerid_name
@@ -55,7 +57,7 @@ def in_callerid(agi, cursor, args):
         return
 
 
-def setup(cursor):
+def setup(cursor: DictCursor) -> None:
     global config
 
     re_objs.clear()

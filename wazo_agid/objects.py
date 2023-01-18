@@ -1,10 +1,10 @@
-# Copyright 2007-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2007-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
 import logging
 import re
-from typing import Sequence
+from typing import Sequence, TYPE_CHECKING
 
 from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Identifier
@@ -17,6 +17,9 @@ from wazo_agid.schedule import (
 )
 
 from xivo_dao import user_dao
+
+if TYPE_CHECKING:
+    from typing import Literal
 
 logger = logging.getLogger(__name__)
 
@@ -124,6 +127,15 @@ class ExtenFeatures:
 
 
 class VMBox:
+    id: int
+    mailbox: str
+    context: str
+    password: str | None
+    email: str | None
+    commented: Literal[0, 1]
+    language: str | None
+    skipcheckpass: Literal[0, 1]
+
     def __init__(
         self,
         agi,
@@ -304,13 +316,13 @@ class Paging:
             (userid, paging_id),
         )
 
-        res: DictRow = cursor.fetchone()
-        if not res:
+        paging_user_res: DictRow = cursor.fetchone()
+        if not paging_user_res:
             raise LookupError(
                 f"Unable to find paging caller entry (userfeaturesid: {userid})"
             )
 
-        columns: tuple[str, ...] = (
+        paging_user_columns: tuple[str, ...] = (
             'endpoint_sip_uuid',
             'endpoint_sccp_id',
             'endpoint_custom_id',
@@ -324,12 +336,14 @@ class Paging:
             "WHERE paginguser.pagingid = %s "
             "AND paginguser.caller = 0"
         )
-        cursor.execute(query.format(columns=join_column_names(columns)), (paging_id,))
-        res: list[DictRow] = cursor.fetchall()
-        if not res:
+        cursor.execute(
+            query.format(columns=join_column_names(paging_user_columns)), (paging_id,)
+        )
+        line_res: list[DictRow] = cursor.fetchall()
+        if not line_res:
             raise LookupError(f"Unable to find paging users entry (id: {paging_id})")
 
-        for line in res:
+        for line in line_res:
             if line['endpoint_sip_uuid']:
                 line = f'PJSIP/{line["name"]}'
             elif line['endpoint_sccp_id']:
@@ -755,6 +769,8 @@ class DID:
 
 
 class Outcall:
+    trunks: list[Trunk]
+
     def __init__(self, agi, cursor: DictCursor):
         self.agi = agi
         self.cursor = cursor
@@ -813,15 +829,15 @@ class Outcall:
             "ORDER BY priority ASC",
             (self.id,),
         )
-        res: list[DictRow] = self.cursor.fetchall()
+        trunk_res: list[DictRow] = self.cursor.fetchall()
 
-        if not res:
+        if not trunk_res:
             raise ValueError(
                 f"No trunk associated with outcall (id: {dialpattern_id:d})"
             )
 
         self.trunks = []
-        for row in res:
+        for row in trunk_res:
             try:
                 trunk = Trunk(self.agi, self.cursor, row['trunkfeaturesid'])
             except LookupError:
@@ -868,7 +884,7 @@ class ScheduleDataMapper:
         )
 
         # fetch schedule periods
-        columns: tuple[str, ...] = (
+        schedule_columns: tuple[str, ...] = (
             'mode',
             'hours',
             'weekdays',
@@ -879,12 +895,14 @@ class ScheduleDataMapper:
             'actionargs',
         )
         query = SQL("SELECT {columns} FROM schedule_time WHERE schedule_id = %s")
-        cursor.execute(query.format(columns=join_column_names(columns)), (schedule_id,))
-        res: list[DictRow] = cursor.fetchall()
+        cursor.execute(
+            query.format(columns=join_column_names(schedule_columns)), (schedule_id,)
+        )
+        schedule_res: list[DictRow] = cursor.fetchall()
 
         opened_periods = []
         closed_periods = []
-        for res_period in res:
+        for res_period in schedule_res:
             period_builder = SchedulePeriodBuilder()
             period_builder.hours(res_period['hours'])
             period_builder.weekdays(res_period['weekdays'])

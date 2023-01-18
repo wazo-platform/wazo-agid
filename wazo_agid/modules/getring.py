@@ -1,5 +1,6 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
 from configparser import RawConfigParser, NoOptionError
@@ -8,13 +9,14 @@ from psycopg2.extras import DictCursor
 
 from wazo_agid import agid
 
+
 CONFIG_FILE = "/etc/xivo/asterisk/xivo_ring.conf"
 CONFIG_PARSER: RawConfigParser = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
 
-def getring(agi, cursor, args):
+def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     dstnum = agi.get_variable('XIVO_REAL_NUMBER')
     context = agi.get_variable('XIVO_REAL_CONTEXT')
     origin = agi.get_variable('XIVO_CALLORIGIN')

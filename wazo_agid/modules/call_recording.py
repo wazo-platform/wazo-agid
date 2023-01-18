@@ -1,10 +1,17 @@
-# Copyright 2020-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2020-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
 import uuid
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid, dialplan_variables, objects
+
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
+
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +20,7 @@ CALL_RECORDING_FILENAME_TEMPLATE = (
 )
 
 
-def call_recording(agi, cursor, args):
+def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     calld = agi.config['calld']['client']
     channel_id = agi.env['agi_uniqueid']
     if agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1':
@@ -22,12 +29,12 @@ def call_recording(agi, cursor, args):
         _enable_call_recording(agi, calld, channel_id)
 
 
-def record_caller(agi, cursor, args):
+def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     is_being_recorded = agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
     if is_being_recorded:
         return
 
-    argument = {}
+    argument: dict[str, str | int] = {}
     user_uuid = agi.get_variable(dialplan_variables.USERUUID)
     if user_uuid:
         argument['xid'] = user_uuid

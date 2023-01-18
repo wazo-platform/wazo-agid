@@ -1,10 +1,10 @@
-# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL
 
 from wazo_agid.handlers.handler import Handler
@@ -12,15 +12,19 @@ from wazo_agid import objects
 from wazo_agid import dialplan_variables
 from wazo_agid.objects import join_column_names
 
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor, DictRow
+
 
 class GroupFeatures(Handler):
-    def __init__(self, agi, cursor: DictCursor, args):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         super().__init__(agi, cursor, args)
-        self._id: int | None = None
-        self._referer: str | None = None
-        self._exten: str | None = None
-        self._context = None
-        self._name = None
+        self._id: int = None  # type: ignore[assignment]
+        self._referer: str = None  # type: ignore[assignment]
+        self._exten: str = None  # type: ignore[assignment]
+        self._context: str = None  # type: ignore[assignment]
+        self._name: str = None  # type: ignore[assignment]
         self._label = None
         self._timeout = None
         self._transfer_user = None
@@ -33,7 +37,7 @@ class GroupFeatures(Handler):
         self._pickup_member = None
         self._tenant_uuid = None
 
-    def execute(self):
+    def execute(self) -> None:
         self._set_members()
         self._display_queue()
         self._set_options()
@@ -46,15 +50,15 @@ class GroupFeatures(Handler):
             self._set_rewrite_cid()
         self._set_call_record_side()
 
-    def _display_queue(self):
+    def _display_queue(self) -> None:
         self._agi.verbose(
             f'Calling group "{self._label}" from tenant "{self._tenant_uuid}"',
         )
 
-    def _needs_rewrite_cid(self):
-        return self._referer == (f"group:{self._id}")
+    def _needs_rewrite_cid(self) -> bool:
+        return self._referer == f"group:{self._id}"
 
-    def _set_members(self):
+    def _set_members(self) -> None:
         self._id = int(self._agi.get_variable(dialplan_variables.DESTINATION_ID))
         self._referer = self._agi.get_variable(dialplan_variables.FWD_REFERER)
 
@@ -111,14 +115,14 @@ class GroupFeatures(Handler):
         self._mark_answered_elsewhere = res['mark_answered_elsewhere']
         self._tenant_uuid = res['tenant_uuid']
 
-    def _set_vars(self):
+    def _set_vars(self) -> None:
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
         self._agi.set_variable('XIVO_REAL_CONTEXT', self._context)
         self._agi.set_variable('XIVO_GROUPNAME', self._name)
         if self._musicclass:
             self._agi.set_variable('CHANNEL(musicclass)', self._musicclass)
 
-    def _set_options(self):
+    def _set_options(self) -> None:
         options = ""
         needanswer = "1"
 
@@ -147,35 +151,35 @@ class GroupFeatures(Handler):
         self._agi.set_variable('XIVO_GROUPOPTIONS', options)
         self._agi.set_variable('XIVO_GROUPNEEDANSWER', needanswer)
 
-    def _set_preprocess_subroutine(self):
+    def _set_preprocess_subroutine(self) -> None:
         if self._preprocess_subroutine:
             self._agi.set_variable(
                 'XIVO_GROUPPREPROCESS_SUBROUTINE', self._preprocess_subroutine
             )
 
-    def _set_timeout(self):
+    def _set_timeout(self) -> None:
         if self._timeout:
             self._agi.set_variable('XIVO_GROUPTIMEOUT', self._timeout)
         else:
             self._agi.set_variable('XIVO_GROUPTIMEOUT', "")
 
-    def _set_dial_action(self):
+    def _set_dial_action(self) -> None:
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
             objects.DialAction(
                 self._agi, self._cursor, event, "group", self._id
             ).set_variables()
 
-    def _set_rewrite_cid(self):
+    def _set_rewrite_cid(self) -> None:
         objects.CallerID(self._agi, self._cursor, 'group', self._id).rewrite(
             force_rewrite=False
         )
 
-    def _set_schedule(self):
+    def _set_schedule(self) -> None:
         path = self._agi.get_variable('XIVO_PATH')
         if path is None or len(path) == 0:
             self._agi.set_variable('XIVO_PATH', 'group')
             self._agi.set_variable('XIVO_PATH_ID', self._id)
 
-    def _set_call_record_side(self):
+    def _set_call_record_side(self) -> None:
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
         self._agi.set_variable('__WAZO_LOCAL_CHAN_MATCH_UUID', str(uuid4()))

@@ -1,5 +1,6 @@
-# Copyright 2016-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import unittest
 
@@ -15,7 +16,7 @@ class TestFwdUndoAll(unittest.TestCase):
         agi.get_variable.return_value = user_id
         agi.config = {'confd': {'client': self._client}}
 
-        fwdundoall(agi, None, None)
+        fwdundoall(agi, Mock(), [])
 
         disabled = {'enabled': False}
         expected_body = {

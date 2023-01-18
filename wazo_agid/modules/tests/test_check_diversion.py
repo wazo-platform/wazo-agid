@@ -1,5 +1,6 @@
-# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import unittest
 from hamcrest import assert_that, equal_to
@@ -62,7 +63,7 @@ class TestCheckDiversion(unittest.TestCase):
         mock_objects.Queue.return_value = self.queue
         self.agi.get_variable.return_value = 42
 
-        check_diversion.check_diversion(self.agi, self.cursor, None)
+        check_diversion.check_diversion(self.agi, self.cursor, [])
 
         expected = [call('XIVO_DIVERT_EVENT', ''), call('XIVO_FWD_TYPE', ANY)]
         assert_that(self.agi.set_variable.call_args_list, equal_to(expected))

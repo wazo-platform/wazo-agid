@@ -1,10 +1,17 @@
-# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid
 
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
 
-def callerid_extend(agi, cursor, args):
+
+def callerid_extend(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     if 'agi_callington' in agi.env:
         agi.set_variable('XIVO_SRCTON', agi.env['agi_callington'])
 

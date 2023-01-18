@@ -1,8 +1,9 @@
-# Copyright 2012-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from xivo_dao import callfilter_dao
 
@@ -19,30 +20,36 @@ from wazo_agid.helpers import build_sip_interface
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from xivo_dao.alchemy.extension import Extension
+    from xivo_dao.alchemy.linefeatures import LineFeatures
+    from psycopg2.extras import DictCursor
+    from wazo_agid.agid import FastAGI
+
 
 class UserFeatures(Handler):
 
     PATH_TYPE = 'user'
 
-    def __init__(self, agi, cursor, args):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         super().__init__(agi, cursor, args)
-        self._userid = None
-        self._dstid = None
-        self._destination_extension_id = None
-        self._zone = None
-        self._srcnum = None
-        self._dstnum = None
+        self._userid: str | None = None
+        self._dstid: str | None = None
+        self._destination_extension_id: str | None = None
+        self._zone: str | None = None
+        self._srcnum: str | None = None
+        self._dstnum: str | None = None
         self._feature_list = None
         self._caller: objects.User | None = None
-        self._user = None
-        self._moh_uuid = None
-        self._moh = None
+        self._user: objects.User = None  # type: ignore[assignment]
+        self._moh_uuid: str | None = None
+        self._moh: objects.MOH | None = None
 
-        self.lines = []
-        self.main_line = None
-        self.main_extension = None
+        self.lines: list[LineFeatures] = []
+        self.main_line: LineFeatures | None = None
+        self.main_extension: Extension = None  # type: ignore[assignment]
 
-    def execute(self):
+    def execute(self) -> None:
         self._set_members()
         self._set_interfaces()
         self._find_moh()
@@ -68,7 +75,7 @@ class UserFeatures(Handler):
         self._set_video_enabled()
         self._set_path(UserFeatures.PATH_TYPE, self._user.id)
 
-    def _find_moh(self):
+    def _find_moh(self) -> None:
         if self._moh_uuid:
             try:
                 self._moh = objects.MOH(self._agi, self._cursor, self._moh_uuid)
@@ -76,7 +83,7 @@ class UserFeatures(Handler):
                 msg = f'expected MOH with UUID {self._moh_uuid} but could not find it'
                 self._agi.verbose(msg)
 
-    def _set_members(self):
+    def _set_members(self) -> None:
         self._userid = self._agi.get_variable(dialplan_variables.USERID)
         self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
         self._destination_extension_id = self._agi.get_variable(
@@ -91,14 +98,14 @@ class UserFeatures(Handler):
         self._set_line()
         self._set_user()
 
-    def _set_caller(self):
+    def _set_caller(self) -> None:
         if self._userid:
             try:
                 self._caller = objects.User(self._agi, self._cursor, int(self._userid))
             except (ValueError, LookupError):
                 self._caller = None
 
-    def _set_line(self):
+    def _set_line(self) -> None:
         if self._dstid:
             try:
                 user_main_line = user_line_dao.get_by(
@@ -135,7 +142,7 @@ class UserFeatures(Handler):
                     'WAZO_DST_USER_CONTEXT', self.main_extension.context
                 )
 
-    def _set_user(self):
+    def _set_user(self) -> None:
         if self._dstid:
             try:
                 self._user = objects.User(self._agi, self._cursor, int(self._dstid))
@@ -145,7 +152,7 @@ class UserFeatures(Handler):
             self._set_xivo_redirecting_info()
             self._set_wazo_uuid()
 
-    def _set_interfaces(self):
+    def _set_interfaces(self) -> None:
         interfaces = [self._build_interface_from_line(line) for line in self.lines]
         self._agi.set_variable('XIVO_INTERFACE', '&'.join(interfaces))
 
@@ -175,12 +182,12 @@ class UserFeatures(Handler):
             )
             self._agi.set_variable('WAZO_DST_NAME', wazo_dst_name.strip())
 
-    def _set_wazo_uuid(self):
+    def _set_wazo_uuid(self) -> None:
         if self._user:
             self._agi.set_variable('WAZO_DST_UUID', self._user.uuid)
             self._agi.set_variable('WAZO_DST_TENANT_UUID', self._user.tenant_uuid)
 
-    def _set_xivo_redirecting_info(self):
+    def _set_xivo_redirecting_info(self) -> None:
         callerid_parsed = CallerID.parse(self._user.callerid)
         if callerid_parsed:
             callerid_name, callerid_num = callerid_parsed
@@ -199,18 +206,17 @@ class UserFeatures(Handler):
                 callerid_num = self._dstnum
         self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
 
-    def _call_filtering(self):
-        caller = self._caller
-        called = self._user
+    def _call_filtering(self) -> bool:
+        callee = self._user
 
-        boss_callfiltermember = callfilter_dao.find_boss(called.id)
+        boss_callfiltermember = callfilter_dao.find_boss(callee.id)
         if not boss_callfiltermember:
             logger.debug('Ignoring callfilter: No boss')
             return False
 
-        if caller is not None:
+        if self._caller is not None:
             secretary_can_call_boss = callfilter_dao.does_secretary_filter_boss(
-                called.id, caller.id
+                callee.id, self._caller.id
             )
             if secretary_can_call_boss:
                 logger.debug('Ignoring callfilter: secretary can call boss')

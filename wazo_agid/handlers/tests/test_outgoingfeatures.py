@@ -1,4 +1,4 @@
-# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -291,8 +291,8 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_retreive_outcall(self):
         outcall = Mock(objects.Outcall)
         self.outgoing_features.outcall = outcall
-        self.outgoing_features.dialpattern_id = 23
+        self.outgoing_features.dialpattern_id = '23'
 
         self.outgoing_features._retrieve_outcall()
 
-        outcall.retrieve_values.assert_called_once_with(23)
+        outcall.retrieve_values.assert_called_once_with('23')

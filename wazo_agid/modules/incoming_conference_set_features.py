@@ -1,16 +1,21 @@
-# Copyright 2016-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
+from psycopg2.extras import DictCursor
 
 from wazo_agid import agid
 from xivo_dao.resources.conference import dao as conference_dao
 
 
-def incoming_conference_set_features(agi, cursor, args):
+def incoming_conference_set_features(
+    agi: agid.FastAGI, cursor: DictCursor, args: list[str]
+) -> None:
     conference_id = int(agi.get_variable('XIVO_DSTID'))
 
     try:
         conference = conference_dao.get(conference_id)
-    except (ValueError) as e:
+    except ValueError as e:
         agi.dp_break(str(e))
 
     menu = 'xivo-default-user-menu'
