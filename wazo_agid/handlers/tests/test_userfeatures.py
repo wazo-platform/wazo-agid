@@ -54,8 +54,8 @@ class TestUserFeatures(_BaseTestCase):
         self.assertEqual(userfeatures._cursor, self._cursor)
         self.assertEqual(userfeatures._args, self._args)
 
-    @patch('wazo_agid.objects.User')
-    def test_set_members(self, mock_user: Mock):
+    @patch('wazo_agid.objects.User', Mock())
+    def test_set_members(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         with patch.multiple(
             userfeatures, _set_caller=Mock(), _set_line=Mock(), _set_user=Mock()
