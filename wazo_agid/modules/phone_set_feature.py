@@ -1,7 +1,10 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+
+from psycopg2.extras import DictCursor
 
 from wazo_agid import agid
 from wazo_agid import objects
@@ -9,7 +12,7 @@ from wazo_agid import objects
 logger = logging.getLogger(__name__)
 
 
-def phone_set_feature(agi, cursor, args):
+def phone_set_feature(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     try:
         feature_name = args[0]
     except IndexError:

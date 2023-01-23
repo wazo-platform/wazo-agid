@@ -1,5 +1,6 @@
-# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import unittest
 
@@ -25,7 +26,7 @@ class TestMeetingUser(unittest.TestCase):
         self.cursor.fetchone.side_effect = LookupError
 
         for args in invalid_args:
-            meeting_user(self.agi, self.cursor, args)
+            meeting_user(self.agi, self.cursor, args)  # type: ignore
             self.agi.stream_file.assert_called_once_with('invalid')
             self.agi.stream_file.reset_mock()
 
@@ -33,6 +34,6 @@ class TestMeetingUser(unittest.TestCase):
         self.cursor.fetchone.side_effect = LookupError
 
         meeting_user(
-            self.agi, self.cursor, 'wazo-meeting-99999999-9999-4999-9999-999999999999'
+            self.agi, self.cursor, ['wazo-meeting-99999999-9999-4999-9999-999999999999']
         )
         self.agi.stream_file.assert_called_once_with('invalid')

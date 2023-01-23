@@ -3,4 +3,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from wazo_agid.bin.agid import main
+
 main()

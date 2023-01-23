@@ -1,40 +1,43 @@
-# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 import re
-
-from psycopg2.extras import DictRow
 
 from wazo_agid import objects
 from wazo_agid.handlers.handler import Handler
 
 
-class AgentFeatures(Handler):
-    def __init__(self, agi, cursor, args):
-        Handler.__init__(self, agi, cursor, args)
-        self.agent_id = None
-        self.agent = None
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor, DictRow
 
-    def execute(self):
+
+class AgentFeatures(Handler):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
+        super().__init__(agi, cursor, args)
+        self.agent_id: str = None  # type: ignore[assignment]
+        self.agent: objects.Agent = None  # type: ignore[assignment]
+
+    def execute(self) -> None:
         self._extract_agent_id()
         self._set_agent_interface()
         self._set_agent()
         self._set_preprocess_subroutine()
         self._set_queue_call_options()
 
-    def _extract_agent_id(self):
+    def _extract_agent_id(self) -> None:
         try:
             self.agent_id = self._args[0]
         except IndexError:
             self._agi.dp_break('Missing feature agent_id argument')
 
-    def _set_agent_interface(self):
+    def _set_agent_interface(self) -> None:
         try:
-            device = self._get_agent_device()
+            self._agi.set_variable('XIVO_AGENT_INTERFACE', self._get_agent_device())
         except LookupError as e:
-            self._agi.dp_break(str(e))
-        self._agi.set_variable('XIVO_AGENT_INTERFACE', device)
+            self._agi.dp_break(e)
 
     def _get_agent_device(self):
         self._cursor.execute(
@@ -47,25 +50,25 @@ class AgentFeatures(Handler):
         device = res[0]
         return device
 
-    def _set_agent(self):
+    def _set_agent(self) -> None:
         try:
             self.agent = objects.Agent(self._agi, self._cursor, self.agent_id)
         except (LookupError, IndexError) as e:
-            self._agi.dp_break(str(e))
+            self._agi.dp_break(e)
 
-    def _set_preprocess_subroutine(self):
+    def _set_preprocess_subroutine(self) -> None:
         if self.agent.preprocess_subroutine:
             preprocess_subroutine = self.agent.preprocess_subroutine
         else:
             preprocess_subroutine = ''
         self._agi.set_variable('XIVO_AGENTPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
-    def _set_queue_call_options(self):
+    def _set_queue_call_options(self) -> None:
         queue_options = self._agi.get_variable('XIVO_QUEUEOPTIONS')
         queue_call_options = self._extract_queue_call_options(queue_options)
         self._agi.set_variable('XIVO_QUEUECALLOPTIONS', queue_call_options)
 
-    def _extract_queue_call_options(self, queue_options):
+    def _extract_queue_call_options(self, queue_options: str) -> str:
         queue_options = re.sub(r'\(.*?\)', '', queue_options)
         authorized_options = ['h', 'i', 't', 'w', 'x', 'k']
         queue_call_options = ''

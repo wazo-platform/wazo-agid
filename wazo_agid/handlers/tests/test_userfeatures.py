@@ -1,4 +1,4 @@
-# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -32,7 +32,7 @@ class _BaseTestCase(unittest.TestCase):
 
 class TestUserFeatures(_BaseTestCase):
     def setUp(self):
-        super(TestUserFeatures, self).setUp()
+        super().setUp()
         self._variables = {
             'XIVO_USERID': '42',
             'XIVO_DSTID': '33',
@@ -54,27 +54,25 @@ class TestUserFeatures(_BaseTestCase):
         self.assertEqual(userfeatures._cursor, self._cursor)
         self.assertEqual(userfeatures._args, self._args)
 
+    @patch('wazo_agid.objects.User', Mock())
     def test_set_members(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._set_caller = Mock()
-        userfeatures._set_line = Mock()
-        userfeatures._set_user = Mock()
+        with patch.multiple(
+            userfeatures, _set_caller=Mock(), _set_line=Mock(), _set_user=Mock()
+        ):
+            userfeatures._set_members()
 
-        userfeatures._set_members()
-
-        old_user, objects.User = objects.User, Mock()
-
-        self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
-        self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
-        self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
-        self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
-        self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
-        self.assertEqual(userfeatures._moh_uuid, self._variables['WAZO_USER_MOH_UUID'])
-        self.assertTrue(userfeatures._set_caller.called)
-        self.assertTrue(userfeatures._set_line.called)
-        self.assertTrue(userfeatures._set_user.called)
-
-        objects.User, old_user = old_user, None
+            self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
+            self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
+            self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
+            self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
+            self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
+            self.assertEqual(
+                userfeatures._moh_uuid, self._variables['WAZO_USER_MOH_UUID']
+            )
+            self.assertTrue(userfeatures._set_caller.called)  # type: ignore
+            self.assertTrue(userfeatures._set_line.called)  # type: ignore
+            self.assertTrue(userfeatures._set_user.called)  # type: ignore
 
     def test_set_options_with_moh(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -209,39 +207,41 @@ class TestUserFeatures(_BaseTestCase):
 
     def test_set_user(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._set_xivo_user_name = Mock()
-        userfeatures._set_xivo_redirecting_info = Mock()
-        userfeatures._set_wazo_uuid = Mock()
-
-        userfeatures._set_user()
-
-        self.assertTrue(userfeatures._user is None)
-        self.assertEqual(userfeatures._set_xivo_user_name.call_count, 0)
-
-        userfeatures._dstid = self._variables['XIVO_DSTID']
-
-        with patch.object(objects.User, '__init__') as user_init:
-            user_init.return_value = None
-
+        with patch.multiple(
+            userfeatures,
+            _set_xivo_user_name=Mock(),
+            _set_xivo_redirecting_info=Mock(),
+            _set_wazo_uuid=Mock(),
+        ):
             userfeatures._set_user()
 
-            self.assertEqual(userfeatures._set_xivo_user_name.call_count, 1)
-            self.assertEqual(userfeatures._set_xivo_redirecting_info.call_count, 1)
-            self.assertEqual(userfeatures._set_wazo_uuid.call_count, 1)
-            self.assertTrue(userfeatures._user is not None)
-            self.assertTrue(isinstance(userfeatures._user, objects.User))
+            self.assertTrue(userfeatures._user is None)
+            self.assertEqual(userfeatures._set_xivo_user_name.call_count, 0)  # type: ignore
+
+            userfeatures._dstid = self._variables['XIVO_DSTID']
+
+            with patch.object(objects.User, '__init__') as user_init:
+                user_init.return_value = None
+
+                userfeatures._set_user()
+
+                userfeatures._set_xivo_user_name.assert_called_once()  # type: ignore
+                userfeatures._set_xivo_redirecting_info.assert_called_once()  # type: ignore
+                userfeatures._set_wazo_uuid.assert_called_once()  # type: ignore
+                self.assertTrue(userfeatures._user is not None)
+                self.assertTrue(isinstance(userfeatures._user, objects.User))
 
     def test_execute(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        userfeatures._set_members = Mock()
-        userfeatures._set_interfaces = Mock()
-        userfeatures._set_user_filter = Mock()
-        userfeatures._call_filtering = Mock()
-
-        userfeatures.execute()
-
-        self.assertEqual(userfeatures._set_members.call_count, 1)
-        self.assertEqual(userfeatures._set_interfaces.call_count, 1)
+        with patch.multiple(
+            userfeatures,
+            _set_members=Mock(),
+            _set_interfaces=Mock(),
+            _call_filtering=Mock(),
+        ):
+            userfeatures.execute()
+            userfeatures._set_members.assert_called_once()  # type: ignore
+            userfeatures._set_interfaces.assert_called_once()  # type: ignore
 
     def test_build_interface_from_custom_line(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -258,7 +258,7 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_xivo_user_name()
 
-        self.assertEqual(self._agi.call_count, 0)
+        self._agi.assert_not_called()
 
         self._agi.set_variable.reset_mock()
 
@@ -268,7 +268,7 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_xivo_user_name()
 
-        self.assertEqual(self._agi.set_variable.call_count, 1)
+        self._agi.set_variable.assert_called_once()
 
     def test_set_xivo_redirecting_info_full_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -406,25 +406,29 @@ class TestSetForwardNoAnswer(_BaseTestCase):
 
     def test_setrna_exten_disabled_noanswer_enabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._set_rna_from_exten = Mock(return_value=False)
-        user_features._set_rna_from_dialaction = Mock(return_value=True)
-
-        user_features._setrna()
-
-        user_features._set_rna_from_exten.assert_called_once_with()
-        assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLERNA', True))
+        with patch.multiple(
+            user_features,
+            _set_rna_from_exten=Mock(return_value=False),
+            _set_rna_from_dialaction=Mock(return_value=True),
+        ):
+            user_features._setrna()
+            user_features._set_rna_from_exten.assert_called_once_with()  # type: ignore
+            assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLERNA', True))
 
     def test_setrna_exten_disabled_noanswer_disabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._set_rna_from_exten = Mock(return_value=False)
-        user_features._set_rna_from_dialaction = Mock(return_value=False)
+        with patch.multiple(
+            user_features,
+            _set_rna_from_exten=Mock(return_value=False),
+            _set_rna_from_dialaction=Mock(return_value=False),
+        ):
 
-        user_features._setrna()
+            user_features._setrna()
 
-        user_features._set_rna_from_exten.assert_called_once_with()
-        user_features._set_rna_from_dialaction.assert_called_once_with()
+            user_features._set_rna_from_exten.assert_called_once_with()  # type: ignore
+            user_features._set_rna_from_dialaction.assert_called_once_with()  # type: ignore
 
-        assert_that(self._agi.set_variable.call_count, equal_to(0))
+            self._agi.set_variable.assert_not_called()
 
 
 class TestSetForwardBusy(_BaseTestCase):
@@ -479,22 +483,27 @@ class TestSetForwardBusy(_BaseTestCase):
 
     def test_set_rbusy_exten_disabled_noanswer_enabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._set_rbusy_from_exten = Mock(return_value=False)
-        user_features._set_rbusy_from_dialaction = Mock(return_value=True)
-
-        user_features._setbusy()
-
-        user_features._set_rbusy_from_exten.assert_called_once_with()
-        assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLEBUSY', True))
+        with patch.multiple(
+            user_features,
+            _set_rbusy_from_exten=Mock(return_value=False),
+            _set_rbusy_from_dialaction=Mock(return_value=True),
+        ):
+            user_features._setbusy()
+            user_features._set_rbusy_from_exten.assert_called_once_with()  # type: ignore
+            assert_that(
+                self._agi.set_variable.called_once_with('XIVO_ENABLEBUSY', True)
+            )
 
     def test_set_busy_exten_disabled_noanswer_disabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)
-        user_features._set_rbusy_from_exten = Mock(return_value=False)
-        user_features._set_rbusy_from_dialaction = Mock(return_value=False)
+        with patch.multiple(
+            user_features,
+            _set_rbusy_from_exten=Mock(return_value=False),
+            _set_rbusy_from_dialaction=Mock(return_value=False),
+        ):
+            user_features._setbusy()
 
-        user_features._setbusy()
+            user_features._set_rbusy_from_exten.assert_called_once_with()  # type: ignore
+            user_features._set_rbusy_from_dialaction.assert_called_once_with()  # type: ignore
 
-        user_features._set_rbusy_from_exten.assert_called_once_with()
-        user_features._set_rbusy_from_dialaction.assert_called_once_with()
-
-        assert_that(self._agi.set_variable.call_count, equal_to(0))
+            self._agi.set_variable.assert_not_called()

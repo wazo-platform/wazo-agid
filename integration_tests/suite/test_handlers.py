@@ -521,7 +521,7 @@ class TestHandlers(IntegrationTest):
         expected = '-o /var/lib/wazo-agid/blank.pdf /var/lib/wazo-agid/blank.tiff'
         assert self.filesystem.read_file('/tmp/last_tiff2pdf_cmd.txt') == expected
 
-        expected = [
+        options = [
             '-e set copy=no',
             '-e set from=no-reply+fax@wazo.community',
             '-e set realname=\'Wazo Fax\'',
@@ -529,7 +529,8 @@ class TestHandlers(IntegrationTest):
             '-s Reception de FAX vers default',
             '-a /var/lib/wazo-agid/blank.pdf -- test@localhost',
         ]
-        assert self.filesystem.read_file('/tmp/last_mutt_cmd.txt') == ' '.join(expected)
+        expected = ' '.join(options)
+        assert self.filesystem.read_file('/tmp/last_mutt_cmd.txt') == expected
 
     def test_in_callerid(self):
         number = '+155555555555'

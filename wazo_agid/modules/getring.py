@@ -1,18 +1,22 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
-import configparser
 import logging
+from configparser import RawConfigParser, NoOptionError
+
+from psycopg2.extras import DictCursor
 
 from wazo_agid import agid
 
+
 CONFIG_FILE = "/etc/xivo/asterisk/xivo_ring.conf"
-CONFIG_PARSER = None
+CONFIG_PARSER: RawConfigParser = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
 
-def getring(agi, cursor, args):
+def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     dstnum = agi.get_variable('XIVO_REAL_NUMBER')
     context = agi.get_variable('XIVO_REAL_CONTEXT')
     origin = agi.get_variable('XIVO_CALLORIGIN')
@@ -41,7 +45,7 @@ def getring(agi, cursor, args):
         if section is None:
             try:
                 section = CONFIG_PARSER.get('number', f"@{context}")
-            except configparser.NoOptionError:
+            except NoOptionError:
                 return
 
         if section == 'number':
@@ -59,7 +63,7 @@ def getring(agi, cursor, args):
             ringtype = CONFIG_PARSER.get(section, origin)
 
         phonetype = CONFIG_PARSER.get(section, 'phonetype')
-    except (configparser.NoOptionError, ValueError):
+    except (NoOptionError, ValueError):
         logger.debug('Ring type exception', exc_info=True)
         agi.verbose("Using the native phone ring tone")
     else:
@@ -68,12 +72,12 @@ def getring(agi, cursor, args):
         agi.verbose(f"Using ring tone {ringtype}")
 
 
-def setup(cursor):
+def setup(cursor: DictCursor) -> None:
     global CONFIG_PARSER
 
     # This module is often called, keep this object alive.
-    CONFIG_PARSER = configparser.RawConfigParser()
-    CONFIG_PARSER.readfp(open(CONFIG_FILE))
+    CONFIG_PARSER = RawConfigParser()
+    CONFIG_PARSER.read_file(open(CONFIG_FILE))
 
 
 agid.register(getring, setup)

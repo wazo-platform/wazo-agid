@@ -1,23 +1,30 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid
+
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
+
 
 logger = logging.getLogger(__name__)
 
 
-def fwdundoall(agi, cursor, args):
+def fwdundoall(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     user_id = _get_id_of_calling_user(agi)
     _user_disable_all_forwards(agi, user_id)
 
 
-def _get_id_of_calling_user(agi):
+def _get_id_of_calling_user(agi: FastAGI) -> int:
     return int(agi.get_variable('XIVO_USERID'))
 
 
-def _user_disable_all_forwards(agi, user_id):
+def _user_disable_all_forwards(agi: FastAGI, user_id: int) -> None:
     try:
         confd_client = agi.config['confd']['client']
         disabled = {'enabled': False}

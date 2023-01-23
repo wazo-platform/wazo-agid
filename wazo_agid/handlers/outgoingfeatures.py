@@ -1,11 +1,17 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from wazo_agid import dialplan_variables
 from wazo_agid.handlers.handler import Handler
 from wazo_agid import objects
+
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
 
 logger = logging.getLogger(__name__)
 
@@ -14,34 +20,38 @@ class OutgoingFeatures(Handler):
 
     PATH_TYPE = 'outcall'
 
-    def __init__(self, agi, cursor, args):
-        Handler.__init__(self, agi, cursor, args)
-        self.user = None
-        self.userid = None
+    dstnum: str
+    dialpattern_id: str
+
+    def __init__(self, agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
+        super().__init__(agi, cursor, args)
+        self.user: objects.User | None = None
+        self.userid: int | str | None = None
         self.callerid = None
         self.callrecord = False
         self.options = ""
-        self._context = None
+        self._context: str | None = None
         self.outcall = objects.Outcall(self._agi, self._cursor)
-        self._tenant_uuid = None
+        self._tenant_uuid: str | None = None
 
-    def _retrieve_outcall(self):
+    def _retrieve_outcall(self) -> None:
         try:
             self.outcall.retrieve_values(self.dialpattern_id)
         except (ValueError, LookupError) as e:
             self._agi.dp_break(str(e))
 
-    def _set_call_record_side(self):
+    def _set_call_record_side(self) -> None:
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
 
-    def _set_destination_number(self):
+    def _set_destination_number(self) -> None:
         if self.outcall.stripnum and self.outcall.stripnum > 0:
             self.dstnum = self.dstnum[self.outcall.stripnum :]
         if self.outcall.externprefix:
             self.dstnum = self.outcall.externprefix + self.dstnum
 
-    def _retrieve_user(self):
+    def _retrieve_user(self) -> None:
         try:
+            userid: int | str
             if not self.userid:
                 userid = self.useruuid
             else:
@@ -58,15 +68,15 @@ class OutgoingFeatures(Handler):
             logger.debug('Could not retrieve user %s', self.userid)
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)
 
-    def _set_userfield(self):
+    def _set_userfield(self) -> None:
         if self.user and self.user.userfield:
             self._agi.set_variable('CHANNEL(userfield)', self.user.userfield)
 
-    def _set_user_music_on_hold(self):
+    def _set_user_music_on_hold(self) -> None:
         if self.user and self.user.musiconhold:
             self._agi.set_variable('CHANNEL(musicclass)', self.user.musiconhold)
 
-    def _set_caller_id(self):
+    def _set_caller_id(self) -> None:
         if self.outcall.internal:
             logger.debug(
                 '%s: _set_caller_id: skipping caller id update: outcall set to internal caller ID',
@@ -100,7 +110,7 @@ class OutgoingFeatures(Handler):
             )
             objects.CallerID.set(self._agi, self.user.outcallerid)
 
-    def _set_trunk_info(self):
+    def _set_trunk_info(self) -> None:
         for i, trunk in enumerate(self.outcall.trunks):
             if trunk.interface.startswith('PJSIP'):
                 name = trunk.interface.replace('PJSIP/', '')
@@ -122,7 +132,7 @@ class OutgoingFeatures(Handler):
                 f'{dialplan_variables.TRUNK_SUFFIX}{i:d}', intfsuffix
             )
 
-    def _set_preprocess_subroutine(self):
+    def _set_preprocess_subroutine(self) -> None:
         if self.outcall.preprocess_subroutine:
             preprocess_subroutine = self.outcall.preprocess_subroutine
         else:
@@ -131,14 +141,14 @@ class OutgoingFeatures(Handler):
             dialplan_variables.OUTCALL_PREPROCESS_SUBROUTINE, preprocess_subroutine
         )
 
-    def _set_hangup_ring_time(self):
+    def _set_hangup_ring_time(self) -> None:
         if self.outcall.hangupringtime:
             hangupringtime = self.outcall.hangupringtime
         else:
             hangupringtime = ""
         self._agi.set_variable(dialplan_variables.HANGUP_RING_TIME, hangupringtime)
 
-    def _extract_dialplan_variables(self):
+    def _extract_dialplan_variables(self) -> None:
         self.userid = self._agi.get_variable(dialplan_variables.USERID)
         self.useruuid = self._agi.get_variable(dialplan_variables.USERUUID)
         self.dialpattern_id = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
@@ -148,7 +158,7 @@ class OutgoingFeatures(Handler):
         self._context = self._agi.get_variable(dialplan_variables.BASE_CONTEXT)
         self._tenant_uuid = self._agi.get_variable(dialplan_variables.TENANT_UUID)
 
-    def execute(self):
+    def execute(self) -> None:
         self._extract_dialplan_variables()
         self._retrieve_outcall()
         self._set_destination_number()

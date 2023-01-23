@@ -1,9 +1,16 @@
-# Copyright 2018-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
+from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
+
 from requests import RequestException
 from wazo_agid import agid
+
+if TYPE_CHECKING:
+    from psycopg2.extras import DictCursor
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +23,7 @@ class UnknownUser(GroupMemberError):
     pass
 
 
-def group_member_add(agi, cursor, args):
+def group_member_add(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     tenant_uuid = args[0]
     user_uuid = args[1]
     group_id = int(args[2])
@@ -29,7 +36,7 @@ def group_member_add(agi, cursor, args):
         logger.error(
             'Error while getting group %s in tenant %s: %s', group_id, tenant_uuid, e
         )
-        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', e)
+        agi.set_variable('WAZO_GROUP_MEMBER_ERROR', str(e))
         return
 
     interface = f'Local/{user_uuid}@usersharedlines'
@@ -40,8 +47,8 @@ def group_member_add(agi, cursor, args):
         'interface': interface,
         'state_interface': state_interface,
     }
-    args = '{group},{interface},,,,{state_interface}'.format(**queue_member_args)
-    agi.appexec('AddQueueMember', args)
+    exec_args = '{group},{interface},,,,{state_interface}'.format(**queue_member_args)
+    agi.appexec('AddQueueMember', exec_args)
 
 
 def group_member_remove(agi, cursor, args):

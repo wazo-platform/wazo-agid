@@ -1,5 +1,6 @@
-# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import re
 import logging
@@ -22,9 +23,9 @@ class AnswerHandler(handler.Handler):
 
         self.record_call(callee)
 
-    def get_user(self):
+    def get_user(self) -> objects.User:
         channel_name = self._agi.env['agi_channel']
-        search_params = {}
+        search_params: dict[str, str | int] = {}
 
         result = AGENT_CHANNEL_RE.match(channel_name)
         if result:
@@ -40,7 +41,7 @@ class AnswerHandler(handler.Handler):
 
         raise LookupError(f'Failed to find a matching user from {channel_name}')
 
-    def record_call(self, callee):
+    def record_call(self, callee: objects.User) -> None:
         recording_is_on = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
         if recording_is_on:
             return

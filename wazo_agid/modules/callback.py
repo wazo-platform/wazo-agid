@@ -1,4 +1,4 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from psycopg2.extras import DictCursor
 from wazo_agid import agid
 from wazo_agid.fastagi import FastAGI
 
-ASTERISK_UID: int | None = None
-ASTERISK_GID: int | None = None
+ASTERISK_UID: int = None  # type: ignore[assignment]
+ASTERISK_GID: int = None  # type: ignore[assignment]
 
 
 def callback(agi: FastAGI, cursor: DictCursor, args: list):
@@ -49,14 +49,13 @@ def callback(agi: FastAGI, cursor: DictCursor, args: list):
     os.rename(tmpfile, realfile)
 
 
-def setup_callback(cursor: DictCursor):
+def setup_callback(cursor: DictCursor) -> None:
     global ASTERISK_UID, ASTERISK_GID
     ASTERISK_UID, ASTERISK_GID = _get_uid_gid("asterisk")
 
 
-def _get_uid_gid(name: str):
-    pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell = pwd.getpwnam(name)
-    return pw_uid, pw_gid
+def _get_uid_gid(name: str) -> tuple[int, int]:
+    return pwd.getpwnam(name)[2:4]
 
 
 agid.register(callback, setup_callback)

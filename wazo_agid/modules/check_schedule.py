@@ -1,14 +1,21 @@
-# Copyright 2010-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2010-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
+
 from wazo_agid import agid
 from wazo_agid import objects
+
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
 
 logger = logging.getLogger(__name__)
 
 
-def check_schedule(agi, cursor, args):
+def check_schedule(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     path = agi.get_variable('XIVO_PATH')
     path_id = agi.get_variable('XIVO_PATH_ID')
 

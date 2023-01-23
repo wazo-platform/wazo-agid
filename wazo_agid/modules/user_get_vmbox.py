@@ -1,14 +1,21 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid, objects
 
+if TYPE_CHECKING:
+    from wazo_agid.agid import FastAGI
+    from psycopg2.extras import DictCursor
 
-def user_get_vmbox(agi, cursor, args):
+
+def user_get_vmbox(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     userid = agi.get_variable('XIVO_USERID')
 
     xlen = len(args)
-
+    user: objects.User
     if xlen > 0 and args[0] != '':
         try:
             context = agi.get_variable('XIVO_BASE_CONTEXT')
