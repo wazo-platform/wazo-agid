@@ -21,7 +21,7 @@ from ..get_user_interfaces import (
 class TestUserLine(TestCase):
 
     hints = {
-        'abc@usersharedlines': 'pjsip/one&sccp/two&dahdi/i1/55555555&pjsip/two&pjsip/three',
+        'abc@usersharedlines': 'pjsip/one&sccp/two&custom/i1/55555555&pjsip/two&pjsip/three',
     }
 
     contacts = {
@@ -56,7 +56,7 @@ class TestUserLine(TestCase):
             user_line.interfaces,
             contains_inanyorder(
                 'sccp/two',
-                'dahdi/i1/55555555',
+                'custom/i1/55555555',
                 'one-1',
                 'one-2',
                 'two-1',
