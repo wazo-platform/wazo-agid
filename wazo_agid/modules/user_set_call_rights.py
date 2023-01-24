@@ -88,7 +88,7 @@ def _user_set_call_rights(
         )
         group_feature_res: list[DictRow] = cursor.fetchall()
 
-        if res:
+        if group_feature_res:
             groupids = [row['id'] for row in group_feature_res]
             columns = (
                 call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
