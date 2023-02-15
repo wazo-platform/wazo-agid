@@ -1203,11 +1203,12 @@ class TestHandlers(IntegrationTest):
         variables = {
             'WAZO_WAIT_FOR_MOBILE': '1',
             'WAZO_VIDEO_ENABLED': '1',
+            'WAZO_RING_TIME': '42',
         }
         recv_cmds = self.agid.wake_mobile(user['uuid'], variables=variables)[1]
 
         assert recv_cmds['FAILURE'] is False
         assert (
             recv_cmds['EXEC UserEvent']
-            == f'Pushmobile,WAZO_DST_UUID: {user["uuid"]},WAZO_VIDEO_ENABLED: 1'
+            == f'Pushmobile,WAZO_DST_UUID: {user["uuid"]},WAZO_VIDEO_ENABLED: 1,WAZO_RING_TIME: 42'
         )
