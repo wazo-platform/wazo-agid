@@ -1212,3 +1212,25 @@ class TestHandlers(IntegrationTest):
             recv_cmds['EXEC UserEvent']
             == f'Pushmobile,WAZO_DST_UUID: {user["uuid"]},WAZO_VIDEO_ENABLED: 1,WAZO_RING_TIME: 42'
         )
+
+    def test_has_vmbox_password(self):
+        with self.db.queries() as queries:
+            context = 'test-context'
+            voicemail = queries.insert_voicemail(
+                context=context, skipcheckpass='1', password='123'
+            )
+            user, line, extension = queries.insert_user_line_extension(
+                enablevoicemail=1,
+                voicemail_id=voicemail['id'],
+                context=context,
+            )
+
+        variables = {
+            'XIVO_USERID': user['id'],
+            'XIVO_BASE_CONTEXT': context,
+        }
+        recv_vars, recv_cmds = self.agid.has_vmbox_password(
+            extension['exten'], variables=variables
+        )
+
+        assert recv_vars['WAZO_VM_HAS_PASSWORD'] == 'True'
