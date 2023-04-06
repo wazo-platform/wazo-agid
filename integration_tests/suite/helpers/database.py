@@ -1,4 +1,4 @@
-# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -252,7 +252,11 @@ class DatabaseQueries:
     def insert_voicemail(self, **kwargs):
         with self.inserter() as inserter:
             voicemail = inserter.add_voicemail(**kwargs)
-            return {'id': voicemail.id, 'mailbox': voicemail.mailbox}
+            return {
+                'id': voicemail.id,
+                'mailbox': voicemail.mailbox,
+                'context': voicemail.context,
+            }
 
     def insert_paging(self, **kwargs):
         with self.inserter() as inserter:
