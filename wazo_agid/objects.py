@@ -221,6 +221,9 @@ class VMBox:
             raise DBUpdateException("Unable to perform the requested update")
         self.commented = enabled
 
+    def has_password(self) -> bool:
+        return bool(self.password) and self.skipcheckpass == 0
+
 
 class Meeting:
     def __init__(self, agi, cursor: DictCursor, tenant_uuid, uuid=None, number=None):
