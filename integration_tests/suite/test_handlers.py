@@ -943,9 +943,9 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_DESTUNC'] == 'dest-unconditional'
 
     def test_phone_progfunckey_devstate(self):
+        AGENTSTATICLOGIN_EXTEN = '31'
         with self.db.queries() as queries:
             user = queries.insert_user()
-            extension = queries.insert_extension(typeval='agentstaticlogin')
 
         variables = {
             'XIVO_USERID': user['id'],
@@ -959,7 +959,7 @@ class TestHandlers(IntegrationTest):
         )
 
         assert recv_cmds['FAILURE'] is False
-        var = f'DEVICE_STATE(Custom:*735{user["id"]}*{extension["exten"]}*dest)'
+        var = f'DEVICE_STATE(Custom:*735{user["id"]}***2{AGENTSTATICLOGIN_EXTEN}*dest)'
         assert recv_vars[var] == 'ONHOLD'
 
     def test_phone_progfunckey(self):
