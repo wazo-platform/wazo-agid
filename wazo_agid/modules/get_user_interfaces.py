@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
+from collections.abc import Generator
 
 from wazo_agid import agid
 from wazo_agid.helpers import build_sip_interface
@@ -36,8 +37,7 @@ class _UserLine:
         protocol, name = endpoint.split('/', 1)
         if protocol == 'pjsip':
             contacts = build_sip_interface(self._agi, self._user_uuid, name)
-            for contact in contacts.split('&'):
-                yield contact
+            yield from contacts.split('&')
         else:
             yield endpoint
 

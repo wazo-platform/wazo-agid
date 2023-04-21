@@ -248,7 +248,7 @@ class UserFeatures(Handler):
         )
 
         boss_user = self._user
-        boss_interface = 'Local/{}@usersharedlines'.format(boss_user.uuid)
+        boss_interface = f'Local/{boss_user.uuid}@usersharedlines'
 
         if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
@@ -265,7 +265,7 @@ class UserFeatures(Handler):
                 secretary_user = objects.User(
                     self._agi, self._cursor, int(secretary_user_id)
                 )
-                iface = 'Local/{}@usersharedlines'.format(secretary_user.uuid)
+                iface = f'Local/{secretary_user.uuid}@usersharedlines'
                 ifaces.append(iface)
 
                 if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):

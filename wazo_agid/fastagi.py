@@ -16,14 +16,14 @@ from __future__ import annotations
 
 import re
 import pprint
-from typing import TYPE_CHECKING, Dict, Tuple, Union, List, NoReturn, Any, BinaryIO
+from typing import TYPE_CHECKING, Union, NoReturn, Any, BinaryIO
 
 if TYPE_CHECKING:
     from typing import Literal
 
 
-DigitList = Union[List[Union[str, int]], str]
-ResultDict = Dict[str, Tuple[str, str]]
+DigitList = Union[list[Union[str, int]], str]
+ResultDict = dict[str, tuple[str, str]]
 
 DEFAULT_TIMEOUT = 2000  # 2sec timeout used as default for functions that take timeouts
 DEFAULT_RECORD = 20000  # 20sec record time
@@ -154,7 +154,7 @@ class FastAGI:
         try:
             self.send_command(command, *args)
             return self.get_result()
-        except IOError as e:
+        except OSError as e:
             if e.errno == 32:
                 # Broken Pipe * let us go
                 raise FastAGISIGPIPEHangup("Received SIGPIPE")
@@ -175,7 +175,7 @@ class FastAGI:
         """
         try:
             self.send_command("failure to have pure code")
-        except IOError as e:
+        except OSError as e:
             if e.errno != 32:
                 raise
 
