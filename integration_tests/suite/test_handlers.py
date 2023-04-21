@@ -560,7 +560,7 @@ class TestHandlers(IntegrationTest):
         assert recv_vars['XIVO_QUEUECALLOPTIONS'] == 'hitwxk'
 
     def test_incoming_conference_set_features(self):
-        name = u'My Conférence'
+        name = 'My Conférence'
         with self.db.queries() as queries:
             conference = queries.insert_conference(name=name)
 

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from collections.abc import Sequence
 
 from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Identifier
