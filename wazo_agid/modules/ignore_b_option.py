@@ -3,23 +3,26 @@
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid
 from wazo_agid.dialplan_variables import CALL_OPTIONS
 
+if TYPE_CHECKING:
+    from psycopg2.extras import DictCursor
+
+
 B_REGEX = re.compile(r'b\(([\-_0-9A-Za-z]+)\^?.*?\)')
 
 
-def ignore_b_option(agi, cursor, args):
+def ignore_b_option(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     """
     handler to detect and warn about usage of b option
     """
-    call_options = agi.get_variable(CALL_OPTIONS)
-    if not call_options:
+    if not (call_options := agi.get_variable(CALL_OPTIONS)):
         return
 
-    match = B_REGEX.search(call_options)
-    if not match:
+    if not (match := B_REGEX.search(call_options)):
         return
 
     to_remove = match.group(0)

@@ -26,8 +26,7 @@ class AnswerHandler(handler.Handler):
     def get_user(self):
         channel_name = self._agi.env['agi_channel']
 
-        result = EXTEN_CONTEXT_RE.match(channel_name)
-        if result:
+        if result := EXTEN_CONTEXT_RE.match(channel_name):
             exten = result.group(1)
             context = result.group(2)
             if context == 'usersharedlines':
@@ -40,8 +39,7 @@ class AnswerHandler(handler.Handler):
         raise LookupError(f'Failed to find a matching user from {channel_name}')
 
     def record_call(self, callee):
-        recording_is_on = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
-        if recording_is_on:
+        if self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1':
             return
 
         external = self._agi.get_variable('XIVO_CALLORIGIN') == 'extern'

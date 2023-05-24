@@ -40,8 +40,7 @@ def _find_meeting(
     if identifier.isdigit():
         return objects.Meeting(agi, cursor, tenant_uuid, number=identifier)
 
-    match = MEETING_RE.match(identifier)
-    if match:
+    if match := MEETING_RE.match(identifier):
         return objects.Meeting(agi, cursor, tenant_uuid, uuid=match.group(1))
     raise ValueError(f'Invalid identifier: {identifier}')
 

@@ -16,10 +16,7 @@ from __future__ import annotations
 
 import re
 import pprint
-from typing import TYPE_CHECKING, Union, NoReturn, Any, BinaryIO
-
-if TYPE_CHECKING:
-    from typing import Literal
+from typing import Union, NoReturn, Any, BinaryIO, Literal
 
 
 DigitList = Union[list[Union[str, int]], str]
@@ -40,6 +37,7 @@ __all__ = [
     'FastAGISIGPIPEHangup',
     'FastAGIResultHangup',
     'FastAGIDBError',
+    'FastAGIDialPlanBreak',
     'FastAGIUsageError',
     'FastAGIInvalidCommand',
     'FastAGI',

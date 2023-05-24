@@ -27,14 +27,11 @@ class AnswerHandler(handler.Handler):
         channel_name = self._agi.env['agi_channel']
         search_params: dict[str, str | int] = {}
 
-        result = AGENT_CHANNEL_RE.match(channel_name)
-        if result:
+        if result := AGENT_CHANNEL_RE.match(channel_name):
             agent_id = result.group(1)
             search_params = {'agent_id': int(agent_id)}
-        else:
-            user_uuid = self._agi.get_variable('XIVO_USERUUID')
-            if user_uuid:
-                search_params = {'xid': user_uuid}
+        elif user_uuid := self._agi.get_variable('XIVO_USERUUID'):
+            search_params = {'xid': user_uuid}
 
         if search_params:
             return objects.User(self._agi, self._cursor, **search_params)
