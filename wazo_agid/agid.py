@@ -112,6 +112,14 @@ class AGID(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     initialized = False
     request_queue_size = 20
+    # Use Daemon threads to avoid memory leak in Python 3.7.
+    # The ThreadingMixin in Python 3.7 sets daemon_threads to false, but block_on_close to True
+    # and this causes a reference to accumulate over time and fills the memory.
+    # Using daemon threads avoids this problem, and they will be killed along with the main
+    # process if killed. This did not exist in Python 2.7. For reference:
+    # https://salsa.debian.org/debian/python-prometheus-client/-/commit/5aa256d8aab3b81604b855dc03f260342fc391fb
+    # Should be patched in later versions of Python so re-check after the upgrade to Bullseye
+    daemon_threads = True
 
     def __init__(self, config: dict[str, Any]) -> None:
         logger.info('wazo-agid starting...')
