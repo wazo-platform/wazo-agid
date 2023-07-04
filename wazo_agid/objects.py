@@ -815,7 +815,9 @@ class Outcall:
 
         res: DictRow = self.cursor.fetchone()
         if not res:
-            raise LookupError(f"Unable to find outcall entry (id: {dialpattern_id})")
+            raise LookupError(
+                f"Unable to find outcall entry (outgoing extension id: {dialpattern_id})"
+            )
 
         self.id = res['id']
         self.exten = res['exten']
@@ -837,7 +839,7 @@ class Outcall:
 
         if not trunk_res:
             raise ValueError(
-                f"No trunk associated with outcall (id: {dialpattern_id:d})"
+                f"No trunk associated with outcall (outgoing extension id: {dialpattern_id})"
             )
 
         self.trunks = []
