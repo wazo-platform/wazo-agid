@@ -35,7 +35,7 @@ class _UserLine:
 
     def _find_matching_interfaces(self, endpoint: str) -> Generator[str, None, None]:
         protocol, name = endpoint.split('/', 1)
-        if protocol == 'pjsip':
+        if protocol == 'PJSIP':
             contacts = build_sip_interface(self._agi, self._user_uuid, name)
             yield from contacts.split('&')
         else:

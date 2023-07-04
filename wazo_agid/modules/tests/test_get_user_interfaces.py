@@ -21,7 +21,7 @@ from ..get_user_interfaces import (
 class TestUserLine(TestCase):
 
     hints = {
-        'abc@usersharedlines': 'pjsip/one&sccp/two&custom/i1/55555555&pjsip/two&pjsip/three',
+        'abc@usersharedlines': 'PJSIP/one&SCCP/two&CUSTOM/i1/55555555&PJSIP/two&PJSIP/three',
     }
 
     contacts = {
@@ -55,8 +55,8 @@ class TestUserLine(TestCase):
         assert_that(
             user_line.interfaces,
             contains_inanyorder(
-                'sccp/two',
-                'custom/i1/55555555',
+                'SCCP/two',
+                'CUSTOM/i1/55555555',
                 'one-1',
                 'one-2',
                 'two-1',

@@ -414,7 +414,7 @@ class TestHandlers(IntegrationTest):
             line_2 = queries.insert_line(typeval=user['id'])
             queries.insert_user_line(user['id'], line_2['id'])
 
-        shared_lines = f'sccp/{line_1["name"]}&pjsip/{line_2["name"]}'
+        shared_lines = f'SCCP/{line_1["name"]}&PJSIP/{line_2["name"]}'
         variables = {
             f'HINT({user["uuid"]}@usersharedlines)': shared_lines,
             f'PJSIP_ENDPOINT({line_2["name"]},webrtc)': 'no',
@@ -425,7 +425,7 @@ class TestHandlers(IntegrationTest):
         )
 
         assert recv_cmds['FAILURE'] is False
-        assert recv_vars['WAZO_USER_INTERFACES'] == f'sccp/{line_1["name"]}&contact'
+        assert recv_vars['WAZO_USER_INTERFACES'] == f'SCCP/{line_1["name"]}&contact'
 
     def test_group_answered_call(self):
         with self.db.queries() as queries:
