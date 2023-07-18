@@ -898,8 +898,7 @@ class TestHandlers(IntegrationTest):
 
     def test_phone_get_features(self):
         with self.db.queries() as queries:
-            context = 'test-context'
-            voicemail = queries.insert_voicemail(context=context, skipcheckpass='1')
+            voicemail = queries.insert_voicemail(skipcheckpass='1')
             user = queries.insert_user(
                 enablevoicemail=1,
                 voicemailid=voicemail['id'],
@@ -1126,17 +1125,19 @@ class TestHandlers(IntegrationTest):
 
     def test_user_get_vmbox(self):
         with self.db.queries() as queries:
-            context = 'test-context'
-            voicemail = queries.insert_voicemail(context=context, skipcheckpass='1')
+            context = queries.insert_context()
+            voicemail = queries.insert_voicemail(
+                context=context['name'], skipcheckpass='1'
+            )
             user, line, extension = queries.insert_user_line_extension(
                 enablevoicemail=1,
                 voicemail_id=voicemail['id'],
-                context=context,
+                context=context['name'],
             )
 
         variables = {
             'XIVO_USERID': user['id'],
-            'XIVO_BASE_CONTEXT': context,
+            'XIVO_BASE_CONTEXT': context['name'],
         }
         recv_vars, recv_cmds = self.agid.user_get_vmbox(
             extension['exten'], variables=variables
@@ -1145,12 +1146,11 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
         assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
-        assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
+        assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context['name']
 
     def test_user_set_call_rights(self):
         with self.db.queries() as queries:
-            context = 'test-context'
-            user, line, extension = queries.insert_user_line_extension(context=context)
+            user, line, extension = queries.insert_user_line_extension()
             call_permission = queries.insert_call_permission(passwd='test')
             queries.insert_call_extension_permission(
                 rightcallid=call_permission['id'], exten=extension['exten']
@@ -1162,7 +1162,7 @@ class TestHandlers(IntegrationTest):
         variables = {
             'XIVO_USERID': user['id'],
             'XIVO_DSTNUM': extension['exten'],
-            'XIVO_OUTCALLID': context,
+            'XIVO_OUTCALLID': '42',
         }
         recv_vars, recv_cmds = self.agid.user_set_call_rights(
             extension['exten'], variables=variables
@@ -1173,18 +1173,20 @@ class TestHandlers(IntegrationTest):
 
     def test_vmbox_get_info(self):
         with self.db.queries() as queries:
-            context = 'default'
-            voicemail = queries.insert_voicemail(context=context, skipcheckpass='1')
+            context = queries.insert_context()
+            voicemail = queries.insert_voicemail(
+                context=context['name'], skipcheckpass='1'
+            )
             user, line, extension = queries.insert_user_line_extension(
                 enablevoicemail=1,
                 voicemail_id=voicemail['id'],
-                context=context,
+                context=context['name'],
             )
 
         variables = {
             'XIVO_USERID': user['id'],
             'XIVO_VMBOXID': voicemail['id'],
-            'XIVO_BASE_CONTEXT': context,
+            'XIVO_BASE_CONTEXT': context['name'],
         }
         recv_vars, recv_cmds = self.agid.vmbox_get_info(
             voicemail['mailbox'], variables=variables
@@ -1193,7 +1195,7 @@ class TestHandlers(IntegrationTest):
         assert recv_cmds['FAILURE'] is False
         assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
         assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
-        assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context
+        assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context['name']
         assert recv_vars['XIVO_MAILBOX_LANGUAGE'] == 'fr_FR'
 
     def test_wake_mobile(self):

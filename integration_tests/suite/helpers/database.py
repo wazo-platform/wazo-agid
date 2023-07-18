@@ -94,6 +94,14 @@ class DatabaseQueries:
                 'tenant_uuid': conference.tenant_uuid,
             }
 
+    def insert_context(self, **kwargs):
+        with self.inserter() as inserter:
+            context = inserter.add_context(**kwargs)
+            return {
+                'name': context.name,
+                'tenant_uuid': context.tenant_uuid,
+            }
+
     def insert_user_line_extension(self, **kwargs):
         with self.inserter() as inserter:
             ule = inserter.add_user_line_with_exten(**kwargs)
@@ -128,16 +136,22 @@ class DatabaseQueries:
                 random.choice('0123456789ABCDEF') for _ in range(6)
             )
 
+        dao_kwargs = {
+            'name': kwargs['name'],
+            'device': kwargs.get('device', 1),
+            'commented': kwargs.get('commented_line', 0),
+        }
+        if 'endpoint_sip_uuid' in kwargs:
+            dao_kwargs['endpoint_sip_uuid'] = kwargs['endpoint_sip_uuid']
+        if 'endpoint_sccp_uuid' in kwargs:
+            dao_kwargs['endpoint_sccp_uuid'] = kwargs['endpoint_sccp_uuid']
+        if 'endpoint_custom_uuid' in kwargs:
+            dao_kwargs['endpoint_custom_uuid'] = kwargs['endpoint_custom_uuid']
+        if 'context' in kwargs:
+            dao_kwargs['context'] = kwargs['context']
+
         with self.inserter() as inserter:
-            line = inserter.add_line(
-                context=kwargs.get('context', 'foocontext'),
-                name=kwargs['name'],
-                device=kwargs.get('device', 1),
-                commented=kwargs.get('commented_line', 0),
-                endpoint_sip_uuid=kwargs.get('endpoint_sip_uuid', None),
-                endpoint_sccp_id=kwargs.get('endpoint_sccp_id', None),
-                endpoint_custom_id=kwargs.get('endpoint_custom_id', None),
-            )
+            line = inserter.add_line(**dao_kwargs)
             return {'id': line.id, 'name': line.name}
 
     def insert_user_line(self, user_id, line_id, **kwargs):
