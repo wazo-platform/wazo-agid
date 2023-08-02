@@ -1,9 +1,8 @@
-# Copyright 2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2022-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
-import pytest
-import os
-import unittest
+from pathlib import Path
 
 from .agentd import AgentdMockClient
 from .agid import AgidClient
@@ -12,48 +11,58 @@ from .calld import CalldMockClient
 from .database import DbHelper
 from .filesystem import FileSystemClient
 from wazo_test_helpers.asset_launching_test_case import (
-    AssetLaunchingTestCase,
+    AbstractAssetLaunchingHelper,
+    cached_class_property,
     NoSuchPort,
     NoSuchService,
     WrongClient,
 )
 from wazo_test_helpers import until
 
-use_asset = pytest.mark.usefixtures
 
-
-class BaseAssetLaunchingTestCase(AssetLaunchingTestCase):
-
-    assets_root = os.path.join(os.path.dirname(__file__), '../..', 'assets')
+class BaseAssetLaunchingHelper(AbstractAssetLaunchingHelper):
+    assets_root = Path(__file__).parent / '..' / '..' / 'assets'
     asset = 'base'
     service = 'agid'
 
     @classmethod
-    def make_agid(cls):
+    def reset_clients(cls):
+        for attr in ('agid', 'db', 'calld', 'confd', 'agentd', 'filesystem'):
+            delattr(cls, attr)
+        until.true(cls.agid.is_ready, timeout=30)
+
+    @classmethod
+    def launch_service_with_asset(cls) -> None:
+        """Make sure Agid service is up before starting first test."""
+        super().launch_service_with_asset()
+        until.true(cls.agid.is_ready, timeout=30)
+
+    @cached_class_property
+    def agid(cls) -> AgidClient:
         port = cls.service_port(4573, 'agid')
         return AgidClient('127.0.0.1', port)
 
-    @classmethod
-    def make_confd(cls):
+    @cached_class_property
+    def confd(cls) -> ConfdMockClient:
         port = cls.service_port('9486', 'confd')
         return ConfdMockClient('127.0.0.1', port, version='1.1')
 
-    @classmethod
-    def make_agentd(cls):
+    @cached_class_property
+    def agentd(cls) -> AgentdMockClient:
         return AgentdMockClient('127.0.0.1', cls.service_port('9493', 'agentd'))
 
-    @classmethod
-    def make_calld(cls):
+    @cached_class_property
+    def calld(cls) -> CalldMockClient:
         return CalldMockClient('127.0.0.1', cls.service_port('9500', 'calld'))
 
-    @classmethod
-    def make_database(cls):
+    @cached_class_property
+    def db(cls) -> DbHelper | WrongClient:
         try:
             port = cls.service_port(5432, 'postgres')
         except (NoSuchService, NoSuchPort):
             return WrongClient('postgres')
 
-        # NOTE(fblackburn): Avoid to import wazo_agid and dependencies in tests,
+        # NOTE(fblackburn): Avoid importing wazo_agid and dependencies in tests,
         # since no database tests are needed
         return DbHelper.build(
             user='asterisk',
@@ -63,31 +72,6 @@ class BaseAssetLaunchingTestCase(AssetLaunchingTestCase):
             db='asterisk',
         )
 
-
-class IntegrationTest(unittest.TestCase):
-    asset_cls = BaseAssetLaunchingTestCase
-    agid: AgidClient
-    db: DbHelper
-    calld: CalldMockClient
-    confd: ConfdMockClient
-    agentd: AgentdMockClient
-    filesystem: FileSystemClient
-
-    @classmethod
-    def setUpClass(cls):
-        cls.reset_clients()
-        # Until a proper healthcheck is implemented we need to wait until agid
-        # is functional before starting tests to avoid random failures.
-        until.true(cls.agid.is_ready, timeout=30)
-
-    @classmethod
-    def reset_clients(cls):
-        cls.agid = cls.asset_cls.make_agid()
-        cls.db = cls.asset_cls.make_database()
-        cls.calld = cls.asset_cls.make_calld()
-        cls.confd = cls.asset_cls.make_confd()
-        cls.agentd = cls.asset_cls.make_agentd()
-        cls.filesystem = FileSystemClient(
-            execute=cls.asset_cls.docker_exec,
-            service_name=cls.asset_cls.service,
-        )
+    @cached_class_property
+    def filesystem(cls) -> FileSystemClient:
+        return FileSystemClient(execute=cls.docker_exec, service_name=cls.service)
