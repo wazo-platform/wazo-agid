@@ -8,4 +8,4 @@ COPY integration_tests/docker/mock_cmd.sh /usr/bin/mutt
 COPY . /usr/src/wazo-agid
 
 WORKDIR /usr/src/wazo-agid
-RUN python3 setup.py develop
+RUN python3 -m pip install -e .
