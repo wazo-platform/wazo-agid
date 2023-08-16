@@ -964,7 +964,7 @@ class TestHandlers(IntegrationTest):
     def test_phone_progfunckey(self):
         with self.db.queries() as queries:
             user = queries.insert_user()
-            extension = queries.insert_extension(typeval='fwdbusy')
+            extension = queries.insert_feature_extension(feature='fwdbusy')
 
         variables = {
             'XIVO_USERID': user['id'],
