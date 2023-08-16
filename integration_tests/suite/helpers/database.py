@@ -231,6 +231,15 @@ class DatabaseQueries:
                 'context': extension.context,
             }
 
+    def insert_feature_extension(self, **kwargs):
+        with self.inserter() as inserter:
+            extension = inserter.add_feature_extension(**kwargs)
+            return {
+                'uuid': extension.uuid,
+                'exten': extension.exten,
+                'feature': extension.feature,
+            }
+
     def insert_meeting(self, **kwargs):
         with self.inserter() as inserter:
             meeting = inserter.add_meeting(**kwargs)

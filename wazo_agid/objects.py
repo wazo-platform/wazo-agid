@@ -77,9 +77,9 @@ class ExtenFeatures:
         self.featureslist = tuple(featureslist)
 
         self.cursor.execute(
-            "SELECT typeval FROM extensions "
-            "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
-            "AND commented = 0",
+            "SELECT feature FROM feature_extension "
+            "WHERE feature IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
+            "AND enabled = true",
             self.featureslist,
         )
         res: list[DictRow] = self.cursor.fetchall()
@@ -87,19 +87,19 @@ class ExtenFeatures:
         if not res:
             enabled_features = []
         else:
-            enabled_features = [row['typeval'] for row in res]
+            enabled_features = [row['feature'] for row in res]
 
         for feature in self.featureslist:
             setattr(self, feature, (feature in enabled_features))
 
     def get_name_by_exten(self, exten):
         self.cursor.execute(
-            "SELECT typeval FROM extensions "
-            "WHERE typeval IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
+            "SELECT feature FROM feature_extension "
+            "WHERE feature IN (" + ", ".join(["%s"] * len(self.featureslist)) + ") "
             "AND (exten = %s "
             "OR (SUBSTR(exten,1,1) = '_' "
             "    AND SUBSTR(exten, 2, %s) LIKE %s)) "
-            "AND commented = 0",
+            "AND enabled = true",
             self.featureslist + (exten, len(exten), f"{exten}%"),
         )
 
@@ -107,15 +107,11 @@ class ExtenFeatures:
         if not res:
             raise LookupError(f"Unable to find feature by exten (exten = {exten!r})")
 
-        return res['typeval']
+        return res['feature']
 
-    def get_exten_by_name(self, name, commented=None):
-        query = "SELECT exten FROM extensions WHERE typeval = %s"
+    def get_exten_by_name(self, name):
+        query = "SELECT exten FROM feature_extension WHERE feature = %s"
         params = [name]
-
-        if commented is not None:
-            params.append(int(bool(commented)))
-            query += " AND commented = %s"
 
         self.cursor.execute(query, params)
 
