@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import re
+from textwrap import dedent
 
 import pytest
-from textwrap import dedent
 from hamcrest import assert_that, calling, raises
+
 from .helpers.agid import AGIFailException
 from .helpers.base import BaseAssetLaunchingHelper
 

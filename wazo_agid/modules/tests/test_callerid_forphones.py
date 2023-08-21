@@ -9,8 +9,8 @@ from hamcrest import assert_that, contains_string, equal_to, is_
 
 from wazo_agid.fastagi import FastAGI
 from wazo_agid.modules.callerid_forphones import (
-    callerid_forphones,
     FAKE_XIVO_USER_UUID,
+    callerid_forphones,
     is_phone_number,
 )
 

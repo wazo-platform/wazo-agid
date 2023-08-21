@@ -6,8 +6,8 @@ import contextlib
 import logging
 import re
 import socket
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator
 
 GET_VARIABLE_REGEX = r'^GET VARIABLE "(.*)"$'
 SET_VARIABLE_REGEX = r'^SET VARIABLE "(.*)" "(.*)"$'

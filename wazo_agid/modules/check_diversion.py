@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING
 from wazo_agid import agid, objects
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 
 def check_diversion(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:

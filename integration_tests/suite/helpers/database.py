@@ -19,7 +19,6 @@ TENANT_UUID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee1'
 
 
 class DbHelper:
-
     TEMPLATE = "xivotemplate"
 
     @classmethod

@@ -9,14 +9,14 @@ from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 logger = logging.getLogger(__name__)
 
 
 class OutgoingFeatures(Handler):
-
     PATH_TYPE = 'outcall'
 
     dstnum: str

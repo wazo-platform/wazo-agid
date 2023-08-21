@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import logging
-from configparser import RawConfigParser, NoOptionError
+from configparser import NoOptionError, RawConfigParser
 
 from psycopg2.extras import DictCursor
 
 from wazo_agid import agid
-
 
 CONFIG_FILE = "/etc/xivo/asterisk/xivo_ring.conf"
 CONFIG_PARSER: RawConfigParser = None  # type: ignore[assignment]

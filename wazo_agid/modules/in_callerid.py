@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
+import logging
 import re
 import sys
-import logging
 from configparser import NoOptionError, RawConfigParser
 
 from psycopg2.extras import DictCursor

@@ -4,20 +4,19 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING
 from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Identifier
+from xivo_dao import user_dao
 
 from wazo_agid.schedule import (
+    AlwaysOpenedSchedule,
+    Schedule,
     ScheduleAction,
     SchedulePeriodBuilder,
-    Schedule,
-    AlwaysOpenedSchedule,
 )
-
-from xivo_dao import user_dao
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -1087,7 +1086,6 @@ class CallerID:
         cidrewritten = self.agi.get_variable('XIVO_CID_REWRITTEN')
 
         if force_rewrite or not cidrewritten:
-
             calleridname = self.agi.get_variable('CALLERID(name)')
             calleridnum = self.agi.get_variable('CALLERID(num)')
 
@@ -1140,7 +1138,6 @@ class ChanSIP:
 class ChanIAX2:
     @staticmethod
     def get_intf_and_suffix(cursor: DictCursor, xid):
-
         cursor.execute(
             "SELECT name FROM useriax WHERE id = %s AND commented = 0",
             (xid,),
@@ -1156,7 +1153,6 @@ class ChanIAX2:
 class ChanCustom:
     @staticmethod
     def get_intf_and_suffix(cursor: DictCursor, xid):
-
         cursor.execute(
             "SELECT interface, intfsuffix FROM usercustom WHERE id = %s AND commented = 0",
             (xid,),

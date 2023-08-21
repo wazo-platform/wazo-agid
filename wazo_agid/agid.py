@@ -8,8 +8,7 @@ import socketserver
 import time
 from contextlib import contextmanager
 from types import FrameType
-
-from typing import Callable, Any
+from typing import Any, Callable
 
 import psycopg2
 from psycopg2.extras import DictCursor

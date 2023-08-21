@@ -9,8 +9,9 @@ from wazo_agid import agid
 from wazo_agid.handlers import agent
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 logger = logging.getLogger(__name__)
 

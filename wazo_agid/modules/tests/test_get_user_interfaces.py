@@ -12,7 +12,6 @@ from ..get_user_interfaces import _UserLine as UserLine
 
 
 class TestUserLine(TestCase):
-
     hints = {
         'abc@usersharedlines': 'PJSIP/one&SCCP/two&CUSTOM/i1/55555555&PJSIP/two&PJSIP/three',
     }

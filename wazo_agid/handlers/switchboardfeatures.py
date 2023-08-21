@@ -5,13 +5,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from xivo_dao.alchemy import Switchboard
-from xivo_dao.resources.switchboard import dao as switchboard_dao
 from xivo_dao.helpers.exception import NotFoundError
+from xivo_dao.resources.switchboard import dao as switchboard_dao
+
 from wazo_agid.handlers.handler import Handler
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 
 class SwitchboardFeatures(Handler):

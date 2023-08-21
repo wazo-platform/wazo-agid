@@ -9,8 +9,9 @@ from typing import TYPE_CHECKING
 from wazo_agid import agid, dialplan_variables, objects
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 
 logger = logging.getLogger(__name__)

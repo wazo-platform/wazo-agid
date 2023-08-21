@@ -19,14 +19,14 @@ from wazo_agid.objects import CallerID, DialAction
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from psycopg2.extras import DictCursor
     from xivo_dao.alchemy.extension import Extension
     from xivo_dao.alchemy.linefeatures import LineFeatures
-    from psycopg2.extras import DictCursor
+
     from wazo_agid.agid import FastAGI
 
 
 class UserFeatures(Handler):
-
     PATH_TYPE = 'user'
 
     def __init__(self, agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:

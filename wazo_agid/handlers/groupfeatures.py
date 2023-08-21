@@ -12,8 +12,9 @@ from wazo_agid.handlers.handler import Handler
 from wazo_agid.objects import join_column_names
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor, DictRow
+
+    from wazo_agid.agid import FastAGI
 
 
 class GroupFeatures(Handler):

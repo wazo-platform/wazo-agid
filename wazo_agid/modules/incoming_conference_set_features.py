@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from psycopg2.extras import DictCursor
-
 from xivo_dao.resources.conference import dao as conference_dao
 
 from wazo_agid import agid

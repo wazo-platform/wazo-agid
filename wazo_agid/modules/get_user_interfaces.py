@@ -2,15 +2,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from collections.abc import Generator
+from typing import TYPE_CHECKING
 
 from wazo_agid import agid
 from wazo_agid.helpers import build_sip_interface
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 
 class UnknownUser(Exception):

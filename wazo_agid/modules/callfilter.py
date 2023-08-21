@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from wazo_agid import agid, dialplan_variables
 from xivo_dao import callfilter_dao
 
+from wazo_agid import agid, dialplan_variables
+
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 
 def callfilter(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
