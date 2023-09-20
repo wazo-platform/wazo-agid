@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 import re
 import socket
 from contextlib import contextmanager
@@ -13,6 +14,8 @@ CMD_STATUS_REGEX = r'^Status: OK$'
 CMD_VERBOSE_REGEX = r'^VERBOSE "(.*)" (\d)$'
 CMD_AGI_FAIL = r'.*agi_fail.*'
 CMD_GENERIC_REGEX = r'^(.*) "(.*)"'
+
+logger = logging.getLogger(__name__)
 
 
 class AGIFailException(Exception):
