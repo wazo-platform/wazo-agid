@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
+import logging
+
 from pathlib import Path
 
 from .agentd import AgentdMockClient
@@ -18,6 +20,9 @@ from wazo_test_helpers.asset_launching_test_case import (
     WrongClient,
 )
 from wazo_test_helpers import until
+
+DEFAULT_LOG_FORMAT = '%(asctime)s [%(process)d] (%(levelname)s) (%(name)s): %(message)s'
+logging.basicConfig(format=DEFAULT_LOG_FORMAT)
 
 
 class BaseAssetLaunchingHelper(AbstractAssetLaunchingHelper):

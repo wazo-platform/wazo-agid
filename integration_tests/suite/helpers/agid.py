@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 import re
 import socket
 from contextlib import contextmanager
+from typing import Generator
 
 GET_VARIABLE_REGEX = r'^GET VARIABLE "(.*)"$'
 SET_VARIABLE_REGEX = r'^SET VARIABLE "(.*)" "(.*)"$'
@@ -13,6 +15,8 @@ CMD_STATUS_REGEX = r'^Status: OK$'
 CMD_VERBOSE_REGEX = r'^VERBOSE "(.*)" (\d)$'
 CMD_AGI_FAIL = r'.*agi_fail.*'
 CMD_GENERIC_REGEX = r'^(.*) "(.*)"'
+
+logger = logging.getLogger(__name__)
 
 
 class AGIFailException(Exception):
@@ -41,7 +45,9 @@ class _BaseAgidClient:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             self._socket = s
             self._socket.connect((self._host, self._port))
+
             yield
+
             self._socket.close()
             self._socket = None  # type: ignore[assignment]
 
@@ -68,17 +74,25 @@ class _BaseAgidClient:
         fragment = fragment + '\n'
         self._socket.send(fragment.encode('utf-8'))
 
+    def _readlines(self) -> Generator[str, None, None]:
+        recved = self._socket.recv(1024)
+
+        while recved:
+            if b'\n' not in recved:
+                return
+            recved_line, recved = recved.split(b'\n', 1)
+
+            yield recved_line.decode('utf-8')
+
+            recved += self._socket.recv(1024)
+
     def _process_communicate(self, variables=None):
         received_variables: dict[str, str] = {}
         received_commands: dict[str, list[str] | bool | str] = {
             'VERBOSE': [],
             'FAILURE': False,
         }
-        while True:
-            data = self._socket.recv(1024).decode('utf-8')
-            if not data:
-                break
-
+        for data in self._readlines():
             result = re.search(CMD_AGI_FAIL, data)
             if result:
                 received_commands['FAILURE'] = True
