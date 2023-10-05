@@ -44,6 +44,11 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
         )
         logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
         if lookup_result['display'] is not None:
+            logger.debug(
+                'Found caller ID from reverse lookup: "%s"<%s>',
+                lookup_result['display'],
+                cid_number,
+            )
             _set_new_caller_id(agi, lookup_result['display'], cid_number)
             _set_reverse_lookup_variable(agi, lookup_result['fields'])
     except Exception as e:
