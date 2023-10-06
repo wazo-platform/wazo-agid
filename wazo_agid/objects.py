@@ -1133,7 +1133,7 @@ class ChanSIP:
         )
         res: DictRow = cursor.fetchone()
         if not res:
-            raise LookupError(f"Unable to find usersip entry (id: {xid})")
+            raise LookupError(f"Unable to find endpoint_sip entry (uuid: {xid})")
         return f'PJSIP/{res["name"]}', None
 
 
