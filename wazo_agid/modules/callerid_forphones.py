@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import phonenumbers
 
 from psycopg2.extras import DictCursor
 from wazo_dird_client.client import DirdClient
@@ -42,7 +43,6 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             exten=cid_number,
             tenant_uuid=tenant_uuid,
         )
-        logger.debug('Found caller ID: "%s"<%s>', lookup_result['display'], cid_number)
         if lookup_result['display'] is not None:
             logger.debug(
                 'Found caller ID from reverse lookup: "%s"<%s>',
@@ -57,8 +57,22 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
         agi.verbose(msg)
 
 
+def is_phone_number(cid_name: str) -> bool:
+    try:
+        phonenumbers.parse(cid_name, None)
+    except phonenumbers.phonenumberutil.NumberParseException as ex:
+        # if error is due to country code not being recognized,
+        # we can assume this is a national or local number format
+        return (
+            ex.error_type
+            == phonenumbers.phonenumberutil.NumberParseException.INVALID_COUNTRY_CODE
+        )
+    else:
+        return True
+
+
 def _should_reverse_lookup(cid_name: str, cid_number: str) -> bool:
-    return cid_name == cid_number or cid_name == 'unknown'
+    return cid_name == 'unknown' or is_phone_number(cid_name)
 
 
 def _set_new_caller_id(agi: agid.FastAGI, display_name: str, cid_number: str) -> None:
