@@ -153,14 +153,14 @@ class AgidClient(_BaseAgidClient):
             variables, commands = self._process_communicate()
         return variables, commands
 
-    def callerid_forphones(self, calleridname, callerid):
+    def callerid_forphones(self, calleridname, callerid, **variables):
         with self._connect():
             self._send_handler(
                 'callerid_forphones',
                 agi_calleridname=calleridname,
                 agi_callerid=callerid,
             )
-            variables, commands = self._process_communicate()
+            variables, commands = self._process_communicate(variables)
         return variables, commands
 
     def __getattr__(self, handler_name):
