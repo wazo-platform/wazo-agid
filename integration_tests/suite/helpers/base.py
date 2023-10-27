@@ -6,6 +6,8 @@ import logging
 
 from pathlib import Path
 
+
+from .dird import DirdMockClient
 from .agentd import AgentdMockClient
 from .agid import AgidClient
 from .confd import ConfdMockClient
@@ -32,7 +34,7 @@ class BaseAssetLaunchingHelper(AbstractAssetLaunchingHelper):
 
     @classmethod
     def reset_clients(cls):
-        for attr in ('agid', 'db', 'calld', 'confd', 'agentd', 'filesystem'):
+        for attr in ('agid', 'db', 'calld', 'confd', 'agentd', 'filesystem', 'dird'):
             delattr(cls, attr)
         until.true(cls.agid.is_ready, timeout=30)
 
@@ -59,6 +61,10 @@ class BaseAssetLaunchingHelper(AbstractAssetLaunchingHelper):
     @cached_class_property
     def calld(cls) -> CalldMockClient:
         return CalldMockClient('127.0.0.1', cls.service_port('9500', 'calld'))
+
+    @cached_class_property
+    def dird(cls) -> DirdMockClient:
+        return DirdMockClient('127.0.0.1', cls.service_port('9489', 'dird'), version='0.1')
 
     @cached_class_property
     def db(cls) -> DbHelper | WrongClient:

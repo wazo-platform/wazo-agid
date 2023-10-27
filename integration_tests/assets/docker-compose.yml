@@ -47,6 +47,13 @@ services:
     ports:
       - "9493"
 
+  dird:
+    image: mockserver/mockserver
+    environment:
+      MOCKSERVER_SERVER_PORT: 9489
+    ports:
+      - "9489"
+
   postgres:
     image: wazoplatform/wazo-confd-db-test:local
     ports:

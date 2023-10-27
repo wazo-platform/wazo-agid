@@ -7,6 +7,7 @@ services:
       - calld
       - confd
       - agentd
+      - dird
       - postgres
     environment:
-      TARGETS: "agid:4573 auth:9497 confd:9486 agentd:9493 calld:9500 postgres:5432"
+      TARGETS: "agid:4573 auth:9497 confd:9486 agentd:9493 calld:9500 dird:9489 postgres:5432"
