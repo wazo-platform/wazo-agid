@@ -220,6 +220,26 @@ def test_callerid_forphones_without_reverse_lookup(
     assert recv_cmds['FAILURE'] is False
 
 
+def test_callerid_forphones_with_reverse_lookup_unknown(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    base_asset.dird.expect_reverse_lookup_succeeds(
+        'numero',
+        '00000000-0000-0000-0000-000000000000',
+        'Mr. Numero',
+        {'name': 'Mr. Numero', 'number': 'numero', 'email': 'numero@example.org'},
+    )
+    recv_vars, recv_cmds = base_asset.agid.callerid_forphones(
+        calleridname='unknown',
+        callerid='numero',
+        XIVO_INCALL_ID=1,
+        WAZO_TENANT_UUID='123-456'
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_cmds['SET CALLERID'] == r'\"Mr. Numero\" <numero>'
+
+
 def test_callfilter(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         user = queries.insert_user()
