@@ -64,7 +64,9 @@ class BaseAssetLaunchingHelper(AbstractAssetLaunchingHelper):
 
     @cached_class_property
     def dird(cls) -> DirdMockClient:
-        return DirdMockClient('127.0.0.1', cls.service_port('9489', 'dird'), version='0.1')
+        return DirdMockClient(
+            '127.0.0.1', cls.service_port('9489', 'dird'), version='0.1'
+        )
 
     @cached_class_property
     def db(cls) -> DbHelper | WrongClient:

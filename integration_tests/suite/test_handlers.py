@@ -233,7 +233,7 @@ def test_callerid_forphones_with_reverse_lookup_unknown(
         calleridname='unknown',
         callerid='numero',
         XIVO_INCALL_ID=1,
-        WAZO_TENANT_UUID='123-456'
+        WAZO_TENANT_UUID='123-456',
     )
 
     assert recv_cmds['FAILURE'] is False
