@@ -4,10 +4,30 @@ from __future__ import annotations
 
 import unittest
 
-from hamcrest import assert_that, contains_string, equal_to
+from hamcrest import assert_that, contains_string, equal_to, is_
 from unittest.mock import Mock, patch, sentinel
 from wazo_agid.fastagi import FastAGI
-from wazo_agid.modules.callerid_forphones import callerid_forphones, FAKE_XIVO_USER_UUID
+from wazo_agid.modules.callerid_forphones import (
+    callerid_forphones,
+    FAKE_XIVO_USER_UUID,
+    is_phone_number,
+)
+
+
+class TestIsPhoneNumber(unittest.TestCase):
+    def test_with_valid_numbers(self):
+        # international E134
+        assert_that(is_phone_number("+11234567890"), is_(True))
+        # example national format
+        assert_that(is_phone_number("1234567890"), is_(True))
+        # international prefix instead of +
+        assert_that(is_phone_number("0011234567890"), is_(True))
+        # short alphanumeric extension
+        assert_that(is_phone_number("1234"), is_(True))
+
+    def test_not_a_number(self):
+        assert_that(is_phone_number('My Name'), is_(False))
+        assert_that(is_phone_number('1 is not a number'), is_(False))
 
 
 class TestCallerIdForPhone(unittest.TestCase):
@@ -34,6 +54,32 @@ class TestCallerIdForPhone(unittest.TestCase):
         self.agi.env = {
             'agi_calleridname': 'unknown',
             'agi_callerid': '5555551234',
+        }
+        self.dird_client.directories.reverse.return_value = {'display': None}
+
+        callerid_forphones(self.agi, Mock(), Mock())
+
+        assert_that(self.dird_client.directories.reverse.call_count, equal_to(1))
+
+    @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
+    def test_callerid_forphones_on_same_cid_name_and_cid_num(self, _):
+        # if cid name is cid number, ignore cid name and lookup
+        self.agi.env = {
+            'agi_calleridname': '5555551234',
+            'agi_callerid': '5555551234',
+        }
+        self.dird_client.directories.reverse.return_value = {'display': None}
+
+        callerid_forphones(self.agi, Mock(), Mock())
+
+        assert_that(self.dird_client.directories.reverse.call_count, equal_to(1))
+
+    @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
+    def test_callerid_forphones_on_almost_same_cid_name_and_cid_num(self, _):
+        # Some operators put a variation of the cid number in the cid name, still lookup
+        self.agi.env = {
+            'agi_calleridname': '+335555551234',
+            'agi_callerid': '00335555551234',
         }
         self.dird_client.directories.reverse.return_value = {'display': None}
 

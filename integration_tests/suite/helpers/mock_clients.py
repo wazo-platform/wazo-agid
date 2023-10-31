@@ -9,15 +9,27 @@ class MockServerClient:
         self._url = f'http://{host}:{port}'
 
     def simple_expectation(
-        self, method, path, expected_status, expected_body, headers=None
+        self,
+        method,
+        path,
+        expected_status,
+        expected_body,
+        headers=None,
+        query_string_params=None,
     ):
         expectation = {
-            'httpRequest': {'method': method, 'path': f'/{self.version}{path}'},
+            'httpRequest': {
+                'method': method,
+                'path': f'/{self.version}{path}',
+            },
             'httpResponse': {
                 'statusCode': expected_status,
                 'body': expected_body,
             },
         }
+        if query_string_params:
+            expectation['httpRequest']['queryStringParameters'] = query_string_params
+
         expectation_kwargs = {}
         if headers:
             expectation_kwargs['headers'] = headers

@@ -13,3 +13,5 @@ confd:
   host: confd
 agentd:
   host: agentd
+dird:
+  host: dird
