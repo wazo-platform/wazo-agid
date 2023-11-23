@@ -23,9 +23,9 @@ def agent_get_options(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None
         number = str(args[1])
 
         if number.startswith('*'):
-            agent = objects.Agent(agi, cursor, xid=number[1:])
+            agent = objects.Agent(agi, cursor, tenant_uuid, xid=number[1:])
         else:
-            agent = objects.Agent(agi, cursor, number=number)
+            agent = objects.Agent(agi, cursor, tenant_uuid, number=number)
 
         if agent.tenant_uuid != tenant_uuid:
             return

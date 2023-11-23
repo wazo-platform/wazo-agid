@@ -579,7 +579,7 @@ class Queue:
 
 
 class Agent:
-    def __init__(self, agi, cursor: DictCursor, xid=None, number=None):
+    def __init__(self, agi, cursor: DictCursor, tenant_uuid, xid=None, number=None):
         self.agi = agi
         self.cursor = cursor
 
@@ -594,20 +594,28 @@ class Agent:
             'preprocess_subroutine',
         )
 
-        query = SQL("SELECT {columns} FROM agentfeatures WHERE {field} = %s")
+        query = SQL(
+            "SELECT {columns} FROM agentfeatures WHERE {field} = %s and tenant_uuid = %s"
+        )
         if xid:
             cursor.execute(
                 query.format(
                     columns=join_column_names(columns), field=Identifier('id')
                 ),
-                (xid,),
+                (
+                    xid,
+                    tenant_uuid,
+                ),
             )
         elif number:
             cursor.execute(
                 query.format(
                     columns=join_column_names(columns), field=Identifier('number')
                 ),
-                (number,),
+                (
+                    number,
+                    tenant_uuid,
+                ),
             )
         else:
             raise LookupError("id or number must be provided to look up an agent")
