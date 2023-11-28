@@ -7,14 +7,12 @@ import os
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid
-from wazo_agid import objects
+from wazo_agid import agid, objects
 
 logger = logging.getLogger(__name__)
 
 
 def paging(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
-
     userid = agi.get_variable('XIVO_USERID')
 
     try:

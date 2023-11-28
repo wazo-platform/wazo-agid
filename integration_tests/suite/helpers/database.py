@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-import sqlalchemy as sa
-
 import random
 from contextlib import contextmanager
+
+import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 from xivo_dao.alchemy.outcalltrunk import OutcallTrunk
@@ -19,7 +19,6 @@ TENANT_UUID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee1'
 
 
 class DbHelper:
-
     TEMPLATE = "xivotemplate"
 
     @classmethod

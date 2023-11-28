@@ -13,7 +13,16 @@ The AGI protocol is documented in the [Asterisk wiki](https://wiki.asterisk.org/
 ```bash
 apt-get install libpq-dev python3-dev libffi-dev libyaml-dev
 pip install tox
-tox --recreate -e py37
+tox --recreate -e py39
+```
+
+## Linting / Type checking with Pre-commit
+```shell
+pip install pre-commit
+# To automatically run on commit:
+pre-commit install
+# or run manually
+pre-commit run --all-files
 ```
 
 ## Integration tests

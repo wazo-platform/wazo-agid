@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import unittest
-
 from unittest.mock import Mock
-from wazo_agid import objects
-from wazo_agid import fastagi
+
+from wazo_agid import fastagi, objects
 from wazo_agid.modules import incoming_queue_set_features
 
 QUEUE_WRAPUP_TIME = '__QUEUEWRAPUPTIME'

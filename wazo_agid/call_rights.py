@@ -1,4 +1,4 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -39,7 +39,7 @@ def deny(agi, password):
 
 
 def extension_matches(number, pattern):
-    for (key, val) in rep:
+    for key, val in rep:
         pattern = pattern.replace(key, val)
     return bool(re.match(rf"^{pattern}$", number))
 

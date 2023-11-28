@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import logging
-import phonenumbers
 
+import phonenumbers
 from psycopg2.extras import DictCursor
 from wazo_dird_client.client import DirdClient
+from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
 from wazo_agid import agid
-from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
 logger = logging.getLogger(__name__)
 

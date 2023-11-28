@@ -14,9 +14,9 @@
 #     - added Fast prefix for coherency.
 from __future__ import annotations
 
-import re
 import pprint
-from typing import TYPE_CHECKING, Union, NoReturn, Any, BinaryIO
+import re
+from typing import TYPE_CHECKING, Any, BinaryIO, NoReturn, Union
 
 if TYPE_CHECKING:
     from typing import Literal

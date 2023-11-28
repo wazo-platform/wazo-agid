@@ -6,29 +6,27 @@ import logging
 from typing import TYPE_CHECKING
 
 from xivo_dao import callfilter_dao
-
-from xivo_dao.resources.user_line import dao as user_line_dao
+from xivo_dao.resources.extension import dao as extension_dao
 from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
-from xivo_dao.resources.extension import dao as extension_dao
+from xivo_dao.resources.user_line import dao as user_line_dao
 
-from wazo_agid.objects import DialAction, CallerID
+from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
-from wazo_agid import objects
-from wazo_agid import dialplan_variables
 from wazo_agid.helpers import build_sip_interface
+from wazo_agid.objects import CallerID, DialAction
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from psycopg2.extras import DictCursor
     from xivo_dao.alchemy.extension import Extension
     from xivo_dao.alchemy.linefeatures import LineFeatures
-    from psycopg2.extras import DictCursor
+
     from wazo_agid.agid import FastAGI
 
 
 class UserFeatures(Handler):
-
     PATH_TYPE = 'user'
 
     def __init__(self, agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:

@@ -6,6 +6,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from requests import RequestException
+
 from wazo_agid import agid
 
 if TYPE_CHECKING:

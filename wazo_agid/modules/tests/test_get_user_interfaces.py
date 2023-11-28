@@ -3,23 +3,15 @@
 from __future__ import annotations
 
 from unittest import TestCase
-
 from unittest.mock import Mock
-from hamcrest import (
-    assert_that,
-    calling,
-    contains_inanyorder,
-    raises,
-)
 
-from ..get_user_interfaces import (
-    UnknownUser,
-    _UserLine as UserLine,
-)
+from hamcrest import assert_that, calling, contains_inanyorder, raises
+
+from ..get_user_interfaces import UnknownUser
+from ..get_user_interfaces import _UserLine as UserLine
 
 
 class TestUserLine(TestCase):
-
     hints = {
         'abc@usersharedlines': 'PJSIP/one&SCCP/two&CUSTOM/i1/55555555&PJSIP/two&PJSIP/three',
     }

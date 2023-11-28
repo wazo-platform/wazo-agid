@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest import TestCase
 from unittest.mock import Mock
+
 from wazo_agid.agid import Handler
 
 

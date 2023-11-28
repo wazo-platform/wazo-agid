@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
+from unittest.mock import Mock, call, patch
+
 from wazo_agid.handlers.groupfeatures import GroupFeatures
-from unittest.mock import Mock, patch, call
 
 
 class TestGroupFeatures(unittest.TestCase):

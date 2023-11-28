@@ -2,16 +2,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 import re
+from typing import TYPE_CHECKING
 
 from wazo_agid import objects
 from wazo_agid.handlers.handler import Handler
 
-
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor, DictRow
+
+    from wazo_agid.agid import FastAGI
 
 
 class AgentFeatures(Handler):

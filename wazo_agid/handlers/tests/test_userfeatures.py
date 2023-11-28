@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-
-from hamcrest import assert_that, equal_to, contains_exactly
 from unittest.mock import Mock, call, patch, sentinel
 
-from wazo_agid.handlers.userfeatures import UserFeatures
+from hamcrest import assert_that, contains_exactly, equal_to
+
 from wazo_agid import objects
+from wazo_agid.handlers.userfeatures import UserFeatures
 
 
 class NotEmptyStringMatcher:
@@ -422,7 +422,6 @@ class TestSetForwardNoAnswer(_BaseTestCase):
             _set_rna_from_exten=Mock(return_value=False),
             _set_rna_from_dialaction=Mock(return_value=False),
         ):
-
             user_features._setrna()
 
             user_features._set_rna_from_exten.assert_called_once_with()  # type: ignore

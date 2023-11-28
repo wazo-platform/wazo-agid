@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 from wazo_agid import agid
+from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 
 def outgoing_user_set_features(

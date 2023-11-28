@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from unittest import TestCase
-
 from unittest.mock import Mock, call, patch
 
 from ..call_recording import record_caller

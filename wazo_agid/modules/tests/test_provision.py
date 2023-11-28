@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import unittest
-
 from unittest.mock import Mock
 
 from wazo_agid.modules import provision
 
 
 class TestDoProvision(unittest.TestCase):
-
     EMPTY_LIST = {'total': 0, 'items': []}
 
     def setUp(self):

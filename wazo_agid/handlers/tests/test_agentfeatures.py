@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-from hamcrest import assert_that, equal_to
-
 from unittest.mock import Mock
+
+from hamcrest import assert_that, equal_to
 
 from wazo_agid.handlers.agentfeatures import AgentFeatures
 

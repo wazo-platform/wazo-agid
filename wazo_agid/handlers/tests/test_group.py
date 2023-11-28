@@ -3,6 +3,7 @@
 
 from unittest import TestCase
 from unittest.mock import Mock, patch
+
 from hamcrest import assert_that, calling, equal_to, raises
 
 from ..group import AnswerHandler

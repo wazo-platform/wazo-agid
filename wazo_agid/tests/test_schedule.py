@@ -5,15 +5,16 @@ from __future__ import annotations
 import datetime
 import unittest
 from unittest.mock import Mock, call
+
 from wazo_agid.schedule import (
-    ScheduleBuilder,
-    SchedulePeriodBuilder,
-    HoursChecker,
-    WeekdaysChecker,
     DaysChecker,
+    HoursChecker,
     MonthsChecker,
-    SchedulePeriod,
     ScheduleAction,
+    ScheduleBuilder,
+    SchedulePeriod,
+    SchedulePeriodBuilder,
+    WeekdaysChecker,
 )
 
 

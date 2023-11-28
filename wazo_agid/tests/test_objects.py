@@ -2,12 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
-from hamcrest import (
-    assert_that,
-    is_,
-)
-
 from unittest import TestCase
+
+from hamcrest import assert_that, is_
 
 from ..objects import VMBox
 

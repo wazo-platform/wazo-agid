@@ -5,14 +5,10 @@
 import argparse
 import sys
 
-from xivo.chain_map import ChainMap
-from xivo.config_helper import (
-    parse_config_file,
-    read_config_file_hierarchy,
-)
 from wazo_auth_client import Client as AuthClient
 from wazo_confd_client import Client as ConfdClient
-
+from xivo.chain_map import ChainMap
+from xivo.config_helper import parse_config_file, read_config_file_hierarchy
 
 _DEFAULT_CONFIG = {
     'config_file': '/etc/wazo-agid/config.yml',

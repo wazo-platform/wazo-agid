@@ -8,8 +8,9 @@ from typing import TYPE_CHECKING
 from wazo_agid import agid
 
 if TYPE_CHECKING:
-    from wazo_agid.agid import FastAGI
     from psycopg2.extras import DictCursor
+
+    from wazo_agid.agid import FastAGI
 
 
 logger = logging.getLogger(__name__)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest import TestCase
 from unittest.mock import Mock
+
 from hamcrest import assert_that, equal_to
 
 from ..paging import build_options

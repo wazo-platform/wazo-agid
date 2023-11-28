@@ -7,6 +7,7 @@ import json
 from psycopg2.extras import DictCursor
 from xivo_dao.alchemy.queueskillrule import QueueSkillRule
 from xivo_dao.helpers.db_utils import session_scope
+
 from wazo_agid import agid
 
 

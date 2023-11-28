@@ -3,19 +3,14 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import Mock, patch
+from unittest.mock import sentinel as s
 
-from hamcrest import (
-    assert_that,
-    equal_to,
-)
-from unittest.mock import Mock, patch, sentinel as s
+from hamcrest import assert_that, equal_to
 
-from ..helpers import (
-    build_sip_interface,
-    _is_mobile_reachable as is_mobile_and_reachable,
-    requests,
-    _has_mobile_connection as has_mobile_connection,
-)
+from ..helpers import _has_mobile_connection as has_mobile_connection
+from ..helpers import _is_mobile_reachable as is_mobile_and_reachable
+from ..helpers import build_sip_interface, requests
 
 ABCD_INTERFACE = (
     'PJSIP/ycetqvtr/sip:n753iqfr@127.0.0.1:44530;transport=ws&'

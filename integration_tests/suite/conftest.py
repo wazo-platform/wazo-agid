@@ -4,6 +4,7 @@ from collections.abc import Generator
 
 import pytest
 from wazo_test_helpers.asset_launching_test_case import make_asset_fixture
+
 from .helpers.base import BaseAssetLaunchingHelper
 
 
