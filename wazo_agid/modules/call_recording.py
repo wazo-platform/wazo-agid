@@ -20,6 +20,13 @@ CALL_RECORDING_FILENAME_TEMPLATE = (
     '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
 )
 
+CALL_RECORDING_FILENAME_TEMPLATE_A = (
+    '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}-a.wav'
+)
+
+CALL_RECORDING_FILENAME_TEMPLATE_B = (
+    '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}-b.wav'
+)
 
 def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     calld = agi.config['calld']['client']
@@ -84,11 +91,18 @@ def _start_mix_monitor(agi):
         tenant_uuid=tenant_uuid,
         recording_uuid=recording_uuid,
     )
+    filename_a = CALL_RECORDING_FILENAME_TEMPLATE_A.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    filename_b = CALL_RECORDING_FILENAME_TEMPLATE_B.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
     mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
 
-    agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}')
+    agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}r({filename_a})t({filename_b}),/usr/bin/sox -M -v 1 {filename_a} -v 1 {filename_b} {filename} && rm {filename_a} {filename_b}')
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
-
 
 agid.register(call_recording)
 agid.register(record_caller)
