@@ -28,6 +28,7 @@ CALL_RECORDING_FILENAME_TEMPLATE_B = (
     '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}-b.wav'
 )
 
+
 def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     calld = agi.config['calld']['client']
     channel_id = agi.env['agi_uniqueid']
@@ -35,6 +36,30 @@ def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         _disable_call_recording(agi, calld, channel_id)
     else:
         _enable_call_recording(agi, calld, channel_id)
+
+
+def setup_binaural_mixmonitor(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
+    tenant_uuid = agi.get_variable(dialplan_variables.TENANT_UUID)
+    recording_uuid = str(uuid.uuid4())
+    filename = CALL_RECORDING_FILENAME_TEMPLATE.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    filename_a = CALL_RECORDING_FILENAME_TEMPLATE_A.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    filename_b = CALL_RECORDING_FILENAME_TEMPLATE_B.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
+
+    binaural_options = f'r({filename_a})t({filename_b})'
+    mixmonitor_command = f'/usr/bin/sox -M -v 1 {filename_a} -v 1 {filename_b} {filename} && rm {filename_a} {filename_b}'
+    new_mixmonitor_options = f'{mix_monitor_options}{binaural_options}'
+    agi.set_variable('WAZO_MIXMONITOR_OPTIONS', new_mixmonitor_options)
+    agi.set_variable('WAZO_MIXMONITOR_COMMAND', mixmonitor_command)
 
 
 def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
@@ -104,6 +129,8 @@ def _start_mix_monitor(agi):
     agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}r({filename_a})t({filename_b}),/usr/bin/sox -M -v 1 {filename_a} -v 1 {filename_b} {filename} && rm {filename_a} {filename_b}')
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
+
 agid.register(call_recording)
 agid.register(record_caller)
 agid.register(start_mix_monitor)
+agid.register(setup_binaural_mixmonitor)
