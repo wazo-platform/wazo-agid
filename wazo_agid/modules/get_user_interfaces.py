@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
-from collections.abc import Generator
 import logging
+from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from wazo_agid import agid
