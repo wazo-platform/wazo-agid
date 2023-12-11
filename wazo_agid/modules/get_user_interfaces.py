@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
+import logging
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
@@ -12,6 +13,9 @@ if TYPE_CHECKING:
     from psycopg2.extras import DictCursor
 
     from wazo_agid.agid import FastAGI
+
+
+logger = logging.getLogger(__name__)
 
 
 class UnknownUser(Exception):
@@ -25,7 +29,8 @@ class _UserLine:
         self.interfaces = []
         hint = agi.get_variable(f'HINT({user_uuid}@usersharedlines)')
         if not hint:
-            raise UnknownUser()
+            logger.error('No hint found for %s', f'{user_uuid}@usersharedlines')
+            raise UnknownUser(user_uuid)
 
         for endpoint in hint.split('&'):
             if '/' not in endpoint:
