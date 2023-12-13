@@ -612,19 +612,17 @@ class Agent:
 
     @classmethod
     def from_id(cls, cursor: DictCursor, agent_id: str) -> Agent:
-        query = SQL("SELECT {columns} FROM agentfeatures WHERE {field} = %s").format(
+        query = SQL("SELECT {columns} FROM agentfeatures WHERE id = %s").format(
             columns=join_column_names(cls._columns),
-            field=Identifier('id'),
         )
         return cls._from_query(cursor, query, agent_id)
 
     @classmethod
     def from_number(cls, cursor: DictCursor, number: str, tenant_uuid: str) -> Agent:
         query = SQL(
-            "SELECT {columns} FROM agentfeatures WHERE {field} = %s and tenant_uuid = %s"
+            "SELECT {columns} FROM agentfeatures WHERE number = %s and tenant_uuid = %s"
         ).format(
             columns=join_column_names(cls._columns),
-            field=Identifier('number'),
         )
         return cls._from_query(cursor, query, number, tenant_uuid)
 
