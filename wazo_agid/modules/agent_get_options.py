@@ -23,12 +23,12 @@ def agent_get_options(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None
         number = str(args[1])
 
         if number.startswith('*'):
-            agent = objects.Agent(agi, cursor, xid=number[1:])
+            agent_id = number[1:]
+            agent = objects.Agent.from_id(cursor, agent_id)
+            if agent.tenant_uuid != tenant_uuid:
+                raise LookupError(f'No agent id:{agent_id} in tenant: {tenant_uuid}')
         else:
-            agent = objects.Agent(agi, cursor, number=number)
-
-        if agent.tenant_uuid != tenant_uuid:
-            return
+            agent = objects.Agent.from_number(cursor, number, tenant_uuid)
     except (LookupError, IndexError) as e:
         agi.verbose(str(e))
         return

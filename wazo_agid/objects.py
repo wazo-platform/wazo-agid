@@ -579,52 +579,61 @@ class Queue:
 
 
 class Agent:
-    def __init__(self, agi, cursor: DictCursor, xid=None, number=None):
-        self.agi = agi
-        self.cursor = cursor
+    _columns = (
+        'id',
+        'tenant_uuid',
+        'number',
+        'passwd',
+        'firstname',
+        'lastname',
+        'language',
+        'preprocess_subroutine',
+    )
 
-        columns = (
-            'id',
-            'tenant_uuid',
-            'number',
-            'passwd',
-            'firstname',
-            'lastname',
-            'language',
-            'preprocess_subroutine',
+    def __init__(
+        self,
+        id: int,
+        tenant_uuid: str,
+        number: str,
+        passwd: str | None,
+        firstname: str | None,
+        lastname: str | None,
+        language: str | None,
+        preprocess_subroutine: str | None,
+    ) -> None:
+        self.id = id
+        self.tenant_uuid = tenant_uuid
+        self.number = number
+        self.passwd = passwd
+        self.firstname = firstname
+        self.lastname = lastname
+        self.language = language
+        self.preprocess_subroutine = preprocess_subroutine
+
+    @classmethod
+    def from_id(cls, cursor: DictCursor, agent_id: str) -> Agent:
+        query = SQL("SELECT {columns} FROM agentfeatures WHERE id = %s").format(
+            columns=join_column_names(cls._columns),
         )
+        return cls._from_query(cursor, query, agent_id)
 
-        query = SQL("SELECT {columns} FROM agentfeatures WHERE {field} = %s")
-        if xid:
-            cursor.execute(
-                query.format(
-                    columns=join_column_names(columns), field=Identifier('id')
-                ),
-                (xid,),
-            )
-        elif number:
-            cursor.execute(
-                query.format(
-                    columns=join_column_names(columns), field=Identifier('number')
-                ),
-                (number,),
-            )
-        else:
-            raise LookupError("id or number must be provided to look up an agent")
+    @classmethod
+    def from_number(cls, cursor: DictCursor, number: str, tenant_uuid: str) -> Agent:
+        query = SQL(
+            "SELECT {columns} FROM agentfeatures WHERE number = %s and tenant_uuid = %s"
+        ).format(
+            columns=join_column_names(cls._columns),
+        )
+        return cls._from_query(cursor, query, number, tenant_uuid)
 
+    @classmethod
+    def _from_query(cls, cursor: DictCursor, query: SQL, *args: str) -> Agent:
+        cursor.execute(query, args)
         res: DictRow = cursor.fetchone()
-
         if not res:
-            raise LookupError(f"Unable to find agent (id: {xid}, number: {number})")
+            raise LookupError(f"Unable to find agent {args}")
 
-        self.id = res['id']
-        self.tenant_uuid = res['tenant_uuid']
-        self.number = res['number']
-        self.passwd = res['passwd']
-        self.firstname = res['firstname']
-        self.lastname = res['lastname']
-        self.language = res['language']
-        self.preprocess_subroutine = res['preprocess_subroutine']
+        return cls(**res)
 
 
 class DialAction:

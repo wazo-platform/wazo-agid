@@ -110,6 +110,18 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_AGENTNUM'] == agent['number']
     assert recv_vars['CHANNEL(language)'] == agent['language']
 
+    recv_vars, recv_cmds = base_asset.agid.agent_get_options(
+        agent['tenant_uuid'],
+        f'*{agent["id"]}',
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['XIVO_AGENTEXISTS'] == '1'
+    assert recv_vars['XIVO_AGENTPASSWD'] == ''
+    assert recv_vars['XIVO_AGENTID'] == str(agent['id'])
+    assert recv_vars['XIVO_AGENTNUM'] == agent['number']
+    assert recv_vars['CHANNEL(language)'] == agent['language']
+
 
 def test_agent_get_status(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
