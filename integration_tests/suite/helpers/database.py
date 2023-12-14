@@ -12,10 +12,9 @@ from xivo_dao.alchemy.outcalltrunk import OutcallTrunk
 from xivo_dao.alchemy.rightcallexten import RightCallExten
 from xivo_dao.tests.test_dao import ItemInserter
 
-logger = logging.getLogger(__name__)
+from .constants import TENANT_UUID
 
-# This tenant_uuid is populated into the test database
-TENANT_UUID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee1'
+logger = logging.getLogger(__name__)
 
 
 class DbHelper:

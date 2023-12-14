@@ -611,16 +611,23 @@ class Agent:
         self.preprocess_subroutine = preprocess_subroutine
 
     @classmethod
-    def from_id(cls, cursor: DictCursor, agent_id: str) -> Agent:
+    def from_id(cls, cursor: DictCursor, agent_id: str, tenant_uuid: str) -> Agent:
+        query = SQL(
+            "SELECT {columns} FROM agentfeatures WHERE id = %s AND tenant_uuid = %s"
+        ).format(columns=join_column_names(cls._columns))
+        return cls._from_query(cursor, query, agent_id, tenant_uuid)
+
+    @classmethod
+    def from_id_any_tenant(cls, cursor: DictCursor, agent_id: str) -> Agent:
         query = SQL("SELECT {columns} FROM agentfeatures WHERE id = %s").format(
-            columns=join_column_names(cls._columns),
+            columns=join_column_names(cls._columns)
         )
         return cls._from_query(cursor, query, agent_id)
 
     @classmethod
     def from_number(cls, cursor: DictCursor, number: str, tenant_uuid: str) -> Agent:
         query = SQL(
-            "SELECT {columns} FROM agentfeatures WHERE number = %s and tenant_uuid = %s"
+            "SELECT {columns} FROM agentfeatures WHERE number = %s AND tenant_uuid = %s"
         ).format(
             columns=join_column_names(cls._columns),
         )

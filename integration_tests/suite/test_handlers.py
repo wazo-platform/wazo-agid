@@ -10,6 +10,7 @@ from hamcrest import assert_that, calling, raises
 
 from .helpers.agid import AGIFailException
 from .helpers.base import BaseAssetLaunchingHelper
+from .helpers.constants import SUBTENANT_UUID, TENANT_UUID
 
 
 def test_monitoring(base_asset: BaseAssetLaunchingHelper) -> None:
@@ -96,8 +97,10 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
 
 def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
-        agent = queries.insert_agent()
+        agent = queries.insert_agent(number='1111', tenant_uuid=TENANT_UUID)
+        agent_parallel = queries.insert_agent(number='2222', tenant_uuid=SUBTENANT_UUID)
 
+    # get agent by number
     recv_vars, recv_cmds = base_asset.agid.agent_get_options(
         agent['tenant_uuid'],
         agent['number'],
@@ -111,6 +114,15 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['CHANNEL(language)'] == agent['language']
 
     recv_vars, recv_cmds = base_asset.agid.agent_get_options(
+        agent_parallel['tenant_uuid'],
+        agent['number'],
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['XIVO_AGENTEXISTS'] == '0'
+
+    # get agent by id
+    recv_vars, recv_cmds = base_asset.agid.agent_get_options(
         agent['tenant_uuid'],
         f'*{agent["id"]}',
     )
@@ -121,6 +133,15 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_AGENTID'] == str(agent['id'])
     assert recv_vars['XIVO_AGENTNUM'] == agent['number']
     assert recv_vars['CHANNEL(language)'] == agent['language']
+
+    # can't find agent by id in other tenant
+    recv_vars, recv_cmds = base_asset.agid.agent_get_options(
+        agent_parallel['tenant_uuid'],
+        f'*{agent["id"]}',
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['XIVO_AGENTEXISTS'] == '0'
 
 
 def test_agent_get_status(base_asset: BaseAssetLaunchingHelper):

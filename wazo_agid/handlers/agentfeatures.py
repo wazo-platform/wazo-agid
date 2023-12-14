@@ -52,7 +52,7 @@ class AgentFeatures(Handler):
 
     def _set_agent(self) -> None:
         try:
-            self.agent = objects.Agent.from_id(self._cursor, self.agent_id)
+            self.agent = objects.Agent.from_id_any_tenant(self._cursor, self.agent_id)
         except (LookupError, IndexError) as e:
             self._agi.dp_break(e)
 
