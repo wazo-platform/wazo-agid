@@ -88,7 +88,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._set_options()
 
         self._agi.set_variable.assert_called_once_with(
-            'XIVO_CALLOPTIONS', 'm(my-music-class)'
+            'WAZO_CALLOPTIONS', 'm(my-music-class)'
         )
 
     def test_set_caller(self):

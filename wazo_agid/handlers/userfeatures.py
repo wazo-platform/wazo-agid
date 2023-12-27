@@ -380,7 +380,7 @@ class UserFeatures(Handler):
             options += "p"
         if self._moh:
             options += f'm({self._moh.name})'
-        self._agi.set_variable('XIVO_CALLOPTIONS', options)
+        self._agi.set_variable('WAZO_CALLOPTIONS', options)
 
     def _set_ringseconds(self):
         self._set_not_zero_or_empty('XIVO_RINGSECONDS', self._user.ringseconds)

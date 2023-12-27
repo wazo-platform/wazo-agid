@@ -24,7 +24,7 @@ class TestIgnoreBOption(unittest.TestCase):
         self.agi.set_variable.assert_not_called()
 
     def test_no_b_option(self):
-        variables = {'XIVO_CALLOPTIONS': 'XB(foobar^s^1)'}
+        variables = {'WAZO_CALLOPTIONS': 'XB(foobar^s^1)'}
         self.agi.get_variable.side_effect = variables.get
 
         ignore_b_option(self.agi, Mock(), Mock())
@@ -33,7 +33,7 @@ class TestIgnoreBOption(unittest.TestCase):
 
     def test_with_b_option_no_handlers(self):
         variables = {
-            'XIVO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
+            'WAZO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
         }
         self.agi.get_variable.side_effect = variables.get
 
@@ -42,6 +42,6 @@ class TestIgnoreBOption(unittest.TestCase):
         assert_that(
             self.agi.set_variable.call_args_list,
             contains_inanyorder(
-                call('XIVO_CALLOPTIONS', 'XB(foobar^s^1)'),
+                call('WAZO_CALLOPTIONS', 'XB(foobar^s^1)'),
             ),
         )

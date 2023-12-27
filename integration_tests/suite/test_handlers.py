@@ -58,7 +58,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['WAZO_DST_UUID'] == user['uuid']
     assert recv_vars['WAZO_DST_TENANT_UUID'] == user['tenant_uuid']
     assert recv_vars['XIVO_INTERFACE'] == 'contact'
-    assert recv_vars['XIVO_CALLOPTIONS'] == ''
+    assert recv_vars['WAZO_CALLOPTIONS'] == ''
     assert recv_vars['XIVO_SIMULTCALLS'] == str(user['simultcalls'])
     assert recv_vars['XIVO_RINGSECONDS'] == str(user['ringseconds'])
     assert recv_vars['XIVO_ENABLEDND'] == str(user['enablednd'])
@@ -438,13 +438,13 @@ def test_check_schedule(base_asset: BaseAssetLaunchingHelper):
 
 def test_ignore_b_option(base_asset: BaseAssetLaunchingHelper):
     variables = {
-        'XIVO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
+        'WAZO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
     }
 
     recv_vars, recv_cmds = base_asset.agid.ignore_b_option(variables=variables)
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_CALLOPTIONS'] == 'XB(foobar^s^1)'
+    assert recv_vars['WAZO_CALLOPTIONS'] == 'XB(foobar^s^1)'
 
 
 def test_fwdundoall(base_asset: BaseAssetLaunchingHelper):
@@ -885,7 +885,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_CALLOPTIONS'] == 'T'
+    assert recv_vars['WAZO_CALLOPTIONS'] == 'T'
     assert recv_vars['CHANNEL(musicclass)'] == 'default'
     assert recv_vars['XIVO_INTERFACE0'] == 'PJSIP'
     assert recv_vars['XIVO_TRUNKEXTEN0'] == f'{extension["exten"]}@{sip["name"]}'

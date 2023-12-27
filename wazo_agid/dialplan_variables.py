@@ -1,8 +1,8 @@
-# Copyright 2006-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 BASE_CONTEXT = 'XIVO_BASE_CONTEXT'
-CALL_OPTIONS = 'XIVO_CALLOPTIONS'
+CALL_OPTIONS = 'WAZO_CALLOPTIONS'
 CALL_ORIGIN = 'XIVO_CALLORIGIN'
 # ID of the callee
 SRCNUM = 'XIVO_SRCNUM'
