@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 VARIABLE_MAP = {
     'WAZO_CALLOPTIONS': 'XIVO_CALLOPTIONS',
+    'WAZO_PICKEDUP': 'XIVO_PICKEDUP',
 }
 ORIG_VALUE_TPL = 'WAZO_COMPAT_{new_name}_ORIG'
 
