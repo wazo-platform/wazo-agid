@@ -57,7 +57,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['XIVO_DST_REDIRECTING_NUM'] == extension['exten']
     assert recv_vars['WAZO_DST_UUID'] == user['uuid']
     assert recv_vars['WAZO_DST_TENANT_UUID'] == user['tenant_uuid']
-    assert recv_vars['XIVO_INTERFACE'] == 'contact'
+    assert recv_vars['WAZO_INTERFACE'] == 'contact'
     assert recv_vars['WAZO_CALLOPTIONS'] == ''
     assert recv_vars['XIVO_SIMULTCALLS'] == str(user['simultcalls'])
     assert recv_vars['XIVO_RINGSECONDS'] == str(user['ringseconds'])
@@ -887,7 +887,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['WAZO_CALLOPTIONS'] == 'T'
     assert recv_vars['CHANNEL(musicclass)'] == 'default'
-    assert recv_vars['XIVO_INTERFACE0'] == 'PJSIP'
+    assert recv_vars['WAZO_INTERFACE0'] == 'PJSIP'
     assert recv_vars['XIVO_TRUNKEXTEN0'] == f'{extension["exten"]}@{sip["name"]}'
     assert recv_vars['XIVO_TRUNKSUFFIX0'] == ''
     assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'

@@ -152,7 +152,7 @@ class UserFeatures(Handler):
 
     def _set_interfaces(self) -> None:
         interfaces = [self._build_interface_from_line(line) for line in self.lines]
-        self._agi.set_variable('XIVO_INTERFACE', '&'.join(interfaces))
+        self._agi.set_variable('WAZO_INTERFACE', '&'.join(interfaces))
 
     def _build_interface_from_line(self, line):
         protocol = line.protocol.upper()
