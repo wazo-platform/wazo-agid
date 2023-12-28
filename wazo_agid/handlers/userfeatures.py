@@ -383,7 +383,7 @@ class UserFeatures(Handler):
         self._agi.set_variable('WAZO_CALLOPTIONS', options)
 
     def _set_ringseconds(self):
-        self._set_not_zero_or_empty('XIVO_RINGSECONDS', self._user.ringseconds)
+        self._set_not_zero_or_empty('WAZO_RINGSECONDS', self._user.ringseconds)
 
     def _set_callfilter_ringseconds(self, name, value):
         self._set_not_zero_or_empty(f'XIVO_CALLFILTER_{name}', value)
