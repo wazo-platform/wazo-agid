@@ -11,7 +11,7 @@ from wazo_agid import agid
 def incoming_conference_set_features(
     agi: agid.FastAGI, cursor: DictCursor, args: list[str]
 ) -> None:
-    conference_id = int(agi.get_variable('XIVO_DSTID'))
+    conference_id = int(agi.get_variable('WAZO_DSTID'))
 
     try:
         conference = conference_dao.get(conference_id)

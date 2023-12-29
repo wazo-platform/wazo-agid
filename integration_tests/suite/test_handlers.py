@@ -30,7 +30,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
 
     variables = {
         'WAZO_USERID': user['id'],
-        'XIVO_DSTID': user['id'],
+        'WAZO_DSTID': user['id'],
         'XIVO_DST_EXTEN_ID': extension['id'],
         'WAZO_CALLORIGIN': 'patate',
         'WAZO_SRCNUM': extension['exten'],
@@ -376,7 +376,7 @@ def test_check_diversion_hold_time(base_asset: BaseAssetLaunchingHelper):
         queue = queries.insert_queue(name=queue_name, waittime=5)
 
     variables = {
-        'XIVO_DSTID': queue['id'],
+        'WAZO_DSTID': queue['id'],
         f'QUEUE_WAITING_COUNT({queue_name})': '1',
         'QUEUEHOLDTIME': '6',
     }
@@ -394,7 +394,7 @@ def test_check_diversion_wait_ratio(base_asset: BaseAssetLaunchingHelper):
         queue = queries.insert_queue(name=queue_name, waitratio=1.2)
 
     variables = {
-        'XIVO_DSTID': queue['id'],
+        'WAZO_DSTID': queue['id'],
         f'QUEUE_WAITING_COUNT({queue_name})': '2',
         f'QUEUE_MEMBER({queue_name},logged)': '2',
     }
@@ -651,7 +651,7 @@ def test_incoming_conference_set_features(base_asset: BaseAssetLaunchingHelper):
         conference = queries.insert_conference(name=name)
 
     variables = {
-        'XIVO_DSTID': conference['id'],
+        'WAZO_DSTID': conference['id'],
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_conference_set_features(
         variables=variables
@@ -682,7 +682,7 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'XIVO_INCALL_ID': call['id'],
-        'XIVO_DSTID': call['id'],
+        'WAZO_DSTID': call['id'],
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_did_set_features(
         variables=variables
@@ -713,7 +713,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
             )
 
     variables = {
-        'XIVO_DSTID': group['id'],
+        'WAZO_DSTID': group['id'],
         'XIVO_FWD_REFERER': group['id'],
         'XIVO_PATH': None,
     }
@@ -802,7 +802,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_DSTID': queue['id'],
+        'WAZO_DSTID': queue['id'],
         'XIVO_FWD_REFERER': queue['id'],
         'XIVO_PATH': '',
     }
@@ -873,7 +873,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     variables = {
         'WAZO_USERID': user['id'],
         'WAZO_USERUUID': user['uuid'],
-        'XIVO_DSTID': dial_pattern['id'],
+        'WAZO_DSTID': dial_pattern['id'],
         'WAZO_DSTNUM': extension['exten'],
         'WAZO_SRCNUM': extension['exten'],
         'XIVO_BASE_CONTEXT': extension['context'],

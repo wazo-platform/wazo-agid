@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 def check_diversion(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    queue_id = agi.get_variable('XIVO_DSTID')
+    queue_id = agi.get_variable('WAZO_DSTID')
     try:
         queue = objects.Queue(agi, cursor, int(queue_id))
     except (ValueError, LookupError) as e:

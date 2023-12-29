@@ -35,7 +35,7 @@ class TestUserFeatures(_BaseTestCase):
         super().setUp()
         self._variables = {
             'WAZO_USERID': '42',
-            'XIVO_DSTID': '33',
+            'WAZO_DSTID': '33',
             'WAZO_CALLORIGIN': 'my_origin',
             'WAZO_SRCNUM': '1000',
             'WAZO_DSTNUM': '1003',
@@ -63,7 +63,7 @@ class TestUserFeatures(_BaseTestCase):
             userfeatures._set_members()
 
             self.assertEqual(userfeatures._userid, self._variables['WAZO_USERID'])
-            self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
+            self.assertEqual(userfeatures._dstid, self._variables['WAZO_DSTID'])
             self.assertEqual(userfeatures._zone, self._variables['WAZO_CALLORIGIN'])
             self.assertEqual(userfeatures._srcnum, self._variables['WAZO_SRCNUM'])
             self.assertEqual(userfeatures._dstnum, self._variables['WAZO_DSTNUM'])
@@ -189,7 +189,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._set_line()
         self.assertEqual(userfeatures.lines, [])
 
-        userfeatures._dstid = self._variables['XIVO_DSTID']
+        userfeatures._dstid = self._variables['WAZO_DSTID']
         user_lines = [Mock(user_id=1, line_id=10)]
         line = Mock(main_line=True)
         extension = Mock(exten='1234')
@@ -218,7 +218,7 @@ class TestUserFeatures(_BaseTestCase):
             self.assertTrue(userfeatures._user is None)
             self.assertEqual(userfeatures._set_xivo_user_name.call_count, 0)  # type: ignore
 
-            userfeatures._dstid = self._variables['XIVO_DSTID']
+            userfeatures._dstid = self._variables['WAZO_DSTID']
 
             with patch.object(objects.User, '__init__') as user_init:
                 user_init.return_value = None

@@ -8,7 +8,7 @@ from wazo_agid import agid, objects
 
 
 def incoming_queue_set_features(agi, cursor, args):
-    queue_id = agi.get_variable('XIVO_DSTID')
+    queue_id = agi.get_variable('WAZO_DSTID')
     referer = agi.get_variable('XIVO_FWD_REFERER')
 
     try:
@@ -105,7 +105,7 @@ def _set_wrapup_time(agi, queue):
 
 
 def holdtime_announce(agi, cursor, args):
-    queue_id = agi.get_variable('XIVO_DSTID')
+    queue_id = agi.get_variable('WAZO_DSTID')
     try:
         queue = objects.Queue(agi, cursor, int(queue_id))
     except (ValueError, LookupError) as e:
