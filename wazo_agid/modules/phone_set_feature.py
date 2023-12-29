@@ -42,7 +42,7 @@ def _get_calling_user(agi, cursor):
 
 
 def _get_id_of_calling_user(agi):
-    return int(agi.get_variable('XIVO_USERID'))
+    return int(agi.get_variable('WAZO_USERID'))
 
 
 def _phone_set_dnd(agi, cursor, args):

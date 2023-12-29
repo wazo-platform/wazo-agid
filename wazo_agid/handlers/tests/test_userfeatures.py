@@ -34,7 +34,7 @@ class TestUserFeatures(_BaseTestCase):
     def setUp(self):
         super().setUp()
         self._variables = {
-            'XIVO_USERID': '42',
+            'WAZO_USERID': '42',
             'XIVO_DSTID': '33',
             'WAZO_CALLORIGIN': 'my_origin',
             'WAZO_SRCNUM': '1000',
@@ -62,7 +62,7 @@ class TestUserFeatures(_BaseTestCase):
         ):
             userfeatures._set_members()
 
-            self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
+            self.assertEqual(userfeatures._userid, self._variables['WAZO_USERID'])
             self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
             self.assertEqual(userfeatures._zone, self._variables['WAZO_CALLORIGIN'])
             self.assertEqual(userfeatures._srcnum, self._variables['WAZO_SRCNUM'])
@@ -98,7 +98,7 @@ class TestUserFeatures(_BaseTestCase):
 
         self.assertTrue(userfeatures._caller is None)
 
-        userfeatures._userid = self._variables['XIVO_USERID']
+        userfeatures._userid = self._variables['WAZO_USERID']
 
         with patch.object(objects.User, '__init__') as user_init:
             user_init.return_value = None
@@ -106,7 +106,7 @@ class TestUserFeatures(_BaseTestCase):
             userfeatures._set_caller()
 
             user_init.assert_called_with(
-                self._agi, self._cursor, int(self._variables['XIVO_USERID'])
+                self._agi, self._cursor, int(self._variables['WAZO_USERID'])
             )
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))

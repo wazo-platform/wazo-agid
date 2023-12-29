@@ -29,7 +29,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
         'XIVO_DSTID': user['id'],
         'XIVO_DST_EXTEN_ID': extension['id'],
         'WAZO_CALLORIGIN': 'patate',
@@ -286,7 +286,7 @@ def test_callfilter(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
     recv_vars, recv_cmds = base_asset.agid.callfilter(
         call_filter_member['id'], variables=variables
@@ -452,7 +452,7 @@ def test_fwdundoall(base_asset: BaseAssetLaunchingHelper):
         user = queries.insert_user()
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
     base_asset.confd.expect_update_forwards(
         user['id'],
@@ -871,7 +871,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
         extension = queries.insert_extension(type='outcall', typeval=call['id'])
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
         'WAZO_USERUUID': user['uuid'],
         'XIVO_DSTID': dial_pattern['id'],
         'WAZO_DSTNUM': extension['exten'],
@@ -955,7 +955,7 @@ def test_paging(base_asset: BaseAssetLaunchingHelper):
         queries.insert_user_line(user['id'], line_2['id'])
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
 
     recv_vars, recv_cmds = base_asset.agid.paging(
@@ -988,7 +988,7 @@ def test_phone_get_features(base_asset: BaseAssetLaunchingHelper):
             enablednd=1,
         )
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
     # Lookup by UUID
     base_asset.confd.expect_forwards(
@@ -1025,7 +1025,7 @@ def test_phone_progfunckey_devstate(base_asset: BaseAssetLaunchingHelper):
         user = queries.insert_user()
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
 
     recv_vars, recv_cmds = base_asset.agid.phone_progfunckey_devstate(
@@ -1046,7 +1046,7 @@ def test_phone_progfunckey(base_asset: BaseAssetLaunchingHelper):
         extension = queries.insert_feature_extension(feature='fwdbusy')
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
 
     recv_vars, recv_cmds = base_asset.agid.phone_progfunckey(
@@ -1224,7 +1224,7 @@ def test_user_get_vmbox(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
         'XIVO_BASE_CONTEXT': context['name'],
     }
     recv_vars, recv_cmds = base_asset.agid.user_get_vmbox(
@@ -1249,7 +1249,7 @@ def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
         'WAZO_DSTNUM': extension['exten'],
         'XIVO_OUTCALLID': '42',
     }
@@ -1272,7 +1272,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
         'XIVO_VMBOXID': voicemail['id'],
         'XIVO_BASE_CONTEXT': context['name'],
     }

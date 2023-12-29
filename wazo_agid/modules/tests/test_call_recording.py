@@ -30,7 +30,7 @@ class TestRecordCaller(TestCase):
     ):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '',
+            'WAZO_USERID': '',
             'WAZO_USERUUID': '',
         }
         self.agi.get_variable.side_effect = agi_variables.get
@@ -40,7 +40,7 @@ class TestRecordCaller(TestCase):
         calls = [
             call('WAZO_CALL_RECORD_ACTIVE'),
             call('WAZO_USERUUID'),
-            call('XIVO_USERID'),
+            call('WAZO_USERID'),
         ]
         self.agi.get_variable.assert_has_calls(calls)
 
@@ -53,7 +53,7 @@ class TestRecordCaller(TestCase):
     ):
         agi_variables = {
             'WAZO_CALL_RECORD_ACTIVE': '',
-            'XIVO_USERID': '1',
+            'WAZO_USERID': '1',
             'WAZO_USERUUID': '',
         }
         self.agi.get_variable.side_effect = agi_variables.get

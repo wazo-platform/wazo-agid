@@ -17,9 +17,9 @@ def vmbox_get_info(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> No
     xlen = len(args)
     if xlen > 0 and args[0] != '':
         try:
-            xivo_userid = agi.get_variable('XIVO_USERID')
-            if xivo_userid:
-                caller = objects.User(agi, cursor, xid=int(xivo_userid))
+            userid = agi.get_variable('WAZO_USERID')
+            if userid:
+                caller = objects.User(agi, cursor, xid=int(userid))
             context = agi.get_variable('XIVO_BASE_CONTEXT')
             if not context:
                 agi.dp_break('Could not get the context of the caller')

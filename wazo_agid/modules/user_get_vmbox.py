@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 def user_get_vmbox(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    userid = agi.get_variable('XIVO_USERID')
+    userid = agi.get_variable('WAZO_USERID')
 
     xlen = len(args)
     user: objects.User

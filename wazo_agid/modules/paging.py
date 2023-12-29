@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def paging(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    userid = agi.get_variable('XIVO_USERID')
+    userid = agi.get_variable('WAZO_USERID')
 
     try:
         paging_entry = objects.Paging(agi, cursor, args[0], userid)

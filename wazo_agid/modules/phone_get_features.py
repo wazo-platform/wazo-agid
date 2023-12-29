@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def phone_get_features(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    userid = agi.get_variable('XIVO_USERID')
+    userid = agi.get_variable('WAZO_USERID')
 
     try:
         user = objects.User(agi, cursor, int(userid))
