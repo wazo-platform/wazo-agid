@@ -89,7 +89,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['CHANNEL(musicclass)'] == user['musiconhold']
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
     assert recv_vars['XIVO_USERPREPROCESS_SUBROUTINE'] == ''
-    assert recv_vars['XIVO_MOBILEPHONENUMBER'] == ''
+    assert recv_vars['WAZO_MOBILEPHONENUMBER'] == ''
     assert recv_vars['WAZO_VIDEO_ENABLED'] == '1'
     assert recv_vars['XIVO_PATH'] == 'user'
     assert recv_vars['XIVO_PATH_ID'] == str(user['id'])

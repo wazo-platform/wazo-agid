@@ -333,7 +333,7 @@ class UserFeatures(Handler):
             mobilephonenumber = self._user.mobilephonenumber
         else:
             mobilephonenumber = ""
-        self._agi.set_variable('XIVO_MOBILEPHONENUMBER', mobilephonenumber)
+        self._agi.set_variable('WAZO_MOBILEPHONENUMBER', mobilephonenumber)
 
     def _set_preprocess_subroutine(self):
         if self._user.preprocess_subroutine:
