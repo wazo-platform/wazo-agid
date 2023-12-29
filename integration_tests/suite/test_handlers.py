@@ -634,7 +634,7 @@ def test_incoming_agent_set_features(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_QUEUEOPTIONS': 'hitPwxk',
+        'WAZO_QUEUEOPTIONS': 'hitPwxk',
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_agent_set_features(
         agent['id'], variables=variables
@@ -814,7 +814,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_REAL_NUMBER'] == queue['number']
     assert recv_vars['XIVO_REAL_CONTEXT'] == 'default'
     assert recv_vars['WAZO_QUEUENAME'] == queue['name']
-    assert recv_vars['XIVO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
+    assert recv_vars['WAZO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
     assert recv_vars['XIVO_QUEUENEEDANSWER'] == '0'
     assert recv_vars['XIVO_QUEUEURL'] == 'localhost'
     assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == 'override'
