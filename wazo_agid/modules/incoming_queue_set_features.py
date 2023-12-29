@@ -55,7 +55,7 @@ def incoming_queue_set_features(agi, cursor, args):
 
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
-    agi.set_variable('XIVO_QUEUENAME', queue.name)
+    agi.set_variable('WAZO_QUEUENAME', queue.name)
     agi.set_variable('XIVO_QUEUEOPTIONS', options)
     agi.set_variable('XIVO_QUEUENEEDANSWER', needanswer)
     agi.set_variable('XIVO_QUEUEURL', queue.url)
