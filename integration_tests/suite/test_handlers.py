@@ -726,7 +726,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_GROUPNEEDANSWER'] == '0'
     assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
-    assert recv_vars['XIVO_GROUPNAME'] == 'incoming_group_set_features'
+    assert recv_vars['WAZO_GROUPNAME'] == 'incoming_group_set_features'
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
 
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTION'] == 'group'
