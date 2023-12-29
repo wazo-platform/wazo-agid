@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     dstnum = agi.get_variable('XIVO_REAL_NUMBER')
     context = agi.get_variable('XIVO_REAL_CONTEXT')
-    origin = agi.get_variable('XIVO_CALLORIGIN')
+    origin = agi.get_variable('WAZO_CALLORIGIN')
     referer = agi.get_variable('XIVO_FWD_REFERER').split(':', 1)[0]
     forwarded = agi.get_variable('XIVO_CALLFORWARDED')
     # TODO: maybe replace number@context with user id in conf file ?

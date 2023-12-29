@@ -32,7 +32,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
         'XIVO_USERID': user['id'],
         'XIVO_DSTID': user['id'],
         'XIVO_DST_EXTEN_ID': extension['id'],
-        'XIVO_CALLORIGIN': 'patate',
+        'WAZO_CALLORIGIN': 'patate',
         'XIVO_SRCNUM': extension['exten'],
         'XIVO_DSTNUM': 1800,
         'XIVO_BASE_CONTEXT': extension['context'],
@@ -348,7 +348,7 @@ def test_call_record_caller(base_asset: BaseAssetLaunchingHelper):
         'WAZO_CALL_RECORD_ACTIVE': '0',
         'WAZO_USERUUID': user['uuid'],
         'WAZO_TENANT_UUID': user['tenant_uuid'],
-        'XIVO_CALLORIGIN': 'intern',
+        'WAZO_CALLORIGIN': 'intern',
         'XIVO_OUTCALLID': '',
         'WAZO_MIXMONITOR_OPTIONS': 'mix-options',
     }
@@ -471,7 +471,7 @@ def test_getring(base_asset: BaseAssetLaunchingHelper):
     variables = {
         'XIVO_REAL_NUMBER': '1001',
         'XIVO_REAL_CONTEXT': 'default',
-        'XIVO_CALLORIGIN': 'patate',
+        'WAZO_CALLORIGIN': 'patate',
         'XIVO_FWD_REFERER': 'foo:bar',
         'XIVO_CALLFORWARDED': '1',
     }
@@ -520,7 +520,7 @@ def test_group_answered_call(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_CALL_RECORD_ACTIVE': '0',
-        'XIVO_CALLORIGIN': 'extern',
+        'WAZO_CALLORIGIN': 'extern',
     }
 
     base_asset.calld.expect_calls_record_start(1)
@@ -1121,7 +1121,7 @@ def test_queue_answered_call(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_CALL_RECORD_ACTIVE': '0',
-        'XIVO_CALLORIGIN': 'extern',
+        'WAZO_CALLORIGIN': 'extern',
     }
 
     base_asset.calld.expect_calls_record_start(1)

@@ -36,7 +36,7 @@ class TestUserFeatures(_BaseTestCase):
         self._variables = {
             'XIVO_USERID': '42',
             'XIVO_DSTID': '33',
-            'XIVO_CALLORIGIN': 'my_origin',
+            'WAZO_CALLORIGIN': 'my_origin',
             'XIVO_SRCNUM': '1000',
             'XIVO_DSTNUM': '1003',
             'XIVO_DST_EXTEN_ID': '983274',
@@ -64,7 +64,7 @@ class TestUserFeatures(_BaseTestCase):
 
             self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
             self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
-            self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
+            self.assertEqual(userfeatures._zone, self._variables['WAZO_CALLORIGIN'])
             self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
             self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
             self.assertEqual(
