@@ -722,7 +722,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_GROUPOPTIONS'] == 'ir'
+    assert recv_vars['WAZO_GROUPOPTIONS'] == 'ir'
     assert recv_vars['XIVO_GROUPNEEDANSWER'] == '0'
     assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
