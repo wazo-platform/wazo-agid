@@ -17,7 +17,7 @@ ASTERISK_GID: int = None  # type: ignore[assignment]
 
 def callback(agi: FastAGI, cursor: DictCursor, args: list):
     context = args[0]
-    srcnum = agi.get_variable('XIVO_SRCNUM')
+    srcnum = agi.get_variable('WAZO_SRCNUM')
     spooldir = agi.get_variable('AST_CONFIG(asterisk.conf,directories,astspooldir)')
 
     if srcnum in (None, ''):

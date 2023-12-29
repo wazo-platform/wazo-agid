@@ -33,7 +33,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
         'XIVO_DSTID': user['id'],
         'XIVO_DST_EXTEN_ID': extension['id'],
         'WAZO_CALLORIGIN': 'patate',
-        'XIVO_SRCNUM': extension['exten'],
+        'WAZO_SRCNUM': extension['exten'],
         'WAZO_DSTNUM': 1800,
         'XIVO_BASE_CONTEXT': extension['context'],
         'WAZO_USER_MOH_UUID': '',
@@ -207,7 +207,7 @@ def test_callback(base_asset: BaseAssetLaunchingHelper):
 
     extension_number, context = extension['exten'], extension['context']
     variables = {
-        'XIVO_SRCNUM': extension_number,
+        'WAZO_SRCNUM': extension_number,
         'AST_CONFIG(asterisk.conf,directories,astspooldir)': '/var/spool/asterisk',
     }
     chown = 'asterisk:asterisk'
@@ -875,7 +875,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
         'WAZO_USERUUID': user['uuid'],
         'XIVO_DSTID': dial_pattern['id'],
         'WAZO_DSTNUM': extension['exten'],
-        'XIVO_SRCNUM': extension['exten'],
+        'WAZO_SRCNUM': extension['exten'],
         'XIVO_BASE_CONTEXT': extension['context'],
         'WAZO_TENANT_UUID': '',
         'XIVO_PATH': '',
