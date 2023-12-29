@@ -34,7 +34,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
         'XIVO_DST_EXTEN_ID': extension['id'],
         'WAZO_CALLORIGIN': 'patate',
         'XIVO_SRCNUM': extension['exten'],
-        'XIVO_DSTNUM': 1800,
+        'WAZO_DSTNUM': 1800,
         'XIVO_BASE_CONTEXT': extension['context'],
         'WAZO_USER_MOH_UUID': '',
         'WAZO_CALL_RECORD_ACTIVE': '0',
@@ -594,7 +594,7 @@ def test_group_member_remove(base_asset: BaseAssetLaunchingHelper):
 
 def test_handle_fax(base_asset: BaseAssetLaunchingHelper):
     variables = {
-        'XIVO_DSTNUM': 'default',
+        'WAZO_DSTNUM': 'default',
     }
     recv_vars, recv_cmds = base_asset.agid.handle_fax(
         '/var/lib/wazo-agid/blank.tiff', 'test@localhost', variables=variables
@@ -874,7 +874,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
         'XIVO_USERID': user['id'],
         'WAZO_USERUUID': user['uuid'],
         'XIVO_DSTID': dial_pattern['id'],
-        'XIVO_DSTNUM': extension['exten'],
+        'WAZO_DSTNUM': extension['exten'],
         'XIVO_SRCNUM': extension['exten'],
         'XIVO_BASE_CONTEXT': extension['context'],
         'WAZO_TENANT_UUID': '',
@@ -1250,7 +1250,7 @@ def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'XIVO_USERID': user['id'],
-        'XIVO_DSTNUM': extension['exten'],
+        'WAZO_DSTNUM': extension['exten'],
         'XIVO_OUTCALLID': '42',
     }
     recv_vars, recv_cmds = base_asset.agid.user_set_call_rights(
