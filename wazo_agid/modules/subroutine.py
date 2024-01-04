@@ -1,4 +1,4 @@
-# Copyright 2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2023-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -23,6 +23,7 @@ VARIABLE_MAP = {
     'WAZO_MOBILEPHONENUMBER': 'XIVO_MOBILEPHONENUMBER',
     'WAZO_QUEUEOPTIONS': 'XIVO_QUEUEOPTIONS',
     'WAZO_SRCNUM': 'XIVO_SRCNUM',
+    'WAZO_DST_EXTEN_ID': 'XIVO_DST_EXTEN_ID',
 }
 ORIG_VALUE_TPL = 'WAZO_COMPAT_{new_name}_ORIG'
 

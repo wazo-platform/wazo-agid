@@ -1,4 +1,4 @@
-# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -39,7 +39,7 @@ class TestUserFeatures(_BaseTestCase):
             'WAZO_CALLORIGIN': 'my_origin',
             'WAZO_SRCNUM': '1000',
             'WAZO_DSTNUM': '1003',
-            'XIVO_DST_EXTEN_ID': '983274',
+            'WAZO_DST_EXTEN_ID': '983274',
             'XIVO_BASE_CONTEXT': 'default',
             'WAZO_CALL_RECORD_ACTIVE': '0',
             'WAZO_USER_MOH_UUID': '00000000-feed-dada-1ced-c0ffee000000',

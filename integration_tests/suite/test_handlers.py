@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     variables = {
         'WAZO_USERID': user['id'],
         'WAZO_DSTID': user['id'],
-        'XIVO_DST_EXTEN_ID': extension['id'],
+        'WAZO_DST_EXTEN_ID': extension['id'],
         'WAZO_CALLORIGIN': 'patate',
         'WAZO_SRCNUM': extension['exten'],
         'WAZO_DSTNUM': 1800,
