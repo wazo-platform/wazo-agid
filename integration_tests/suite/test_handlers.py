@@ -35,7 +35,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
         'WAZO_CALLORIGIN': 'patate',
         'WAZO_SRCNUM': extension['exten'],
         'WAZO_DSTNUM': 1800,
-        'XIVO_BASE_CONTEXT': extension['context'],
+        'WAZO_BASE_CONTEXT': extension['context'],
         'WAZO_USER_MOH_UUID': '',
         'WAZO_CALL_RECORD_ACTIVE': '0',
         'WAZO_FROMGROUP': '0',
@@ -876,7 +876,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
         'WAZO_DSTID': dial_pattern['id'],
         'WAZO_DSTNUM': extension['exten'],
         'WAZO_SRCNUM': extension['exten'],
-        'XIVO_BASE_CONTEXT': extension['context'],
+        'WAZO_BASE_CONTEXT': extension['context'],
         'WAZO_TENANT_UUID': '',
         'XIVO_PATH': '',
     }
@@ -1225,7 +1225,7 @@ def test_user_get_vmbox(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_USERID': user['id'],
-        'XIVO_BASE_CONTEXT': context['name'],
+        'WAZO_BASE_CONTEXT': context['name'],
     }
     recv_vars, recv_cmds = base_asset.agid.user_get_vmbox(
         extension['exten'], variables=variables
@@ -1274,7 +1274,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
     variables = {
         'WAZO_USERID': user['id'],
         'XIVO_VMBOXID': voicemail['id'],
-        'XIVO_BASE_CONTEXT': context['name'],
+        'WAZO_BASE_CONTEXT': context['name'],
     }
     recv_vars, recv_cmds = base_asset.agid.vmbox_get_info(
         voicemail['mailbox'], variables=variables

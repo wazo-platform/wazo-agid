@@ -40,7 +40,7 @@ class TestUserFeatures(_BaseTestCase):
             'WAZO_SRCNUM': '1000',
             'WAZO_DSTNUM': '1003',
             'WAZO_DST_EXTEN_ID': '983274',
-            'XIVO_BASE_CONTEXT': 'default',
+            'WAZO_BASE_CONTEXT': 'default',
             'WAZO_CALL_RECORD_ACTIVE': '0',
             'WAZO_USER_MOH_UUID': '00000000-feed-dada-1ced-c0ffee000000',
         }

@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -99,7 +99,7 @@ def _get_user_from_exten(agi, cursor, exten):
 
 
 def _get_context_of_calling_user(agi):
-    context = agi.get_variable('XIVO_BASE_CONTEXT')
+    context = agi.get_variable('WAZO_BASE_CONTEXT')
     if not context:
         agi.dp_break('Could not get the context of the caller')
     return context
