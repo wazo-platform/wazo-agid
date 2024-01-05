@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ def phone_get_features(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             agi.set_variable("XIVO_INCALLFILTER", int(enabled))
         elif service == 'enablednd':
             enabled = user.enablednd
-            agi.set_variable("XIVO_ENABLEDND", int(enabled))
+            agi.set_variable("WAZO_ENABLEDND", int(enabled))
 
 
 def _set_current_forwards(agi, user_id):

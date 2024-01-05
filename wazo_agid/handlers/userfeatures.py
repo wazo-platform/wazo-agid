@@ -398,7 +398,7 @@ class UserFeatures(Handler):
         return self._agi.set_variable('XIVO_SIMULTCALLS', self._user.simultcalls)
 
     def _set_enablednd(self):
-        self._agi.set_variable('XIVO_ENABLEDND', self._user.enablednd)
+        self._agi.set_variable('WAZO_ENABLEDND', self._user.enablednd)
 
     def _set_rna_from_dialaction(self):
         return self._set_fwd_from_dialaction('noanswer')

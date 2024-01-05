@@ -61,7 +61,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['WAZO_CALLOPTIONS'] == ''
     assert recv_vars['XIVO_SIMULTCALLS'] == str(user['simultcalls'])
     assert recv_vars['WAZO_RINGSECONDS'] == str(user['ringseconds'])
-    assert recv_vars['XIVO_ENABLEDND'] == str(user['enablednd'])
+    assert recv_vars['WAZO_ENABLEDND'] == str(user['enablednd'])
     assert recv_vars['XIVO_ENABLEVOICEMAIL'] == str(user['enablevoicemail'])
     assert recv_vars['XIVO_MAILBOX'] == ''
     assert recv_vars['XIVO_MAILBOX_CONTEXT'] == ''
@@ -1009,7 +1009,7 @@ def test_phone_get_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_ENABLEVOICEMAIL'] == '1'
     assert recv_vars['XIVO_CALLRECORD'] == '1'
     assert recv_vars['XIVO_INCALLFILTER'] == '1'
-    assert recv_vars['XIVO_ENABLEDND'] == '1'
+    assert recv_vars['WAZO_ENABLEDND'] == '1'
 
     assert recv_vars['XIVO_ENABLEBUSY'] == '1'
     assert recv_vars['XIVO_DESTBUSY'] == 'dest-busy'
