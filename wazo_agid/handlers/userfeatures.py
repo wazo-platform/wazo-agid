@@ -340,7 +340,7 @@ class UserFeatures(Handler):
             preprocess_subroutine = self._user.preprocess_subroutine
         else:
             preprocess_subroutine = ""
-        self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
+        self._agi.set_variable('WAZO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     def _set_call_record_enabled(self):
         is_being_recorded = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
