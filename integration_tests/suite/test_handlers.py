@@ -472,7 +472,7 @@ def test_getring(base_asset: BaseAssetLaunchingHelper):
         'XIVO_REAL_NUMBER': '1001',
         'XIVO_REAL_CONTEXT': 'default',
         'WAZO_CALLORIGIN': 'patate',
-        'XIVO_FWD_REFERER': 'foo:bar',
+        'WAZO_FWD_REFERER': 'foo:bar',
         'XIVO_CALLFORWARDED': '1',
     }
 
@@ -714,7 +714,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_DSTID': group['id'],
-        'XIVO_FWD_REFERER': group['id'],
+        'WAZO_FWD_REFERER': group['id'],
         'XIVO_PATH': None,
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_group_set_features(
@@ -803,7 +803,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_DSTID': queue['id'],
-        'XIVO_FWD_REFERER': queue['id'],
+        'WAZO_FWD_REFERER': queue['id'],
         'XIVO_PATH': '',
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_queue_set_features(

@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     dstnum = agi.get_variable('XIVO_REAL_NUMBER')
     context = agi.get_variable('XIVO_REAL_CONTEXT')
     origin = agi.get_variable('WAZO_CALLORIGIN')
-    referer = agi.get_variable('XIVO_FWD_REFERER').split(':', 1)[0]
+    referer = agi.get_variable('WAZO_FWD_REFERER').split(':', 1)[0]
     forwarded = agi.get_variable('XIVO_CALLFORWARDED')
     # TODO: maybe replace number@context with user id in conf file ?
     dstnum_context = f"{dstnum}@{context}"

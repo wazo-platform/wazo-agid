@@ -1,4 +1,4 @@
-# Copyright 2019-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2019-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ class TestGetRing(unittest.TestCase):
         variables = {
             'XIVO_REAL_NUMBER': '1001',
             'XIVO_REAL_CONTEXT': 'default',
-            'XIVO_FWD_REFERER': 'foo:bar',
+            'WAZO_FWD_REFERER': 'foo:bar',
         }
         self.agi.get_variable.side_effect = lambda var: variables.get(var)
 

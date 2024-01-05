@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from wazo_agid import agid, objects
 
 def incoming_queue_set_features(agi, cursor, args):
     queue_id = agi.get_variable('WAZO_DSTID')
-    referer = agi.get_variable('XIVO_FWD_REFERER')
+    referer = agi.get_variable('WAZO_FWD_REFERER')
 
     try:
         queue = objects.Queue(agi, cursor, int(queue_id))
