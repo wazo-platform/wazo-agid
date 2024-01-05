@@ -38,7 +38,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
         'XIVO_BASE_CONTEXT': extension['context'],
         'WAZO_USER_MOH_UUID': '',
         'WAZO_CALL_RECORD_ACTIVE': '0',
-        'XIVO_FROMGROUP': '0',
+        'WAZO_FROMGROUP': '0',
         'XIVO_PATH': '',
         f'PJSIP_ENDPOINT({line["name"]},webrtc)': 'no',
         f'PJSIP_DIAL_CONTACTS({line["name"]})': 'contact',

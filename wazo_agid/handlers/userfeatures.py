@@ -1,4 +1,4 @@
-# Copyright 2012-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -344,7 +344,7 @@ class UserFeatures(Handler):
 
     def _set_call_record_enabled(self):
         is_being_recorded = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
-        is_a_group_extension_member = self._agi.get_variable('XIVO_FROMGROUP') == '1'
+        is_a_group_extension_member = self._agi.get_variable('WAZO_FROMGROUP') == '1'
         if is_being_recorded or is_a_group_extension_member:
             return
 

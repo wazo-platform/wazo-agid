@@ -159,7 +159,7 @@ class TestUserFeatures(_BaseTestCase):
         self._agi.set_variable.assert_not_called()
 
     def test_set_call_record_enabled_from_group(self):
-        self._variables['XIVO_FROMGROUP'] = '1'
+        self._variables['WAZO_FROMGROUP'] = '1'
 
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock(
