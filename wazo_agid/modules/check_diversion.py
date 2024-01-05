@@ -1,4 +1,4 @@
-# Copyright 2010-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2010-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ def _is_agent_ratio_overrun(agi, queue, waiting_calls):
 
 def _set_diversion(agi, event, dialaction):
     agi.set_variable('XIVO_DIVERT_EVENT', event)
-    agi.set_variable('XIVO_FWD_TYPE', 'QUEUE_' + dialaction)
+    agi.set_variable('WAZO_FWD_TYPE', 'QUEUE_' + dialaction)
 
 
 agid.register(check_diversion)

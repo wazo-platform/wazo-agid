@@ -385,7 +385,7 @@ def test_check_diversion_hold_time(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_HOLDTIME'
-    assert recv_vars['XIVO_FWD_TYPE'] == 'QUEUE_QWAITTIME'
+    assert recv_vars['WAZO_FWD_TYPE'] == 'QUEUE_QWAITTIME'
 
 
 def test_check_diversion_wait_ratio(base_asset: BaseAssetLaunchingHelper):
@@ -403,7 +403,7 @@ def test_check_diversion_wait_ratio(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_CA_RATIO'
-    assert recv_vars['XIVO_FWD_TYPE'] == 'QUEUE_QWAITRATIO'
+    assert recv_vars['WAZO_FWD_TYPE'] == 'QUEUE_QWAITRATIO'
 
 
 def test_check_schedule(base_asset: BaseAssetLaunchingHelper):
