@@ -286,7 +286,7 @@ class UserFeatures(Handler):
             force_rewrite=True
         )
         self._agi.set_variable('WAZO_CALLFILTER', '1')
-        self._agi.set_variable('XIVO_CALLFILTER_MODE', callfilter.bosssecretary)
+        self._agi.set_variable('WAZO_CALLFILTER_MODE', callfilter.bosssecretary)
 
         return True
 
