@@ -1,4 +1,4 @@
-# Copyright 2010-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2010-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def check_schedule(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     schedule = objects.ScheduleDataMapper.get_from_path(cursor, path, path_id)
     schedule_state = schedule.compute_state_for_now()
 
-    agi.set_variable('XIVO_SCHEDULE_STATUS', schedule_state.state)
+    agi.set_variable('WAZO_SCHEDULE_STATUS', schedule_state.state)
     if schedule_state.state == 'closed':
         schedule_state.action.set_variables_in_agi(agi)
 

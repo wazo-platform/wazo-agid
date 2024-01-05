@@ -429,7 +429,7 @@ def test_check_schedule(base_asset: BaseAssetLaunchingHelper):
     recv_vars, recv_cmds = base_asset.agid.check_schedule(variables=variables)
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_SCHEDULE_STATUS'] == 'closed'
+    assert recv_vars['WAZO_SCHEDULE_STATUS'] == 'closed'
     assert recv_vars['XIVO_PATH'] == ''
     assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTION'] == 'sound'
     assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTIONARG1'] == '1'
