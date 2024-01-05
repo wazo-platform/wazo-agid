@@ -66,7 +66,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['XIVO_MAILBOX'] == ''
     assert recv_vars['XIVO_MAILBOX_CONTEXT'] == ''
     assert recv_vars['XIVO_USEREMAIL'] == ''
-    assert recv_vars['XIVO_ENABLEUNC'] == str(user['enableunc'])
+    assert recv_vars['WAZO_ENABLEUNC'] == str(user['enableunc'])
     assert recv_vars['XIVO_FWD_USER_UNC_ACTION'] == 'none'
     assert recv_vars['XIVO_FWD_USER_UNC_ACTIONARG1'] == ''
     assert recv_vars['XIVO_FWD_USER_UNC_ACTIONARG2'] == ''
@@ -1015,7 +1015,7 @@ def test_phone_get_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_DESTBUSY'] == 'dest-busy'
     assert recv_vars['XIVO_ENABLERNA'] == '1'
     assert recv_vars['XIVO_DESTRNA'] == 'dest-noanswer'
-    assert recv_vars['XIVO_ENABLEUNC'] == '0'
+    assert recv_vars['WAZO_ENABLEUNC'] == '0'
     assert recv_vars['XIVO_DESTUNC'] == 'dest-unconditional'
 
 

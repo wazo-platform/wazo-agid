@@ -464,7 +464,7 @@ class UserFeatures(Handler):
             unc_action = 'none'
             unc_actionarg1 = ""
             unc_actionarg2 = ""
-        self._agi.set_variable('XIVO_ENABLEUNC', self._user.enableunc)
+        self._agi.set_variable('WAZO_ENABLEUNC', self._user.enableunc)
         objects.DialAction.set_agi_variables(
             self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False
         )
