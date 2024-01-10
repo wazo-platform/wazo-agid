@@ -69,7 +69,7 @@ def post_subroutine_compat(
         # The old variable name has been used
         if compat_value != orig_value:
             msg = (
-                f'The {old_name} variable has been modified by a subroutine.'
+                f'The deprecated variable {old_name} has been modified by a subroutine.'
                 f' Use {new_name} instead'
             )
             logger.info(msg)
