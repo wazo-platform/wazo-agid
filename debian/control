@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Wazo Maintainers <dev@wazo.community>
 Build-Depends: debhelper (>= 9), dh-python, dh-systemd (>= 1.5), python3-all (>= 3.7), python3-setuptools
 Standards-Version: 3.9.6
-X-Python3-Version: >= 3.7, << 3.8
+X-Python3-Version: >= 3.7
 
 Package: wazo-agid
 Architecture: all
@@ -13,7 +13,7 @@ Depends: ${python3:Depends},
          ${misc:Depends},
          adduser,
          asterisk | asterisk-virtual,
-         python-tz,
+         python3-tz,
          python3-unidecode,
          rename,
          wazo-agentd-client-python3,
