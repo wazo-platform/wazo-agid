@@ -1,4 +1,4 @@
-# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -34,13 +34,13 @@ class TestUserFeatures(_BaseTestCase):
     def setUp(self):
         super().setUp()
         self._variables = {
-            'XIVO_USERID': '42',
-            'XIVO_DSTID': '33',
-            'XIVO_CALLORIGIN': 'my_origin',
-            'XIVO_SRCNUM': '1000',
-            'XIVO_DSTNUM': '1003',
-            'XIVO_DST_EXTEN_ID': '983274',
-            'XIVO_BASE_CONTEXT': 'default',
+            'WAZO_USERID': '42',
+            'WAZO_DSTID': '33',
+            'WAZO_CALLORIGIN': 'my_origin',
+            'WAZO_SRCNUM': '1000',
+            'WAZO_DSTNUM': '1003',
+            'WAZO_DST_EXTEN_ID': '983274',
+            'WAZO_BASE_CONTEXT': 'default',
             'WAZO_CALL_RECORD_ACTIVE': '0',
             'WAZO_USER_MOH_UUID': '00000000-feed-dada-1ced-c0ffee000000',
         }
@@ -62,11 +62,11 @@ class TestUserFeatures(_BaseTestCase):
         ):
             userfeatures._set_members()
 
-            self.assertEqual(userfeatures._userid, self._variables['XIVO_USERID'])
-            self.assertEqual(userfeatures._dstid, self._variables['XIVO_DSTID'])
-            self.assertEqual(userfeatures._zone, self._variables['XIVO_CALLORIGIN'])
-            self.assertEqual(userfeatures._srcnum, self._variables['XIVO_SRCNUM'])
-            self.assertEqual(userfeatures._dstnum, self._variables['XIVO_DSTNUM'])
+            self.assertEqual(userfeatures._userid, self._variables['WAZO_USERID'])
+            self.assertEqual(userfeatures._dstid, self._variables['WAZO_DSTID'])
+            self.assertEqual(userfeatures._zone, self._variables['WAZO_CALLORIGIN'])
+            self.assertEqual(userfeatures._srcnum, self._variables['WAZO_SRCNUM'])
+            self.assertEqual(userfeatures._dstnum, self._variables['WAZO_DSTNUM'])
             self.assertEqual(
                 userfeatures._moh_uuid, self._variables['WAZO_USER_MOH_UUID']
             )
@@ -88,7 +88,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._set_options()
 
         self._agi.set_variable.assert_called_once_with(
-            'XIVO_CALLOPTIONS', 'm(my-music-class)'
+            'WAZO_CALLOPTIONS', 'm(my-music-class)'
         )
 
     def test_set_caller(self):
@@ -98,7 +98,7 @@ class TestUserFeatures(_BaseTestCase):
 
         self.assertTrue(userfeatures._caller is None)
 
-        userfeatures._userid = self._variables['XIVO_USERID']
+        userfeatures._userid = self._variables['WAZO_USERID']
 
         with patch.object(objects.User, '__init__') as user_init:
             user_init.return_value = None
@@ -106,7 +106,7 @@ class TestUserFeatures(_BaseTestCase):
             userfeatures._set_caller()
 
             user_init.assert_called_with(
-                self._agi, self._cursor, int(self._variables['XIVO_USERID'])
+                self._agi, self._cursor, int(self._variables['WAZO_USERID'])
             )
         self.assertTrue(userfeatures._caller is not None)
         self.assertTrue(isinstance(userfeatures._caller, objects.User))
@@ -159,7 +159,7 @@ class TestUserFeatures(_BaseTestCase):
         self._agi.set_variable.assert_not_called()
 
     def test_set_call_record_enabled_from_group(self):
-        self._variables['XIVO_FROMGROUP'] = '1'
+        self._variables['WAZO_FROMGROUP'] = '1'
 
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         userfeatures._user = Mock(
@@ -189,7 +189,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._set_line()
         self.assertEqual(userfeatures.lines, [])
 
-        userfeatures._dstid = self._variables['XIVO_DSTID']
+        userfeatures._dstid = self._variables['WAZO_DSTID']
         user_lines = [Mock(user_id=1, line_id=10)]
         line = Mock(main_line=True)
         extension = Mock(exten='1234')
@@ -218,7 +218,7 @@ class TestUserFeatures(_BaseTestCase):
             self.assertTrue(userfeatures._user is None)
             self.assertEqual(userfeatures._set_xivo_user_name.call_count, 0)  # type: ignore
 
-            userfeatures._dstid = self._variables['XIVO_DSTID']
+            userfeatures._dstid = self._variables['WAZO_DSTID']
 
             with patch.object(objects.User, '__init__') as user_init:
                 user_init.return_value = None

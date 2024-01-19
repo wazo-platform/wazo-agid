@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 def _user_set_call_rights(
     agi: agid.FastAGI, cursor: DictCursor, args: list[str]
 ) -> None:
-    userid = agi.get_variable('XIVO_USERID')
-    dstnum = agi.get_variable('XIVO_DSTNUM')
+    userid = agi.get_variable('WAZO_USERID')
+    dstnum = agi.get_variable('WAZO_DSTNUM')
     outcallid = agi.get_variable('XIVO_OUTCALLID')
 
     cursor.execute("SELECT rightcallid, exten FROM rightcallexten")

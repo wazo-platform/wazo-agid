@@ -9,7 +9,7 @@ from wazo_agid import agid, objects
 
 
 def phone_progfunckey(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    userid = agi.get_variable('XIVO_USERID')
+    userid = agi.get_variable('WAZO_USERID')
     xlen = len(args)
 
     if xlen != 1:

@@ -118,7 +118,7 @@ class GroupFeatures(Handler):
     def _set_vars(self) -> None:
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
         self._agi.set_variable('XIVO_REAL_CONTEXT', self._context)
-        self._agi.set_variable('XIVO_GROUPNAME', self._name)
+        self._agi.set_variable('WAZO_GROUPNAME', self._name)
         if self._musicclass:
             self._agi.set_variable('CHANNEL(musicclass)', self._musicclass)
 
@@ -148,7 +148,7 @@ class GroupFeatures(Handler):
         if self._mark_answered_elsewhere:
             options += "C"
 
-        self._agi.set_variable('XIVO_GROUPOPTIONS', options)
+        self._agi.set_variable('WAZO_GROUPOPTIONS', options)
         self._agi.set_variable('XIVO_GROUPNEEDANSWER', needanswer)
 
     def _set_preprocess_subroutine(self) -> None:

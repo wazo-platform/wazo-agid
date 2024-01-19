@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def phone_get_features(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    userid = agi.get_variable('XIVO_USERID')
+    userid = agi.get_variable('WAZO_USERID')
 
     try:
         user = objects.User(agi, cursor, int(userid))
@@ -33,7 +33,7 @@ def phone_get_features(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             agi.set_variable("XIVO_INCALLFILTER", int(enabled))
         elif service == 'enablednd':
             enabled = user.enablednd
-            agi.set_variable("XIVO_ENABLEDND", int(enabled))
+            agi.set_variable("WAZO_ENABLEDND", int(enabled))
 
 
 def _set_current_forwards(agi, user_id):
@@ -46,7 +46,7 @@ def _set_current_forwards(agi, user_id):
     agi.set_variable('XIVO_DESTRNA', _extract_and_format_destination(noanswer_forward))
     unconditional_forward = forwards['unconditional']
     agi.set_variable(
-        'XIVO_ENABLEUNC', _extract_and_format_enabled(unconditional_forward)
+        'WAZO_ENABLEUNC', _extract_and_format_enabled(unconditional_forward)
     )
     agi.set_variable(
         'XIVO_DESTUNC', _extract_and_format_destination(unconditional_forward)

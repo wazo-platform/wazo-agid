@@ -1,4 +1,4 @@
-# Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ class TestGetFeatures(unittest.TestCase):
             call('XIVO_DESTBUSY', '1234'),
             call('XIVO_ENABLERNA', 0),
             call('XIVO_DESTRNA', '5678'),
-            call('XIVO_ENABLEUNC', 0),
+            call('WAZO_ENABLEUNC', 0),
             call('XIVO_DESTUNC', ''),
         ]
         self._agi.set_variable.assert_has_calls(expected_calls)
@@ -46,7 +46,7 @@ class TestGetFeatures(unittest.TestCase):
             call('XIVO_DESTBUSY', ''),
             call('XIVO_ENABLERNA', 0),
             call('XIVO_DESTRNA', ''),
-            call('XIVO_ENABLEUNC', 0),
+            call('WAZO_ENABLEUNC', 0),
             call('XIVO_DESTUNC', ''),
         ]
         self._agi.set_variable.assert_has_calls(expected_calls)

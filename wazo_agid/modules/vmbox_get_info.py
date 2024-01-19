@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -17,10 +17,10 @@ def vmbox_get_info(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> No
     xlen = len(args)
     if xlen > 0 and args[0] != '':
         try:
-            xivo_userid = agi.get_variable('XIVO_USERID')
-            if xivo_userid:
-                caller = objects.User(agi, cursor, xid=int(xivo_userid))
-            context = agi.get_variable('XIVO_BASE_CONTEXT')
+            userid = agi.get_variable('WAZO_USERID')
+            if userid:
+                caller = objects.User(agi, cursor, xid=int(userid))
+            context = agi.get_variable('WAZO_BASE_CONTEXT')
             if not context:
                 agi.dp_break('Could not get the context of the caller')
 

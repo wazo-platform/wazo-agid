@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -29,16 +29,16 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
-        'XIVO_DSTID': user['id'],
-        'XIVO_DST_EXTEN_ID': extension['id'],
-        'XIVO_CALLORIGIN': 'patate',
-        'XIVO_SRCNUM': extension['exten'],
-        'XIVO_DSTNUM': 1800,
-        'XIVO_BASE_CONTEXT': extension['context'],
+        'WAZO_USERID': user['id'],
+        'WAZO_DSTID': user['id'],
+        'WAZO_DST_EXTEN_ID': extension['id'],
+        'WAZO_CALLORIGIN': 'patate',
+        'WAZO_SRCNUM': extension['exten'],
+        'WAZO_DSTNUM': 1800,
+        'WAZO_BASE_CONTEXT': extension['context'],
         'WAZO_USER_MOH_UUID': '',
         'WAZO_CALL_RECORD_ACTIVE': '0',
-        'XIVO_FROMGROUP': '0',
+        'WAZO_FROMGROUP': '0',
         'XIVO_PATH': '',
         f'PJSIP_ENDPOINT({line["name"]},webrtc)': 'no',
         f'PJSIP_DIAL_CONTACTS({line["name"]})': 'contact',
@@ -57,16 +57,16 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['XIVO_DST_REDIRECTING_NUM'] == extension['exten']
     assert recv_vars['WAZO_DST_UUID'] == user['uuid']
     assert recv_vars['WAZO_DST_TENANT_UUID'] == user['tenant_uuid']
-    assert recv_vars['XIVO_INTERFACE'] == 'contact'
-    assert recv_vars['XIVO_CALLOPTIONS'] == ''
-    assert recv_vars['XIVO_SIMULTCALLS'] == str(user['simultcalls'])
-    assert recv_vars['XIVO_RINGSECONDS'] == str(user['ringseconds'])
-    assert recv_vars['XIVO_ENABLEDND'] == str(user['enablednd'])
+    assert recv_vars['WAZO_INTERFACE'] == 'contact'
+    assert recv_vars['WAZO_CALLOPTIONS'] == ''
+    assert recv_vars['WAZO_SIMULTCALLS'] == str(user['simultcalls'])
+    assert recv_vars['WAZO_RINGSECONDS'] == str(user['ringseconds'])
+    assert recv_vars['WAZO_ENABLEDND'] == str(user['enablednd'])
     assert recv_vars['XIVO_ENABLEVOICEMAIL'] == str(user['enablevoicemail'])
     assert recv_vars['XIVO_MAILBOX'] == ''
     assert recv_vars['XIVO_MAILBOX_CONTEXT'] == ''
     assert recv_vars['XIVO_USEREMAIL'] == ''
-    assert recv_vars['XIVO_ENABLEUNC'] == str(user['enableunc'])
+    assert recv_vars['WAZO_ENABLEUNC'] == str(user['enableunc'])
     assert recv_vars['XIVO_FWD_USER_UNC_ACTION'] == 'none'
     assert recv_vars['XIVO_FWD_USER_UNC_ACTIONARG1'] == ''
     assert recv_vars['XIVO_FWD_USER_UNC_ACTIONARG2'] == ''
@@ -88,8 +88,8 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['XIVO_FWD_USER_CHANUNAVAIL_ACTIONARG2'] == ''
     assert recv_vars['CHANNEL(musicclass)'] == user['musiconhold']
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
-    assert recv_vars['XIVO_USERPREPROCESS_SUBROUTINE'] == ''
-    assert recv_vars['XIVO_MOBILEPHONENUMBER'] == ''
+    assert recv_vars['WAZO_USERPREPROCESS_SUBROUTINE'] == ''
+    assert recv_vars['WAZO_MOBILEPHONENUMBER'] == ''
     assert recv_vars['WAZO_VIDEO_ENABLED'] == '1'
     assert recv_vars['XIVO_PATH'] == 'user'
     assert recv_vars['XIVO_PATH_ID'] == str(user['id'])
@@ -207,7 +207,7 @@ def test_callback(base_asset: BaseAssetLaunchingHelper):
 
     extension_number, context = extension['exten'], extension['context']
     variables = {
-        'XIVO_SRCNUM': extension_number,
+        'WAZO_SRCNUM': extension_number,
         'AST_CONFIG(asterisk.conf,directories,astspooldir)': '/var/spool/asterisk',
     }
     chown = 'asterisk:asterisk'
@@ -286,7 +286,7 @@ def test_callfilter(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
     recv_vars, recv_cmds = base_asset.agid.callfilter(
         call_filter_member['id'], variables=variables
@@ -348,7 +348,7 @@ def test_call_record_caller(base_asset: BaseAssetLaunchingHelper):
         'WAZO_CALL_RECORD_ACTIVE': '0',
         'WAZO_USERUUID': user['uuid'],
         'WAZO_TENANT_UUID': user['tenant_uuid'],
-        'XIVO_CALLORIGIN': 'intern',
+        'WAZO_CALLORIGIN': 'intern',
         'XIVO_OUTCALLID': '',
         'WAZO_MIXMONITOR_OPTIONS': 'mix-options',
     }
@@ -376,7 +376,7 @@ def test_check_diversion_hold_time(base_asset: BaseAssetLaunchingHelper):
         queue = queries.insert_queue(name=queue_name, waittime=5)
 
     variables = {
-        'XIVO_DSTID': queue['id'],
+        'WAZO_DSTID': queue['id'],
         f'QUEUE_WAITING_COUNT({queue_name})': '1',
         'QUEUEHOLDTIME': '6',
     }
@@ -385,7 +385,7 @@ def test_check_diversion_hold_time(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_HOLDTIME'
-    assert recv_vars['XIVO_FWD_TYPE'] == 'QUEUE_QWAITTIME'
+    assert recv_vars['WAZO_FWD_TYPE'] == 'QUEUE_QWAITTIME'
 
 
 def test_check_diversion_wait_ratio(base_asset: BaseAssetLaunchingHelper):
@@ -394,7 +394,7 @@ def test_check_diversion_wait_ratio(base_asset: BaseAssetLaunchingHelper):
         queue = queries.insert_queue(name=queue_name, waitratio=1.2)
 
     variables = {
-        'XIVO_DSTID': queue['id'],
+        'WAZO_DSTID': queue['id'],
         f'QUEUE_WAITING_COUNT({queue_name})': '2',
         f'QUEUE_MEMBER({queue_name},logged)': '2',
     }
@@ -403,7 +403,7 @@ def test_check_diversion_wait_ratio(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_DIVERT_EVENT'] == 'DIVERT_CA_RATIO'
-    assert recv_vars['XIVO_FWD_TYPE'] == 'QUEUE_QWAITRATIO'
+    assert recv_vars['WAZO_FWD_TYPE'] == 'QUEUE_QWAITRATIO'
 
 
 def test_check_schedule(base_asset: BaseAssetLaunchingHelper):
@@ -429,7 +429,7 @@ def test_check_schedule(base_asset: BaseAssetLaunchingHelper):
     recv_vars, recv_cmds = base_asset.agid.check_schedule(variables=variables)
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_SCHEDULE_STATUS'] == 'closed'
+    assert recv_vars['WAZO_SCHEDULE_STATUS'] == 'closed'
     assert recv_vars['XIVO_PATH'] == ''
     assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTION'] == 'sound'
     assert recv_vars['XIVO_FWD_SCHEDULE_OUT_ACTIONARG1'] == '1'
@@ -438,13 +438,13 @@ def test_check_schedule(base_asset: BaseAssetLaunchingHelper):
 
 def test_ignore_b_option(base_asset: BaseAssetLaunchingHelper):
     variables = {
-        'XIVO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
+        'WAZO_CALLOPTIONS': 'Xb(foobaz^s^1)B(foobar^s^1)',
     }
 
     recv_vars, recv_cmds = base_asset.agid.ignore_b_option(variables=variables)
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_CALLOPTIONS'] == 'XB(foobar^s^1)'
+    assert recv_vars['WAZO_CALLOPTIONS'] == 'XB(foobar^s^1)'
 
 
 def test_fwdundoall(base_asset: BaseAssetLaunchingHelper):
@@ -452,7 +452,7 @@ def test_fwdundoall(base_asset: BaseAssetLaunchingHelper):
         user = queries.insert_user()
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
     base_asset.confd.expect_update_forwards(
         user['id'],
@@ -471,8 +471,8 @@ def test_getring(base_asset: BaseAssetLaunchingHelper):
     variables = {
         'XIVO_REAL_NUMBER': '1001',
         'XIVO_REAL_CONTEXT': 'default',
-        'XIVO_CALLORIGIN': 'patate',
-        'XIVO_FWD_REFERER': 'foo:bar',
+        'WAZO_CALLORIGIN': 'patate',
+        'WAZO_FWD_REFERER': 'foo:bar',
         'XIVO_CALLFORWARDED': '1',
     }
 
@@ -520,7 +520,7 @@ def test_group_answered_call(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_CALL_RECORD_ACTIVE': '0',
-        'XIVO_CALLORIGIN': 'extern',
+        'WAZO_CALLORIGIN': 'extern',
     }
 
     base_asset.calld.expect_calls_record_start(1)
@@ -594,7 +594,7 @@ def test_group_member_remove(base_asset: BaseAssetLaunchingHelper):
 
 def test_handle_fax(base_asset: BaseAssetLaunchingHelper):
     variables = {
-        'XIVO_DSTNUM': 'default',
+        'WAZO_DSTNUM': 'default',
     }
     recv_vars, recv_cmds = base_asset.agid.handle_fax(
         '/var/lib/wazo-agid/blank.tiff', 'test@localhost', variables=variables
@@ -634,7 +634,7 @@ def test_incoming_agent_set_features(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_QUEUEOPTIONS': 'hitPwxk',
+        'WAZO_QUEUEOPTIONS': 'hitPwxk',
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_agent_set_features(
         agent['id'], variables=variables
@@ -651,7 +651,7 @@ def test_incoming_conference_set_features(base_asset: BaseAssetLaunchingHelper):
         conference = queries.insert_conference(name=name)
 
     variables = {
-        'XIVO_DSTID': conference['id'],
+        'WAZO_DSTID': conference['id'],
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_conference_set_features(
         variables=variables
@@ -682,7 +682,7 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'XIVO_INCALL_ID': call['id'],
-        'XIVO_DSTID': call['id'],
+        'WAZO_DSTID': call['id'],
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_did_set_features(
         variables=variables
@@ -713,8 +713,8 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
             )
 
     variables = {
-        'XIVO_DSTID': group['id'],
-        'XIVO_FWD_REFERER': group['id'],
+        'WAZO_DSTID': group['id'],
+        'WAZO_FWD_REFERER': group['id'],
         'XIVO_PATH': None,
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_group_set_features(
@@ -722,11 +722,11 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_GROUPOPTIONS'] == 'ir'
+    assert recv_vars['WAZO_GROUPOPTIONS'] == 'ir'
     assert recv_vars['XIVO_GROUPNEEDANSWER'] == '0'
     assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
-    assert recv_vars['XIVO_GROUPNAME'] == 'incoming_group_set_features'
+    assert recv_vars['WAZO_GROUPNAME'] == 'incoming_group_set_features'
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
 
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTION'] == 'group'
@@ -802,8 +802,8 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_DSTID': queue['id'],
-        'XIVO_FWD_REFERER': queue['id'],
+        'WAZO_DSTID': queue['id'],
+        'WAZO_FWD_REFERER': queue['id'],
         'XIVO_PATH': '',
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_queue_set_features(
@@ -813,8 +813,8 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_REAL_NUMBER'] == queue['number']
     assert recv_vars['XIVO_REAL_CONTEXT'] == 'default'
-    assert recv_vars['XIVO_QUEUENAME'] == queue['name']
-    assert recv_vars['XIVO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
+    assert recv_vars['WAZO_QUEUENAME'] == queue['name']
+    assert recv_vars['WAZO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
     assert recv_vars['XIVO_QUEUENEEDANSWER'] == '0'
     assert recv_vars['XIVO_QUEUEURL'] == 'localhost'
     assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == 'override'
@@ -871,12 +871,12 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
         extension = queries.insert_extension(type='outcall', typeval=call['id'])
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
         'WAZO_USERUUID': user['uuid'],
-        'XIVO_DSTID': dial_pattern['id'],
-        'XIVO_DSTNUM': extension['exten'],
-        'XIVO_SRCNUM': extension['exten'],
-        'XIVO_BASE_CONTEXT': extension['context'],
+        'WAZO_DSTID': dial_pattern['id'],
+        'WAZO_DSTNUM': extension['exten'],
+        'WAZO_SRCNUM': extension['exten'],
+        'WAZO_BASE_CONTEXT': extension['context'],
         'WAZO_TENANT_UUID': '',
         'XIVO_PATH': '',
     }
@@ -885,9 +885,9 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_CALLOPTIONS'] == 'T'
+    assert recv_vars['WAZO_CALLOPTIONS'] == 'T'
     assert recv_vars['CHANNEL(musicclass)'] == 'default'
-    assert recv_vars['XIVO_INTERFACE0'] == 'PJSIP'
+    assert recv_vars['WAZO_INTERFACE0'] == 'PJSIP'
     assert recv_vars['XIVO_TRUNKEXTEN0'] == f'{extension["exten"]}@{sip["name"]}'
     assert recv_vars['XIVO_TRUNKSUFFIX0'] == ''
     assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'
@@ -955,7 +955,7 @@ def test_paging(base_asset: BaseAssetLaunchingHelper):
         queries.insert_user_line(user['id'], line_2['id'])
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
 
     recv_vars, recv_cmds = base_asset.agid.paging(
@@ -988,7 +988,7 @@ def test_phone_get_features(base_asset: BaseAssetLaunchingHelper):
             enablednd=1,
         )
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
     # Lookup by UUID
     base_asset.confd.expect_forwards(
@@ -1009,13 +1009,13 @@ def test_phone_get_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_ENABLEVOICEMAIL'] == '1'
     assert recv_vars['XIVO_CALLRECORD'] == '1'
     assert recv_vars['XIVO_INCALLFILTER'] == '1'
-    assert recv_vars['XIVO_ENABLEDND'] == '1'
+    assert recv_vars['WAZO_ENABLEDND'] == '1'
 
     assert recv_vars['XIVO_ENABLEBUSY'] == '1'
     assert recv_vars['XIVO_DESTBUSY'] == 'dest-busy'
     assert recv_vars['XIVO_ENABLERNA'] == '1'
     assert recv_vars['XIVO_DESTRNA'] == 'dest-noanswer'
-    assert recv_vars['XIVO_ENABLEUNC'] == '0'
+    assert recv_vars['WAZO_ENABLEUNC'] == '0'
     assert recv_vars['XIVO_DESTUNC'] == 'dest-unconditional'
 
 
@@ -1025,7 +1025,7 @@ def test_phone_progfunckey_devstate(base_asset: BaseAssetLaunchingHelper):
         user = queries.insert_user()
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
 
     recv_vars, recv_cmds = base_asset.agid.phone_progfunckey_devstate(
@@ -1046,7 +1046,7 @@ def test_phone_progfunckey(base_asset: BaseAssetLaunchingHelper):
         extension = queries.insert_feature_extension(feature='fwdbusy')
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
     }
 
     recv_vars, recv_cmds = base_asset.agid.phone_progfunckey(
@@ -1121,7 +1121,7 @@ def test_queue_answered_call(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_CALL_RECORD_ACTIVE': '0',
-        'XIVO_CALLORIGIN': 'extern',
+        'WAZO_CALLORIGIN': 'extern',
     }
 
     base_asset.calld.expect_calls_record_start(1)
@@ -1224,8 +1224,8 @@ def test_user_get_vmbox(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
-        'XIVO_BASE_CONTEXT': context['name'],
+        'WAZO_USERID': user['id'],
+        'WAZO_BASE_CONTEXT': context['name'],
     }
     recv_vars, recv_cmds = base_asset.agid.user_get_vmbox(
         extension['exten'], variables=variables
@@ -1249,8 +1249,8 @@ def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
-        'XIVO_DSTNUM': extension['exten'],
+        'WAZO_USERID': user['id'],
+        'WAZO_DSTNUM': extension['exten'],
         'XIVO_OUTCALLID': '42',
     }
     recv_vars, recv_cmds = base_asset.agid.user_set_call_rights(
@@ -1272,9 +1272,9 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
         )
 
     variables = {
-        'XIVO_USERID': user['id'],
+        'WAZO_USERID': user['id'],
         'XIVO_VMBOXID': voicemail['id'],
-        'XIVO_BASE_CONTEXT': context['name'],
+        'WAZO_BASE_CONTEXT': context['name'],
     }
     recv_vars, recv_cmds = base_asset.agid.vmbox_get_info(
         voicemail['mailbox'], variables=variables

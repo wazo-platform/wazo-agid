@@ -32,7 +32,7 @@ class AnswerHandler(handler.Handler):
             agent_id = result.group(1)
             search_params = {'agent_id': int(agent_id)}
         else:
-            user_uuid = self._agi.get_variable('XIVO_USERUUID')
+            user_uuid = self._agi.get_variable('WAZO_USERUUID')
             if user_uuid:
                 search_params = {'xid': user_uuid}
 
@@ -46,7 +46,7 @@ class AnswerHandler(handler.Handler):
         if recording_is_on:
             return
 
-        external = self._agi.get_variable('XIVO_CALLORIGIN') == 'extern'
+        external = self._agi.get_variable('WAZO_CALLORIGIN') == 'extern'
         internal = not external
         should_record = any(
             [

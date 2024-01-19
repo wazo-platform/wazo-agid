@@ -44,7 +44,7 @@ class AnswerHandler(handler.Handler):
         if recording_is_on:
             return
 
-        external = self._agi.get_variable('XIVO_CALLORIGIN') == 'extern'
+        external = self._agi.get_variable('WAZO_CALLORIGIN') == 'extern'
         internal = not external
         should_record = any(
             [

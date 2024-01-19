@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ from wazo_agid import agid, objects
 
 
 def incoming_queue_set_features(agi, cursor, args):
-    queue_id = agi.get_variable('XIVO_DSTID')
-    referer = agi.get_variable('XIVO_FWD_REFERER')
+    queue_id = agi.get_variable('WAZO_DSTID')
+    referer = agi.get_variable('WAZO_FWD_REFERER')
 
     try:
         queue = objects.Queue(agi, cursor, int(queue_id))
@@ -55,8 +55,8 @@ def incoming_queue_set_features(agi, cursor, args):
 
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
-    agi.set_variable('XIVO_QUEUENAME', queue.name)
-    agi.set_variable('XIVO_QUEUEOPTIONS', options)
+    agi.set_variable('WAZO_QUEUENAME', queue.name)
+    agi.set_variable('WAZO_QUEUEOPTIONS', options)
     agi.set_variable('XIVO_QUEUENEEDANSWER', needanswer)
     agi.set_variable('XIVO_QUEUEURL', queue.url)
     agi.set_variable('XIVO_QUEUEANNOUNCEOVERRIDE', queue.announceoverride)
@@ -105,7 +105,7 @@ def _set_wrapup_time(agi, queue):
 
 
 def holdtime_announce(agi, cursor, args):
-    queue_id = agi.get_variable('XIVO_DSTID')
+    queue_id = agi.get_variable('WAZO_DSTID')
     try:
         queue = objects.Queue(agi, cursor, int(queue_id))
     except (ValueError, LookupError) as e:

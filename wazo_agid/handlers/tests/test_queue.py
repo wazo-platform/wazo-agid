@@ -1,4 +1,4 @@
-# Copyright 2021-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
@@ -37,7 +37,7 @@ class TestAnswerHandler(TestCase):
     @patch('wazo_agid.handlers.queue.objects.User')
     def test_get_user_user_member(self, User):
         user_uuid = 'e15b4765-719d-40d4-8bdd-ff578e2bef47'
-        chan_vars = {'XIVO_USERUUID': user_uuid}
+        chan_vars = {'WAZO_USERUUID': user_uuid}
         self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
         self.agi.env = {'agi_channel': 'PJSIP/wedontcare-00000001;1'}
 
@@ -50,7 +50,7 @@ class TestAnswerHandler(TestCase):
     def test_get_user_unknown_user(self, User):
         User.side_effect = LookupError
         user_uuid = 'unknown    '
-        chan_vars = {'XIVO_USERUUID': user_uuid}
+        chan_vars = {'WAZO_USERUUID': user_uuid}
         self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
 
         self.agi.env = {

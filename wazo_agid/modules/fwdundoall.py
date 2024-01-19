@@ -22,7 +22,7 @@ def fwdundoall(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
 
 
 def _get_id_of_calling_user(agi: FastAGI) -> int:
-    return int(agi.get_variable('XIVO_USERID'))
+    return int(agi.get_variable('WAZO_USERID'))
 
 
 def _user_disable_all_forwards(agi: FastAGI, user_id: int) -> None:

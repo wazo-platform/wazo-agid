@@ -11,7 +11,7 @@ from wazo_agid import agid, objects
 def phone_progfunckey_devstate(
     agi: agid.FastAGI, cursor: DictCursor, args: list[str]
 ) -> None:
-    userid = agi.get_variable('XIVO_USERID')
+    userid = agi.get_variable('WAZO_USERID')
     arg_count = len(args)
 
     if arg_count < 2:

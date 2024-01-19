@@ -1,4 +1,4 @@
-# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -67,5 +67,5 @@ class TestCheckDiversion(unittest.TestCase):
 
         check_diversion.check_diversion(self.agi, self.cursor, [])
 
-        expected = [call('XIVO_DIVERT_EVENT', ''), call('XIVO_FWD_TYPE', ANY)]
+        expected = [call('XIVO_DIVERT_EVENT', ''), call('WAZO_FWD_TYPE', ANY)]
         assert_that(self.agi.set_variable.call_args_list, equal_to(expected))

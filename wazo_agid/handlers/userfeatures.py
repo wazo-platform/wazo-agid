@@ -1,4 +1,4 @@
-# Copyright 2012-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -152,7 +152,7 @@ class UserFeatures(Handler):
 
     def _set_interfaces(self) -> None:
         interfaces = [self._build_interface_from_line(line) for line in self.lines]
-        self._agi.set_variable('XIVO_INTERFACE', '&'.join(interfaces))
+        self._agi.set_variable('WAZO_INTERFACE', '&'.join(interfaces))
 
     def _build_interface_from_line(self, line):
         protocol = line.protocol.upper()
@@ -285,8 +285,8 @@ class UserFeatures(Handler):
         CallerID(self._agi, self._cursor, "callfilter", callfilter.id).rewrite(
             force_rewrite=True
         )
-        self._agi.set_variable('XIVO_CALLFILTER', '1')
-        self._agi.set_variable('XIVO_CALLFILTER_MODE', callfilter.bosssecretary)
+        self._agi.set_variable('WAZO_CALLFILTER', '1')
+        self._agi.set_variable('WAZO_CALLFILTER_MODE', callfilter.bosssecretary)
 
         return True
 
@@ -333,18 +333,18 @@ class UserFeatures(Handler):
             mobilephonenumber = self._user.mobilephonenumber
         else:
             mobilephonenumber = ""
-        self._agi.set_variable('XIVO_MOBILEPHONENUMBER', mobilephonenumber)
+        self._agi.set_variable('WAZO_MOBILEPHONENUMBER', mobilephonenumber)
 
     def _set_preprocess_subroutine(self):
         if self._user.preprocess_subroutine:
             preprocess_subroutine = self._user.preprocess_subroutine
         else:
             preprocess_subroutine = ""
-        self._agi.set_variable('XIVO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
+        self._agi.set_variable('WAZO_USERPREPROCESS_SUBROUTINE', preprocess_subroutine)
 
     def _set_call_record_enabled(self):
         is_being_recorded = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
-        is_a_group_extension_member = self._agi.get_variable('XIVO_FROMGROUP') == '1'
+        is_a_group_extension_member = self._agi.get_variable('WAZO_FROMGROUP') == '1'
         if is_being_recorded or is_a_group_extension_member:
             return
 
@@ -380,10 +380,10 @@ class UserFeatures(Handler):
             options += "p"
         if self._moh:
             options += f'm({self._moh.name})'
-        self._agi.set_variable('XIVO_CALLOPTIONS', options)
+        self._agi.set_variable('WAZO_CALLOPTIONS', options)
 
     def _set_ringseconds(self):
-        self._set_not_zero_or_empty('XIVO_RINGSECONDS', self._user.ringseconds)
+        self._set_not_zero_or_empty('WAZO_RINGSECONDS', self._user.ringseconds)
 
     def _set_callfilter_ringseconds(self, name, value):
         self._set_not_zero_or_empty(f'XIVO_CALLFILTER_{name}', value)
@@ -395,10 +395,10 @@ class UserFeatures(Handler):
             self._agi.set_variable(name, '')
 
     def _set_simultcalls(self):
-        return self._agi.set_variable('XIVO_SIMULTCALLS', self._user.simultcalls)
+        return self._agi.set_variable('WAZO_SIMULTCALLS', self._user.simultcalls)
 
     def _set_enablednd(self):
-        self._agi.set_variable('XIVO_ENABLEDND', self._user.enablednd)
+        self._agi.set_variable('WAZO_ENABLEDND', self._user.enablednd)
 
     def _set_rna_from_dialaction(self):
         return self._set_fwd_from_dialaction('noanswer')
@@ -464,7 +464,7 @@ class UserFeatures(Handler):
             unc_action = 'none'
             unc_actionarg1 = ""
             unc_actionarg2 = ""
-        self._agi.set_variable('XIVO_ENABLEUNC', self._user.enableunc)
+        self._agi.set_variable('WAZO_ENABLEUNC', self._user.enableunc)
         objects.DialAction.set_agi_variables(
             self._agi, 'unc', 'user', unc_action, unc_actionarg1, unc_actionarg2, False
         )

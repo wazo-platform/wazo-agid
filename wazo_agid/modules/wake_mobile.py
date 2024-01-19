@@ -16,7 +16,7 @@ def wake_mobile(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
 
     video_enabled = agi.get_variable('WAZO_VIDEO_ENABLED')
     ring_time = (
-        agi.get_variable('WAZO_RING_TIME') or agi.get_variable('XIVO_RINGSECONDS') or 30
+        agi.get_variable('WAZO_RING_TIME') or agi.get_variable('WAZO_RINGSECONDS') or 30
     )
     agi.appexec(
         'UserEvent',

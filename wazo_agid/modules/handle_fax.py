@@ -47,7 +47,7 @@ def _convert_tiff_to_pdf(tiff_file: str, pdf_file: str | None = None) -> str:
 
 # A backend is a callable object taking 3 arguments, in this order:
 #   faxfile -- the path to the fax file (in TIFF format)
-#   dstnum -- the content of the XIVO_DSTNUM dialplan variable
+#   dstnum -- the content of the WAZO_DSTNUM dialplan variable
 #   args -- args specific to the backend
 def _new_mail_backend(
     subject: str, content_file: str, email_from: str, email_realname: str = 'Wazo Fax'
@@ -221,7 +221,7 @@ def _do_handle_fax(fax_file: str, dstnum: str, args: list[str]) -> None:
 def handle_fax(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     try:
         faxfile = args[0]
-        dstnum = agi.get_variable("XIVO_DSTNUM")
+        dstnum = agi.get_variable("WAZO_DSTNUM")
         _do_handle_fax(faxfile, dstnum, args[1:])
     except Exception as e:
         agi.dp_break(e)
