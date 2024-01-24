@@ -25,9 +25,6 @@ Depends: ${python3:Depends},
          wazo-dird-client-python3,
          xivo-lib-python-python3,
          xivo-libdao-python3
-Provides: xivo-agid
-Conflicts: xivo-utils (<= 18.09~20180808.174753.0834260.deb9), xivo-agid
-Replaces: xivo-agid
 Description: Wazo AGI Daemon
  Wazo is a system based on a powerful IPBX, to bring an easy to
  install solution for telephony and related services.

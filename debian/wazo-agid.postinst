@@ -20,18 +20,6 @@ case "$1" in
             adduser --quiet $USER asterisk
         fi
 
-        # Fix wazo-agid home from < 19.15
-        if getent passwd wazo-agid | grep -q xivo-agid; then
-            usermod --home /var/lib/wazo-agid wazo-agid
-        fi
-
-        # move home directory from wrong renaming < 19.15
-        if [ -d /var/lib/xivo-agid ] ; then
-            find /var/lib/xivo-agid/ -mindepth 1 -maxdepth 1 -exec mv {} /var/lib/wazo-agid/ \;
-            chown --recursive wazo-agid:wazo-agid /var/lib/wazo-agid
-            rmdir --ignore-fail-on-non-empty /var/lib/xivo-agid
-        fi
-
         # setup permissions for the log file
         if [ ! -e "$LOG_FILENAME" ]; then
             touch "$LOG_FILENAME"
