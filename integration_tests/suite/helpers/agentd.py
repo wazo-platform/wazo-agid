@@ -37,6 +37,7 @@ class AgentdMockClient(MockServerClient):
                 'number': '12345',
                 'extension': '12345',
                 'state_interface': 'interface',
+                'tenant_uuid': tenant_uuid,
             },
             headers={'Wazo-Tenant': tenant_uuid},
         )
