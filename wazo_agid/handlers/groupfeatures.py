@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -9,12 +10,17 @@ from psycopg2.sql import SQL
 
 from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
-from wazo_agid.objects import join_column_names
+from wazo_agid.objects import (
+    sanitize_aliased_column,
+    sanitize_column,
+)
 
 if TYPE_CHECKING:
     from psycopg2.extras import DictCursor, DictRow
 
     from wazo_agid.agid import FastAGI
+
+logger = logging.getLogger(__name__)
 
 
 class GroupFeatures(Handler):
@@ -59,7 +65,9 @@ class GroupFeatures(Handler):
         return self._referer == f"group:{self._id}"
 
     def _set_members(self) -> None:
-        self._id = int(self._agi.get_variable(dialplan_variables.DESTINATION_ID))
+        dst_id = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
+        logger.debug('%s=%s', dialplan_variables.DESTINATION_ID, dst_id)
+        self._id = int(dst_id)
         self._referer = self._agi.get_variable(dialplan_variables.FWD_REFERER)
 
         groupfeatures_columns = (
@@ -76,11 +84,13 @@ class GroupFeatures(Handler):
             'mark_answered_elsewhere',
             'tenant_uuid',
         )
-        queue_columns = ('musicclass',)
+        queue_columns = ('musicclass', 'timeout')
         extensions_columns = ('exten', 'context')
-        columns = [f"groupfeatures.{c}" for c in groupfeatures_columns]
-        columns += [f"queue.{c}" for c in queue_columns]
-        columns += [f"extensions.{c}" for c in extensions_columns]
+        columns = [sanitize_column(f"groupfeatures.{c}") for c in groupfeatures_columns]
+        columns += [
+            sanitize_aliased_column(f"queue.{c}", f"queue_{c}") for c in queue_columns
+        ]
+        columns += [sanitize_column(f"extensions.{c}") for c in extensions_columns]
 
         query = SQL(
             "SELECT {columns} FROM groupfeatures "
@@ -93,9 +103,7 @@ class GroupFeatures(Handler):
             "AND queue.category = 'group' "
             "AND queue.commented = 0"
         )
-        self._cursor.execute(
-            query.format(columns=join_column_names(columns)), (self._id,)
-        )
+        self._cursor.execute(query.format(columns=SQL(", ").join(columns)), (self._id,))
         res: DictRow = self._cursor.fetchone()
         if not res:
             raise LookupError(f"Unable to find group (id: {self._id})")
@@ -111,9 +119,10 @@ class GroupFeatures(Handler):
         self._write_calling = res['write_calling']
         self._ignore_forward = res['ignore_forward']
         self._preprocess_subroutine = res['preprocess_subroutine']
-        self._musicclass = res['musicclass']
+        self._musicclass = res['queue_musicclass']
         self._mark_answered_elsewhere = res['mark_answered_elsewhere']
         self._tenant_uuid = res['tenant_uuid']
+        self._user_timeout = res['queue_timeout']
 
     def _set_vars(self) -> None:
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
@@ -162,6 +171,7 @@ class GroupFeatures(Handler):
             self._agi.set_variable('XIVO_GROUPTIMEOUT', self._timeout)
         else:
             self._agi.set_variable('XIVO_GROUPTIMEOUT', "")
+        self._agi.set_variable('__WAZO_RING_TIME', self._user_timeout)
 
     def _set_dial_action(self) -> None:
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
