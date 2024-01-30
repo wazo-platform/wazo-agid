@@ -63,7 +63,6 @@ class GroupFeatures(Handler):
 
     def _set_members(self) -> None:
         dst_id = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
-        logger.debug('%s=%s', dialplan_variables.DESTINATION_ID, dst_id)
         self._id = int(dst_id)
         self._referer = self._agi.get_variable(dialplan_variables.FWD_REFERER)
 
