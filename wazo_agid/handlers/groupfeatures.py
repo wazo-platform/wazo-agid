@@ -10,10 +10,7 @@ from psycopg2.sql import SQL
 
 from wazo_agid import dialplan_variables, objects
 from wazo_agid.handlers.handler import Handler
-from wazo_agid.objects import (
-    sanitize_aliased_column,
-    sanitize_column,
-)
+from wazo_agid.objects import sanitize_aliased_column, sanitize_column
 
 if TYPE_CHECKING:
     from psycopg2.extras import DictCursor, DictRow
