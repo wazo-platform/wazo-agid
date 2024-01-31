@@ -700,7 +700,9 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
 
 def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
-        group = queries.insert_group(name='incoming_group_set_features', timeout=25)
+        group = queries.insert_group(
+            name='incoming_group_set_features', timeout=25, user_timeout=10
+        )
         extension = queries.insert_extension(type='group', typeval=group['id'])
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
             queries.insert_dial_action(
@@ -728,6 +730,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
     assert recv_vars['WAZO_GROUPNAME'] == 'incoming_group_set_features'
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
+    assert recv_vars['__WAZO_RING_TIME'] == '10'
 
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTION'] == 'group'
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ISDA'] == '1'
