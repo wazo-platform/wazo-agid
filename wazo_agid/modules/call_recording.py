@@ -39,7 +39,7 @@ def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
 
 
 BINAURAL_MIXMONITOR_COMMAND = (
-    '/usr/bin/sox -M -v 1 {filename_a} -v 1 {filename_b} {filename}'
+    '/usr/bin/sox -M -v 1 {filename_a} -v 1 {filename_b} {filename} '
     '&& rm {filename_a} {filename_b}'
 )
 BINAURAL_MIXMONITOR_OPTIONS = 'r({filename_a})t({filename_b})'
