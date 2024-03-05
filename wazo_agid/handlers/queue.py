@@ -14,6 +14,8 @@ AGENT_CHANNEL_RE = re.compile(r'^Local/id-(\d+)@agentcallback-[a-f0-9]+;1$')
 
 
 class AnswerHandler(handler.Handler):
+    destination_agent_id: str | None = None
+
     def execute(self):
         try:
             callee = self.get_user()
@@ -31,6 +33,7 @@ class AnswerHandler(handler.Handler):
         if result:
             agent_id = result.group(1)
             search_params = {'agent_id': int(agent_id)}
+            self.destination_agent_id = agent_id
         else:
             user_uuid = self._agi.get_variable('WAZO_USERUUID')
             if user_uuid:
@@ -53,7 +56,7 @@ class AnswerHandler(handler.Handler):
             [
                 internal and callee.call_record_incoming_internal_enabled,
                 external and callee.call_record_incoming_external_enabled,
-                queue_recording,
+                self.destination_agent_id and queue_recording,
             ]
         )
         if not should_record:
