@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -14,6 +14,8 @@ AGENT_CHANNEL_RE = re.compile(r'^Local/id-(\d+)@agentcallback-[a-f0-9]+;1$')
 
 
 class AnswerHandler(handler.Handler):
+    destination_agent_id: str | None = None
+
     def execute(self):
         try:
             callee = self.get_user()
@@ -31,6 +33,7 @@ class AnswerHandler(handler.Handler):
         if result:
             agent_id = result.group(1)
             search_params = {'agent_id': int(agent_id)}
+            self.destination_agent_id = agent_id
         else:
             user_uuid = self._agi.get_variable('WAZO_USERUUID')
             if user_uuid:
@@ -46,20 +49,39 @@ class AnswerHandler(handler.Handler):
         if recording_is_on:
             return
 
+        queue_recording = self._agi.get_variable('WAZO_QUEUE_RECORDING')
         external = self._agi.get_variable('WAZO_CALLORIGIN') == 'extern'
         internal = not external
         should_record = any(
             [
                 internal and callee.call_record_incoming_internal_enabled,
                 external and callee.call_record_incoming_external_enabled,
+                self.destination_agent_id and queue_recording,
             ]
         )
         if not should_record:
+            self._agi.verbose(
+                (
+                    'Call recording is not enabled for call of type "{}" '
+                    'for callee "{}"(uuid={})'
+                ).format(
+                    "external" if external else "internal",
+                    " ".join([callee.firstname, callee.lastname]),
+                    callee.uuid,
+                )
+            )
             return
 
         calld = self._agi.config['calld']['client']
         channel_id = self._agi.env['agi_uniqueid']
+
         try:
+            self._agi.verbose(
+                'Initiating call recording for callee "{}"(uuid={})'.format(
+                    " ".join([callee.firstname, callee.lastname]),
+                    callee.uuid,
+                )
+            )
             calld.calls.start_record(channel_id)
         except Exception as e:
             logger.error('Error during enabling call recording: %s', e)

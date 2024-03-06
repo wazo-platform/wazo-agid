@@ -1,10 +1,10 @@
-# Copyright 2020-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2020-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
 import logging
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from wazo_agid import agid, dialplan_variables, objects
 
@@ -20,6 +20,14 @@ CALL_RECORDING_FILENAME_TEMPLATE = (
     '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
 )
 
+CALL_RECORDING_FILENAME_TEMPLATE_A = (
+    '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}-a.wav'
+)
+
+CALL_RECORDING_FILENAME_TEMPLATE_B = (
+    '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}-b.wav'
+)
+
 
 def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     calld = agi.config['calld']['client']
@@ -28,6 +36,51 @@ def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         _disable_call_recording(agi, calld, channel_id)
     else:
         _enable_call_recording(agi, calld, channel_id)
+
+
+BINAURAL_MIXMONITOR_COMMAND = (
+    '/usr/bin/sox -M -v 1 {filename_a} -v 1 {filename_b} {filename} '
+    '&& rm {filename_a} {filename_b}'
+)
+BINAURAL_MIXMONITOR_OPTIONS = 'r({filename_a})t({filename_b})'
+
+
+def _get_mixmonitor_args(agi: FastAGI, *args: list[Any]) -> tuple[str, str, str]:
+    tenant_uuid = agi.get_variable(dialplan_variables.TENANT_UUID)
+    recording_uuid = str(uuid.uuid4())
+    filename = CALL_RECORDING_FILENAME_TEMPLATE.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    filename_a = CALL_RECORDING_FILENAME_TEMPLATE_A.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    filename_b = CALL_RECORDING_FILENAME_TEMPLATE_B.format(
+        tenant_uuid=tenant_uuid,
+        recording_uuid=recording_uuid,
+    )
+    mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
+
+    binaural_options = BINAURAL_MIXMONITOR_OPTIONS.format(
+        filename_a=filename_a,
+        filename_b=filename_b,
+    )
+    mixmonitor_command = BINAURAL_MIXMONITOR_COMMAND.format(
+        filename=filename,
+        filename_a=filename_a,
+        filename_b=filename_b,
+    )
+    new_mixmonitor_options = f'{mix_monitor_options}{binaural_options}'
+    return filename, new_mixmonitor_options, mixmonitor_command
+
+
+def setup_binaural_mixmonitor(
+    agi: FastAGI, cursor: DictCursor, args: list[str]
+) -> None:
+    filename, mixmonitor_options, mixmonitor_command = _get_mixmonitor_args(agi)
+    agi.set_variable('__WAZO_MIXMONITOR_OPTIONS', mixmonitor_options)
+    agi.set_variable('__WAZO_MIXMONITOR_COMMAND', mixmonitor_command)
 
 
 def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
@@ -78,18 +131,15 @@ def start_mix_monitor(agi, cursor, args):
 
 
 def _start_mix_monitor(agi):
-    tenant_uuid = agi.get_variable(dialplan_variables.TENANT_UUID)
-    recording_uuid = str(uuid.uuid4())
-    filename = CALL_RECORDING_FILENAME_TEMPLATE.format(
-        tenant_uuid=tenant_uuid,
-        recording_uuid=recording_uuid,
+    filename, mixmonitor_options, mixmonitor_command = _get_mixmonitor_args(agi)
+    agi.appexec(
+        'MixMonitor',
+        f'{filename},{mixmonitor_options},{mixmonitor_command}',
     )
-    mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
-
-    agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}')
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
 
 agid.register(call_recording)
 agid.register(record_caller)
 agid.register(start_mix_monitor)
+agid.register(setup_binaural_mixmonitor)
