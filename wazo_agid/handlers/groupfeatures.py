@@ -80,7 +80,7 @@ class GroupFeatures(Handler):
             'mark_answered_elsewhere',
             'tenant_uuid',
         )
-        queue_columns = ('musicclass', 'timeout')
+        queue_columns = ('musicclass', 'timeout', 'strategy')
         extensions_columns = ('exten', 'context')
         columns = [sanitize_column(f"groupfeatures.{c}") for c in groupfeatures_columns]
         columns += [
@@ -119,11 +119,13 @@ class GroupFeatures(Handler):
         self._mark_answered_elsewhere = res['mark_answered_elsewhere']
         self._tenant_uuid = res['tenant_uuid']
         self._user_timeout = res['queue_timeout']
+        self._group_strategy = res['queue_strategy']
 
     def _set_vars(self) -> None:
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
         self._agi.set_variable('XIVO_REAL_CONTEXT', self._context)
         self._agi.set_variable('WAZO_GROUPNAME', self._name)
+        self._agi.set_variable('WAZO_GROUP_STRATEGY', self._group_strategy)
         if self._musicclass:
             self._agi.set_variable('CHANNEL(musicclass)', self._musicclass)
 
