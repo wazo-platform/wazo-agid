@@ -1,4 +1,4 @@
-# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -238,8 +238,8 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.outgoing_features._set_caller_id()
 
         expected_calls = [
-            call('CALLERID(name-pres)', 'prohib'),
-            call('CALLERID(num-pres)', 'prohib'),
+            call('CALLERID(pres)', 'prohib'),
+            call('_WAZO_OUTBOUND_PAI', '"Anonymous" <sip:@anonymous.invalid>'),
         ]
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)
@@ -257,8 +257,8 @@ class TestOutgoingFeatures(unittest.TestCase):
         self.outgoing_features._set_caller_id()
 
         expected_calls = [
-            call('CALLERID(name-pres)', 'prohib'),
-            call('CALLERID(num-pres)', 'prohib'),
+            call('CALLERID(pres)', 'prohib'),
+            call('_WAZO_OUTBOUND_PAI', '"Anonymous" <sip:27857218@anonymous.invalid>'),
         ]
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)
