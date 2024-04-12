@@ -100,7 +100,7 @@ class OutgoingFeatures(Handler):
                 '%s: _set_caller_id: using anonymous caller ID',
                 self._agi.env['agi_channel'],
             )
-            pai_header = f'tel:{self.outcall.callerid}'
+            pai_header = f'"Anonymous" <sip:{self.outcall.callerid}@anonymous.invalid>'
 
             self._agi.set_variable('CALLERID(pres)', 'prohib')
             self._agi.set_variable('_WAZO_OUTBOUND_PAI', pai_header)
@@ -113,7 +113,11 @@ class OutgoingFeatures(Handler):
             objects.CallerID.set(self._agi, self.user.outcallerid)
 
     def _schedule_predial_subroutine(self, subroutine: str) -> None:
-        self._agi.execute('EXEC', 'Gosub', f'wazo-add-pre-dial-hook,s,1({subroutine})')
+        extension = 'wazo-add-pre-dial-hook'
+        context = 's'
+        priority = '1'
+        args = self._agi._quote(f'{extension},{context},{priority}({subroutine})')
+        self._agi.execute('EXEC', 'Gosub', args)
 
     def _set_trunk_info(self) -> None:
         for i, trunk in enumerate(self.outcall.trunks):
