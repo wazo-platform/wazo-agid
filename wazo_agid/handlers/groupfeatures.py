@@ -80,7 +80,7 @@ class GroupFeatures(Handler):
             'mark_answered_elsewhere',
             'tenant_uuid',
         )
-        queue_columns = ('musicclass', 'timeout', 'strategy')
+        queue_columns = ('musicclass', 'timeout', 'strategy', 'retry')
         extensions_columns = ('exten', 'context')
         columns = [sanitize_column(f"groupfeatures.{c}") for c in groupfeatures_columns]
         columns += [
@@ -120,6 +120,7 @@ class GroupFeatures(Handler):
         self._tenant_uuid = res['tenant_uuid']
         self._user_timeout = res['queue_timeout']
         self._group_strategy = res['queue_strategy']
+        self._group_retry_delay = res['queue_retry']
 
     def _set_vars(self) -> None:
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
@@ -174,6 +175,11 @@ class GroupFeatures(Handler):
             self._agi.set_variable('WAZO_GROUP_USER_TIMEOUT', self._user_timeout)
         else:
             self._agi.set_variable('WAZO_GROUP_USER_TIMEOUT', "")
+
+        if self._group_retry_delay:
+            self._agi.set_variable('WAZO_GROUP_RETRY_DELAY', self._group_retry_delay)
+        else:
+            self._agi.set_variable('WAZO_GROUP_RETRY_DELAY', "0")
 
     def _set_dial_action(self) -> None:
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
