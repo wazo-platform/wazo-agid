@@ -1,4 +1,4 @@
-# Copyright 2012-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ _DEFAULT_CONFIG = {
     'config_file': '/etc/wazo-agid/config.yml',
     'extra_config_files': '/etc/wazo-agid/conf.d/',
     'connection_pool_size': 10,
-    'db_uri': 'postgresql://asterisk:proformatique@localhost/asterisk?charset=utf8',
+    'db_uri': 'postgresql://asterisk:proformatique@localhost/asterisk?application_name=wazo-agid',
     'call_recording': {
         'filename_template': 'user-{{ srcnum }}-{{ dstnum }}-{{ timestamp }}',
         'filename_extension': 'wav',

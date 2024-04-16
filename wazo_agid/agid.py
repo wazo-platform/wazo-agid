@@ -1,4 +1,4 @@
-# Copyright 2008-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2008-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -32,10 +32,12 @@ _handlers: dict[str, Handler] = {}
 def info_from_db_uri(db_uri: str) -> dict[str, str | int]:
     parsed_url = make_url(db_uri)
     exceptions = {'database': 'dbname', 'username': 'user'}
-    return {
+    connect_args = {
         exceptions.get(name, name): value
         for name, value in parsed_url.translate_connect_args().items()
     }
+    query_args = parsed_url.query
+    return query_args | connect_args
 
 
 class Database:
