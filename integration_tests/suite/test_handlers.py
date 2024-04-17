@@ -705,6 +705,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
             timeout=25,
             user_timeout=10,
             ring_strategy='linear',
+            retry_delay=5,
         )
         extension = queries.insert_extension(type='group', typeval=group['id'])
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
@@ -735,6 +736,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
+    assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
 
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTION'] == 'group'
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ISDA'] == '1'
