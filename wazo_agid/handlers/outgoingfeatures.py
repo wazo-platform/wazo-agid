@@ -15,6 +15,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+_SELECTED_CALLED_ID_HEADER = 'X-Wazo-Selected-Caller-ID'
+_ANONYMOUS_CALLER_ID = 'anonymous'
+
 
 class OutgoingFeatures(Handler):
     PATH_TYPE = 'outcall'
@@ -82,8 +85,15 @@ class OutgoingFeatures(Handler):
                 self._agi.env['agi_channel'],
             )
             return
-
-        if self.user is None or self.user.outcallerid == 'default':
+        selected_caller_id = self._agi.get_variable(
+            f'PJSIP_HEADER(read,{_SELECTED_CALLED_ID_HEADER})'
+        )
+        if selected_caller_id and selected_caller_id != _ANONYMOUS_CALLER_ID:
+            logger.debug(
+                'selected caller ID received from client: %s', selected_caller_id
+            )
+            objects.CallerID.set(self._agi, selected_caller_id)
+        elif self.user is None or self.user.outcallerid == 'default':
             if self.outcall.callerid:
                 logger.debug(
                     '%s: _set_caller_id: using outcall caller ID',
@@ -95,7 +105,10 @@ class OutgoingFeatures(Handler):
                     '%s: _set_caller_id: using user default caller ID',
                     self._agi.env['agi_channel'],
                 )
-        elif self.user.outcallerid == 'anonymous':
+        elif (
+            self.user.outcallerid == 'anonymous'
+            or selected_caller_id == _ANONYMOUS_CALLER_ID
+        ):
             logger.debug(
                 '%s: _set_caller_id: using anonymous caller ID',
                 self._agi.env['agi_channel'],
