@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import time
 from textwrap import dedent
 
 import pytest
@@ -766,6 +767,57 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
         re.match(r'^[a-f0-9\-]{36}$', recv_vars['__WAZO_LOCAL_CHAN_MATCH_UUID'])
         is not None
     )
+
+
+def test_linear_group_check_timeout_initial(base_asset: BaseAssetLaunchingHelper):
+    variables = {
+        'WAZO_DSTID': '1',
+        'XIVO_GROUPTIMEOUT': 25,
+        'WAZO_GROUP_USER_TIMEOUT': 5,
+    }
+    start_time = time.time()
+    recv_vars, recv_cmds = base_asset.agid.linear_group_check_timeout(
+        variables=variables
+    )
+    post_time = time.time()
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['WAZO_GROUP_START_TIME'] and (
+        current_time <= float(recv_vars['WAZO_GROUP_START_TIME']) <= post_time
+    )
+    assert 'WAZO_GROUP_TIMEOUT_EXPIRED' not in recv_vars
+
+
+def test_linear_group_check_timeout_not_expired(base_asset: BaseAssetLaunchingHelper):
+    start_time = time.time() - 10
+    variables = {
+        'WAZO_DSTID': '1',
+        'XIVO_GROUPTIMEOUT': 25,
+        'WAZO_GROUP_START_TIME': start_time,
+        'WAZO_GROUP_USER_TIMEOUT': 5,
+    }
+    recv_vars, recv_cmds = base_asset.agid.linear_group_check_timeout(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert 'WAZO_GROUP_TIMEOUT_EXPIRED' not in recv_vars
+
+
+def test_linear_group_check_timeout_expired(base_asset: BaseAssetLaunchingHelper):
+    start_time = time.time() - 25
+    variables = {
+        'WAZO_DSTID': '1',
+        'XIVO_GROUPTIMEOUT': 25,
+        'WAZO_GROUP_START_TIME': start_time,
+        'WAZO_GROUP_USER_TIMEOUT': 5,
+    }
+    recv_vars, recv_cmds = base_asset.agid.linear_group_check_timeout(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['WAZO_GROUP_TIMEOUT_EXPIRED'] == '1'
 
 
 def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
