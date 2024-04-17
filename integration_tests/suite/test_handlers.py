@@ -783,13 +783,16 @@ def test_linear_group_check_timeout_initial(base_asset: BaseAssetLaunchingHelper
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['WAZO_GROUP_START_TIME'] and (
-        current_time <= float(recv_vars['WAZO_GROUP_START_TIME']) <= post_time
+        start_time <= float(recv_vars['WAZO_GROUP_START_TIME']) <= post_time
+    )
+    assert recv_vars['WAZO_DIAL_TIMEOUT'] and (
+        float(recv_vars['WAZO_DIAL_TIMEOUT']) == 5
     )
     assert 'WAZO_GROUP_TIMEOUT_EXPIRED' not in recv_vars
 
 
 def test_linear_group_check_timeout_not_expired(base_asset: BaseAssetLaunchingHelper):
-    start_time = time.time() - 10
+    start_time = time.time() - 21
     variables = {
         'WAZO_DSTID': '1',
         'XIVO_GROUPTIMEOUT': 25,
@@ -802,6 +805,9 @@ def test_linear_group_check_timeout_not_expired(base_asset: BaseAssetLaunchingHe
 
     assert recv_cmds['FAILURE'] is False
     assert 'WAZO_GROUP_TIMEOUT_EXPIRED' not in recv_vars
+    assert recv_vars['WAZO_DIAL_TIMEOUT'] and (
+        float(recv_vars['WAZO_DIAL_TIMEOUT']) < 5
+    )
 
 
 def test_linear_group_check_timeout_expired(base_asset: BaseAssetLaunchingHelper):

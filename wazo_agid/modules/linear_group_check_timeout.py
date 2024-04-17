@@ -24,21 +24,31 @@ def linear_group_check_timeout(
 
     if not (_group_timeout := agi.get_variable('XIVO_GROUPTIMEOUT')):
         logger.info('XIVO_GROUPTIMEOUT not set for group %s', group_id)
-        return
+        group_timeout = 0
     else:
-        group_timeout = float(_group_timeout)
+        group_timeout = int(_group_timeout)
 
     current_time = time.time()
 
     if not (_start_time := agi.get_variable('WAZO_GROUP_START_TIME')):
         start_time = current_time
         agi.set_variable('WAZO_GROUP_START_TIME', str(start_time))
-        return
     else:
         start_time = float(_start_time)
 
     if (current_time - start_time) >= group_timeout:
         agi.set_variable('WAZO_GROUP_TIMEOUT_EXPIRED', '1')
+        return
+
+    if _user_timeout := agi.get_variable('WAZO_GROUP_USER_TIMEOUT'):
+        user_timeout = int(_user_timeout)
+    else:
+        user_timeout = group_timeout
+
+    remaining_time = group_timeout - (current_time - start_time)
+    next_dial_timeout = int(min(user_timeout, remaining_time))
+
+    agi.set_variable('WAZO_DIAL_TIMEOUT', str(next_dial_timeout))
 
 
 agid.register(linear_group_check_timeout)
