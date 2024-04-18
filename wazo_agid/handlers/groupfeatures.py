@@ -152,6 +152,8 @@ class GroupFeatures(Handler):
         if not self._musicclass:
             options += "r"
             needanswer = "0"
+        else:
+            options += f"m({self._musicclass})"
 
         if self._mark_answered_elsewhere:
             options += "C"
