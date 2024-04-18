@@ -826,6 +826,45 @@ def test_linear_group_check_timeout_expired(base_asset: BaseAssetLaunchingHelper
     assert recv_vars['WAZO_GROUP_TIMEOUT_EXPIRED'] == '1'
 
 
+USER_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-].+)@userlineslineargroup')
+
+
+def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunchingHelper):
+    with base_asset.db.queries() as queries:
+        users = [
+            queries.insert_user(),
+            queries.insert_user(),
+            queries.insert_user(),
+            queries.insert_user(),
+        ]
+        group = queries.insert_group(name='group1')
+        members = [
+            queries.insert_group_user_member(
+                groupname=group['name'], userid=user['id'], position=i
+            )
+            for i, user in enumerate(users, start=1)
+        ]
+
+    recv_vars, recv_cmds = base_asset.agid.linear_group_get_interfaces(
+        group['id'], variables={}
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert {
+        f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(len(users))
+    } <= recv_vars.keys()
+
+    for i, (member, user) in enumerate(zip(members, users), start=1):
+        position = i
+        print(recv_vars[f'WAZO_GROUP_LINEAR_{position-1}_INTERFACE'])
+        assert (
+            match := USER_INTERFACE_RE.match(
+                recv_vars[f'WAZO_GROUP_LINEAR_{position-1}_INTERFACE']
+            )
+        )
+        assert match.group(1) == user['uuid']
+
+
 def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         queue = queries.insert_queue(
