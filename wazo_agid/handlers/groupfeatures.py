@@ -41,6 +41,7 @@ class GroupFeatures(Handler):
         self._tenant_uuid = None
 
     def execute(self) -> None:
+        self._get_linear_feature_flag()
         self._set_members()
         self._display_queue()
         self._set_options()
@@ -52,6 +53,9 @@ class GroupFeatures(Handler):
         if self._needs_rewrite_cid():
             self._set_rewrite_cid()
         self._set_call_record_side()
+
+    def _get_linear_feature_flag(self):
+        self._linear_feature_flag = self._agi.get_variable("WAZO_LINEAR_GROUP_FLAG")
 
     def _display_queue(self) -> None:
         self._agi.verbose(
@@ -152,11 +156,13 @@ class GroupFeatures(Handler):
         if not self._musicclass:
             options += "r"
             needanswer = "0"
-        else:
-            options += f"m({self._musicclass})"
 
         if self._mark_answered_elsewhere:
-            options += "C"
+            if self._group_strategy == 'linear' and self._linear_feature_flag:
+                # equivalent Dial option used for linear groups
+                options += "c"
+            else:
+                options += "C"
 
         self._agi.set_variable('WAZO_GROUPOPTIONS', options)
         self._agi.set_variable('XIVO_GROUPNEEDANSWER', needanswer)
