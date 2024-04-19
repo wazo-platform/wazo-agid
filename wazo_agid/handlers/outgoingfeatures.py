@@ -1,4 +1,4 @@
-# Copyright 2006-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -100,8 +100,12 @@ class OutgoingFeatures(Handler):
                 '%s: _set_caller_id: using anonymous caller ID',
                 self._agi.env['agi_channel'],
             )
-            self._agi.set_variable('CALLERID(name-pres)', 'prohib')
-            self._agi.set_variable('CALLERID(num-pres)', 'prohib')
+            self._agi.set_variable('CALLERID(pres)', 'prohib')
+            self._agi.set_variable('WAZO_OUTGOING_ANONYMOUS_CALL', '1')
+            if self.outcall.callerid:
+                _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
+                if pai_tel:
+                    self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
         else:
             logger.debug(
                 '%s: _set_caller_id: using user outgoing caller ID',
