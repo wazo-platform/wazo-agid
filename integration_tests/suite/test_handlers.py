@@ -897,10 +897,8 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_PATH_ID'] == str(call['id'])
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
     assert recv_vars['CALLERID(pres)'] == 'prohib'
-    assert (
-        recv_vars['_WAZO_OUTBOUND_PAI']
-        == '\\"Anonymous\\" <sip:123456@anonymous.invalid>'
-    )
+    assert recv_vars['WAZO_OUTGOING_ANONYMOUS_CALL'] == '1'
+    assert recv_vars['_WAZO_OUTCALL_PAI_NUMBER'] == '123456'
 
 
 def test_meeting_user(base_asset: BaseAssetLaunchingHelper):

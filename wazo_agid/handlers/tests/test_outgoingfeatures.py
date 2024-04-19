@@ -239,7 +239,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         expected_calls = [
             call('CALLERID(pres)', 'prohib'),
-            call('_WAZO_OUTBOUND_PAI', '"Anonymous" <sip:@anonymous.invalid>'),
+            call('WAZO_OUTGOING_ANONYMOUS_CALL', '1'),
         ]
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)
@@ -258,7 +258,8 @@ class TestOutgoingFeatures(unittest.TestCase):
 
         expected_calls = [
             call('CALLERID(pres)', 'prohib'),
-            call('_WAZO_OUTBOUND_PAI', '"Anonymous" <sip:27857218@anonymous.invalid>'),
+            call('WAZO_OUTGOING_ANONYMOUS_CALL', '1'),
+            call('_WAZO_OUTCALL_PAI_NUMBER', '27857218'),
         ]
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
         self.assertFalse(mock_set_caller_id.called)

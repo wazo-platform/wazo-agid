@@ -100,10 +100,12 @@ class OutgoingFeatures(Handler):
                 '%s: _set_caller_id: using anonymous caller ID',
                 self._agi.env['agi_channel'],
             )
-            pai_header = f'"Anonymous" <sip:{self.outcall.callerid}@anonymous.invalid>'
-
             self._agi.set_variable('CALLERID(pres)', 'prohib')
-            self._agi.set_variable('_WAZO_OUTBOUND_PAI', pai_header)
+            self._agi.set_variable('WAZO_OUTGOING_ANONYMOUS_CALL', '1')
+            if self.outcall.callerid:
+                _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
+                if pai_tel:
+                    self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
         else:
             logger.debug(
                 '%s: _set_caller_id: using user outgoing caller ID',
