@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -390,6 +390,46 @@ class DatabaseQueries:
                 'id': group.id,
                 'tenant_uuid': group.tenant_uuid,
                 'name': group.name,
+            }
+
+    def insert_group_user_member(self, userid: str, groupname: str, **kwargs):
+        with self.inserter() as inserter:
+            member = inserter.add_queue_member(
+                queue_name=groupname,
+                userid=userid,
+                usertype='user',
+                category='group',
+                **kwargs,
+            )
+            member.fix()
+            return {
+                'interface': member.interface,
+                'queue_name': member.queue_name,
+                'position': member.position,
+                'exten': member.exten,
+                'context': member.context,
+            }
+
+    def insert_group_extension_member(
+        self, exten: str, context: str, groupname: str, **kwargs
+    ):
+        with self.inserter() as inserter:
+            member = inserter.add_queue_member(
+                queue_name=groupname,
+                userid=0,
+                usertype='user',
+                category='group',
+                exten=exten,
+                context=context,
+                **kwargs,
+            )
+            member.fix()
+            return {
+                'interface': member.interface,
+                'queue_name': member.queue_name,
+                'position': member.position,
+                'exten': member.exten,
+                'context': member.context,
             }
 
     def insert_dial_action(self, **kwargs):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import time
 from textwrap import dedent
 
 import pytest
@@ -700,7 +701,13 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
 
 def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
-        group = queries.insert_group(name='incoming_group_set_features', timeout=25)
+        group = queries.insert_group(
+            name='incoming_group_set_features',
+            timeout=25,
+            user_timeout=10,
+            ring_strategy='linear',
+            retry_delay=5,
+        )
         extension = queries.insert_extension(type='group', typeval=group['id'])
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
             queries.insert_dial_action(
@@ -728,6 +735,9 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
     assert recv_vars['WAZO_GROUPNAME'] == 'incoming_group_set_features'
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
+    assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
+    assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
+    assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
 
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTION'] == 'group'
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ISDA'] == '1'
@@ -757,6 +767,136 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
         re.match(r'^[a-f0-9\-]{36}$', recv_vars['__WAZO_LOCAL_CHAN_MATCH_UUID'])
         is not None
     )
+
+
+def test_linear_group_check_timeout_initial(base_asset: BaseAssetLaunchingHelper):
+    variables = {
+        'WAZO_DSTID': '1',
+        'XIVO_GROUPTIMEOUT': 25,
+        'WAZO_GROUP_USER_TIMEOUT': 5,
+    }
+    start_time = time.time()
+    recv_vars, recv_cmds = base_asset.agid.linear_group_check_timeout(
+        variables=variables
+    )
+    post_time = time.time()
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['WAZO_GROUP_START_TIME'] and (
+        start_time <= float(recv_vars['WAZO_GROUP_START_TIME']) <= post_time
+    )
+    assert recv_vars['WAZO_DIAL_TIMEOUT'] and (
+        float(recv_vars['WAZO_DIAL_TIMEOUT']) == 5
+    )
+    assert 'WAZO_GROUP_TIMEOUT_EXPIRED' not in recv_vars
+
+
+def test_linear_group_check_timeout_not_expired(base_asset: BaseAssetLaunchingHelper):
+    start_time = time.time() - 21
+    variables = {
+        'WAZO_DSTID': '1',
+        'XIVO_GROUPTIMEOUT': 25,
+        'WAZO_GROUP_START_TIME': start_time,
+        'WAZO_GROUP_USER_TIMEOUT': 5,
+    }
+    recv_vars, recv_cmds = base_asset.agid.linear_group_check_timeout(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert 'WAZO_GROUP_TIMEOUT_EXPIRED' not in recv_vars
+    assert recv_vars['WAZO_DIAL_TIMEOUT'] and (
+        float(recv_vars['WAZO_DIAL_TIMEOUT']) < 5
+    )
+
+
+def test_linear_group_check_timeout_expired(base_asset: BaseAssetLaunchingHelper):
+    start_time = time.time() - 25
+    variables = {
+        'WAZO_DSTID': '1',
+        'XIVO_GROUPTIMEOUT': 25,
+        'WAZO_GROUP_START_TIME': start_time,
+        'WAZO_GROUP_USER_TIMEOUT': 5,
+    }
+    recv_vars, recv_cmds = base_asset.agid.linear_group_check_timeout(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['WAZO_GROUP_TIMEOUT_EXPIRED'] == '1'
+
+
+USER_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-]+)@userlineslineargroup')
+
+
+def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunchingHelper):
+    with base_asset.db.queries() as queries:
+        users = [
+            queries.insert_user(),
+            queries.insert_user(),
+            queries.insert_user(),
+            queries.insert_user(),
+        ]
+        group = queries.insert_group(name='group1')
+        members = [
+            queries.insert_group_user_member(
+                groupname=group['name'], userid=user['id'], position=i
+            )
+            for i, user in enumerate(users, start=1)
+        ]
+
+    recv_vars, recv_cmds = base_asset.agid.linear_group_get_interfaces(
+        group['id'], variables={}
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert {
+        f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(len(users))
+    } <= recv_vars.keys()
+
+    for member, user in zip(members, users):
+        position = member['position']
+        assert (
+            match := USER_INTERFACE_RE.match(
+                recv_vars[f'WAZO_GROUP_LINEAR_{position-1}_INTERFACE']
+            )
+        )
+        assert match.group(1) == user['uuid']
+
+
+EXTENSION_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-]+)@(.+)')
+
+
+def test_linear_group_get_interfaces_extension_members(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    with base_asset.db.queries() as queries:
+        group = queries.insert_group()
+        members = [
+            queries.insert_group_extension_member(
+                groupname=group['name'], exten=str(i), context='somecontext', position=i
+            )
+            for i in range(1, 6)
+        ]
+
+    recv_vars, recv_cmds = base_asset.agid.linear_group_get_interfaces(
+        group['id'], variables={}
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert {
+        f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(len(members))
+    } <= recv_vars.keys()
+
+    for member in members:
+        position = member['position']
+        assert (
+            match := EXTENSION_INTERFACE_RE.match(
+                recv_vars[f'WAZO_GROUP_LINEAR_{position-1}_INTERFACE']
+            )
+        )
+        assert match.group(1) == member['exten']
+        assert match.group(2) == member['context']
 
 
 def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):

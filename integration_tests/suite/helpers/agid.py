@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -101,7 +101,10 @@ class _BaseAgidClient:
             result = re.search(GET_VARIABLE_REGEX, data)
             if result:
                 name = result.group(1)
-                self._send_result(data=variables[name])
+                self._send_result(
+                    result=1 if variables and (name in variables) else 0,
+                    data=variables.get(name, '') if variables else '',
+                )
                 continue
 
             result = re.search(SET_VARIABLE_REGEX, data)

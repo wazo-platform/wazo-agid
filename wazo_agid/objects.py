@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from psycopg2.extras import DictCursor, DictRow
-from psycopg2.sql import SQL, Identifier
+from psycopg2.sql import SQL, Composable, Identifier
 from xivo_dao import user_dao
 
 from wazo_agid.schedule import (
@@ -28,14 +28,22 @@ class DBUpdateException(Exception):
     pass
 
 
-def join_column_names(fields: Sequence[str]) -> SQL:
+def sanitize_column(name: str) -> Identifier:
     """
     Take a list of fields and join them together for insertion, safely, into SQL query.
     """
-    return SQL(',').join(
-        SQL('.').join(map(Identifier, f.split('.'))) if '.' in f else Identifier(f)
-        for f in fields
-    )
+    return Identifier(*name.split("."))
+
+
+def sanitize_aliased_column(name: str, alias: str) -> Composable:
+    return Identifier(*name.split(".")) + SQL(" AS ") + Identifier(alias)
+
+
+def join_column_names(fields: Sequence[str]) -> Composable:
+    """
+    Take a list of fields and join them together for insertion, safely, into SQL query.
+    """
+    return SQL(',').join(sanitize_column(f) for f in fields)
 
 
 class ExtenFeatures:
