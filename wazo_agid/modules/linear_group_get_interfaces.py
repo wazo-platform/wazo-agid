@@ -67,12 +67,8 @@ def linear_group_get_interfaces(
 ) -> None:
     group_id = int(args[0])
     members = get_group_members(group_id)
-    # TODO: sort members with users first
     for i, member in enumerate(members):
         if member.type == 'user':
-            # TODO: implement dispatch to wake_mobile, direct dial multiple interfaces
-            # user_interfaces = _UserLine(agi, member['uuid']).interfaces
-
             agi.set_variable(
                 f'WAZO_GROUP_LINEAR_{i}_INTERFACE',
                 build_user_interface(member.uuid, ()),
