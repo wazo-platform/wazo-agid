@@ -88,11 +88,14 @@ class OutgoingFeatures(Handler):
         selected_caller_id = self._agi.get_variable(
             f'PJSIP_HEADER(read,{_SELECTED_CALLED_ID_HEADER})'
         )
-        if selected_caller_id and selected_caller_id != _ANONYMOUS_CALLER_ID:
+        if selected_caller_id:
             logger.debug(
                 'selected caller ID received from client: %s', selected_caller_id
             )
-            objects.CallerID.set(self._agi, selected_caller_id)
+            if selected_caller_id == _ANONYMOUS_CALLER_ID:
+                self._set_anonymous()
+            else:
+                objects.CallerID.set(self._agi, selected_caller_id)
         elif self.user is None or self.user.outcallerid == 'default':
             if self.outcall.callerid:
                 logger.debug(
@@ -105,26 +108,26 @@ class OutgoingFeatures(Handler):
                     '%s: _set_caller_id: using user default caller ID',
                     self._agi.env['agi_channel'],
                 )
-        elif (
-            self.user.outcallerid == 'anonymous'
-            or selected_caller_id == _ANONYMOUS_CALLER_ID
-        ):
+        elif self.user.outcallerid == 'anonymous':
             logger.debug(
                 '%s: _set_caller_id: using anonymous caller ID',
                 self._agi.env['agi_channel'],
             )
-            self._agi.set_variable('CALLERID(pres)', 'prohib')
-            self._agi.set_variable('WAZO_OUTGOING_ANONYMOUS_CALL', '1')
-            if self.outcall.callerid:
-                _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
-                if pai_tel:
-                    self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
+            self._set_anonymous()
         else:
             logger.debug(
                 '%s: _set_caller_id: using user outgoing caller ID',
                 self._agi.env['agi_channel'],
             )
             objects.CallerID.set(self._agi, self.user.outcallerid)
+
+    def _set_anonymous(self):
+        self._agi.set_variable('CALLERID(pres)', 'prohib')
+        self._agi.set_variable('WAZO_OUTGOING_ANONYMOUS_CALL', '1')
+        if self.outcall.callerid:
+            _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
+            if pai_tel:
+                self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
 
     def _set_trunk_info(self) -> None:
         for i, trunk in enumerate(self.outcall.trunks):

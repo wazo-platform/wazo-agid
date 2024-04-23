@@ -359,6 +359,27 @@ class TestOutgoingFeatures(unittest.TestCase):
         for mock_call in calls:
             assert mock_call in self._agi.set_variable.call_args_list
 
+    @patch('wazo_agid.objects.CallerID.set')
+    def test_anonymous_caller_id_from_SIP_header_user_default(self, mock_set_caller_id):
+        user = a_user().withCustomOutCallerId('default').build()
+        outcall = an_outcall().external().build()
+        caller_id_header = 'anonymous'
+        self._channel_variables[
+            'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
+        ] = caller_id_header
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        calls = [
+            call('CALLERID(pres)', 'prohib'),
+            call('WAZO_OUTGOING_ANONYMOUS_CALL', '1'),
+        ]
+        for mock_call in calls:
+            assert mock_call in self._agi.set_variable.call_args_list
+
     def test_retreive_outcall(self):
         outcall = Mock(objects.Outcall)
         self.outgoing_features.outcall = outcall
