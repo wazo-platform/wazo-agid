@@ -156,6 +156,8 @@ class GroupFeatures(Handler):
         if not self._musicclass:
             options += "r"
             needanswer = "0"
+        elif self._group_strategy == 'linear' and self._linear_feature_flag:
+            options += "m"
 
         if self._mark_answered_elsewhere:
             if self._group_strategy == 'linear' and self._linear_feature_flag:
