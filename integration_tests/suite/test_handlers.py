@@ -769,6 +769,38 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
 
+def test_incoming_group_set_features_linear_with_music(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    with base_asset.db.queries() as queries:
+        group = queries.insert_group(
+            name='incoming_group_set_features_linear',
+            timeout=25,
+            user_timeout=10,
+            ring_strategy='linear',
+            retry_delay=5,
+            music_on_hold='some-music-class',
+        )
+
+    variables = {
+        'WAZO_DSTID': group['id'],
+        'WAZO_FWD_REFERER': group['id'],
+        'XIVO_PATH': None,
+        'WAZO_LINEAR_GROUP_FLAG': '1',
+    }
+    recv_vars, recv_cmds = base_asset.agid.incoming_group_set_features(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['WAZO_GROUPOPTIONS'] == 'im'
+    assert recv_vars['XIVO_GROUPNEEDANSWER'] == '1'
+    assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
+    assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
+    assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
+    assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
+
+
 def test_linear_group_check_timeout_initial(base_asset: BaseAssetLaunchingHelper):
     variables = {
         'WAZO_DSTID': '1',
