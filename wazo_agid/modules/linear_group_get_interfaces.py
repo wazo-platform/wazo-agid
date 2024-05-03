@@ -79,50 +79,46 @@ def linear_group_get_interfaces(
     agi: FastAGI, cursor: DictCursor, args: list[str]
 ) -> None:
     group_id = int(args[0])
+    logger.info('Computing member interfaces for group (id=%s)', group_id)
     group_info = get_group_info(group_id)
-    for i, member in enumerate(group_info.members):
+    logger.debug(
+        'group %s(id=%s) has %d members',
+        group_info.name,
+        group_id,
+        len(group_info.members),
+    )
+    member_interfaces = []
+    for member in group_info.members:
         if member.type == 'user':
             extension = f'{member.uuid}@usersharedlines'
             extension_state = agi.get_variable(f'EXTENSION_STATE({extension})')
-            if group_info.ring_in_use or extension_state in (
-                'NOT_INUSE',
-                'UNKNOWN',
-            ):
-                interface = f'Local/{extension}'
-                agi.set_variable(
-                    f'WAZO_GROUP_LINEAR_{i}_INTERFACE',
-                    interface,
-                )
-            else:
-                logger.info(
-                    'ring in use is disabled for group %s, '
-                    'and extension %s is not available(state %s), '
-                    'excluding it from linear group dialing',
-                    group_info.name,
-                    extension,
-                    extension_state,
-                )
         elif member.type == 'extension':
             extension = f'{member.extension}@{member.context}'
             extension_state = agi.get_variable(f'EXTENSION_STATE({extension})')
-            if group_info.ring_in_use or extension_state in (
-                'NOT_INUSE',
-                'UNKNOWN',
-            ):
-                interface = f'Local/{extension}'
-                agi.set_variable(
-                    f'WAZO_GROUP_LINEAR_{i}_INTERFACE',
-                    interface,
-                )
-            else:
-                logger.info(
-                    'ring in use is disabled for group %s, '
-                    'and extension %s is not available(state %s), '
-                    'excluding it from linear group dialing',
-                    group_info.name,
-                    extension,
-                    extension_state,
-                )
+
+        if group_info.ring_in_use or extension_state in (
+            'NOT_INUSE',
+            'UNKNOWN',
+        ):
+            interface = f'Local/{extension}'
+            member_interfaces.append(interface)
+        else:
+            logger.info(
+                'ring in use is disabled for group %s, '
+                'and extension %s is not available(state %s), '
+                'excluding it from linear group dialing',
+                group_info.name,
+                extension,
+                extension_state,
+            )
+
+    logger.debug('Identified %d available member interfaces', len(member_interfaces))
+
+    for i, interface in enumerate(member_interfaces):
+        agi.set_variable(
+            f'WAZO_GROUP_LINEAR_{i}_INTERFACE',
+            interface,
+        )
 
 
 agid.register(linear_group_get_interfaces)
