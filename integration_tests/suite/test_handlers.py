@@ -858,7 +858,7 @@ def test_linear_group_check_timeout_expired(base_asset: BaseAssetLaunchingHelper
     assert recv_vars['WAZO_GROUP_TIMEOUT_EXPIRED'] == '1'
 
 
-USER_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-]+)@userlineslineargroup')
+USER_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-]+)@usersharedlines')
 
 
 def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunchingHelper):
