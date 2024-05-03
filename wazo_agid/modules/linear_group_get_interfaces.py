@@ -84,19 +84,7 @@ def linear_group_get_interfaces(
         if member.type == 'user':
             extension = f'{member.uuid}@usersharedlines'
             extension_state = agi.get_variable(f'EXTENSION_STATE({extension})')
-            if not group_info.ring_in_use and extension_state in (
-                'NOT_INUSE',
-                'UNKNOWN',
-            ):
-                interface = f'Local/{extension}'
-                agi.set_variable(
-                    f'WAZO_GROUP_LINEAR_{i}_INTERFACE',
-                    interface,
-                )
-        elif member.type == 'extension':
-            extension = f'{member.extension}@{member.context}'
-            extension_state = agi.get_variable(f'EXTENSION_STATE({extension})')
-            if not group_info.ring_in_use and extension_state in (
+            if group_info.ring_in_use or extension_state in (
                 'NOT_INUSE',
                 'UNKNOWN',
             ):
@@ -107,10 +95,32 @@ def linear_group_get_interfaces(
                 )
             else:
                 logger.info(
-                    'Extension %s@%s is not available(state %s), '
-                    'excluding from linear group dial list',
-                    member.extension,
-                    member.context,
+                    'ring in use is disabled for group %s, '
+                    'and extension %s is not available(state %s), '
+                    'excluding it from linear group dialing',
+                    group_info.name,
+                    extension,
+                    extension_state,
+                )
+        elif member.type == 'extension':
+            extension = f'{member.extension}@{member.context}'
+            extension_state = agi.get_variable(f'EXTENSION_STATE({extension})')
+            if group_info.ring_in_use or extension_state in (
+                'NOT_INUSE',
+                'UNKNOWN',
+            ):
+                interface = f'Local/{extension}'
+                agi.set_variable(
+                    f'WAZO_GROUP_LINEAR_{i}_INTERFACE',
+                    interface,
+                )
+            else:
+                logger.info(
+                    'ring in use is disabled for group %s, '
+                    'and extension %s is not available(state %s), '
+                    'excluding it from linear group dialing',
+                    group_info.name,
+                    extension,
                     extension_state,
                 )
 
