@@ -17,18 +17,22 @@ class TestGetGroupMembers(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_get_group_members_empty(self):
+    def test_get_group_info_empty(self):
         with patch(
             'wazo_agid.modules.linear_group_get_interfaces.group_dao'
         ) as mock_dao:
             mock_dao.get.return_value = Mock(
                 user_queue_members=[],
                 extension_queue_members=[],
+                ring_in_use=False,
             )
-            members = linear_group_get_interfaces.get_group_members(1)
-            assert members == []
+            mock_dao.get.return_value.name = 'test'
+            group_info = linear_group_get_interfaces.get_group_info(1)
+            assert group_info.members == []
+            assert group_info.name == 'test'
+            assert not group_info.ring_in_use
 
-    def test_get_group_members_only_users(self):
+    def test_get_group_info_only_users(self):
         with patch(
             'wazo_agid.modules.linear_group_get_interfaces.group_dao'
         ) as mock_dao:
@@ -54,10 +58,10 @@ class TestGetGroupMembers(unittest.TestCase):
                 extension_queue_members=[],
             )
             user_uuids = [member.user.uuid for member in mock_users]
-            members = linear_group_get_interfaces.get_group_members(1)
-            assert members and len(members) == 3
+            group_info = linear_group_get_interfaces.get_group_info(1)
+            assert group_info.members and len(group_info.members) == 3
             assert_that(
-                members,
+                group_info.members,
                 contains_inanyorder(
                     *(
                         has_properties(type='user', uuid=user_uuid)
@@ -66,7 +70,7 @@ class TestGetGroupMembers(unittest.TestCase):
                 ),
             )
 
-    def test_get_group_members_only_extensions(self):
+    def test_get_group_info_only_extensions(self):
         with patch(
             'wazo_agid.modules.linear_group_get_interfaces.group_dao'
         ) as mock_dao:
@@ -92,10 +96,10 @@ class TestGetGroupMembers(unittest.TestCase):
                 extension_queue_members=mock_extensions,
             )
 
-            members = linear_group_get_interfaces.get_group_members(1)
-            assert members and len(members) == 3
+            group_info = linear_group_get_interfaces.get_group_info(1)
+            assert group_info.members and len(group_info.members) == 3
             assert_that(
-                members,
+                group_info.members,
                 contains_inanyorder(
                     *(
                         has_properties(

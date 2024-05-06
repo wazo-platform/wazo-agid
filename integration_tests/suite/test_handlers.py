@@ -858,7 +858,7 @@ def test_linear_group_check_timeout_expired(base_asset: BaseAssetLaunchingHelper
     assert recv_vars['WAZO_GROUP_TIMEOUT_EXPIRED'] == '1'
 
 
-USER_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-]+)@userlineslineargroup')
+USER_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-]+)@usersharedlines')
 
 
 def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunchingHelper):
@@ -894,6 +894,65 @@ def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunching
             )
         )
         assert match.group(1) == user['uuid']
+
+
+def test_linear_group_get_interfaces_user_members_ring_in_use_disabled(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    with base_asset.db.queries() as queries:
+        users = [
+            queries.insert_user(),
+            queries.insert_user(),
+            queries.insert_user(),
+            queries.insert_user(),
+        ]
+        group = queries.insert_group(ring_in_use=False)
+        members = [
+            queries.insert_group_user_member(
+                groupname=group['name'], userid=user['id'], position=i
+            )
+            for i, user in enumerate(users, start=1)
+        ]
+
+    # two users are busy and two availables
+    user_extension_states = {
+        user['uuid']: ('INUSE' if i < 2 else 'NOT_INUSE')
+        for i, user in enumerate(users)
+    }
+
+    available_users = [
+        user for user in users if user_extension_states[user['uuid']] == 'NOT_INUSE'
+    ]
+
+    recv_vars, recv_cmds = base_asset.agid.linear_group_get_interfaces(
+        group['id'],
+        variables={
+            f'EXTENSION_STATE({user_uuid}@usersharedlines)': state
+            for user_uuid, state in user_extension_states.items()
+        },
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert {
+        f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(len(available_users))
+    } <= recv_vars.keys()
+
+    observed_interface_index = 0
+    for member, user in zip(members, users):
+        if user_extension_states[user['uuid']] != 'INUSE':
+            match = USER_INTERFACE_RE.match(
+                recv_vars[f'WAZO_GROUP_LINEAR_{observed_interface_index}_INTERFACE']
+            )
+            assert match
+            assert match.group(1) == user['uuid']
+            observed_interface_index += 1
+        else:
+            assert not any(
+                user['uuid'] in recv_vars[interface_variable]
+                for interface_variable in recv_vars.keys()
+                if interface_variable.startswith('WAZO_GROUP_LINEAR_')
+                and interface_variable.endswith('_INTERFACE')
+            )
 
 
 EXTENSION_INTERFACE_RE = re.compile(r'Local/([a-f0-9\-]+)@(.+)')
