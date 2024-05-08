@@ -28,7 +28,7 @@ class GroupFeatures(Handler):
         self._exten: str = None  # type: ignore[assignment]
         self._context: str = None  # type: ignore[assignment]
         self._name: str = None  # type: ignore[assignment]
-        self._label = None
+        self._label: str = None  # type: ignore[assignment]
         self._timeout = None
         self._transfer_user = None
         self._transfer_call = None
