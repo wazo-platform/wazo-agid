@@ -130,6 +130,7 @@ class GroupFeatures(Handler):
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
         self._agi.set_variable('XIVO_REAL_CONTEXT', self._context)
         self._agi.set_variable('WAZO_GROUPNAME', self._name)
+        self._agi.set_variable('WAZO_GROUP_LABEL', self._label)
         self._agi.set_variable('WAZO_GROUP_STRATEGY', self._group_strategy)
         if self._musicclass:
             self._agi.set_variable('CHANNEL(musicclass)', self._musicclass)
