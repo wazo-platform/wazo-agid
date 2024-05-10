@@ -268,6 +268,7 @@ class DatabaseQueries:
                 'id': user.id,
                 'uuid': user.uuid,
                 'tenant_uuid': user.tenant_uuid,
+                'enablednd': user.enablednd,
             }
 
     def insert_voicemail(self, **kwargs):
