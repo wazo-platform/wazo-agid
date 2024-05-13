@@ -93,7 +93,7 @@ def linear_group_get_interfaces(
     for member in group_info.members:
         if member.type == 'user':
             if member.dnd:
-                logger.info(
+                logger.debug(
                     'group member (user_uuid=%s) is in DND, skipping', member.uuid
                 )
                 continue
