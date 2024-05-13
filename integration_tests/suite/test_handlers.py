@@ -871,7 +871,7 @@ def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunching
             queries.insert_user(),
             queries.insert_user(),
         ]
-        group = queries.insert_group(name='group1')
+        group = queries.insert_group()
         members = [
             queries.insert_group_user_member(
                 groupname=group['name'], userid=user['id'], position=i
@@ -908,7 +908,7 @@ def test_linear_group_get_interfaces_user_members_dnd(
             queries.insert_user(),
             queries.insert_user(enablednd=True),
         ]
-        group = queries.insert_group(name='group1')
+        group = queries.insert_group()
         members = [
             queries.insert_group_user_member(
                 groupname=group['name'], userid=user['id'], position=i
