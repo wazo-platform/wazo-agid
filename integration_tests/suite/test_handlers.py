@@ -703,6 +703,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         group = queries.insert_group(
             name='incoming_group_set_features',
+            label='incoming group set features',
             timeout=25,
             user_timeout=10,
             ring_strategy='linear',
@@ -734,6 +735,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
     assert recv_vars['WAZO_GROUPNAME'] == 'incoming_group_set_features'
+    assert recv_vars['WAZO_GROUP_LABEL'] == 'incoming group set features'
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
