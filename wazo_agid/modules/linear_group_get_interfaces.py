@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class UserMemberInfo:
     uuid: str
+    dnd: bool
     type: Literal['user'] = 'user'
 
 
@@ -54,6 +55,7 @@ def get_group_info(group_id: int) -> GroupInfo:
     user_member_info = [
         UserMemberInfo(
             uuid=user_member.user.uuid,
+            dnd=user_member.user.enablednd,
         )
         for user_member in group.user_queue_members
     ]
@@ -90,6 +92,11 @@ def linear_group_get_interfaces(
     member_interfaces = []
     for member in group_info.members:
         if member.type == 'user':
+            if member.dnd:
+                logger.debug(
+                    'group member (user_uuid=%s) is in DND, skipping', member.uuid
+                )
+                continue
             extension = f'{member.uuid}@usersharedlines'
             extension_state = agi.get_variable(f'EXTENSION_STATE({extension})')
         elif member.type == 'extension':

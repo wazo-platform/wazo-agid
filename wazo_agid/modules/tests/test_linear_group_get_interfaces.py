@@ -40,32 +40,35 @@ class TestGetGroupMembers(unittest.TestCase):
                 Mock(
                     spec=QueueMember,
                     id='1',
-                    user=Mock(spec=UserFeatures, uuid=str(uuid4())),
+                    user=Mock(spec=UserFeatures, uuid=str(uuid4()), enablednd=False),
                 ),
                 Mock(
                     spec=QueueMember,
                     id='2',
-                    user=Mock(spec=UserFeatures, uuid=str(uuid4())),
+                    user=Mock(spec=UserFeatures, uuid=str(uuid4()), enablednd=True),
                 ),
                 Mock(
                     spec=QueueMember,
                     id='3',
-                    user=Mock(spec=UserFeatures, uuid=str(uuid4())),
+                    user=Mock(spec=UserFeatures, uuid=str(uuid4()), enablednd=False),
                 ),
             ]
             mock_dao.get.return_value = Mock(
                 user_queue_members=mock_users,
                 extension_queue_members=[],
             )
-            user_uuids = [member.user.uuid for member in mock_users]
             group_info = linear_group_get_interfaces.get_group_info(1)
             assert group_info.members and len(group_info.members) == 3
             assert_that(
                 group_info.members,
                 contains_inanyorder(
                     *(
-                        has_properties(type='user', uuid=user_uuid)
-                        for user_uuid in user_uuids
+                        has_properties(
+                            type='user',
+                            uuid=member.user.uuid,
+                            dnd=member.user.enablednd,
+                        )
+                        for member in mock_users
                     )
                 ),
             )

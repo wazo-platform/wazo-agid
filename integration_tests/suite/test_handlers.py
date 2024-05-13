@@ -871,7 +871,7 @@ def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunching
             queries.insert_user(),
             queries.insert_user(),
         ]
-        group = queries.insert_group(name='group1')
+        group = queries.insert_group()
         members = [
             queries.insert_group_user_member(
                 groupname=group['name'], userid=user['id'], position=i
@@ -896,6 +896,56 @@ def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunching
             )
         )
         assert match.group(1) == user['uuid']
+
+
+def test_linear_group_get_interfaces_user_members_dnd(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    with base_asset.db.queries() as queries:
+        users = [
+            queries.insert_user(),
+            queries.insert_user(enablednd=True),
+            queries.insert_user(),
+            queries.insert_user(enablednd=True),
+        ]
+        group = queries.insert_group()
+        members = [
+            queries.insert_group_user_member(
+                groupname=group['name'], userid=user['id'], position=i
+            )
+            for i, user in enumerate(users, start=1)
+        ]
+
+    expected_interface_count = sum(1 for user in users if not user['enablednd'])
+
+    recv_vars, recv_cmds = base_asset.agid.linear_group_get_interfaces(
+        group['id'], variables={}
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert {
+        f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(expected_interface_count)
+    } <= recv_vars.keys()
+
+    interface_vars = {
+        i: recv_vars[f'WAZO_GROUP_LINEAR_{i}_INTERFACE']
+        for i in range(expected_interface_count)
+    }
+
+    interface_index = 0
+    for member, user in zip(members, users):
+        if not user['enablednd']:
+            assert (
+                match := USER_INTERFACE_RE.match(
+                    recv_vars[f'WAZO_GROUP_LINEAR_{interface_index}_INTERFACE']
+                )
+            )
+            assert match.group(1) == user['uuid']
+            interface_index += 1
+        else:
+            assert not any(
+                user['uuid'] in interface for interface in interface_vars.values()
+            )
 
 
 def test_linear_group_get_interfaces_user_members_ring_in_use_disabled(

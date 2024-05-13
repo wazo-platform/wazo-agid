@@ -262,12 +262,14 @@ class DatabaseQueries:
                 lastname=kwargs.get('lastname', 'unittest'),
                 callerid=kwargs.get('callerid', '"unittest" <1234>'),
                 musiconhold=kwargs.get('musiconhold', 'default'),
+                enablednd=int(kwargs.pop('enablednd', False)),
                 **kwargs,
             )
             return {
                 'id': user.id,
                 'uuid': user.uuid,
                 'tenant_uuid': user.tenant_uuid,
+                'enablednd': user.enablednd,
             }
 
     def insert_voicemail(self, **kwargs):
