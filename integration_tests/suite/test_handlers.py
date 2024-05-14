@@ -788,7 +788,6 @@ def test_incoming_group_set_features_linear_with_music(
         'WAZO_DSTID': group['id'],
         'WAZO_FWD_REFERER': group['id'],
         'XIVO_PATH': None,
-        'WAZO_LINEAR_GROUP_FLAG': '1',
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_group_set_features(
         variables=variables
