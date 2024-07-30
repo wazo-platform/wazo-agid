@@ -1,2 +1,3 @@
 etc/wazo-agid/conf.d
+etc/rsyslog.d
 var/lib/wazo-agid
