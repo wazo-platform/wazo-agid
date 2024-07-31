@@ -9,6 +9,7 @@ StartLimitIntervalSec=150
 ExecStart=/usr/bin/wazo-agid
 Restart=on-failure
 RestartSec=5
+SyslogIdentifier=wazo-agid
 
 [Install]
 WantedBy=multi-user.target
