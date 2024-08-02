@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -57,8 +57,9 @@ class AnswerHandler(handler.Handler):
 
         calld = self._agi.config['calld']['client']
         channel_id = self._agi.env['agi_uniqueid']
+        tenant_uuid = self._agi.get_variable('WAZO_TENANT_UUID')
         self._agi.set_variable('WAZO_RECORD_GROUP_CALLEE', '1')
         try:
-            calld.calls.start_record(channel_id)
+            calld.calls.start_record(channel_id, tenant_uuid=tenant_uuid)
         except Exception as e:
             logger.error('Error during enabling call recording: %s', e)
