@@ -1,4 +1,4 @@
-# Copyright 2020-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2020-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -24,10 +24,11 @@ CALL_RECORDING_FILENAME_TEMPLATE = (
 def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     calld = agi.config['calld']['client']
     channel_id = agi.env['agi_uniqueid']
+    tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
     if agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1':
-        _disable_call_recording(agi, calld, channel_id)
+        _disable_call_recording(agi, calld, channel_id, tenant_uuid)
     else:
-        _enable_call_recording(agi, calld, channel_id)
+        _enable_call_recording(agi, calld, channel_id, tenant_uuid)
 
 
 def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
@@ -59,16 +60,16 @@ def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     _start_mix_monitor(agi)
 
 
-def _enable_call_recording(agi, calld, channel_id):
+def _enable_call_recording(agi, calld, channel_id, tenant_uuid):
     try:
-        calld.calls.start_record(channel_id)
+        calld.calls.start_record(channel_id, tenant_uuid=tenant_uuid)
     except Exception as e:
         logger.error('Error during enabling call recording: %s', e)
 
 
-def _disable_call_recording(agi, calld, channel_id):
+def _disable_call_recording(agi, calld, channel_id, tenant_uuid):
     try:
-        calld.calls.stop_record(channel_id)
+        calld.calls.stop_record(channel_id, tenant_uuid=tenant_uuid)
     except Exception as e:
         logger.error('Error during disabling call recording: %s', e)
 
