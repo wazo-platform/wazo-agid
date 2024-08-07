@@ -1570,6 +1570,9 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_MAILBOX_LANGUAGE'] == 'fr_FR'
 
 
+DATETIME_REGEX = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{1,6})?\+00:00)'
+
+
 def test_wake_mobile(base_asset: BaseAssetLaunchingHelper) -> None:
     with base_asset.db.queries() as queries:
         user = queries.insert_user()
@@ -1582,9 +1585,13 @@ def test_wake_mobile(base_asset: BaseAssetLaunchingHelper) -> None:
     recv_cmds = base_asset.agid.wake_mobile(user['uuid'], variables=variables)[1]
 
     assert recv_cmds['FAILURE'] is False
-    assert (
-        recv_cmds['EXEC UserEvent']
-        == f'Pushmobile,WAZO_DST_UUID: {user["uuid"]},WAZO_VIDEO_ENABLED: 1,WAZO_RING_TIME: 42'
+    assert re.fullmatch(
+        (
+            rf'Pushmobile,WAZO_DST_UUID: {user["uuid"]},'
+            rf'WAZO_VIDEO_ENABLED: 1,WAZO_RING_TIME: 42,'
+            rf'WAZO_TIMESTAMP: {DATETIME_REGEX}'
+        ),
+        recv_cmds['EXEC UserEvent'],
     )
 
 
