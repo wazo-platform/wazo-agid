@@ -1570,7 +1570,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_MAILBOX_LANGUAGE'] == 'fr_FR'
 
 
-DATETIME_REGEX = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2,6}\+00:00)'
+DATETIME_REGEX = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{1,6})?\+00:00)'
 
 
 def test_wake_mobile(base_asset: BaseAssetLaunchingHelper) -> None:
