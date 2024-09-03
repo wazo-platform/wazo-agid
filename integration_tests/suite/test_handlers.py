@@ -1,5 +1,6 @@
 # Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+
 from __future__ import annotations
 
 import re
@@ -891,7 +892,7 @@ def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunching
         position = member['position']
         assert (
             match := USER_INTERFACE_RE.match(
-                recv_vars[f'WAZO_GROUP_LINEAR_{position-1}_INTERFACE']
+                recv_vars[f'WAZO_GROUP_LINEAR_{position - 1}_INTERFACE']
             )
         )
         assert match.group(1) == user['uuid']
@@ -1034,7 +1035,7 @@ def test_linear_group_get_interfaces_extension_members(
         position = member['position']
         assert (
             match := EXTENSION_INTERFACE_RE.match(
-                recv_vars[f'WAZO_GROUP_LINEAR_{position-1}_INTERFACE']
+                recv_vars[f'WAZO_GROUP_LINEAR_{position - 1}_INTERFACE']
             )
         )
         assert match.group(1) == member['exten']

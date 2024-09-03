@@ -1,4 +1,4 @@
-# Copyright 2004-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2004-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Modifications by Proformatique from pyst-0.2:
@@ -12,6 +12,7 @@
 #     - replaced references to sys.std{in,out} to custom file objects.
 #     - added args attribute to replace sys.argv.
 #     - added Fast prefix for coherency.
+
 from __future__ import annotations
 
 import pprint
