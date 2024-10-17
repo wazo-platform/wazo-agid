@@ -6,20 +6,47 @@ from collections import defaultdict
 from typing import Any
 from unittest.mock import Mock, call, patch
 
-from hamcrest import assert_that
+from hamcrest import assert_that, contains_exactly
 from hamcrest.core import equal_to
 
 from wazo_agid import objects
 from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 
+class TrunkBuilder:
+    def __init__(self):
+        self._outgoing_caller_id_format = None
+        self._interface = ''
+        self._intfsuffix = ''
+
+    def with_outgoing_caller_id_format(self, outgoing_caller_id_format):
+        self._outgoing_caller_id_format = outgoing_caller_id_format
+        return self
+
+    def with_interface(self, interface):
+        self._interface = interface
+        return self
+
+    def build(self):
+        trunk = Mock(objects.Trunk)
+        trunk.outgoing_caller_id_format = self._outgoing_caller_id_format
+        trunk.interface = self._interface
+        trunk.intfsuffix = self._intfsuffix
+        return trunk
+
+
 class OutCallBuilder:
     def __init__(self):
         self._internal = 0
         self.callerId = ''
+        self._trunks = []
 
     def withCallerId(self, callerId):
         self.callerId = callerId
+        return self
+
+    def with_trunk(self, trunk):
+        self._trunks.append(trunk)
         return self
 
     def internal(self):
@@ -34,6 +61,9 @@ class OutCallBuilder:
         outcall = Mock(objects.Outcall)
         outcall.callerid = self.callerId
         outcall.internal = self._internal
+        outcall.trunks = []
+        for trunk in self._trunks:
+            outcall.trunks.append(trunk)
         return outcall
 
 
@@ -81,6 +111,10 @@ def an_outcall():
     return OutCallBuilder()
 
 
+def a_trunk():
+    return TrunkBuilder()
+
+
 def a_user():
     return UserBuilder()
 
@@ -100,6 +134,42 @@ class TestOutgoingFeatures(unittest.TestCase):
         self._cursor = Mock()
         self._args = Mock()
         self.outgoing_features = OutgoingFeatures(self._agi, self._cursor, self._args)
+
+    def test_set_trunk_info(self):
+        trunk1 = (
+            a_trunk()
+            .with_interface('PJSIP/abc')
+            .with_outgoing_caller_id_format('+E164')
+            .build()
+        )
+        trunk2 = (
+            a_trunk()
+            .with_interface('PJSIP/def')
+            .with_outgoing_caller_id_format('national')
+            .build()
+        )
+        outcall = an_outcall().with_trunk(trunk1).with_trunk(trunk2).build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.dstnum = '911'
+
+        self.outgoing_features._set_trunk_info()
+
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                # Trunk 0
+                call('WAZO_OUTGOING_CALLER_ID_FORMAT0', '+E164'),
+                call('WAZO_INTERFACE0', 'PJSIP'),
+                call('XIVO_TRUNKEXTEN0', '911@abc'),
+                call('XIVO_TRUNKSUFFIX0', ''),
+                # Trunk 1
+                call('WAZO_OUTGOING_CALLER_ID_FORMAT1', 'national'),
+                call('WAZO_INTERFACE1', 'PJSIP'),
+                call('XIVO_TRUNKEXTEN1', '911@def'),
+                call('XIVO_TRUNKSUFFIX1', ''),
+            ),
+        )
 
     def test_set_userfield(self):
         userfield = 'CP1234'

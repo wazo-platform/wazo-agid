@@ -132,6 +132,10 @@ class OutgoingFeatures(Handler):
 
     def _set_trunk_info(self) -> None:
         for i, trunk in enumerate(self.outcall.trunks):
+            self._agi.set_variable(
+                f'{dialplan_variables.OUTGOING_CALLER_ID_FORMAT}{i:d}',
+                trunk.outgoing_caller_id_format,
+            )
             if trunk.interface.startswith('PJSIP'):
                 name = trunk.interface.replace('PJSIP/', '')
                 exten = f'{self.dstnum}@{name}'

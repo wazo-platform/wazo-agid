@@ -717,10 +717,17 @@ class Trunk:
     def __init__(self, agi, cursor: DictCursor, xid):
         self.agi = agi
         self.cursor = cursor
+        columns = [
+            'endpoint_sip_uuid',
+            'endpoint_iax_id',
+            'endpoint_custom_id',
+            'outgoing_caller_id_format',
+        ]
+        query = SQL(
+            "SELECT {columns} FROM trunkfeatures WHERE id = %s",
+        )
         cursor.execute(
-            "SELECT endpoint_sip_uuid, endpoint_iax_id, endpoint_custom_id "
-            "FROM trunkfeatures "
-            "WHERE id = %s",
+            query.format(columns=join_column_names(columns)),
             (xid,),
         )
         res: DictRow = cursor.fetchone()
@@ -730,7 +737,7 @@ class Trunk:
             raise LookupError(f"Unable to find trunk (id: {xid:d})")
 
         self.id = xid
-
+        self.outgoing_caller_id_format = res['outgoing_caller_id_format']
         if res['endpoint_sip_uuid']:
             (self.interface, self.intfsuffix) = ChanSIP.get_intf_and_suffix(
                 cursor, res['endpoint_sip_uuid']
