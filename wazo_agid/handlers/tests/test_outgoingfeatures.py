@@ -38,11 +38,11 @@ class TrunkBuilder:
 class OutCallBuilder:
     def __init__(self):
         self._internal = 0
-        self.callerId = ''
+        self._caller_id = ''
         self._trunks = []
 
-    def withCallerId(self, callerId):
-        self.callerId = callerId
+    def with_caller_id(self, caller_id):
+        self._caller_id = caller_id
         return self
 
     def with_trunk(self, trunk):
@@ -59,7 +59,7 @@ class OutCallBuilder:
 
     def build(self):
         outcall = Mock(objects.Outcall)
-        outcall.callerid = self.callerId
+        outcall.callerid = self._caller_id
         outcall.internal = self._internal
         outcall.trunks = []
         for trunk in self._trunks:
@@ -264,7 +264,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self, mock_set_caller_id
     ):
         user = None
-        outcall = an_outcall().external().withCallerId('27857218').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -290,7 +290,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self, mock_set_caller_id
     ):
         user = a_user().withDefaultOutCallerId().build()
-        outcall = an_outcall().external().withCallerId('27857218').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -323,7 +323,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self, mock_set_caller_id
     ):
         user = a_user().withAnonymousOutCallerId().build()
-        outcall = an_outcall().external().withCallerId('27857218').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -355,7 +355,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self, mock_set_caller_id
     ):
         user = a_user().withCustomOutCallerId('"Custom1"').build()
-        outcall = an_outcall().external().withCallerId('27857218').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -369,7 +369,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self, mock_set_caller_id
     ):
         user = a_user().withCustomOutCallerId('"Custom1"').build()
-        outcall = an_outcall().external().withCallerId('27857218').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
         caller_id_header = '5555551234'
         self._channel_variables[
             'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
@@ -387,7 +387,7 @@ class TestOutgoingFeatures(unittest.TestCase):
         self, mock_set_caller_id
     ):
         user = a_user().withCustomOutCallerId('"Custom1"').build()
-        outcall = an_outcall().external().withCallerId('27857218').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
         caller_id_header = 'anonymous'
         self._channel_variables[
             'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
