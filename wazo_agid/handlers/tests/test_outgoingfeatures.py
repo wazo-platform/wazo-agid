@@ -74,27 +74,27 @@ class UserBuilder:
         self._userfield = None
         self._musiconhold = None
 
-    def withCallerId(self, caller_id):
+    def with_caller_id(self, caller_id):
         self._caller_id = caller_id
         return self
 
-    def withDefaultOutCallerId(self):
+    def with_default_outgoing_caller_id(self):
         self._out_caller_id = 'default'
         return self
 
-    def withAnonymousOutCallerId(self):
+    def with_anonymous_out_caller_id(self):
         self._out_caller_id = 'anonymous'
         return self
 
-    def withCustomOutCallerId(self, caller_id):
+    def with_custom_out_caller_id(self, caller_id):
         self._out_caller_id = caller_id
         return self
 
-    def withUserField(self, userfield):
+    def with_user_field(self, userfield):
         self._userfield = userfield
         return self
 
-    def withMoh(self, moh):
+    def with_moh(self, moh):
         self._musiconhold = moh
         return self
 
@@ -173,7 +173,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     def test_set_userfield(self):
         userfield = 'CP1234'
-        user = a_user().withUserField(userfield).build()
+        user = a_user().with_user_field(userfield).build()
         outcall = an_outcall().build()
 
         self.outgoing_features.outcall = outcall
@@ -205,7 +205,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     def test_set_user_music_on_hold(self):
         moh = 'a-moh'
-        user = a_user().withMoh(moh).build()
+        user = a_user().with_moh(moh).build()
         outcall = an_outcall().build()
 
         self.outgoing_features.outcall = outcall
@@ -275,7 +275,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_default_and_outcall_external(self, mock_set_caller_id):
-        user = a_user().withDefaultOutCallerId().build()
+        user = a_user().with_default_outgoing_caller_id().build()
         outcall = an_outcall().external().build()
 
         self.outgoing_features.outcall = outcall
@@ -289,7 +289,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_set_caller_id_user_default_and_outcall_external_caller_id(
         self, mock_set_caller_id
     ):
-        user = a_user().withDefaultOutCallerId().build()
+        user = a_user().with_default_outgoing_caller_id().build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
@@ -303,7 +303,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_set_caller_id_user_anonymous_and_outcall_external(
         self, mock_set_caller_id
     ):
-        user = a_user().withAnonymousOutCallerId().build()
+        user = a_user().with_anonymous_out_caller_id().build()
         outcall = an_outcall().external().build()
 
         self.outgoing_features.outcall = outcall
@@ -322,7 +322,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_set_caller_id_user_anonymous_and_outcall_external_caller_id(
         self, mock_set_caller_id
     ):
-        user = a_user().withAnonymousOutCallerId().build()
+        user = a_user().with_anonymous_out_caller_id().build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
@@ -340,7 +340,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_set_caller_id_user_custom_and_outcall_external(self, mock_set_caller_id):
-        user = a_user().withCustomOutCallerId('"Custom1"').build()
+        user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().build()
 
         self.outgoing_features.outcall = outcall
@@ -354,7 +354,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_set_caller_id_user_custom_and_outcall_external_caller_id(
         self, mock_set_caller_id
     ):
-        user = a_user().withCustomOutCallerId('"Custom1"').build()
+        user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
@@ -368,7 +368,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_caller_id_from_SIP_header_user_custom_outcall_custom(
         self, mock_set_caller_id
     ):
-        user = a_user().withCustomOutCallerId('"Custom1"').build()
+        user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
         caller_id_header = '5555551234'
         self._channel_variables[
@@ -386,7 +386,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_anonymous_caller_id_from_SIP_header_user_custom_outcall_custom(
         self, mock_set_caller_id
     ):
-        user = a_user().withCustomOutCallerId('"Custom1"').build()
+        user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
         caller_id_header = 'anonymous'
         self._channel_variables[
@@ -410,7 +410,7 @@ class TestOutgoingFeatures(unittest.TestCase):
     def test_anonymous_caller_id_from_SIP_header_no_outcall_cid(
         self, mock_set_caller_id
     ):
-        user = a_user().withCustomOutCallerId('"Custom1"').build()
+        user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().build()
         caller_id_header = 'anonymous'
         self._channel_variables[
@@ -431,7 +431,7 @@ class TestOutgoingFeatures(unittest.TestCase):
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_anonymous_caller_id_from_SIP_header_user_default(self, mock_set_caller_id):
-        user = a_user().withCustomOutCallerId('default').build()
+        user = a_user().with_custom_out_caller_id('default').build()
         outcall = an_outcall().external().build()
         caller_id_header = 'anonymous'
         self._channel_variables[
