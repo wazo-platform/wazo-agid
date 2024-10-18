@@ -1145,7 +1145,10 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
             preprocess_subroutine='test-subroutine', hangupringtime=10
         )
         sip = queries.insert_endpoint_sip()
-        trunk = queries.insert_trunk(endpoint_sip_uuid=sip['uuid'])
+        trunk = queries.insert_trunk(
+            endpoint_sip_uuid=sip['uuid'],
+            outgoing_caller_id_format='national',
+        )
         queries.insert_outgoing_call_trunk(
             outcallid=call['id'], trunkfeaturesid=trunk['id']
         )
@@ -1171,6 +1174,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_CALLOPTIONS'] == 'T'
     assert recv_vars['CHANNEL(musicclass)'] == 'default'
     assert recv_vars['WAZO_INTERFACE0'] == 'PJSIP'
+    assert recv_vars['WAZO_OUTGOING_CALLER_ID_FORMAT0'] == 'national'
     assert recv_vars['XIVO_TRUNKEXTEN0'] == f'{extension["exten"]}@{sip["name"]}'
     assert recv_vars['XIVO_TRUNKSUFFIX0'] == ''
     assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'
