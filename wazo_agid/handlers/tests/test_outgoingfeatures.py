@@ -14,6 +14,20 @@ from wazo_agid import objects
 from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 
+class TenantBuilder:
+    def __init__(self) -> None:
+        self._country: str = ''
+
+    def with_country(self, country: str) -> Self:
+        self._country = country
+        return self
+
+    def build(self) -> objects.Tenant:
+        tenant = Mock(objects.Tenant)
+        tenant.country = self._country
+        return tenant
+
+
 class TrunkBuilder:
     def __init__(self) -> None:
         self._outgoing_caller_id_format: str = ''
@@ -112,6 +126,10 @@ def an_outcall() -> OutCallBuilder:
     return OutCallBuilder()
 
 
+def a_tenant() -> TenantBuilder:
+    return TenantBuilder()
+
+
 def a_trunk() -> TrunkBuilder:
     return TrunkBuilder()
 
@@ -207,6 +225,29 @@ class TestSetUserField(BaseOutgoingFeaturesTestCase):
         self.outgoing_features.outcall = outcall
 
         self.outgoing_features._set_userfield()
+
+
+class TestSetTenantCountry(BaseOutgoingFeaturesTestCase):
+    def test_no_tenant(self) -> None:
+        self.outgoing_features._set_tenant_country()
+
+        self._agi.set_variable.assert_called_once_with('WAZO_TENANT_COUNTRY', '')
+
+    def test_tenant_has_no_country(self) -> None:
+        tenant = a_tenant().build()
+        self.outgoing_features.tenant = tenant
+
+        self.outgoing_features._set_tenant_country()
+
+        self._agi.set_variable.assert_called_once_with('WAZO_TENANT_COUNTRY', '')
+
+    def test_tenant_with_a_country(self) -> None:
+        tenant = a_tenant().with_country('CA').build()
+        self.outgoing_features.tenant = tenant
+
+        self.outgoing_features._set_tenant_country()
+
+        self._agi.set_variable.assert_called_once_with('WAZO_TENANT_COUNTRY', 'CA')
 
 
 class TestSetUserMusicOnHold(BaseOutgoingFeaturesTestCase):

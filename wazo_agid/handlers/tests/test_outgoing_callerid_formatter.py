@@ -71,3 +71,60 @@ class TestOutgoingCallerIdFormatter(TestCase):
             'CALLERID(all)',
             '"+15551234567" <+15551234567>',
         )
+
+    def test_selected_E164_going_plusE164(self) -> None:
+        channel_vars = {
+            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '15551234567',
+            'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+            'WAZO_TENANT_COUNTRY': 'CA',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.set_caller_id()
+
+        self.agi.set_variable.assert_called_once_with(
+            'CALLERID(all)',
+            '"+15551234567" <+15551234567>',
+        )
+
+    def test_selected_national_going_plusE164(self) -> None:
+        channel_vars = {
+            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '5551234567',
+            'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+            'WAZO_TENANT_COUNTRY': 'CA',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.set_caller_id()
+
+        self.agi.set_variable.assert_called_once_with(
+            'CALLERID(all)',
+            '"+15551234567" <+15551234567>',
+        )
+
+    def test_selected_invalid(self) -> None:
+        channel_vars = {
+            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': 'invalid',
+            'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+            'WAZO_TENANT_COUNTRY': '',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.set_caller_id()
+
+        self.agi.set_variable.assert_not_called()
+
+    def test_selected_valid_raw(self) -> None:
+        channel_vars = {
+            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '123',
+            'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+            'WAZO_TENANT_COUNTRY': '',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.set_caller_id()
+
+        self.agi.set_variable.assert_called_once_with(
+            'CALLERID(all)',
+            '"123" <123>',
+        )

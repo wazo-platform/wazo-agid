@@ -36,12 +36,17 @@ class OutgoingFeatures(Handler):
         self._context: str | None = None
         self.outcall = objects.Outcall(self._agi, self._cursor)
         self._tenant_uuid: str | None = None
+        self.tenant: objects.Tenant | None = None
 
     def _retrieve_outcall(self) -> None:
         try:
             self.outcall.retrieve_values(self.dialpattern_id)
         except (ValueError, LookupError) as e:
             self._agi.dp_break(str(e))
+
+    def _retrieve_tenant(self) -> None:
+        if self._tenant_uuid:
+            self.tenant = objects.Tenant(self._agi, self._cursor, self._tenant_uuid)
 
     def _set_call_record_side(self) -> None:
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
@@ -70,6 +75,12 @@ class OutgoingFeatures(Handler):
         except (ValueError, LookupError):
             logger.debug('Could not retrieve user %s', self.userid)
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)
+
+    def _set_tenant_country(self) -> None:
+        country = ''
+        if self.tenant:
+            country = self.tenant.country
+        self._agi.set_variable('WAZO_TENANT_COUNTRY', country)
 
     def _set_userfield(self) -> None:
         if self.user and self.user.userfield:
@@ -185,6 +196,8 @@ class OutgoingFeatures(Handler):
     def execute(self) -> None:
         self._extract_dialplan_variables()
         self._retrieve_outcall()
+        self._retrieve_tenant()
+        self._set_tenant_country()
         self._set_destination_number()
         self._retrieve_user()
         self._set_userfield()

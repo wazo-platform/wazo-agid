@@ -22,6 +22,8 @@ from wazo_agid.schedule import (
 if TYPE_CHECKING:
     from typing import Literal
 
+    from wazo_agid.agid import FastAGI
+
 logger = logging.getLogger(__name__)
 
 
@@ -711,6 +713,28 @@ class DialAction:
             self.actionarg2,
             (self.category not in category_no_isda),
         )
+
+
+class Tenant:
+    def __init__(self, agi: FastAGI, cursor: DictCursor, tenant_uuid: str):
+        self.agi = agi
+        self.cursor = cursor
+        self.tenant_uuid = tenant_uuid
+        self.country = ''
+
+        columns = [
+            'country',
+        ]
+        query = SQL('SELECT {columns} FROM tenant WHERE uuid = %s')
+        cursor.execute(
+            query.format(columns=join_column_names(columns)),
+            (tenant_uuid,),
+        )
+        res = cursor.fetchone()
+        if not res:
+            raise LookupError(f'Unable to find tenant (uuid: {tenant_uuid})')
+
+        self.country = res['country']
 
 
 class Trunk:

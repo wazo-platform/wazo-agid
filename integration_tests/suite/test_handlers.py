@@ -449,6 +449,38 @@ def test_ignore_b_option(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_CALLOPTIONS'] == 'XB(foobar^s^1)'
 
 
+def test_format_and_set_outgoing_caller_id(base_asset: BaseAssetLaunchingHelper):
+    variables = {
+        'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '4185551234',
+        'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+        'WAZO_TENANT_COUNTRY': 'CA',
+    }
+
+    recv_vars, recv_cmds = base_asset.agid.format_and_set_outgoing_caller_id(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['CALLERID(all)'] == '\\"+14185551234\\" <+14185551234>'
+
+
+def test_format_and_set_outgoing_caller_id_cannot_be_parsed(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    variables = {
+        'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '4185551234',
+        'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+        'WAZO_TENANT_COUNTRY': '',
+    }
+
+    recv_vars, recv_cmds = base_asset.agid.format_and_set_outgoing_caller_id(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['CALLERID(all)'] == '\\"4185551234\\" <4185551234>'
+
+
 def test_fwdundoall(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         user = queries.insert_user()
