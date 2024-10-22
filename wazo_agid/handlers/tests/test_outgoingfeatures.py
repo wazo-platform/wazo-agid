@@ -426,7 +426,9 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
 
         self.outgoing_features._set_caller_id()
 
-        mock_set_caller_id.assert_called_once_with(self._agi, caller_id_header)
+        self._agi.set_variable.assert_called_once_with(
+            'WAZO_SELECTED_CALLER_ID_TO_FORMAT', caller_id_header
+        )
 
     @patch('wazo_agid.objects.CallerID.set')
     def test_anonymous_caller_id_from_SIP_header_user_custom_outcall_custom(

@@ -107,7 +107,9 @@ class OutgoingFeatures(Handler):
             if selected_caller_id == _ANONYMOUS_CALLER_ID:
                 self._set_anonymous()
             else:
-                objects.CallerID.set(self._agi, selected_caller_id)
+                self._agi.set_variable(
+                    'WAZO_SELECTED_CALLER_ID_TO_FORMAT', selected_caller_id
+                )
         elif self.user is None or self.user.outcallerid == 'default':
             if self.outcall.callerid:
                 logger.debug(

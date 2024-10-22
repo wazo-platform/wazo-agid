@@ -9,6 +9,7 @@ from wazo_agid import objects
 from wazo_agid.handlers import handler
 
 VALID_PHONE_NUMBER_RE = re.compile(r'^\+?\d{3,15}$')
+CALLER_ID_ALL_REGEX = re.compile(r'^"(.*)" <(\+?\d{3,15})>$')
 
 
 def _remove_none_numeric_char(raw: str) -> str:
@@ -30,21 +31,29 @@ class CallerIDFormatter(handler.Handler):
         if not cid_format:
             return
 
-        try:
-            number = phonenumbers.parse(selected_cid, tenant_country)
-        except phonenumbers.phonenumberutil.NumberParseException:
-            self._set_raw_number(selected_cid)
-        else:
-            self._set_formated_number(number, cid_format)
-
-    def _set_raw_number(self, selected_number: str) -> None:
-        matches = VALID_PHONE_NUMBER_RE.match(selected_number)
+        matches = CALLER_ID_ALL_REGEX.match(selected_cid)
         if matches:
-            objects.CallerID.set(self._agi, selected_number)
+            cid_name = matches.group(1)
+            cid_number = matches.group(2)
+        else:
+            cid_name = ''
+            cid_number = selected_cid
+
+        try:
+            cid_number = phonenumbers.parse(cid_number, tenant_country)
+        except phonenumbers.phonenumberutil.NumberParseException:
+            self._set_raw_number(cid_name, cid_number)
+        else:
+            self._set_formated_number(cid_name, cid_number, cid_format)
+
+    def _set_raw_number(self, name: str, number: str) -> None:
+        matches = VALID_PHONE_NUMBER_RE.match(number)
+        if matches:
+            self._set_caller_id(name, number)
         else:
             self._agi.verbose('Ignoring selected caller ID')
 
-    def _set_formated_number(self, number, cid_format: str) -> None:
+    def _set_formated_number(self, cid_name: str, number, cid_format: str) -> None:
         if cid_format == 'national':
             formated_number = _remove_none_numeric_char(
                 phonenumbers.format_number(
@@ -68,4 +77,11 @@ class CallerIDFormatter(handler.Handler):
             self._agi.verbose(
                 f'Unknown supported TRUNK_OUTGOING_CALLER_ID_FORMAT "{cid_format}"'
             )
-        objects.CallerID.set(self._agi, formated_number)
+
+        self._set_caller_id(cid_name, formated_number)
+
+    def _set_caller_id(self, name: str, number: str) -> None:
+        if name:
+            objects.CallerID.set(self._agi, f'"{name}" <{number}>')
+        else:
+            objects.CallerID.set(self._agi, number)
