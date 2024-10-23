@@ -39,6 +39,7 @@ class GroupFeatures(Handler):
         self._preprocess_subroutine = None
         self._musicclass = None
         self._pickup_member = None
+        self._max_calls: int = None  # type: ignore[assignment]
         self._tenant_uuid = None
 
     def execute(self) -> None:
@@ -81,7 +82,7 @@ class GroupFeatures(Handler):
             'mark_answered_elsewhere',
             'tenant_uuid',
         )
-        queue_columns = ('musicclass', 'timeout', 'strategy', 'retry')
+        queue_columns = ('musicclass', 'timeout', 'strategy', 'retry', 'maxlen')
         extensions_columns = ('exten', 'context')
         columns = [sanitize_column(f"groupfeatures.{c}") for c in groupfeatures_columns]
         columns += [
@@ -122,6 +123,7 @@ class GroupFeatures(Handler):
         self._user_timeout = res['queue_timeout']
         self._group_strategy = res['queue_strategy']
         self._group_retry_delay = res['queue_retry']
+        self._max_calls = res['queue_maxlen']
 
     def _set_vars(self) -> None:
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
@@ -129,6 +131,7 @@ class GroupFeatures(Handler):
         self._agi.set_variable('WAZO_GROUPNAME', self._name)
         self._agi.set_variable('WAZO_GROUP_LABEL', self._label)
         self._agi.set_variable('WAZO_GROUP_STRATEGY', self._group_strategy)
+        self._agi.set_variable('WAZO_GROUP_MAX_CALLS', self._max_calls)
         if self._musicclass:
             self._agi.set_variable('CHANNEL(musicclass)', self._musicclass)
 
