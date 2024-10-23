@@ -1,6 +1,7 @@
 # Copyright 2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import logging
 import re
 
 import phonenumbers
@@ -10,6 +11,9 @@ from wazo_agid.handlers import handler
 
 VALID_PHONE_NUMBER_RE = re.compile(r'^\+?\d{3,15}$')
 CALLER_ID_ALL_REGEX = re.compile(r'^"(.*)" <(\+?\d{3,15})>$')
+
+
+logger = logging.getLogger(__name__)
 
 
 def _remove_none_numeric_char(raw: str) -> str:
@@ -42,6 +46,12 @@ class CallerIDFormatter(handler.Handler):
         try:
             parsed_cid_number = phonenumbers.parse(cid_number, tenant_country)
         except phonenumbers.phonenumberutil.NumberParseException:
+            logger.info(
+                'caller id number %s cannot be parsed '
+                'as a valid number for tenant country %s',
+                cid_number,
+                tenant_country,
+            )
             self._set_raw_number(cid_name, cid_number)
         else:
             self._set_formated_number(cid_name, parsed_cid_number, cid_format)
@@ -51,7 +61,9 @@ class CallerIDFormatter(handler.Handler):
         if matches:
             self._set_caller_id(name, number)
         else:
-            self._agi.verbose('Ignoring selected caller ID')
+            self._agi.verbose(
+                f'Ignoring selected caller ID {number} not matching supported pattern'
+            )
 
     def _set_formated_number(
         self, cid_name: str, number: phonenumbers.PhoneNumber, cid_format: str
