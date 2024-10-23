@@ -40,11 +40,11 @@ class CallerIDFormatter(handler.Handler):
             cid_number = selected_cid
 
         try:
-            cid_number = phonenumbers.parse(cid_number, tenant_country)
+            parsed_cid_number = phonenumbers.parse(cid_number, tenant_country)
         except phonenumbers.phonenumberutil.NumberParseException:
             self._set_raw_number(cid_name, cid_number)
         else:
-            self._set_formated_number(cid_name, cid_number, cid_format)
+            self._set_formated_number(cid_name, parsed_cid_number, cid_format)
 
     def _set_raw_number(self, name: str, number: str) -> None:
         matches = VALID_PHONE_NUMBER_RE.match(number)
@@ -53,7 +53,9 @@ class CallerIDFormatter(handler.Handler):
         else:
             self._agi.verbose('Ignoring selected caller ID')
 
-    def _set_formated_number(self, cid_name: str, number, cid_format: str) -> None:
+    def _set_formated_number(
+        self, cid_name: str, number: phonenumbers.PhoneNumber, cid_format: str
+    ) -> None:
         if cid_format == 'national':
             formated_number = _remove_none_numeric_char(
                 phonenumbers.format_number(
