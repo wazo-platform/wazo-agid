@@ -7,6 +7,7 @@ import re
 import phonenumbers
 
 from wazo_agid import objects
+from wazo_agid.dialplan_variables import SELECTED_CALLER_ID
 from wazo_agid.handlers import handler
 
 VALID_PHONE_NUMBER_RE = re.compile(r'^\+?\d{3,15}$')
@@ -25,7 +26,7 @@ class CallerIDFormatter(handler.Handler):
         self.set_caller_id()
 
     def set_caller_id(self) -> None:
-        selected_cid = self._agi.get_variable('WAZO_SELECTED_CALLER_ID_TO_FORMAT')
+        selected_cid = self._agi.get_variable(SELECTED_CALLER_ID)
         cid_format = self._agi.get_variable('TRUNK_OUTGOING_CALLER_ID_FORMAT')
         tenant_country = self._agi.get_variable('WAZO_TENANT_COUNTRY')
 

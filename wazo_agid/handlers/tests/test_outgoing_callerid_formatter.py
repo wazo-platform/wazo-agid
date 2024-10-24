@@ -7,6 +7,7 @@ from unittest.mock import Mock
 from psycopg2.extras import DictCursor
 
 from wazo_agid.agid import FastAGI
+from wazo_agid.dialplan_variables import SELECTED_CALLER_ID
 
 from ..outgoing_callerid_formatter import CallerIDFormatter
 
@@ -21,7 +22,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_no_selected_caller_id(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '',
+            SELECTED_CALLER_ID: '',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -32,7 +33,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_going_national(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '+15551234567',
+            SELECTED_CALLER_ID: '+15551234567',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': 'national',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -46,7 +47,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_going_E164(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '+15551234567',
+            SELECTED_CALLER_ID: '+15551234567',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': 'E164',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -60,7 +61,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_going_plusE164(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '+15551234567',
+            SELECTED_CALLER_ID: '+15551234567',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -74,7 +75,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_going_plusE164_cid_name_preserved(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '"Foobar" <+15551234567>',
+            SELECTED_CALLER_ID: '"Foobar" <+15551234567>',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -88,7 +89,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_E164_going_plusE164(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '15551234567',
+            SELECTED_CALLER_ID: '15551234567',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
             'WAZO_TENANT_COUNTRY': 'CA',
         }
@@ -103,7 +104,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_national_going_plusE164(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '5551234567',
+            SELECTED_CALLER_ID: '5551234567',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
             'WAZO_TENANT_COUNTRY': 'CA',
         }
@@ -118,7 +119,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_invalid(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': 'invalid',
+            SELECTED_CALLER_ID: 'invalid',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
             'WAZO_TENANT_COUNTRY': '',
         }
@@ -130,7 +131,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_valid_raw(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '123',
+            SELECTED_CALLER_ID: '123',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
             'WAZO_TENANT_COUNTRY': '',
         }
@@ -145,7 +146,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_valid_raw_name_preserved(self) -> None:
         channel_vars = {
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT': '"Foobar" <123>',
+            SELECTED_CALLER_ID: '"Foobar" <123>',
             'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
             'WAZO_TENANT_COUNTRY': '',
         }

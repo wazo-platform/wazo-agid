@@ -11,6 +11,7 @@ from hamcrest.core import equal_to
 from typing_extensions import Self
 
 from wazo_agid import objects
+from wazo_agid.dialplan_variables import SELECTED_CALLER_ID
 from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 
@@ -427,7 +428,7 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         self.outgoing_features._set_caller_id()
 
         self._agi.set_variable.assert_called_once_with(
-            'WAZO_SELECTED_CALLER_ID_TO_FORMAT', caller_id_header
+            SELECTED_CALLER_ID, caller_id_header
         )
 
     @patch('wazo_agid.objects.CallerID.set')

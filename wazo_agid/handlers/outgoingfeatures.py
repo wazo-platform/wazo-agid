@@ -108,7 +108,8 @@ class OutgoingFeatures(Handler):
                 self._set_anonymous()
             else:
                 self._agi.set_variable(
-                    'WAZO_SELECTED_CALLER_ID_TO_FORMAT', selected_caller_id
+                    dialplan_variables.SELECTED_CALLER_ID,
+                    selected_caller_id,
                 )
         elif self.user is None or self.user.outcallerid == 'default':
             if self.outcall.callerid:
