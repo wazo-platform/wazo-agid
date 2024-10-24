@@ -10,7 +10,7 @@ from textwrap import dedent
 import pytest
 from hamcrest import assert_that, calling, raises
 
-from wazo_agid.dialplan_variables import SELECTED_CALLER_ID
+from wazo_agid.dialplan_variables import SELECTED_CALLER_ID, TRUNK_CID_FORMAT
 
 from .helpers.agid import AGIFailException
 from .helpers.base import BaseAssetLaunchingHelper
@@ -454,7 +454,7 @@ def test_ignore_b_option(base_asset: BaseAssetLaunchingHelper):
 def test_format_and_set_outgoing_caller_id(base_asset: BaseAssetLaunchingHelper):
     variables = {
         SELECTED_CALLER_ID: '4185551234',
-        'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+        TRUNK_CID_FORMAT: '+E164',
         'WAZO_TENANT_COUNTRY': 'CA',
     }
 
@@ -471,7 +471,7 @@ def test_format_and_set_outgoing_caller_id_cannot_be_parsed(
 ):
     variables = {
         SELECTED_CALLER_ID: '4185551234',
-        'TRUNK_OUTGOING_CALLER_ID_FORMAT': '+E164',
+        TRUNK_CID_FORMAT: '+E164',
         'WAZO_TENANT_COUNTRY': '',
     }
 
