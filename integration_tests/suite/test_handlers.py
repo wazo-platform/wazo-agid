@@ -10,6 +10,8 @@ from textwrap import dedent
 import pytest
 from hamcrest import assert_that, calling, raises
 
+from wazo_agid.dialplan_variables import SELECTED_CALLER_ID, TRUNK_CID_FORMAT
+
 from .helpers.agid import AGIFailException
 from .helpers.base import BaseAssetLaunchingHelper
 from .helpers.constants import SUBTENANT_UUID, TENANT_UUID
@@ -447,6 +449,38 @@ def test_ignore_b_option(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['WAZO_CALLOPTIONS'] == 'XB(foobar^s^1)'
+
+
+def test_format_and_set_outgoing_caller_id(base_asset: BaseAssetLaunchingHelper):
+    variables = {
+        SELECTED_CALLER_ID: '4185551234',
+        TRUNK_CID_FORMAT: '+E164',
+        'WAZO_TENANT_COUNTRY': 'CA',
+    }
+
+    recv_vars, recv_cmds = base_asset.agid.format_and_set_outgoing_caller_id(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['CALLERID(all)'] == '\\"+14185551234\\" <+14185551234>'
+
+
+def test_format_and_set_outgoing_caller_id_cannot_be_parsed(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    variables = {
+        SELECTED_CALLER_ID: '4185551234',
+        TRUNK_CID_FORMAT: '+E164',
+        'WAZO_TENANT_COUNTRY': '',
+    }
+
+    recv_vars, recv_cmds = base_asset.agid.format_and_set_outgoing_caller_id(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['CALLERID(all)'] == '\\"4185551234\\" <4185551234>'
 
 
 def test_fwdundoall(base_asset: BaseAssetLaunchingHelper):
@@ -1145,7 +1179,10 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
             preprocess_subroutine='test-subroutine', hangupringtime=10
         )
         sip = queries.insert_endpoint_sip()
-        trunk = queries.insert_trunk(endpoint_sip_uuid=sip['uuid'])
+        trunk = queries.insert_trunk(
+            endpoint_sip_uuid=sip['uuid'],
+            outgoing_caller_id_format='national',
+        )
         queries.insert_outgoing_call_trunk(
             outcallid=call['id'], trunkfeaturesid=trunk['id']
         )
@@ -1171,6 +1208,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_CALLOPTIONS'] == 'T'
     assert recv_vars['CHANNEL(musicclass)'] == 'default'
     assert recv_vars['WAZO_INTERFACE0'] == 'PJSIP'
+    assert recv_vars['WAZO_OUTGOING_CALLER_ID_FORMAT0'] == 'national'
     assert recv_vars['XIVO_TRUNKEXTEN0'] == f'{extension["exten"]}@{sip["name"]}'
     assert recv_vars['XIVO_TRUNKSUFFIX0'] == ''
     assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'

@@ -36,12 +36,17 @@ class OutgoingFeatures(Handler):
         self._context: str | None = None
         self.outcall = objects.Outcall(self._agi, self._cursor)
         self._tenant_uuid: str | None = None
+        self.tenant: objects.Tenant | None = None
 
     def _retrieve_outcall(self) -> None:
         try:
             self.outcall.retrieve_values(self.dialpattern_id)
         except (ValueError, LookupError) as e:
             self._agi.dp_break(str(e))
+
+    def _retrieve_tenant(self) -> None:
+        if self._tenant_uuid:
+            self.tenant = objects.Tenant(self._agi, self._cursor, self._tenant_uuid)
 
     def _set_call_record_side(self) -> None:
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
@@ -71,6 +76,12 @@ class OutgoingFeatures(Handler):
             logger.debug('Could not retrieve user %s', self.userid)
         self._agi.set_variable(dialplan_variables.CALL_OPTIONS, self.options)
 
+    def _set_tenant_country(self) -> None:
+        country = ''
+        if self.tenant:
+            country = self.tenant.country
+        self._agi.set_variable('WAZO_TENANT_COUNTRY', country)
+
     def _set_userfield(self) -> None:
         if self.user and self.user.userfield:
             self._agi.set_variable('CHANNEL(userfield)', self.user.userfield)
@@ -96,7 +107,10 @@ class OutgoingFeatures(Handler):
             if selected_caller_id == _ANONYMOUS_CALLER_ID:
                 self._set_anonymous()
             else:
-                objects.CallerID.set(self._agi, selected_caller_id)
+                self._agi.set_variable(
+                    dialplan_variables.SELECTED_CALLER_ID,
+                    selected_caller_id,
+                )
         elif self.user is None or self.user.outcallerid == 'default':
             if self.outcall.callerid:
                 logger.debug(
@@ -132,6 +146,10 @@ class OutgoingFeatures(Handler):
 
     def _set_trunk_info(self) -> None:
         for i, trunk in enumerate(self.outcall.trunks):
+            self._agi.set_variable(
+                f'{dialplan_variables.OUTGOING_CALLER_ID_FORMAT}{i:d}',
+                trunk.outgoing_caller_id_format,
+            )
             if trunk.interface.startswith('PJSIP'):
                 name = trunk.interface.replace('PJSIP/', '')
                 exten = f'{self.dstnum}@{name}'
@@ -181,6 +199,8 @@ class OutgoingFeatures(Handler):
     def execute(self) -> None:
         self._extract_dialplan_variables()
         self._retrieve_outcall()
+        self._retrieve_tenant()
+        self._set_tenant_country()
         self._set_destination_number()
         self._retrieve_user()
         self._set_userfield()
