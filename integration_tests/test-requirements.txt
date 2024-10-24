@@ -1,12 +1,4 @@
+# Backward compatiblity for jenkins
+
+-r test-requirements-for-tox.txt
 -e ..
-
-psycopg2-binary==2.8.6
-pyhamcrest
-pytest
-pyyaml==5.3.1  # from xivo-lib-python
-sqlalchemy==1.3.22
-sqlalchemy-utils==0.36.8  # from xivo-dao
-
-https://github.com/wazo-platform/xivo-dao/archive/master.zip
-https://github.com/wazo-platform/xivo-lib-python/archive/master.zip
-https://github.com/wazo-platform/wazo-test-helpers/archive/master.zip
