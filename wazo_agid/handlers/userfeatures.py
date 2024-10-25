@@ -201,8 +201,8 @@ class UserFeatures(Handler):
             if self.main_extension:
                 callerid_num = self.main_extension.exten
             else:
-                callerid_num = self._dstnum
-        self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num or '')
+                callerid_num = self._dstnum or ''
+        self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
 
     def _call_filtering(self) -> bool:
         callee = self._user

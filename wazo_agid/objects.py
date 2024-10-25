@@ -1022,7 +1022,7 @@ CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
 
 class CallerID:
     @staticmethod
-    def parse(callerid: str) -> tuple[str, str | None]:
+    def parse(callerid: str) -> tuple[str, str]:
         logger.debug('caller_id parse: parsing "%s"', callerid)
         m = CALLERID_MATCHER(callerid)
 
@@ -1056,32 +1056,31 @@ class CallerID:
                     calleridnum,
                 )
 
-        return calleridname, calleridnum
+        return calleridname, calleridnum or ''
 
     @staticmethod
     def set(agi, callerid):
         logger.debug('caller_id set: parsing "%s"', callerid)
         try:
-            cid_parsed = CallerID.parse(callerid)
+            calleridname, calleridnum = CallerID.parse(callerid)
         except ValueError:
             logger.debug('caller_id.set: could not parse callerid, giving up')
             return None
 
-        calleridname, calleridnum = cid_parsed
         logger.debug(
             'caller_id set: calleridname: "%s", calleridnum: "%s"',
             calleridname,
             calleridnum,
         )
 
-        if calleridname is None and calleridnum is not None:
+        if not calleridname and calleridnum:
             calleridname = calleridnum
             logger.debug(
                 'caller_id set: using calleridnum as calleridname: '
                 f'calleridname: "{calleridname}", calleridnum: "{calleridnum}"',
             )
 
-        if calleridname is not None and calleridnum is None:
+        if calleridname and not calleridnum:
             logger.debug(
                 'caller_id set: applying calleridname only: calleridname: "%s"',
                 calleridname,
@@ -1096,11 +1095,14 @@ class CallerID:
 
         return True
 
-    def __init__(self, agi, cursor: DictCursor, xtype, typeval):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, xtype, typeval):
         self.agi = agi
         self.cursor = cursor
         self.type = xtype
         self.typeval = typeval
+        self.mode = None
+        self.calleridname = ''
+        self.calleridnum = ''
 
         cursor.execute(
             "SELECT mode, callerdisplay FROM callerid "
@@ -1110,10 +1112,6 @@ class CallerID:
             (xtype, typeval),
         )
         res: DictRow = cursor.fetchone()
-
-        self.mode = None
-        self.calleridname = None
-        self.calleridnum = None
         if not res:
             return
 
@@ -1146,15 +1144,16 @@ class CallerID:
             calleridname = self.agi.get_variable('CALLERID(name)')
             calleridnum = self.agi.get_variable('CALLERID(num)')
 
-            if self.calleridnum is not None:
+            if self.calleridnum:
                 calleridnum = self.calleridnum
-            elif calleridnum in (None, ''):
+            elif not calleridnum:
                 calleridnum = 'unknown'
 
-            if calleridname in (None, '', '""'):
-                calleridname = calleridnum
-            elif calleridname[0] == '"' and calleridname[-1] == '"':
+            if calleridname[0] == '"' and calleridname[-1] == '"':
                 calleridname = calleridname[1:-1]
+
+            if not calleridname:
+                calleridname = calleridnum
 
             if (
                 self.mode in ('prepend', 'append')

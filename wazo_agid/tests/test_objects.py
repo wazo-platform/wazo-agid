@@ -12,7 +12,7 @@ from ..objects import CallerID, VMBox
 
 class TestCallerID(TestCase):
     def test_parse(self) -> None:
-        scenarios: list[tuple[str, tuple[str, str | None]]] = [
+        scenarios: list[tuple[str, tuple[str, str]]] = [
             ('"Foo Bar" <123>', ('Foo Bar', '123')),
             ('"Foo Bar" <#42>', ('Foo Bar', '#42')),
             ('234', ('234', '234')),
@@ -20,7 +20,7 @@ class TestCallerID(TestCase):
             ('*10', ('*10', '*10')),
             ('SingleWord <789>', ('SingleWord', '789')),
             ('SingleWord <*10>', ('SingleWord', '*10')),
-            ('"Foo Bar"', ('Foo Bar', None)),
+            ('"Foo Bar"', ('Foo Bar', '')),
         ]
 
         for caller_id, expected in scenarios:
