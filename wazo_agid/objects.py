@@ -74,7 +74,7 @@ class ExtenFeatures:
         ),
     }
 
-    def __init__(self, agi, cursor: DictCursor):
+    def __init__(self, agi: FastAGI, cursor: DictCursor):
         self.agi = agi
         self.cursor = cursor
 
@@ -233,7 +233,9 @@ class VMBox:
 
 
 class Meeting:
-    def __init__(self, agi, cursor: DictCursor, tenant_uuid, uuid=None, number=None):
+    def __init__(
+        self, agi: FastAGI, cursor: DictCursor, tenant_uuid, uuid=None, number=None
+    ):
         self.agi = agi
         self.cursor = cursor
         self.uuid = uuid
@@ -263,7 +265,7 @@ class Meeting:
 
 
 class MOH:
-    def __init__(self, agi, cursor, uuid):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, uuid):
         self.agi = agi
         self.cursor = cursor
         self.name = None
@@ -281,7 +283,7 @@ class MOH:
 
 
 class Paging:
-    def __init__(self, agi, cursor, number, userid):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, number, userid):
         self.agi = agi
         self.cursor = cursor
         self.lines = set()
@@ -368,7 +370,13 @@ class Paging:
 
 class User:
     def __init__(
-        self, agi, cursor: DictCursor, xid=None, exten=None, context=None, agent_id=None
+        self,
+        agi: FastAGI,
+        cursor: DictCursor,
+        xid=None,
+        exten=None,
+        context=None,
+        agent_id=None,
     ):
         self.agi = agi
         self.cursor = cursor
@@ -481,7 +489,7 @@ class User:
 
 
 class Queue:
-    def __init__(self, agi, cursor: DictCursor, queue_id):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, queue_id):
         self.agi = agi
         self.cursor = cursor
 
@@ -673,7 +681,7 @@ class DialAction:
         agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG1", action_arg_1)
         agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG2", action_arg_2)
 
-    def __init__(self, agi, cursor: DictCursor, event, category, categoryval):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, event, category, categoryval):
         self.agi = agi
         self.cursor = cursor
         self.event = event
@@ -738,7 +746,7 @@ class Tenant:
 
 
 class Trunk:
-    def __init__(self, agi, cursor: DictCursor, xid):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, xid):
         self.agi = agi
         self.cursor = cursor
         columns = [
@@ -779,7 +787,7 @@ class Trunk:
 
 
 class DID:
-    def __init__(self, agi, cursor: DictCursor, incall_id):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, incall_id):
         self.agi = agi
         self.cursor = cursor
 
@@ -826,7 +834,7 @@ class DID:
 class Outcall:
     trunks: list[Trunk]
 
-    def __init__(self, agi, cursor: DictCursor):
+    def __init__(self, agi: FastAGI, cursor: DictCursor):
         self.agi = agi
         self.cursor = cursor
 
@@ -982,7 +990,7 @@ class ScheduleDataMapper:
 
 class Context:
     # TODO: Recursive inclusion
-    def __init__(self, agi, cursor: DictCursor, context):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, context):
         self.agi = agi
         self.cursor = cursor
 
@@ -1059,7 +1067,7 @@ class CallerID:
         return calleridname, calleridnum or ''
 
     @staticmethod
-    def set(agi, callerid):
+    def set(agi: FastAGI, callerid):
         logger.debug('caller_id set: parsing "%s"', callerid)
         try:
             calleridname, calleridnum = CallerID.parse(callerid)
