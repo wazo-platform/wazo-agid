@@ -11,7 +11,7 @@ from hamcrest.core import equal_to
 from typing_extensions import Self
 
 from wazo_agid import objects
-from wazo_agid.dialplan_variables import SELECTED_CALLER_ID
+from wazo_agid.dialplan_variables import SELECTED_CALLER_ID, TENANT_COUNTRY
 from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 
@@ -232,7 +232,7 @@ class TestSetTenantCountry(BaseOutgoingFeaturesTestCase):
     def test_no_tenant(self) -> None:
         self.outgoing_features._set_tenant_country()
 
-        self._agi.set_variable.assert_called_once_with('WAZO_TENANT_COUNTRY', '')
+        self._agi.set_variable.assert_called_once_with(TENANT_COUNTRY, '')
 
     def test_tenant_has_no_country(self) -> None:
         tenant = a_tenant().build()
@@ -240,7 +240,7 @@ class TestSetTenantCountry(BaseOutgoingFeaturesTestCase):
 
         self.outgoing_features._set_tenant_country()
 
-        self._agi.set_variable.assert_called_once_with('WAZO_TENANT_COUNTRY', '')
+        self._agi.set_variable.assert_called_once_with(TENANT_COUNTRY, '')
 
     def test_tenant_with_a_country(self) -> None:
         tenant = a_tenant().with_country('CA').build()
@@ -248,7 +248,7 @@ class TestSetTenantCountry(BaseOutgoingFeaturesTestCase):
 
         self.outgoing_features._set_tenant_country()
 
-        self._agi.set_variable.assert_called_once_with('WAZO_TENANT_COUNTRY', 'CA')
+        self._agi.set_variable.assert_called_once_with(TENANT_COUNTRY, 'CA')
 
 
 class TestSetUserMusicOnHold(BaseOutgoingFeaturesTestCase):

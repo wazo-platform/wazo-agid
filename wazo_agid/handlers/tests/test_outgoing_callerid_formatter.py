@@ -7,7 +7,11 @@ from unittest.mock import Mock
 from psycopg2.extras import DictCursor
 
 from wazo_agid.agid import FastAGI
-from wazo_agid.dialplan_variables import SELECTED_CALLER_ID, TRUNK_CID_FORMAT
+from wazo_agid.dialplan_variables import (
+    SELECTED_CALLER_ID,
+    TENANT_COUNTRY,
+    TRUNK_CID_FORMAT,
+)
 
 from ..outgoing_callerid_formatter import CallerIDFormatter
 
@@ -91,7 +95,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         channel_vars = {
             SELECTED_CALLER_ID: '15551234567',
             TRUNK_CID_FORMAT: '+E164',
-            'WAZO_TENANT_COUNTRY': 'CA',
+            TENANT_COUNTRY: 'CA',
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
@@ -106,7 +110,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         channel_vars = {
             SELECTED_CALLER_ID: '5551234567',
             TRUNK_CID_FORMAT: '+E164',
-            'WAZO_TENANT_COUNTRY': 'CA',
+            TENANT_COUNTRY: 'CA',
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
@@ -121,7 +125,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         channel_vars = {
             SELECTED_CALLER_ID: 'invalid',
             TRUNK_CID_FORMAT: '+E164',
-            'WAZO_TENANT_COUNTRY': '',
+            TENANT_COUNTRY: '',
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
@@ -133,7 +137,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         channel_vars = {
             SELECTED_CALLER_ID: '123',
             TRUNK_CID_FORMAT: '+E164',
-            'WAZO_TENANT_COUNTRY': '',
+            TENANT_COUNTRY: '',
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
@@ -148,7 +152,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         channel_vars = {
             SELECTED_CALLER_ID: '"Foobar" <123>',
             TRUNK_CID_FORMAT: '+E164',
-            'WAZO_TENANT_COUNTRY': '',
+            TENANT_COUNTRY: '',
         }
         self.agi.get_variable.side_effect = channel_vars.get
 

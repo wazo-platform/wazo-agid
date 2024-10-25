@@ -80,7 +80,7 @@ class OutgoingFeatures(Handler):
         country = ''
         if self.tenant:
             country = self.tenant.country
-        self._agi.set_variable('WAZO_TENANT_COUNTRY', country)
+        self._agi.set_variable(dialplan_variables.TENANT_COUNTRY, country)
 
     def _set_userfield(self) -> None:
         if self.user and self.user.userfield:
