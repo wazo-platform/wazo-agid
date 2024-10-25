@@ -1022,13 +1022,13 @@ CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
 
 class CallerID:
     @staticmethod
-    def parse(callerid):
+    def parse(callerid: str) -> tuple[str, str | None] | None:
         logger.debug('caller_id parse: parsing "%s"', callerid)
         m = CALLERID_MATCHER(callerid)
 
         if not m:
             logger.debug('caller_id parse: could not match callerid, giving up')
-            return
+            return None
 
         calleridname = m.group(1)
         calleridnum = m.group(3)
