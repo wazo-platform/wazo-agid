@@ -140,7 +140,10 @@ class OutgoingFeatures(Handler):
         self._agi.set_variable('CALLERID(pres)', 'prohib')
         self._agi.set_variable('WAZO_OUTGOING_ANONYMOUS_CALL', '1')
         if self.outcall.callerid:
-            _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
+            try:
+                _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
+            except ValueError:
+                return None
             if pai_tel:
                 self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
 

@@ -1022,13 +1022,13 @@ CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
 
 class CallerID:
     @staticmethod
-    def parse(callerid: str) -> tuple[str, str | None] | None:
+    def parse(callerid: str) -> tuple[str, str | None]:
         logger.debug('caller_id parse: parsing "%s"', callerid)
         m = CALLERID_MATCHER(callerid)
 
         if not m:
             logger.debug('caller_id parse: could not match callerid, giving up')
-            return None
+            raise ValueError('Could not parse callerid')
 
         calleridname = m.group(1)
         calleridnum = m.group(3)
@@ -1061,11 +1061,11 @@ class CallerID:
     @staticmethod
     def set(agi, callerid):
         logger.debug('caller_id set: parsing "%s"', callerid)
-        cid_parsed = CallerID.parse(callerid)
-
-        if not cid_parsed:
-            logger.debug('caller_id set: parsing result: "%s", giving up', cid_parsed)
-            return
+        try:
+            cid_parsed = CallerID.parse(callerid)
+        except ValueError:
+            logger.debug('caller_id.set: could not parse callerid, giving up')
+            return None
 
         calleridname, calleridnum = cid_parsed
         logger.debug(
@@ -1114,13 +1114,14 @@ class CallerID:
         self.mode = None
         self.calleridname = None
         self.calleridnum = None
+        if not res:
+            return
 
-        if res:
-            cid_parsed = self.parse(res['callerdisplay'])
-
-            if cid_parsed:
-                self.mode = res['mode']
-                self.calleridname, self.calleridnum = cid_parsed
+        try:
+            self.calleridname, self.calleridnum = self.parse(res['callerdisplay'])
+            self.mode = res['mode']
+        except ValueError:
+            return
 
     def rewrite(self, force_rewrite):
         """

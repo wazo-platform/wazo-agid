@@ -187,12 +187,11 @@ class UserFeatures(Handler):
             self._agi.set_variable('WAZO_DST_TENANT_UUID', self._user.tenant_uuid)
 
     def _set_xivo_redirecting_info(self) -> None:
-        callerid_parsed = CallerID.parse(self._user.callerid)
-        if callerid_parsed:
-            callerid_name, callerid_num = callerid_parsed
-        else:
-            callerid_name = None
-            callerid_num = None
+        try:
+            callerid_name, callerid_num = CallerID.parse(self._user.callerid)
+        except ValueError:
+            callerid_name = ''
+            callerid_num = ''
 
         if not callerid_name:
             callerid_name = f"{self._user.firstname} {self._user.lastname}"
@@ -203,7 +202,7 @@ class UserFeatures(Handler):
                 callerid_num = self.main_extension.exten
             else:
                 callerid_num = self._dstnum
-        self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
+        self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num or '')
 
     def _call_filtering(self) -> bool:
         callee = self._user
