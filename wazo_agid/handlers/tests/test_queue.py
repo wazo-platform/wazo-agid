@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
@@ -37,9 +37,7 @@ class TestAnswerHandler(TestCase):
     @patch('wazo_agid.handlers.queue.objects.User')
     def test_get_user_user_member(self, User):
         user_uuid = 'e15b4765-719d-40d4-8bdd-ff578e2bef47'
-        chan_vars = {'WAZO_USERUUID': user_uuid}
-        self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
-        self.agi.env = {'agi_channel': 'PJSIP/wedontcare-00000001;1'}
+        self.agi.env = {'agi_channel': f'Local/{user_uuid}@usersharedlines-00000001;1'}
 
         result = self.handler.get_user()
 
@@ -50,11 +48,8 @@ class TestAnswerHandler(TestCase):
     def test_get_user_unknown_user(self, User):
         User.side_effect = LookupError
         user_uuid = 'unknown    '
-        chan_vars = {'WAZO_USERUUID': user_uuid}
-        self.agi.get_variable.side_effect = lambda name: chan_vars.get(name, '')
-
         self.agi.env = {
-            'agi_channel': 'PJSIP/wedontcare-00000001;1',
+            'agi_channel': f'Local/{user_uuid}@usersharedlines-00000001;1',
         }
 
         assert_that(calling(self.handler.get_user), raises(LookupError))

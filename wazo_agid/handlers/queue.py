@@ -12,6 +12,7 @@ from wazo_agid.handlers import handler
 logger = logging.getLogger(__name__)
 
 AGENT_CHANNEL_RE = re.compile(r'^Local/id-(\d+)@agentcallback-[a-f0-9]+;1$')
+USERSHAREDLINES_CONTEXT_RE = re.compile(r'^Local/(.+)@usersharedlines-[a-f0-9]+;1$')
 
 
 class AnswerHandler(handler.Handler):
@@ -19,6 +20,7 @@ class AnswerHandler(handler.Handler):
         try:
             callee = self.get_user()
         except LookupError as e:
+            logger.exception('Failed to find a matching user')
             self._agi.verbose(e)
             return
 
@@ -32,8 +34,8 @@ class AnswerHandler(handler.Handler):
         if result:
             agent_id = result.group(1)
             search_params = {'agent_id': int(agent_id)}
-        else:
-            user_uuid = self._agi.get_variable('WAZO_USERUUID')
+        elif usersharedlines_match := USERSHAREDLINES_CONTEXT_RE.match(channel_name):
+            user_uuid = usersharedlines_match.group(1)
             if user_uuid:
                 search_params = {'xid': user_uuid}
 
@@ -47,7 +49,9 @@ class AnswerHandler(handler.Handler):
         if recording_is_on:
             return
 
-        external = self._agi.get_variable('WAZO_CALLORIGIN') == 'extern'
+        call_origin = self._agi.get_variable('WAZO_CALLORIGIN')
+        external = call_origin == 'extern'
+        logger.info('Queue call origin is %s', call_origin)
         internal = not external
         should_record = any(
             [
@@ -55,6 +59,12 @@ class AnswerHandler(handler.Handler):
                 external and callee.call_record_incoming_external_enabled,
             ]
         )
+        logger.info(
+            'Callee(uuid=%s) recording configuration indicates should_record=%s',
+            callee.uuid,
+            should_record,
+        )
+
         if not should_record:
             return
 
