@@ -51,7 +51,7 @@ class AnswerHandler(handler.Handler):
 
         call_origin = self._agi.get_variable('WAZO_CALLORIGIN')
         external = call_origin == 'extern'
-        logger.info('Queue call origin is %s', call_origin)
+        logger.debug('Queue call origin is %s', call_origin)
         internal = not external
         should_record = any(
             [
@@ -59,7 +59,7 @@ class AnswerHandler(handler.Handler):
                 external and callee.call_record_incoming_external_enabled,
             ]
         )
-        logger.info(
+        logger.debug(
             'Callee(uuid=%s) recording configuration indicates should_record=%s',
             callee.uuid,
             should_record,
