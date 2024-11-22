@@ -71,6 +71,7 @@ class AnswerHandler(handler.Handler):
         calld = self._agi.config['calld']['client']
         channel_id = self._agi.env['agi_uniqueid']
         tenant_uuid = self._agi.get_variable('WAZO_TENANT_UUID')
+        self._agi.set_variable('WAZO_RECORD_QUEUE_CALLEE', '1')
         try:
             calld.calls.start_record(channel_id, tenant_uuid=tenant_uuid)
         except Exception as e:
