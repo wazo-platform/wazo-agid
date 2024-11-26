@@ -104,6 +104,11 @@ class UserFeatures(Handler):
             except (ValueError, LookupError):
                 self._caller = None
 
+            if self._caller:
+                self._agi.set_variable(
+                    dialplan_variables.CALLER_SIMULTCALLS, self._caller.simultcalls
+                )
+
     def _set_line(self) -> None:
         if self._dstid:
             try:
