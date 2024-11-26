@@ -248,8 +248,9 @@ class UserFeatures(Handler):
 
         boss_user = self._user
         boss_interface = f'Local/{boss_user.uuid}@usersharedlines'
+        strategy = callfilter.bosssecretary
 
-        if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
+        if strategy in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
             self._set_callfilter_ringseconds(
                 'BOSS_TIMEOUT', boss_callfiltermember.ringseconds
@@ -267,7 +268,7 @@ class UserFeatures(Handler):
                 iface = f'Local/{secretary_user.uuid}@usersharedlines'
                 ifaces.append(iface)
 
-                if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
+                if strategy in ("bossfirst-serial", "secretary-serial"):
                     self._agi.set_variable(
                         f'XIVO_CALLFILTER_SECRETARY{index:d}_INTERFACE', iface
                     )
@@ -276,7 +277,7 @@ class UserFeatures(Handler):
                     )
                     index += 1
 
-        if callfilter.bosssecretary in ("bossfirst-simult", "secretary-simult", "all"):
+        if strategy in ("bossfirst-simult", "secretary-simult", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_INTERFACE', '&'.join(ifaces))
             self._set_callfilter_ringseconds('TIMEOUT', callfilter.ringseconds)
 
@@ -287,7 +288,7 @@ class UserFeatures(Handler):
             force_rewrite=True
         )
         self._agi.set_variable('WAZO_CALLFILTER', '1')
-        self._agi.set_variable('WAZO_CALLFILTER_MODE', callfilter.bosssecretary)
+        self._agi.set_variable('WAZO_CALLFILTER_MODE', strategy)
 
         return True
 
