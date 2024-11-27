@@ -5,9 +5,7 @@ from __future__ import annotations
 
 import re
 import time
-from dataclasses import dataclass
 from textwrap import dedent
-from typing import Any
 
 import pytest
 from hamcrest import assert_that, calling, raises
@@ -17,13 +15,7 @@ from wazo_agid.dialplan_variables import SELECTED_CALLER_ID, TRUNK_CID_FORMAT
 from .helpers.agid import AGIFailException
 from .helpers.base import BaseAssetLaunchingHelper
 from .helpers.constants import SUBTENANT_UUID, TENANT_UUID
-
-
-@dataclass
-class ULE:
-    user: Any
-    line: Any
-    extension: Any
+from .helpers.database import Extension, UserFeatures
 
 
 def test_monitoring(base_asset: BaseAssetLaunchingHelper) -> None:
@@ -108,10 +100,12 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['XIVO_PATH_ID'] == str(user['id'])
 
 
-def _setup_bsfilter(queries, strategy: str, enablednd: int) -> ULE:
+def _setup_bsfilter(
+    queries, strategy: str, enablednd: int
+) -> tuple[UserFeatures, Extension]:
     boss_sip = queries.insert_endpoint_sip()
     secretary_sip = queries.insert_endpoint_sip()
-    boss_user, boss_line, boss_extension = queries.insert_user_line_extension(
+    boss_user, _, boss_extension = queries.insert_user_line_extension(
         firstname='Boss',
         exten='1801',
         endpoint_sip_uuid=boss_sip['uuid'],
@@ -140,7 +134,7 @@ def _setup_bsfilter(queries, strategy: str, enablednd: int) -> ULE:
         callfilterid=call_filter['id'],
         active=1,
     )
-    return ULE(boss_user, boss_line, boss_extension)
+    return boss_user, boss_extension
 
 
 def test_incoming_user_set_features_with_bsfilter(base_asset: BaseAssetLaunchingHelper):
@@ -151,16 +145,16 @@ def test_incoming_user_set_features_with_bsfilter(base_asset: BaseAssetLaunching
 
     for args, kwargs, expected_mode in tests:
         with base_asset.db.queries() as queries:
-            boss_ule = _setup_bsfilter(queries, args, **kwargs)
+            boss_user, boss_extension = _setup_bsfilter(queries, args, **kwargs)
 
             variables = {
-                'WAZO_USERID': boss_ule.user['id'],
-                'WAZO_DSTID': boss_ule.user['id'],
-                'WAZO_DST_EXTEN_ID': boss_ule.extension['id'],
+                'WAZO_USERID': boss_user['id'],
+                'WAZO_DSTID': boss_user['id'],
+                'WAZO_DST_EXTEN_ID': boss_extension['id'],
                 'WAZO_CALLORIGIN': 'patate',
                 'WAZO_SRCNUM': '1234',
-                'WAZO_DSTNUM': boss_ule.extension['exten'],
-                'WAZO_BASE_CONTEXT': boss_ule.extension['context'],
+                'WAZO_DSTNUM': boss_extension['exten'],
+                'WAZO_BASE_CONTEXT': boss_extension['context'],
             }
             recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
                 variables=variables
