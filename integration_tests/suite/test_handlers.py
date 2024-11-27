@@ -155,13 +155,6 @@ def test_incoming_user_set_features_with_bsfilter(base_asset: BaseAssetLaunching
         'WAZO_SRCNUM': '1234',
         'WAZO_DSTNUM': boss_ule.extension['exten'],
         'WAZO_BASE_CONTEXT': boss_ule.extension['context'],
-        'WAZO_USER_MOH_UUID': '',
-        'WAZO_CALL_RECORD_ACTIVE': '0',
-        'WAZO_FROMGROUP': '0',
-        'XIVO_PATH': '',
-        f'PJSIP_ENDPOINT({boss_ule.line["name"]},webrtc)': 'no',
-        f'PJSIP_DIAL_CONTACTS({boss_ule.line["name"]})': 'contact',
-        'CHANNEL(videonativeformat)': '1',
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
         variables=variables
@@ -187,13 +180,6 @@ def test_incoming_user_set_features_with_bsfilter_boss_dnd(
         'WAZO_SRCNUM': '1234',
         'WAZO_DSTNUM': boss_ule.extension['exten'],
         'WAZO_BASE_CONTEXT': boss_ule.extension['context'],
-        'WAZO_USER_MOH_UUID': '',
-        'WAZO_CALL_RECORD_ACTIVE': '0',
-        'WAZO_FROMGROUP': '0',
-        'XIVO_PATH': '',
-        f'PJSIP_ENDPOINT({boss_ule.line["name"]},webrtc)': 'no',
-        f'PJSIP_DIAL_CONTACTS({boss_ule.line["name"]})': 'contact',
-        'CHANNEL(videonativeformat)': '1',
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
         variables=variables
