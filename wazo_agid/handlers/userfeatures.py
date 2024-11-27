@@ -292,7 +292,7 @@ class UserFeatures(Handler):
 
         return True
 
-    def _get_call_filter_strategy(self, callfilter) -> str:
+    def _get_call_filter_strategy(self, callfilter: callfilter_dao.CallFilter) -> str:
         dnd_enabled = bool(self._user.enablednd)
         configured_strategy = callfilter.bosssecretary
         if not dnd_enabled:
@@ -302,7 +302,7 @@ class UserFeatures(Handler):
         else:
             return 'secretary-serial'
 
-    def _callfilter_check_in_zone(self, callfilter_zone):
+    def _callfilter_check_in_zone(self, callfilter_zone: str) -> bool:
         if callfilter_zone == "all":
             return True
         elif callfilter_zone == "internal" and self._zone == "intern":
