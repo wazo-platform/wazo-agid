@@ -144,51 +144,32 @@ def _setup_bsfilter(queries, strategy: str, enablednd: int) -> ULE:
 
 
 def test_incoming_user_set_features_with_bsfilter(base_asset: BaseAssetLaunchingHelper):
-    with base_asset.db.queries() as queries:
-        boss_ule = _setup_bsfilter(queries, 'bossfirst-simult', enablednd=0)
+    tests = [
+        ('bossfirst-simult', {'enablednd': 0}, 'bossfirst-simult'),
+        ('bossfirst-simult', {'enablednd': 1}, 'secretary-simult'),
+    ]
 
-    variables = {
-        'WAZO_USERID': boss_ule.user['id'],
-        'WAZO_DSTID': boss_ule.user['id'],
-        'WAZO_DST_EXTEN_ID': boss_ule.extension['id'],
-        'WAZO_CALLORIGIN': 'patate',
-        'WAZO_SRCNUM': '1234',
-        'WAZO_DSTNUM': boss_ule.extension['exten'],
-        'WAZO_BASE_CONTEXT': boss_ule.extension['context'],
-    }
-    recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
-        variables=variables
-    )
+    for args, kwargs, expected_mode in tests:
+        with base_asset.db.queries() as queries:
+            boss_ule = _setup_bsfilter(queries, args, **kwargs)
 
-    assert recv_cmds['FAILURE'] is False
+            variables = {
+                'WAZO_USERID': boss_ule.user['id'],
+                'WAZO_DSTID': boss_ule.user['id'],
+                'WAZO_DST_EXTEN_ID': boss_ule.extension['id'],
+                'WAZO_CALLORIGIN': 'patate',
+                'WAZO_SRCNUM': '1234',
+                'WAZO_DSTNUM': boss_ule.extension['exten'],
+                'WAZO_BASE_CONTEXT': boss_ule.extension['context'],
+            }
+            recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
+                variables=variables
+            )
 
-    assert recv_vars['WAZO_CALLFILTER'] == '1'
-    assert recv_vars['WAZO_CALLFILTER_MODE'] == 'bossfirst-simult'
+            assert recv_cmds['FAILURE'] is False
 
-
-def test_incoming_user_set_features_with_bsfilter_boss_dnd(
-    base_asset: BaseAssetLaunchingHelper,
-):
-    with base_asset.db.queries() as queries:
-        boss_ule = _setup_bsfilter(queries, 'bossfirst-simult', enablednd=1)
-
-    variables = {
-        'WAZO_USERID': boss_ule.user['id'],
-        'WAZO_DSTID': boss_ule.user['id'],
-        'WAZO_DST_EXTEN_ID': boss_ule.extension['id'],
-        'WAZO_CALLORIGIN': 'patate',
-        'WAZO_SRCNUM': '1234',
-        'WAZO_DSTNUM': boss_ule.extension['exten'],
-        'WAZO_BASE_CONTEXT': boss_ule.extension['context'],
-    }
-    recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
-        variables=variables
-    )
-
-    assert recv_cmds['FAILURE'] is False
-
-    assert recv_vars['WAZO_CALLFILTER'] == '1'
-    assert recv_vars['WAZO_CALLFILTER_MODE'] == 'secretary-simult'
+            assert recv_vars['WAZO_CALLFILTER'] == '1'
+            assert recv_vars['WAZO_CALLFILTER_MODE'] == expected_mode
 
 
 def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
