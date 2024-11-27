@@ -268,7 +268,7 @@ class UserFeatures(Handler):
 
                 if strategy in ("bossfirst-serial", "secretary-serial"):
                     self._agi.set_variable(
-                        f'XIVO_CALLFILTER_SECRETARY{index:d}_INTERFACE', iface
+                        f'WAZO_CALLFILTER_SECRETARY{index:d}_INTERFACE', iface
                     )
                     self._set_callfilter_ringseconds(
                         f'SECRETARY{index:d}_TIMEOUT', ringseconds
@@ -398,7 +398,7 @@ class UserFeatures(Handler):
         self._set_not_zero_or_empty('WAZO_RINGSECONDS', self._user.ringseconds)
 
     def _set_callfilter_ringseconds(self, name, value):
-        self._set_not_zero_or_empty(f'XIVO_CALLFILTER_{name}', value)
+        self._set_not_zero_or_empty(f'WAZO_CALLFILTER_{name}', value)
 
     def _set_not_zero_or_empty(self, name, value):
         if value and value > 0:
