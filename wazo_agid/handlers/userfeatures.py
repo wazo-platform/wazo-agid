@@ -248,7 +248,7 @@ class UserFeatures(Handler):
 
         boss_user = self._user
         boss_interface = f'Local/{boss_user.uuid}@usersharedlines'
-        strategy = callfilter.bosssecretary
+        strategy = self._get_call_filter_strategy(callfilter)
 
         if strategy in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
@@ -291,6 +291,16 @@ class UserFeatures(Handler):
         self._agi.set_variable('WAZO_CALLFILTER_MODE', strategy)
 
         return True
+
+    def _get_call_filter_strategy(self, callfilter) -> str:
+        dnd_enabled = bool(self._user.enablednd)
+        configured_strategy = callfilter.bosssecretary
+        if not dnd_enabled:
+            return configured_strategy
+        if configured_strategy in ['all', 'bossfirst-simult', 'secretary-simult']:
+            return 'secretary-simult'
+        else:
+            return 'secretary-serial'
 
     def _callfilter_check_in_zone(self, callfilter_zone):
         if callfilter_zone == "all":

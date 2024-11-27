@@ -99,6 +99,127 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['XIVO_PATH_ID'] == str(user['id'])
 
 
+def test_incoming_user_set_features_with_bsfilter(base_asset: BaseAssetLaunchingHelper):
+    with base_asset.db.queries() as queries:
+        boss_sip = queries.insert_endpoint_sip()
+        secretary_sip = queries.insert_endpoint_sip()
+        boss_user, boss_line, boss_extension = queries.insert_user_line_extension(
+            firstname='Boss',
+            exten='1801',
+            endpoint_sip_uuid=boss_sip['uuid'],
+        )
+        secretary_user, _, __ = queries.insert_user_line_extension(
+            firstname='Secretary',
+            exten='1802',
+            endpoint_sip_uuid=secretary_sip['uuid'],
+        )
+        call_filter = queries.insert_call_filter(
+            bosssecretary='bossfirst-simult',
+            callfrom='all',
+        )
+        queries.insert_call_filter_member(
+            type='user',
+            bstype='boss',
+            typeval=boss_user['id'],
+            callfilterid=call_filter['id'],
+            active=1,
+        )
+        queries.insert_call_filter_member(
+            type='user',
+            bstype='secretary',
+            typeval=secretary_user['id'],
+            callfilterid=call_filter['id'],
+            active=1,
+        )
+
+    variables = {
+        'WAZO_USERID': boss_user['id'],
+        'WAZO_DSTID': boss_user['id'],
+        'WAZO_DST_EXTEN_ID': boss_extension['id'],
+        'WAZO_CALLORIGIN': 'patate',
+        'WAZO_SRCNUM': '1234',
+        'WAZO_DSTNUM': boss_extension['exten'],
+        'WAZO_BASE_CONTEXT': boss_extension['context'],
+        'WAZO_USER_MOH_UUID': '',
+        'WAZO_CALL_RECORD_ACTIVE': '0',
+        'WAZO_FROMGROUP': '0',
+        'XIVO_PATH': '',
+        f'PJSIP_ENDPOINT({boss_line["name"]},webrtc)': 'no',
+        f'PJSIP_DIAL_CONTACTS({boss_line["name"]})': 'contact',
+        'CHANNEL(videonativeformat)': '1',
+    }
+    recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+
+    assert recv_vars['WAZO_CALLFILTER'] == '1'
+    assert recv_vars['WAZO_CALLFILTER_MODE'] == 'bossfirst-simult'
+
+
+def test_incoming_user_set_features_with_bsfilter_boss_dnd(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    with base_asset.db.queries() as queries:
+        boss_sip = queries.insert_endpoint_sip()
+        secretary_sip = queries.insert_endpoint_sip()
+        boss_user, boss_line, boss_extension = queries.insert_user_line_extension(
+            firstname='Boss',
+            enablednd='1',
+            exten='1801',
+            endpoint_sip_uuid=boss_sip['uuid'],
+        )
+        secretary_user, _, __ = queries.insert_user_line_extension(
+            firstname='Secretary',
+            exten='1802',
+            endpoint_sip_uuid=secretary_sip['uuid'],
+        )
+        call_filter = queries.insert_call_filter(
+            bosssecretary='bossfirst-simult',
+            callfrom='all',
+        )
+        queries.insert_call_filter_member(
+            type='user',
+            bstype='boss',
+            typeval=boss_user['id'],
+            callfilterid=call_filter['id'],
+            active=1,
+        )
+        queries.insert_call_filter_member(
+            type='user',
+            bstype='secretary',
+            typeval=secretary_user['id'],
+            callfilterid=call_filter['id'],
+            active=1,
+        )
+
+    variables = {
+        'WAZO_USERID': boss_user['id'],
+        'WAZO_DSTID': boss_user['id'],
+        'WAZO_DST_EXTEN_ID': boss_extension['id'],
+        'WAZO_CALLORIGIN': 'patate',
+        'WAZO_SRCNUM': '1234',
+        'WAZO_DSTNUM': boss_extension['exten'],
+        'WAZO_BASE_CONTEXT': boss_extension['context'],
+        'WAZO_USER_MOH_UUID': '',
+        'WAZO_CALL_RECORD_ACTIVE': '0',
+        'WAZO_FROMGROUP': '0',
+        'XIVO_PATH': '',
+        f'PJSIP_ENDPOINT({boss_line["name"]},webrtc)': 'no',
+        f'PJSIP_DIAL_CONTACTS({boss_line["name"]})': 'contact',
+        'CHANNEL(videonativeformat)': '1',
+    }
+    recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+
+    assert recv_vars['WAZO_CALLFILTER'] == '1'
+    assert recv_vars['WAZO_CALLFILTER_MODE'] == 'secretary-simult'
+
+
 def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         agent = queries.insert_agent(number='1111', tenant_uuid=TENANT_UUID)
