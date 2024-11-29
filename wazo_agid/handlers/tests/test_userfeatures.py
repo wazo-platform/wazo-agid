@@ -320,7 +320,7 @@ class TestUserFeatures(_BaseTestCase):
 
     def test_set_callfilter_ringseconds_zero(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        name = 'XIVO_CALLFILTER_TIMEOUT'
+        name = 'WAZO_CALLFILTER_TIMEOUT'
         value = 0
 
         userfeatures._set_callfilter_ringseconds('TIMEOUT', value)
@@ -329,7 +329,7 @@ class TestUserFeatures(_BaseTestCase):
 
     def test_set_callfilter_ringseconds_negative(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        name = 'XIVO_CALLFILTER_TIMEOUT'
+        name = 'WAZO_CALLFILTER_TIMEOUT'
         value = -42
 
         userfeatures._set_callfilter_ringseconds('TIMEOUT', value)
@@ -338,7 +338,7 @@ class TestUserFeatures(_BaseTestCase):
 
     def test_set_callfilter_ringseconds(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
-        name = 'XIVO_CALLFILTER_TIMEOUT'
+        name = 'WAZO_CALLFILTER_TIMEOUT'
         value = 1
 
         userfeatures._set_callfilter_ringseconds('TIMEOUT', value)

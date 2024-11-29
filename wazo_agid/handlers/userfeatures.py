@@ -205,54 +205,53 @@ class UserFeatures(Handler):
                 callerid_num = self._dstnum
         self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
 
-    def _call_filtering(self) -> bool:
-        callee = self._user
+    def _is_the_secretary_calling(self, boss: objects.User) -> bool:
+        if not self._caller:
+            return False
+        return callfilter_dao.does_secretary_filter_boss(boss.id, self._caller.id)
 
-        boss_callfiltermember = callfilter_dao.find_boss(callee.id)
+    def _call_filtering(self) -> bool:
+        boss = self._user
+
+        boss_callfiltermember = callfilter_dao.find_boss(boss.id)
         if not boss_callfiltermember:
-            logger.debug('Ignoring callfilter: No boss')
+            logger.debug('Ignoring call filter: Not a call filter boss')
+            return False
+        call_filter_id = boss_callfiltermember.callfilterid
+
+        if self._is_the_secretary_calling(boss):
+            logger.debug('Ignoring call filter: secretary is calling the boss')
             return False
 
-        if self._caller is not None:
-            secretary_can_call_boss = callfilter_dao.does_secretary_filter_boss(
-                callee.id, self._caller.id
-            )
-            if secretary_can_call_boss:
-                logger.debug('Ignoring callfilter: secretary can call boss')
-                return False
-
-        callfilter = callfilter_dao.find(boss_callfiltermember.callfilterid)
+        callfilter = callfilter_dao.find(call_filter_id)
         if not callfilter:
             logger.debug(
-                'Ignoring callfilter: no such callfilter: "%s"',
-                boss_callfiltermember.callfilterid,
+                'Ignoring call filter: no such callfilter: "%s"', call_filter_id
             )
             return False
 
-        callfilter_active = callfilter_dao.is_activated_by_callfilter_id(
-            boss_callfiltermember.callfilterid
-        )
-
-        if callfilter_active == 0:
-            logger.debug('Ignoring callfilter: callfilter is not active')
+        if not callfilter_dao.is_activated_by_callfilter_id(call_filter_id):
+            logger.debug('Ignoring call filter: callfilter is not active')
             return False
 
-        in_zone = self._callfilter_check_in_zone(callfilter.callfrom)
-        if in_zone is not True:
-            logger.debug('Ignoring callfilter: call not in zone')
+        if not self._callfilter_check_in_zone(callfilter.callfrom):
+            logger.debug('Ignoring call filter: call not in zone')
             return False
 
         secretaries = callfilter_dao.get_secretaries_by_callfiltermember_id(
-            boss_callfiltermember.callfilterid
+            call_filter_id
         )
+        boss_interface = f'Local/{boss.uuid}@usersharedlines'
+        strategy = self._get_call_filter_strategy(callfilter)
 
-        boss_user = self._user
-        boss_interface = f'Local/{boss_user.uuid}@usersharedlines'
-
-        if callfilter.bosssecretary in ("bossfirst-simult", "bossfirst-serial", "all"):
-            self._agi.set_variable('XIVO_CALLFILTER_BOSS_INTERFACE', boss_interface)
+        if strategy in ("bossfirst-simult", "bossfirst-serial", "all"):
+            self._agi.set_variable(
+                dialplan_variables.CALLFILTER_BOSS_INTERFACE,
+                boss_interface,
+            )
             self._set_callfilter_ringseconds(
-                'BOSS_TIMEOUT', boss_callfiltermember.ringseconds
+                'BOSS_TIMEOUT',
+                boss_callfiltermember.ringseconds,
             )
 
         index = 0
@@ -267,17 +266,19 @@ class UserFeatures(Handler):
                 iface = f'Local/{secretary_user.uuid}@usersharedlines'
                 ifaces.append(iface)
 
-                if callfilter.bosssecretary in ("bossfirst-serial", "secretary-serial"):
+                if strategy in ("bossfirst-serial", "secretary-serial"):
                     self._agi.set_variable(
-                        f'XIVO_CALLFILTER_SECRETARY{index:d}_INTERFACE', iface
+                        f'WAZO_CALLFILTER_SECRETARY{index:d}_INTERFACE', iface
                     )
                     self._set_callfilter_ringseconds(
                         f'SECRETARY{index:d}_TIMEOUT', ringseconds
                     )
                     index += 1
 
-        if callfilter.bosssecretary in ("bossfirst-simult", "secretary-simult", "all"):
-            self._agi.set_variable('XIVO_CALLFILTER_INTERFACE', '&'.join(ifaces))
+        if strategy in ("bossfirst-simult", "secretary-simult", "all"):
+            self._agi.set_variable(
+                dialplan_variables.CALLFILTER_INTERFACE, '&'.join(ifaces)
+            )
             self._set_callfilter_ringseconds('TIMEOUT', callfilter.ringseconds)
 
         DialAction(
@@ -286,12 +287,22 @@ class UserFeatures(Handler):
         CallerID(self._agi, self._cursor, "callfilter", callfilter.id).rewrite(
             force_rewrite=True
         )
-        self._agi.set_variable('WAZO_CALLFILTER', '1')
-        self._agi.set_variable('WAZO_CALLFILTER_MODE', callfilter.bosssecretary)
+        self._agi.set_variable(dialplan_variables.CALLFILTER, '1')
+        self._agi.set_variable(dialplan_variables.CALLFILTER_MODE, strategy)
 
         return True
 
-    def _callfilter_check_in_zone(self, callfilter_zone):
+    def _get_call_filter_strategy(self, callfilter: callfilter_dao.CallFilter) -> str:
+        dnd_enabled = bool(self._user.enablednd)
+        configured_strategy = callfilter.bosssecretary
+        if not dnd_enabled:
+            return configured_strategy
+        if configured_strategy in ['all', 'bossfirst-simult', 'secretary-simult']:
+            return 'secretary-simult'
+        else:
+            return 'secretary-serial'
+
+    def _callfilter_check_in_zone(self, callfilter_zone: str) -> bool:
         if callfilter_zone == "all":
             return True
         elif callfilter_zone == "internal" and self._zone == "intern":
@@ -387,7 +398,7 @@ class UserFeatures(Handler):
         self._set_not_zero_or_empty('WAZO_RINGSECONDS', self._user.ringseconds)
 
     def _set_callfilter_ringseconds(self, name, value):
-        self._set_not_zero_or_empty(f'XIVO_CALLFILTER_{name}', value)
+        self._set_not_zero_or_empty(f'WAZO_CALLFILTER_{name}', value)
 
     def _set_not_zero_or_empty(self, name, value):
         if value and value > 0:

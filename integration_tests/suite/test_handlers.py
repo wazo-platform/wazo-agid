@@ -15,6 +15,7 @@ from wazo_agid.dialplan_variables import SELECTED_CALLER_ID, TRUNK_CID_FORMAT
 from .helpers.agid import AGIFailException
 from .helpers.base import BaseAssetLaunchingHelper
 from .helpers.constants import SUBTENANT_UUID, TENANT_UUID
+from .helpers.database import Extension, UserFeatures
 
 
 def test_monitoring(base_asset: BaseAssetLaunchingHelper) -> None:
@@ -97,6 +98,72 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['WAZO_VIDEO_ENABLED'] == '1'
     assert recv_vars['XIVO_PATH'] == 'user'
     assert recv_vars['XIVO_PATH_ID'] == str(user['id'])
+
+
+def _setup_bsfilter(
+    queries, strategy: str, enablednd: int
+) -> tuple[UserFeatures, Extension]:
+    boss_sip = queries.insert_endpoint_sip()
+    secretary_sip = queries.insert_endpoint_sip()
+    boss_user, _, boss_extension = queries.insert_user_line_extension(
+        firstname='Boss',
+        exten='1801',
+        endpoint_sip_uuid=boss_sip['uuid'],
+        enablednd=enablednd,
+    )
+    secretary_user, _, __ = queries.insert_user_line_extension(
+        firstname='Secretary',
+        exten='1802',
+        endpoint_sip_uuid=secretary_sip['uuid'],
+    )
+    call_filter = queries.insert_call_filter(
+        bosssecretary=strategy,
+        callfrom='all',
+    )
+    queries.insert_call_filter_member(
+        type='user',
+        bstype='boss',
+        typeval=boss_user['id'],
+        callfilterid=call_filter['id'],
+        active=1,
+    )
+    queries.insert_call_filter_member(
+        type='user',
+        bstype='secretary',
+        typeval=secretary_user['id'],
+        callfilterid=call_filter['id'],
+        active=1,
+    )
+    return boss_user, boss_extension
+
+
+def test_incoming_user_set_features_with_bsfilter(base_asset: BaseAssetLaunchingHelper):
+    tests = [
+        ('bossfirst-simult', {'enablednd': 0}, 'bossfirst-simult'),
+        ('bossfirst-simult', {'enablednd': 1}, 'secretary-simult'),
+    ]
+
+    for args, kwargs, expected_mode in tests:
+        with base_asset.db.queries() as queries:
+            boss_user, boss_extension = _setup_bsfilter(queries, args, **kwargs)
+
+            variables = {
+                'WAZO_USERID': boss_user['id'],
+                'WAZO_DSTID': boss_user['id'],
+                'WAZO_DST_EXTEN_ID': boss_extension['id'],
+                'WAZO_CALLORIGIN': 'patate',
+                'WAZO_SRCNUM': '1234',
+                'WAZO_DSTNUM': boss_extension['exten'],
+                'WAZO_BASE_CONTEXT': boss_extension['context'],
+            }
+            recv_vars, recv_cmds = base_asset.agid.incoming_user_set_features(
+                variables=variables
+            )
+
+            assert recv_cmds['FAILURE'] is False
+
+            assert recv_vars['WAZO_CALLFILTER'] == '1'
+            assert recv_vars['WAZO_CALLFILTER_MODE'] == expected_mode
 
 
 def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):

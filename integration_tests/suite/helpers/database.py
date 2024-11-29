@@ -8,8 +8,13 @@ from contextlib import contextmanager
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
-from xivo_dao.alchemy.outcalltrunk import OutcallTrunk
-from xivo_dao.alchemy.rightcallexten import RightCallExten
+from xivo_dao.alchemy.all import (
+    Extension,
+    LineFeatures,
+    OutcallTrunk,
+    RightCallExten,
+    UserFeatures,
+)
 from xivo_dao.tests.test_dao import ItemInserter
 
 from .constants import TENANT_UUID
@@ -100,7 +105,9 @@ class DatabaseQueries:
                 'tenant_uuid': context.tenant_uuid,
             }
 
-    def insert_user_line_extension(self, **kwargs):
+    def insert_user_line_extension(
+        self, **kwargs
+    ) -> tuple[UserFeatures, LineFeatures, Extension]:
         with self.inserter() as inserter:
             ule = inserter.add_user_line_with_exten(**kwargs)
             user = {
