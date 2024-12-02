@@ -985,6 +985,10 @@ def test_linear_group_get_interfaces_user_members(base_asset: BaseAssetLaunching
     )
 
     assert recv_cmds['FAILURE'] is False
+
+    assert 'WAZO_GROUP_LINEAR_INTERFACE_COUNT' in recv_vars
+    assert recv_vars['WAZO_GROUP_LINEAR_INTERFACE_COUNT'] == str(len(users))
+
     assert {
         f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(len(users))
     } <= recv_vars.keys()
@@ -1024,6 +1028,12 @@ def test_linear_group_get_interfaces_user_members_dnd(
     )
 
     assert recv_cmds['FAILURE'] is False
+
+    assert 'WAZO_GROUP_LINEAR_INTERFACE_COUNT' in recv_vars
+    assert recv_vars['WAZO_GROUP_LINEAR_INTERFACE_COUNT'] == str(
+        expected_interface_count
+    )
+
     assert {
         f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(expected_interface_count)
     } <= recv_vars.keys()
@@ -1086,6 +1096,10 @@ def test_linear_group_get_interfaces_user_members_ring_in_use_disabled(
     )
 
     assert recv_cmds['FAILURE'] is False
+
+    assert 'WAZO_GROUP_LINEAR_INTERFACE_COUNT' in recv_vars
+    assert recv_vars['WAZO_GROUP_LINEAR_INTERFACE_COUNT'] == str(len(available_users))
+
     assert {
         f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(len(available_users))
     } <= recv_vars.keys()
@@ -1128,6 +1142,10 @@ def test_linear_group_get_interfaces_extension_members(
     )
 
     assert recv_cmds['FAILURE'] is False
+
+    assert 'WAZO_GROUP_LINEAR_INTERFACE_COUNT' in recv_vars
+    assert recv_vars['WAZO_GROUP_LINEAR_INTERFACE_COUNT'] == str(len(members))
+
     assert {
         f'WAZO_GROUP_LINEAR_{i}_INTERFACE' for i in range(len(members))
     } <= recv_vars.keys()

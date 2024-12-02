@@ -121,7 +121,10 @@ def linear_group_get_interfaces(
             )
 
     logger.debug('Identified %d available member interfaces', len(member_interfaces))
-
+    agi.set_variable(
+        'WAZO_GROUP_LINEAR_INTERFACE_COUNT',
+        len(member_interfaces),
+    )
     for i, interface in enumerate(member_interfaces):
         agi.set_variable(
             f'WAZO_GROUP_LINEAR_{i}_INTERFACE',
