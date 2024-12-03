@@ -64,7 +64,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['WAZO_DST_TENANT_UUID'] == user['tenant_uuid']
     assert recv_vars['WAZO_INTERFACE'] == 'contact'
     assert recv_vars['WAZO_CALLOPTIONS'] == ''
-    assert recv_vars['WAZO_SIMULTCALLS'] == str(user['simultcalls'])
+    assert recv_vars['WAZO_CALLEE_SIMULTCALLS'] == str(user['simultcalls'])
     assert recv_vars['WAZO_RINGSECONDS'] == str(user['ringseconds'])
     assert recv_vars['WAZO_ENABLEDND'] == str(user['enablednd'])
     assert recv_vars['XIVO_ENABLEVOICEMAIL'] == str(user['enablevoicemail'])

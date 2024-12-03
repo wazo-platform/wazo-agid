@@ -412,7 +412,9 @@ class UserFeatures(Handler):
             self._agi.set_variable(name, '')
 
     def _set_dest_simultcalls(self):
-        return self._agi.set_variable('WAZO_SIMULTCALLS', self._user.simultcalls)
+        return self._agi.set_variable(
+            dialplan_variables.CALLEE_SIMULTCALLS, self._user.simultcalls
+        )
 
     def _set_enablednd(self):
         self._agi.set_variable('WAZO_ENABLEDND', self._user.enablednd)
