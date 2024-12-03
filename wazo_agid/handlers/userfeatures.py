@@ -58,7 +58,7 @@ class UserFeatures(Handler):
             return
 
         self._set_options()
-        self._set_dest_simultcalls()
+        self._set_callee_simultcalls()
         self._set_ringseconds()
         self._set_enablednd()
         self._set_mailbox()
@@ -411,7 +411,7 @@ class UserFeatures(Handler):
         else:
             self._agi.set_variable(name, '')
 
-    def _set_dest_simultcalls(self):
+    def _set_callee_simultcalls(self):
         return self._agi.set_variable(
             dialplan_variables.CALLEE_SIMULTCALLS, self._user.simultcalls
         )
