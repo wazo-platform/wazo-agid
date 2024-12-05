@@ -100,16 +100,16 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._userid = self._variables['WAZO_USERID']
 
-        with patch.object(objects.User, '__init__') as user_init:
-            user_init.return_value = None
+        with patch('wazo_agid.objects.User') as user_init:
+            user_init.return_value.simultcalls = 5
 
             userfeatures._set_caller()
 
             user_init.assert_called_with(
                 self._agi, self._cursor, int(self._variables['WAZO_USERID'])
             )
+            self._agi.set_variable.assert_called_once_with('WAZO_CALLER_SIMULTCALLS', 5)
         self.assertTrue(userfeatures._caller is not None)
-        self.assertTrue(isinstance(userfeatures._caller, objects.User))
 
     def test_set_call_record_enabled_incoming_external_call(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)

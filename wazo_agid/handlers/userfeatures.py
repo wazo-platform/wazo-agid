@@ -58,7 +58,7 @@ class UserFeatures(Handler):
             return
 
         self._set_options()
-        self._set_simultcalls()
+        self._set_callee_simultcalls()
         self._set_ringseconds()
         self._set_enablednd()
         self._set_mailbox()
@@ -103,6 +103,11 @@ class UserFeatures(Handler):
                 self._caller = objects.User(self._agi, self._cursor, int(self._userid))
             except (ValueError, LookupError):
                 self._caller = None
+
+            if self._caller:
+                self._agi.set_variable(
+                    dialplan_variables.CALLER_SIMULTCALLS, self._caller.simultcalls
+                )
 
     def _set_line(self) -> None:
         if self._dstid:
@@ -406,8 +411,10 @@ class UserFeatures(Handler):
         else:
             self._agi.set_variable(name, '')
 
-    def _set_simultcalls(self):
-        return self._agi.set_variable('WAZO_SIMULTCALLS', self._user.simultcalls)
+    def _set_callee_simultcalls(self):
+        return self._agi.set_variable(
+            dialplan_variables.CALLEE_SIMULTCALLS, self._user.simultcalls
+        )
 
     def _set_enablednd(self):
         self._agi.set_variable('WAZO_ENABLEDND', self._user.enablednd)
