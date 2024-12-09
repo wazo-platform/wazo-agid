@@ -6,6 +6,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from requests import RequestException
 from xivo_dao import callfilter_dao
 from xivo_dao.resources.extension import dao as extension_dao
 from xivo_dao.resources.line import dao as line_dao
@@ -209,6 +210,49 @@ class UserFeatures(Handler):
             else:
                 callerid_num = self._dstnum
         self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
+
+        confd_client = self._agi.config['confd']['client']
+        try:
+            outgoing_callerids = confd_client.users.relations(
+                self._user.uuid
+            ).list_outgoing_callerids()['items']
+        except (RequestException, KeyError) as e:
+            logger.error(
+                'Error while getting user outgoing callerids for user %s in tenant %s: %s',
+                self._user.uuid,
+                self._user.tenant_uuid,
+                e,
+            )
+            self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NAME', '')
+            self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NUM', '')
+            return
+
+        try:
+            associated_callerid = [
+                callerid
+                for callerid in outgoing_callerids
+                if callerid['type'] == 'associated'
+            ][0]
+        except IndexError:
+            associated_callerid = None
+        try:
+            main_callerid = [
+                callerid
+                for callerid in outgoing_callerids
+                if callerid['type'] == 'main'
+            ][0]
+        except IndexError:
+            main_callerid = None
+
+        if associated_callerid:
+            callerid_extern_num = associated_callerid['number']
+        elif main_callerid:
+            callerid_extern_num = main_callerid['number']
+        else:
+            callerid_extern_num = ''
+
+        self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NAME', callerid_extern_num)
+        self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NUM', callerid_extern_num)
 
     def _is_the_secretary_calling(self, boss: objects.User) -> bool:
         if not self._caller:
