@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import Mock, call, patch, sentinel
 
 from hamcrest import assert_that, contains_exactly, equal_to
+from requests.exceptions import HTTPError
 
 from wazo_agid import objects
 from wazo_agid.handlers.userfeatures import UserFeatures
@@ -18,16 +19,29 @@ class NotEmptyStringMatcher:
 class _BaseTestCase(unittest.TestCase):
     def setUp(self):
         self._auth_mock = Mock()
+        self._confd_mock = Mock()
+        self._set_confd_mock_outgoing_callerids([])
         config = {
             'auth': {'client': self._auth_mock},
             'call_recording': {
                 'filename_template': '{{ mock }}',
                 'filename_extension': 'wav',
             },
+            'confd': {'client': self._confd_mock},
         }
         self._agi = Mock(config=config)
         self._cursor = Mock(cast=lambda x, y: '')
         self._args = Mock()
+
+    def _set_confd_mock_outgoing_callerids(self, value):
+        self._confd_mock.users.relations.return_value.list_outgoing_callerids.return_value = {
+            'items': value
+        }
+
+    def _set_confd_mock_outgoing_callerids_side_effect(self, error):
+        self._confd_mock.users.relations.return_value.list_outgoing_callerids.side_effect = (
+            error
+        )
 
 
 class TestUserFeatures(_BaseTestCase):
@@ -279,11 +293,15 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_xivo_redirecting_info()
 
-        expected_calls = [
-            call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-            call('XIVO_DST_REDIRECTING_NUM', '123'),
-        ]
-        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call('XIVO_DST_REDIRECTING_NUM', '123'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
+                call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
+            ),
+        )
 
     def test_set_xivo_redirecting_info_no_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -296,11 +314,15 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_xivo_redirecting_info()
 
-        expected_calls = [
-            call('XIVO_DST_REDIRECTING_NAME', 'First Last'),
-            call('XIVO_DST_REDIRECTING_NUM', '42'),
-        ]
-        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_DST_REDIRECTING_NAME', 'First Last'),
+                call('XIVO_DST_REDIRECTING_NUM', '42'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
+                call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
+            ),
+        )
 
     def test_set_xivo_redirecting_info_line(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
@@ -312,11 +334,100 @@ class TestUserFeatures(_BaseTestCase):
 
         userfeatures._set_xivo_redirecting_info()
 
-        expected_calls = [
-            call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-            call('XIVO_DST_REDIRECTING_NUM', '32'),
-        ]
-        self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
+                call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
+            ),
+        )
+
+    def test_set_xivo_redirecting_info_no_outgoing_callerids(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.callerid = '"Foobar"'
+        userfeatures.main_extension = Mock(exten='32')
+        userfeatures._dstnum = '42'
+        self._set_confd_mock_outgoing_callerids_side_effect(HTTPError(404))
+
+        userfeatures._set_xivo_redirecting_info()
+
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
+                call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
+            ),
+        )
+
+    def test_set_xivo_redirecting_info_associated_outgoing_callerid(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.callerid = '"Foobar"'
+        userfeatures.main_extension = Mock(exten='32')
+        userfeatures._dstnum = '42'
+        self._set_confd_mock_outgoing_callerids(
+            [
+                {
+                    'type': 'associated',
+                    'number': '4242',
+                },
+                {
+                    'type': 'main',
+                    'number': '4343',
+                },
+            ]
+        )
+
+        userfeatures._set_xivo_redirecting_info()
+
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NAME', '4242'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NUM', '4242'),
+            ),
+        )
+
+    def test_set_xivo_redirecting_info_associated_main_callerid(self):
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+
+        userfeatures._user = Mock()
+        userfeatures._user.callerid = '"Foobar"'
+        userfeatures.main_extension = Mock(exten='32')
+        userfeatures._dstnum = '42'
+        self._set_confd_mock_outgoing_callerids(
+            [
+                {
+                    'type': 'main',
+                    'number': '4343',
+                },
+                {
+                    'type': 'shared',
+                    'number': '4444',
+                },
+            ]
+        )
+
+        userfeatures._set_xivo_redirecting_info()
+
+        assert_that(
+            self._agi.set_variable.call_args_list,
+            contains_exactly(
+                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NAME', '4343'),
+                call('WAZO_DST_REDIRECTING_EXTERN_NUM', '4343'),
+            ),
+        )
 
     def test_set_callfilter_ringseconds_zero(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
