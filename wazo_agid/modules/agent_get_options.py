@@ -33,7 +33,7 @@ def agent_get_options(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None
         return
 
     agi.set_variable('WAZO_AGENTEXISTS', 1)
-    agi.set_variable('XIVO_AGENTPASSWD', agent.passwd or '')
+    agi.set_variable('WAZO_AGENTPASSWD', agent.passwd or '')
     agi.set_variable('WAZO_AGENTID', agent.id)
     agi.set_variable('WAZO_AGENTNUM', agent.number)
 
