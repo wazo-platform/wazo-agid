@@ -1,11 +1,11 @@
-# Copyright 2023-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2023-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid
+from wazo_agid import agid, dialplan_variables
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,7 @@ VARIABLE_MAP = {
     'WAZO_INTERFACE': 'XIVO_INTERFACE',
     'WAZO_GROUPNAME': 'XIVO_GROUPNAME',
     'WAZO_GROUPOPTIONS': 'XIVO_GROUPOPTIONS',
+    dialplan_variables.HANGUP_RING_TIME: 'XIVO_HANGUPRINGTIME',  # 25.01
     'WAZO_QUEUENAME': 'XIVO_QUEUENAME',
     'WAZO_PICKEDUP': 'XIVO_PICKEDUP',
     'WAZO_RINGSECONDS': 'XIVO_RINGSECONDS',
