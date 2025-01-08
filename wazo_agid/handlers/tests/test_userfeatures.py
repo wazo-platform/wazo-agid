@@ -1,4 +1,4 @@
-# Copyright 2013-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -223,14 +223,14 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
         with patch.multiple(
             userfeatures,
-            _set_xivo_user_name=Mock(),
+            _set_user_name=Mock(),
             _set_xivo_redirecting_info=Mock(),
             _set_wazo_uuid=Mock(),
         ):
             userfeatures._set_user()
 
             self.assertTrue(userfeatures._user is None)
-            self.assertEqual(userfeatures._set_xivo_user_name.call_count, 0)  # type: ignore
+            self.assertEqual(userfeatures._set_user_name.call_count, 0)  # type: ignore
 
             userfeatures._dstid = self._variables['WAZO_DSTID']
 
@@ -239,7 +239,7 @@ class TestUserFeatures(_BaseTestCase):
 
                 userfeatures._set_user()
 
-                userfeatures._set_xivo_user_name.assert_called_once()  # type: ignore
+                userfeatures._set_user_name.assert_called_once()  # type: ignore
                 userfeatures._set_xivo_redirecting_info.assert_called_once()  # type: ignore
                 userfeatures._set_wazo_uuid.assert_called_once()  # type: ignore
                 self.assertTrue(userfeatures._user is not None)
@@ -267,10 +267,10 @@ class TestUserFeatures(_BaseTestCase):
 
         self.assertEqual(interface, 'sip/abcd')
 
-    def test_set_xivo_user_name(self):
+    def test_set_user_name(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
-        userfeatures._set_xivo_user_name()
+        userfeatures._set_user_name()
 
         self._agi.assert_not_called()
 
@@ -280,7 +280,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._user.firstname = 'firstname'
         userfeatures._user.lastname = 'lastname'
 
-        userfeatures._set_xivo_user_name()
+        userfeatures._set_user_name()
 
         self._agi.set_variable.assert_called_once()
 
