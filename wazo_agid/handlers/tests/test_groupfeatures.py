@@ -64,13 +64,16 @@ class TestGroupFeatures(unittest.TestCase):
         self.group_features._id = 34
         self._agi.get_variable.return_value = ''
 
-        calls = [call('XIVO_PATH', 'group'), call(dialplan_variables.PATH_ID, 34)]
+        calls = [
+            call(dialplan_variables.PATH, 'group'),
+            call(dialplan_variables.PATH_ID, 34),
+        ]
 
         self.group_features._set_schedule()
 
         self._agi.set_variable.assert_has_calls(calls)
 
-        self._agi.set_variable.assert_any_call('XIVO_PATH', 'group')
+        self._agi.set_variable.assert_any_call(dialplan_variables.PATH, 'group')
         self._agi.set_variable.assert_any_call(dialplan_variables.PATH_ID, 34)
 
     def test_set_call_record_options_toggle_enabled(self):

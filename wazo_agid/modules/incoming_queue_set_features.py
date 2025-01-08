@@ -89,9 +89,9 @@ def incoming_queue_set_features(agi, cursor, args):
 
     # schedule
     # 'incall' schedule has priority over queue's schedule
-    path = agi.get_variable('XIVO_PATH')
-    if path is None or len(path) == 0:
-        agi.set_variable('XIVO_PATH', 'queue')
+    path = agi.get_variable(dialplan_variables.PATH)
+    if not path:
+        agi.set_variable(dialplan_variables.PATH, 'queue')
         agi.set_variable(dialplan_variables.PATH_ID, queue.id)
 
     # pickup
