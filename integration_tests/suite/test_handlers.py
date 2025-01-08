@@ -189,7 +189,7 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_AGENTEXISTS'] == '1'
     assert recv_vars['XIVO_AGENTPASSWD'] == ''
-    assert recv_vars['XIVO_AGENTID'] == str(agent['id'])
+    assert recv_vars['WAZO_AGENTID'] == str(agent['id'])
     assert recv_vars['XIVO_AGENTNUM'] == agent['number']
     assert recv_vars['CHANNEL(language)'] == agent['language']
 
@@ -210,7 +210,7 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_AGENTEXISTS'] == '1'
     assert recv_vars['XIVO_AGENTPASSWD'] == ''
-    assert recv_vars['XIVO_AGENTID'] == str(agent['id'])
+    assert recv_vars['WAZO_AGENTID'] == str(agent['id'])
     assert recv_vars['XIVO_AGENTNUM'] == agent['number']
     assert recv_vars['CHANNEL(language)'] == agent['language']
 
