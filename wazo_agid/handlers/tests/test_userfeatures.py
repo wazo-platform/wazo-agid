@@ -224,7 +224,7 @@ class TestUserFeatures(_BaseTestCase):
         with patch.multiple(
             userfeatures,
             _set_user_name=Mock(),
-            _set_xivo_redirecting_info=Mock(),
+            _set_redirecting_info=Mock(),
             _set_wazo_uuid=Mock(),
         ):
             userfeatures._set_user()
@@ -240,7 +240,7 @@ class TestUserFeatures(_BaseTestCase):
                 userfeatures._set_user()
 
                 userfeatures._set_user_name.assert_called_once()  # type: ignore
-                userfeatures._set_xivo_redirecting_info.assert_called_once()  # type: ignore
+                userfeatures._set_redirecting_info.assert_called_once()  # type: ignore
                 userfeatures._set_wazo_uuid.assert_called_once()  # type: ignore
                 self.assertTrue(userfeatures._user is not None)
                 self.assertTrue(isinstance(userfeatures._user, objects.User))
@@ -284,14 +284,14 @@ class TestUserFeatures(_BaseTestCase):
 
         self._agi.set_variable.assert_called_once()
 
-    def test_set_xivo_redirecting_info_full_callerid(self):
+    def test_set_redirecting_info_full_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
         userfeatures._user = Mock()
         userfeatures._user.callerid = '"Foobar" <123>'
         userfeatures._dstnum = '42'
 
-        userfeatures._set_xivo_redirecting_info()
+        userfeatures._set_redirecting_info()
 
         assert_that(
             self._agi.set_variable.call_args_list,
@@ -303,7 +303,7 @@ class TestUserFeatures(_BaseTestCase):
             ),
         )
 
-    def test_set_xivo_redirecting_info_no_callerid(self):
+    def test_set_redirecting_info_no_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
         userfeatures._user = Mock()
@@ -312,7 +312,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._user.callerid = ''
         userfeatures._dstnum = '42'
 
-        userfeatures._set_xivo_redirecting_info()
+        userfeatures._set_redirecting_info()
 
         assert_that(
             self._agi.set_variable.call_args_list,
@@ -324,7 +324,7 @@ class TestUserFeatures(_BaseTestCase):
             ),
         )
 
-    def test_set_xivo_redirecting_info_line(self):
+    def test_set_redirecting_info_line(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
         userfeatures._user = Mock()
@@ -332,7 +332,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures.main_extension = Mock(exten='32')
         userfeatures._dstnum = '42'
 
-        userfeatures._set_xivo_redirecting_info()
+        userfeatures._set_redirecting_info()
 
         assert_that(
             self._agi.set_variable.call_args_list,
@@ -344,7 +344,7 @@ class TestUserFeatures(_BaseTestCase):
             ),
         )
 
-    def test_set_xivo_redirecting_info_no_outgoing_callerids(self):
+    def test_set_redirecting_info_no_outgoing_callerids(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
         userfeatures._user = Mock()
@@ -353,7 +353,7 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._dstnum = '42'
         self._set_confd_mock_outgoing_callerids_side_effect(HTTPError(404))
 
-        userfeatures._set_xivo_redirecting_info()
+        userfeatures._set_redirecting_info()
 
         assert_that(
             self._agi.set_variable.call_args_list,
@@ -365,7 +365,7 @@ class TestUserFeatures(_BaseTestCase):
             ),
         )
 
-    def test_set_xivo_redirecting_info_associated_outgoing_callerid(self):
+    def test_set_redirecting_info_associated_outgoing_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
         userfeatures._user = Mock()
@@ -385,7 +385,7 @@ class TestUserFeatures(_BaseTestCase):
             ]
         )
 
-        userfeatures._set_xivo_redirecting_info()
+        userfeatures._set_redirecting_info()
 
         assert_that(
             self._agi.set_variable.call_args_list,
@@ -397,7 +397,7 @@ class TestUserFeatures(_BaseTestCase):
             ),
         )
 
-    def test_set_xivo_redirecting_info_associated_main_callerid(self):
+    def test_set_redirecting_info_associated_main_callerid(self):
         userfeatures = UserFeatures(self._agi, self._cursor, self._args)
 
         userfeatures._user = Mock()
@@ -417,7 +417,7 @@ class TestUserFeatures(_BaseTestCase):
             ]
         )
 
-        userfeatures._set_xivo_redirecting_info()
+        userfeatures._set_redirecting_info()
 
         assert_that(
             self._agi.set_variable.call_args_list,

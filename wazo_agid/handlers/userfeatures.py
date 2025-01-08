@@ -154,7 +154,7 @@ class UserFeatures(Handler):
             except (ValueError, LookupError) as e:
                 self._agi.dp_break(str(e))
             self._set_user_name()
-            self._set_xivo_redirecting_info()
+            self._set_redirecting_info()
             self._set_wazo_uuid()
 
     def _set_interfaces(self) -> None:
@@ -192,7 +192,7 @@ class UserFeatures(Handler):
             self._agi.set_variable('WAZO_DST_UUID', self._user.uuid)
             self._agi.set_variable('WAZO_DST_TENANT_UUID', self._user.tenant_uuid)
 
-    def _set_xivo_redirecting_info(self) -> None:
+    def _set_redirecting_info(self) -> None:
         callerid_parsed = CallerID.parse(self._user.callerid)
         if callerid_parsed:
             callerid_name, callerid_num = callerid_parsed
