@@ -1,4 +1,4 @@
-# Copyright 2012-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -153,7 +153,7 @@ class UserFeatures(Handler):
                 self._user = objects.User(self._agi, self._cursor, int(self._dstid))
             except (ValueError, LookupError) as e:
                 self._agi.dp_break(str(e))
-            self._set_xivo_user_name()
+            self._set_user_name()
             self._set_xivo_redirecting_info()
             self._set_wazo_uuid()
 
@@ -179,7 +179,7 @@ class UserFeatures(Handler):
     def _build_sip_interface(self, line):
         return build_sip_interface(self._agi, self._user.uuid, line.name)
 
-    def _set_xivo_user_name(self):
+    def _set_user_name(self):
         if self._user:
             wazo_dst_name = '{firstname} {lastname}'.format(
                 firstname=self._user.firstname if self._user.firstname else '',
