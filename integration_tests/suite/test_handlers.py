@@ -12,8 +12,9 @@ from hamcrest import assert_that, calling, raises
 
 from wazo_agid.dialplan_variables import (
     GROUP_DTMF_RECORD_TOGGLE_ENABLED,
-    PATH,
+    HANGUP_RING_TIME,
     PATH_ID,
+    PATH,
     QUEUE_DTMF_RECORD_TOGGLE_ENABLED,
     SELECTED_CALLER_ID,
     TRUNK_CID_FORMAT,
@@ -1331,7 +1332,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_TRUNKEXTEN0'] == f'{extension["exten"]}@{sip["name"]}'
     assert recv_vars['XIVO_TRUNKSUFFIX0'] == ''
     assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'
-    assert recv_vars['XIVO_HANGUPRINGTIME'] == '10'
+    assert recv_vars[HANGUP_RING_TIME] == '10'
     assert recv_vars['XIVO_OUTCALLID'] == str(call['id'])
     assert recv_vars[PATH] == 'outcall'
     assert recv_vars[PATH_ID] == str(call['id'])
