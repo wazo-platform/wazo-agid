@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def agent_get_options(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    agi.set_variable('XIVO_AGENTEXISTS', 0)
+    agi.set_variable('WAZO_AGENTEXISTS', 0)
 
     try:
         tenant_uuid = args[0]
@@ -32,7 +32,7 @@ def agent_get_options(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None
         agi.verbose(str(e))
         return
 
-    agi.set_variable('XIVO_AGENTEXISTS', 1)
+    agi.set_variable('WAZO_AGENTEXISTS', 1)
     agi.set_variable('XIVO_AGENTPASSWD', agent.passwd or '')
     agi.set_variable('WAZO_AGENTID', agent.id)
     agi.set_variable('XIVO_AGENTNUM', agent.number)

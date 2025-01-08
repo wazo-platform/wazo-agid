@@ -187,7 +187,7 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_AGENTEXISTS'] == '1'
+    assert recv_vars['WAZO_AGENTEXISTS'] == '1'
     assert recv_vars['XIVO_AGENTPASSWD'] == ''
     assert recv_vars['WAZO_AGENTID'] == str(agent['id'])
     assert recv_vars['XIVO_AGENTNUM'] == agent['number']
@@ -199,7 +199,7 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_AGENTEXISTS'] == '0'
+    assert recv_vars['WAZO_AGENTEXISTS'] == '0'
 
     # get agent by id
     recv_vars, recv_cmds = base_asset.agid.agent_get_options(
@@ -208,7 +208,7 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_AGENTEXISTS'] == '1'
+    assert recv_vars['WAZO_AGENTEXISTS'] == '1'
     assert recv_vars['XIVO_AGENTPASSWD'] == ''
     assert recv_vars['WAZO_AGENTID'] == str(agent['id'])
     assert recv_vars['XIVO_AGENTNUM'] == agent['number']
@@ -221,7 +221,7 @@ def test_agent_get_options(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_AGENTEXISTS'] == '0'
+    assert recv_vars['WAZO_AGENTEXISTS'] == '0'
 
 
 def test_agent_get_status(base_asset: BaseAssetLaunchingHelper):
