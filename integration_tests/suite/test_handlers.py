@@ -770,13 +770,13 @@ def test_incoming_conference_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_CONFBRIDGE_TENANT_UUID'] == conference['tenant_uuid']
     assert (
         recv_vars['WAZO_CONFBRIDGE_BRIDGE_PROFILE']
-        == f'xivo-bridge-profile-{conference["id"]}'
+        == f'wazo-bridge-profile-{conference["id"]}'
     )
     assert (
         recv_vars['WAZO_CONFBRIDGE_USER_PROFILE']
-        == f'xivo-user-profile-{conference["id"]}'
+        == f'wazo-user-profile-{conference["id"]}'
     )
-    assert recv_vars['WAZO_CONFBRIDGE_MENU'] == 'xivo-default-user-menu'
+    assert recv_vars['WAZO_CONFBRIDGE_MENU'] == 'wazo-default-user-menu'
     assert recv_vars['WAZO_CONFBRIDGE_PREPROCESS_SUBROUTINE'] == ''
     assert recv_cmds['EXEC CELGenUserEvent'] == f'WAZO_CONFERENCE, NAME: {name}'
 
