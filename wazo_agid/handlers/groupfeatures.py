@@ -208,9 +208,9 @@ class GroupFeatures(Handler):
         )
 
     def _set_schedule(self) -> None:
-        path = self._agi.get_variable('XIVO_PATH')
-        if path is None or len(path) == 0:
-            self._agi.set_variable('XIVO_PATH', 'group')
+        path = self._agi.get_variable(dialplan_variables.PATH)
+        if not path:
+            self._agi.set_variable(dialplan_variables.PATH, 'group')
             self._agi.set_variable(dialplan_variables.PATH_ID, self._id)
 
     def _set_call_record_options(self) -> None:

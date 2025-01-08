@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def check_schedule(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    path = agi.get_variable('XIVO_PATH')
+    path = agi.get_variable(dialplan_variables.PATH)
     path_id = agi.get_variable(dialplan_variables.PATH_ID)
 
     if not path:
@@ -31,7 +31,7 @@ def check_schedule(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         schedule_state.action.set_variables_in_agi(agi)
 
     # erase path for next schedule check
-    agi.set_variable('XIVO_PATH', '')
+    agi.set_variable(dialplan_variables.PATH, '')
 
 
 agid.register(check_schedule)
