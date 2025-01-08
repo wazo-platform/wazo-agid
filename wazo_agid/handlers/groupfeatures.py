@@ -211,7 +211,7 @@ class GroupFeatures(Handler):
         path = self._agi.get_variable('XIVO_PATH')
         if path is None or len(path) == 0:
             self._agi.set_variable('XIVO_PATH', 'group')
-            self._agi.set_variable('XIVO_PATH_ID', self._id)
+            self._agi.set_variable(dialplan_variables.PATH_ID, self._id)
 
     def _set_call_record_options(self) -> None:
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')

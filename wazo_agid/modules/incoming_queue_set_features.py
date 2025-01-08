@@ -92,7 +92,7 @@ def incoming_queue_set_features(agi, cursor, args):
     path = agi.get_variable('XIVO_PATH')
     if path is None or len(path) == 0:
         agi.set_variable('XIVO_PATH', 'queue')
-        agi.set_variable('XIVO_PATH_ID', queue.id)
+        agi.set_variable(dialplan_variables.PATH_ID, queue.id)
 
     # pickup
     pickups = queue.pickupgroups()

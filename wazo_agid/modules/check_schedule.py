@@ -1,4 +1,4 @@
-# Copyright 2010-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2010-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from wazo_agid import agid, objects
+from wazo_agid import agid, dialplan_variables, objects
 
 if TYPE_CHECKING:
     from psycopg2.extras import DictCursor
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def check_schedule(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     path = agi.get_variable('XIVO_PATH')
-    path_id = agi.get_variable('XIVO_PATH_ID')
+    path_id = agi.get_variable(dialplan_variables.PATH_ID)
 
     if not path:
         return

@@ -1,9 +1,11 @@
 # Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 from unittest.mock import ANY, Mock, call, patch
 
+from wazo_agid import dialplan_variables
 from wazo_agid import dialplan_variables
 from wazo_agid.handlers.groupfeatures import GroupFeatures
 
@@ -62,14 +64,14 @@ class TestGroupFeatures(unittest.TestCase):
         self.group_features._id = 34
         self._agi.get_variable.return_value = ''
 
-        calls = [call('XIVO_PATH', 'group'), call('XIVO_PATH_ID', 34)]
+        calls = [call('XIVO_PATH', 'group'), call(dialplan_variables.PATH_ID, 34)]
 
         self.group_features._set_schedule()
 
         self._agi.set_variable.assert_has_calls(calls)
 
         self._agi.set_variable.assert_any_call('XIVO_PATH', 'group')
-        self._agi.set_variable.assert_any_call('XIVO_PATH_ID', 34)
+        self._agi.set_variable.assert_any_call(dialplan_variables.PATH_ID, 34)
 
     def test_set_call_record_options_toggle_enabled(self):
         self.group_features._dtmf_record_toggle = True

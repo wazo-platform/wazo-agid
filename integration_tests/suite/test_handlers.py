@@ -12,6 +12,7 @@ from hamcrest import assert_that, calling, raises
 
 from wazo_agid.dialplan_variables import (
     GROUP_DTMF_RECORD_TOGGLE_ENABLED,
+    PATH_ID,
     QUEUE_DTMF_RECORD_TOGGLE_ENABLED,
     SELECTED_CALLER_ID,
     TRUNK_CID_FORMAT,
@@ -102,7 +103,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['WAZO_MOBILEPHONENUMBER'] == ''
     assert recv_vars['WAZO_VIDEO_ENABLED'] == '1'
     assert recv_vars['XIVO_PATH'] == 'user'
-    assert recv_vars['XIVO_PATH_ID'] == str(user['id'])
+    assert recv_vars[PATH_ID] == str(user['id'])
 
 
 def _setup_bsfilter(
@@ -499,7 +500,7 @@ def test_check_schedule(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'XIVO_PATH': schedule_path['path'],
-        'XIVO_PATH_ID': str(schedule_path['path_id']),
+        PATH_ID: str(schedule_path['path_id']),
     }
 
     recv_vars, recv_cmds = base_asset.agid.check_schedule(variables=variables)
@@ -800,7 +801,7 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_DIDPREPROCESS_SUBROUTINE'] == 'test-subroutine'
     assert recv_vars['XIVO_EXTENPATTERN'] == extension['exten']
     assert recv_vars['XIVO_PATH'] == 'incall'
-    assert recv_vars['XIVO_PATH_ID'] == str(call['id'])
+    assert recv_vars[PATH_ID] == str(call['id'])
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
     assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
     assert recv_vars['WAZO_GREETING_SOUND'] == 'test-sound'
@@ -872,7 +873,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_vars['XIVO_PATH'] == 'group'
-    assert recv_vars['XIVO_PATH_ID'] == str(group['id'])
+    assert recv_vars[PATH_ID] == str(group['id'])
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
     assert (
         re.match(r'^[a-f0-9\-]{36}$', recv_vars['__WAZO_LOCAL_CHAN_MATCH_UUID'])
@@ -1255,7 +1256,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_vars['XIVO_QUEUESTATUS'] == 'ok'
     assert recv_vars['XIVO_PATH'] == 'queue'
-    assert recv_vars['XIVO_PATH_ID'] == str(queue['id'])
+    assert recv_vars[PATH_ID] == str(queue['id'])
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
     assert recv_vars['CHANNEL(musicclass)'] == 'test-music'
     assert recv_vars['__QUEUEWRAPUPTIME'] == '20'
@@ -1309,7 +1310,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_HANGUPRINGTIME'] == '10'
     assert recv_vars['XIVO_OUTCALLID'] == str(call['id'])
     assert recv_vars['XIVO_PATH'] == 'outcall'
-    assert recv_vars['XIVO_PATH_ID'] == str(call['id'])
+    assert recv_vars[PATH_ID] == str(call['id'])
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
     assert recv_vars['CALLERID(pres)'] == 'prohib'
     assert recv_vars['WAZO_OUTGOING_ANONYMOUS_CALL'] == '1'
