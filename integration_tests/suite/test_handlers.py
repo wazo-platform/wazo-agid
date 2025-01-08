@@ -13,6 +13,7 @@ from hamcrest import assert_that, calling, raises
 from wazo_agid.dialplan_variables import (
     GROUP_DTMF_RECORD_TOGGLE_ENABLED,
     HANGUP_RING_TIME,
+    OUTCALL_ID,
     PATH_ID,
     PATH,
     QUEUE_DTMF_RECORD_TOGGLE_ENABLED,
@@ -451,7 +452,7 @@ def test_call_record_caller(base_asset: BaseAssetLaunchingHelper):
         'WAZO_USERUUID': user['uuid'],
         'WAZO_TENANT_UUID': user['tenant_uuid'],
         'WAZO_CALLORIGIN': 'intern',
-        'XIVO_OUTCALLID': '',
+        OUTCALL_ID: '',
         'WAZO_MIXMONITOR_OPTIONS': 'mix-options',
     }
 
@@ -1333,7 +1334,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_TRUNKSUFFIX0'] == ''
     assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'
     assert recv_vars[HANGUP_RING_TIME] == '10'
-    assert recv_vars['XIVO_OUTCALLID'] == str(call['id'])
+    assert recv_vars[OUTCALL_ID] == str(call['id'])
     assert recv_vars[PATH] == 'outcall'
     assert recv_vars[PATH_ID] == str(call['id'])
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
@@ -1693,7 +1694,7 @@ def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
     variables = {
         'WAZO_USERID': user['id'],
         'WAZO_DSTNUM': extension['exten'],
-        'XIVO_OUTCALLID': '42',
+        OUTCALL_ID: '42',
     }
     recv_vars, recv_cmds = base_asset.agid.user_set_call_rights(
         extension['exten'], variables=variables
