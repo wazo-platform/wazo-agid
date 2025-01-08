@@ -320,7 +320,7 @@ def test_callerid_extend(base_asset: BaseAssetLaunchingHelper):
     recv_vars, recv_cmds = base_asset.agid.callerid_extend('en')
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_SRCTON'] == 'en'
+    assert recv_vars['WAZO_SRCTON'] == 'en'
 
 
 def test_callerid_forphones_without_reverse_lookup(
