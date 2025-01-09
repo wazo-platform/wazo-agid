@@ -24,7 +24,7 @@ def incoming_did_set_features(
     agi.set_variable('XIVO_EXTENPATTERN', did.exten)
     agi.set_variable(dialplan_variables.PATH, 'incall')
     agi.set_variable(dialplan_variables.PATH_ID, did.id)
-    agi.set_variable('XIVO_REAL_CONTEXT', did.context)
+    agi.set_variable(dialplan_variables.REAL_CONTEXT, did.context)
     agi.set_variable(dialplan_variables.REAL_NUMBER, did.exten)
     agi.set_variable('WAZO_GREETING_SOUND', did.greeting_sound or '')
 

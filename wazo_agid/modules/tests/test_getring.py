@@ -31,7 +31,7 @@ class TestGetRing(unittest.TestCase):
         self._set_config(DEFAULT_CONFIG)
         variables = {
             dialplan_variables.REAL_NUMBER: '1001',
-            'XIVO_REAL_CONTEXT': 'default',
+            dialplan_variables.REAL_CONTEXT: 'default',
             'WAZO_FWD_REFERER': 'foo:bar',
         }
         self.agi.get_variable.side_effect = lambda var: variables.get(var)
