@@ -54,7 +54,7 @@ def incoming_queue_set_features(agi, cursor, args):
     if queue.mark_answered_elsewhere:
         options += "C"
 
-    agi.set_variable('XIVO_REAL_NUMBER', queue.number)
+    agi.set_variable(dialplan_variables.REAL_NUMBER, queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
     agi.set_variable('__WAZO_QUEUENAME', queue.name)
     agi.set_variable('WAZO_QUEUEOPTIONS', options)
