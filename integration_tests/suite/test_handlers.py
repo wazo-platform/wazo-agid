@@ -17,6 +17,7 @@ from wazo_agid.dialplan_variables import (
     PATH_ID,
     PATH,
     QUEUE_DTMF_RECORD_TOGGLE_ENABLED,
+    REAL_CONTEXT,
     REAL_NUMBER,
     SELECTED_CALLER_ID,
     TRUNK_CID_FORMAT,
@@ -606,7 +607,7 @@ def test_fwdundoall(base_asset: BaseAssetLaunchingHelper):
 def test_getring(base_asset: BaseAssetLaunchingHelper):
     variables = {
         REAL_NUMBER: '1001',
-        'XIVO_REAL_CONTEXT': 'default',
+        REAL_CONTEXT: 'default',
         'WAZO_CALLORIGIN': 'patate',
         'WAZO_FWD_REFERER': 'foo:bar',
         'XIVO_CALLFORWARDED': '1',
@@ -829,7 +830,7 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_EXTENPATTERN'] == extension['exten']
     assert recv_vars[PATH] == 'incall'
     assert recv_vars[PATH_ID] == str(call['id'])
-    assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
+    assert recv_vars[REAL_CONTEXT] == extension['context']
     assert recv_vars[REAL_NUMBER] == extension['exten']
     assert recv_vars['WAZO_GREETING_SOUND'] == 'test-sound'
 
@@ -869,7 +870,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_GROUPOPTIONS'] == 'ir'
     assert recv_vars['XIVO_GROUPNEEDANSWER'] == '0'
     assert recv_vars[REAL_NUMBER] == extension['exten']
-    assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
+    assert recv_vars[REAL_CONTEXT] == extension['context']
     assert recv_vars['__WAZO_GROUPNAME'] == 'incoming_group_set_features'
     assert recv_vars['WAZO_GROUP_LABEL'] == 'incoming group set features'
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
@@ -1250,7 +1251,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars[REAL_NUMBER] == queue['number']
-    assert recv_vars['XIVO_REAL_CONTEXT'] == 'default'
+    assert recv_vars[REAL_CONTEXT] == 'default'
     assert recv_vars['__WAZO_QUEUENAME'] == queue['name']
     assert recv_vars['WAZO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
     assert recv_vars[f'__{QUEUE_DTMF_RECORD_TOGGLE_ENABLED}'] == '1'
