@@ -129,7 +129,7 @@ class GroupFeatures(Handler):
         self._max_calls = res['queue_maxlen']
 
     def _set_vars(self) -> None:
-        self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
+        self._agi.set_variable(dialplan_variables.REAL_NUMBER, self._exten)
         self._agi.set_variable('XIVO_REAL_CONTEXT', self._context)
         self._agi.set_variable('__WAZO_GROUPNAME', self._name)
         self._agi.set_variable('WAZO_GROUP_LABEL', self._label)
