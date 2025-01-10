@@ -7,6 +7,7 @@ from unittest.mock import Mock, call, patch, sentinel
 from hamcrest import assert_that, contains_exactly, equal_to
 from requests.exceptions import HTTPError
 
+from wazo_agid import dialplan_variables as dv
 from wazo_agid import objects
 from wazo_agid.handlers.userfeatures import UserFeatures
 
@@ -297,7 +298,7 @@ class TestUserFeatures(_BaseTestCase):
             self._agi.set_variable.call_args_list,
             contains_exactly(
                 call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-                call('XIVO_DST_REDIRECTING_NUM', '123'),
+                call(dv.DST_REDIRECTING_NUM, '123'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
             ),
@@ -318,7 +319,7 @@ class TestUserFeatures(_BaseTestCase):
             self._agi.set_variable.call_args_list,
             contains_exactly(
                 call('XIVO_DST_REDIRECTING_NAME', 'First Last'),
-                call('XIVO_DST_REDIRECTING_NUM', '42'),
+                call(dv.DST_REDIRECTING_NUM, '42'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
             ),
@@ -338,7 +339,7 @@ class TestUserFeatures(_BaseTestCase):
             self._agi.set_variable.call_args_list,
             contains_exactly(
                 call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
             ),
@@ -359,7 +360,7 @@ class TestUserFeatures(_BaseTestCase):
             self._agi.set_variable.call_args_list,
             contains_exactly(
                 call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
             ),
@@ -391,7 +392,7 @@ class TestUserFeatures(_BaseTestCase):
             self._agi.set_variable.call_args_list,
             contains_exactly(
                 call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', '4242'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', '4242'),
             ),
@@ -423,7 +424,7 @@ class TestUserFeatures(_BaseTestCase):
             self._agi.set_variable.call_args_list,
             contains_exactly(
                 call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
-                call('XIVO_DST_REDIRECTING_NUM', '32'),
+                call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', '4343'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', '4343'),
             ),
