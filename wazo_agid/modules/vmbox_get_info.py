@@ -1,4 +1,4 @@
-# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -7,7 +7,9 @@ import logging
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid, objects
+from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +55,7 @@ def vmbox_get_info(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> No
 
     agi.set_variable('XIVO_VMMAIN_OPTIONS', vmmain_options)
     agi.set_variable('XIVO_MAILBOX', vmbox.mailbox)
-    agi.set_variable('XIVO_MAILBOX_CONTEXT', vmbox.context)
+    agi.set_variable(dv.MAILBOX_CONTEXT, vmbox.context)
     agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
 
 
