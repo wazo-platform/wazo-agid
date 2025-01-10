@@ -69,7 +69,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['WAZO_ENABLEDND'] == str(user['enablednd'])
     assert recv_vars['XIVO_ENABLEVOICEMAIL'] == str(user['enablevoicemail'])
     assert recv_vars['XIVO_MAILBOX'] == ''
-    assert recv_vars['XIVO_MAILBOX_CONTEXT'] == ''
+    assert recv_vars[dv.MAILBOX_CONTEXT] == ''
     assert recv_vars['XIVO_USEREMAIL'] == ''
     assert recv_vars['WAZO_ENABLEUNC'] == str(user['enableunc'])
     assert recv_vars['XIVO_FWD_USER_UNC_ACTION'] == 'none'
@@ -1645,7 +1645,7 @@ def test_user_get_vmbox(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
     assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
-    assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context['name']
+    assert recv_vars[dv.MAILBOX_CONTEXT] == context['name']
 
 
 def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
@@ -1694,7 +1694,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
     assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
-    assert recv_vars['XIVO_MAILBOX_CONTEXT'] == context['name']
+    assert recv_vars[dv.MAILBOX_CONTEXT] == context['name']
     assert recv_vars['XIVO_MAILBOX_LANGUAGE'] == 'fr_FR'
 
 
