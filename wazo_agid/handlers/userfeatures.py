@@ -201,7 +201,7 @@ class UserFeatures(Handler):
 
         if not callerid_name:
             callerid_name = f"{self._user.firstname} {self._user.lastname}"
-        self._agi.set_variable('XIVO_DST_REDIRECTING_NAME', callerid_name)
+        self._agi.set_variable(dv.DST_REDIRECTING_NAME, callerid_name)
 
         if not callerid_num:
             if self.main_extension:
