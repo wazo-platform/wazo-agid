@@ -13,7 +13,8 @@ from xivo_dao.resources.line import dao as line_dao
 from xivo_dao.resources.line_extension import dao as line_extension_dao
 from xivo_dao.resources.user_line import dao as user_line_dao
 
-from wazo_agid import dialplan_variables, objects
+from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 from wazo_agid.handlers.handler import Handler
 from wazo_agid.helpers import build_sip_interface
 from wazo_agid.objects import CallerID, DialAction
@@ -84,16 +85,16 @@ class UserFeatures(Handler):
                 self._agi.verbose(msg)
 
     def _set_members(self) -> None:
-        self._userid = self._agi.get_variable(dialplan_variables.USERID)
-        self._dstid = self._agi.get_variable(dialplan_variables.DESTINATION_ID)
+        self._userid = self._agi.get_variable(dv.USERID)
+        self._dstid = self._agi.get_variable(dv.DESTINATION_ID)
         self._destination_extension_id = self._agi.get_variable(
-            dialplan_variables.DESTINATION_EXTENSION_ID
+            dv.DESTINATION_EXTENSION_ID
         )
-        self._zone = self._agi.get_variable(dialplan_variables.CALL_ORIGIN)
-        self._srcnum = self._agi.get_variable(dialplan_variables.SOURCE_NUMBER)
-        self._dstnum = self._agi.get_variable(dialplan_variables.DESTINATION_NUMBER)
-        self._context = self._agi.get_variable(dialplan_variables.BASE_CONTEXT)
-        self._moh_uuid = self._agi.get_variable(dialplan_variables.USER_MOH)
+        self._zone = self._agi.get_variable(dv.CALL_ORIGIN)
+        self._srcnum = self._agi.get_variable(dv.SOURCE_NUMBER)
+        self._dstnum = self._agi.get_variable(dv.DESTINATION_NUMBER)
+        self._context = self._agi.get_variable(dv.BASE_CONTEXT)
+        self._moh_uuid = self._agi.get_variable(dv.USER_MOH)
         self._set_caller()
         self._set_line()
         self._set_user()
@@ -106,9 +107,7 @@ class UserFeatures(Handler):
                 self._caller = None
 
             if self._caller:
-                self._agi.set_variable(
-                    dialplan_variables.CALLER_SIMULTCALLS, self._caller.simultcalls
-                )
+                self._agi.set_variable(dv.CALLER_SIMULTCALLS, self._caller.simultcalls)
 
     def _set_line(self) -> None:
         if self._dstid:
@@ -295,7 +294,7 @@ class UserFeatures(Handler):
 
         if strategy in ("bossfirst-simult", "bossfirst-serial", "all"):
             self._agi.set_variable(
-                dialplan_variables.CALLFILTER_BOSS_INTERFACE,
+                dv.CALLFILTER_BOSS_INTERFACE,
                 boss_interface,
             )
             self._set_callfilter_ringseconds(
@@ -325,9 +324,7 @@ class UserFeatures(Handler):
                     index += 1
 
         if strategy in ("bossfirst-simult", "secretary-simult", "all"):
-            self._agi.set_variable(
-                dialplan_variables.CALLFILTER_INTERFACE, '&'.join(ifaces)
-            )
+            self._agi.set_variable(dv.CALLFILTER_INTERFACE, '&'.join(ifaces))
             self._set_callfilter_ringseconds('TIMEOUT', callfilter.ringseconds)
 
         DialAction(
@@ -336,8 +333,8 @@ class UserFeatures(Handler):
         CallerID(self._agi, self._cursor, "callfilter", callfilter.id).rewrite(
             force_rewrite=True
         )
-        self._agi.set_variable(dialplan_variables.CALLFILTER, '1')
-        self._agi.set_variable(dialplan_variables.CALLFILTER_MODE, strategy)
+        self._agi.set_variable(dv.CALLFILTER, '1')
+        self._agi.set_variable(dv.CALLFILTER_MODE, strategy)
 
         return True
 
@@ -456,9 +453,7 @@ class UserFeatures(Handler):
             self._agi.set_variable(name, '')
 
     def _set_callee_simultcalls(self):
-        return self._agi.set_variable(
-            dialplan_variables.CALLEE_SIMULTCALLS, self._user.simultcalls
-        )
+        return self._agi.set_variable(dv.CALLEE_SIMULTCALLS, self._user.simultcalls)
 
     def _set_enablednd(self):
         self._agi.set_variable('WAZO_ENABLEDND', self._user.enablednd)

@@ -8,7 +8,8 @@ from configparser import NoOptionError, RawConfigParser
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid, dialplan_variables
+from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
 
 CONFIG_FILE = "/etc/xivo/asterisk/xivo_ring.conf"
 CONFIG_PARSER: RawConfigParser = None  # type: ignore[assignment]
@@ -17,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    dstnum = agi.get_variable(dialplan_variables.REAL_NUMBER)
-    context = agi.get_variable(dialplan_variables.REAL_CONTEXT)
+    dstnum = agi.get_variable(dv.REAL_NUMBER)
+    context = agi.get_variable(dv.REAL_CONTEXT)
     origin = agi.get_variable('WAZO_CALLORIGIN')
     referer = agi.get_variable('WAZO_FWD_REFERER').split(':', 1)[0]
     forwarded = agi.get_variable('XIVO_CALLFORWARDED')

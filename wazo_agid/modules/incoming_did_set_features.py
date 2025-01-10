@@ -5,7 +5,9 @@ from __future__ import annotations
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid, dialplan_variables, objects
+from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 
 
 def incoming_did_set_features(
@@ -22,10 +24,10 @@ def incoming_did_set_features(
 
     agi.set_variable('XIVO_DIDPREPROCESS_SUBROUTINE', preprocess_subroutine)
     agi.set_variable('XIVO_EXTENPATTERN', did.exten)
-    agi.set_variable(dialplan_variables.PATH, 'incall')
-    agi.set_variable(dialplan_variables.PATH_ID, did.id)
-    agi.set_variable(dialplan_variables.REAL_CONTEXT, did.context)
-    agi.set_variable(dialplan_variables.REAL_NUMBER, did.exten)
+    agi.set_variable(dv.PATH, 'incall')
+    agi.set_variable(dv.PATH_ID, did.id)
+    agi.set_variable(dv.REAL_CONTEXT, did.context)
+    agi.set_variable(dv.REAL_NUMBER, did.exten)
     agi.set_variable('WAZO_GREETING_SOUND', did.greeting_sound or '')
 
     did.set_dial_actions()

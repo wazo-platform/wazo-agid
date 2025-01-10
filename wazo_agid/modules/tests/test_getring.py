@@ -10,7 +10,7 @@ from unittest.mock import Mock
 
 from hamcrest import assert_that, calling, not_, raises
 
-from wazo_agid import dialplan_variables
+from wazo_agid import dialplan_variables as dv
 
 from .. import getring
 
@@ -30,8 +30,8 @@ class TestGetRing(unittest.TestCase):
     def test_that_no_number_config_does_not_raise(self):
         self._set_config(DEFAULT_CONFIG)
         variables = {
-            dialplan_variables.REAL_NUMBER: '1001',
-            dialplan_variables.REAL_CONTEXT: 'default',
+            dv.REAL_NUMBER: '1001',
+            dv.REAL_CONTEXT: 'default',
             'WAZO_FWD_REFERER': 'foo:bar',
         }
         self.agi.get_variable.side_effect = lambda var: variables.get(var)
