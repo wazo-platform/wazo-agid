@@ -1,12 +1,10 @@
 # Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
-# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
 from unittest.mock import ANY, Mock, call, patch
 
-from wazo_agid import dialplan_variables
-from wazo_agid import dialplan_variables
+from wazo_agid import dialplan_variables as dv
 from wazo_agid.handlers.groupfeatures import GroupFeatures
 
 
@@ -65,16 +63,16 @@ class TestGroupFeatures(unittest.TestCase):
         self._agi.get_variable.return_value = ''
 
         calls = [
-            call(dialplan_variables.PATH, 'group'),
-            call(dialplan_variables.PATH_ID, 34),
+            call(dv.PATH, 'group'),
+            call(dv.PATH_ID, 34),
         ]
 
         self.group_features._set_schedule()
 
         self._agi.set_variable.assert_has_calls(calls)
 
-        self._agi.set_variable.assert_any_call(dialplan_variables.PATH, 'group')
-        self._agi.set_variable.assert_any_call(dialplan_variables.PATH_ID, 34)
+        self._agi.set_variable.assert_any_call(dv.PATH, 'group')
+        self._agi.set_variable.assert_any_call(dv.PATH_ID, 34)
 
     def test_set_call_record_options_toggle_enabled(self):
         self.group_features._dtmf_record_toggle = True
@@ -82,7 +80,7 @@ class TestGroupFeatures(unittest.TestCase):
         self.group_features._set_call_record_options()
 
         self._agi.set_variable.assert_any_call(
-            f'__{dialplan_variables.GROUP_DTMF_RECORD_TOGGLE_ENABLED}', '1'
+            f'__{dv.GROUP_DTMF_RECORD_TOGGLE_ENABLED}', '1'
         )
         self._agi.set_variable.assert_any_call('WAZO_CALL_RECORD_SIDE', 'caller')
         self._agi.set_variable.assert_any_call('__WAZO_LOCAL_CHAN_MATCH_UUID', ANY)
@@ -93,7 +91,7 @@ class TestGroupFeatures(unittest.TestCase):
         self.group_features._set_call_record_options()
 
         self._agi.set_variable.assert_any_call(
-            f'__{dialplan_variables.GROUP_DTMF_RECORD_TOGGLE_ENABLED}', '0'
+            f'__{dv.GROUP_DTMF_RECORD_TOGGLE_ENABLED}', '0'
         )
         self._agi.set_variable.assert_any_call('WAZO_CALL_RECORD_SIDE', 'caller')
         self._agi.set_variable.assert_any_call('__WAZO_LOCAL_CHAN_MATCH_UUID', ANY)

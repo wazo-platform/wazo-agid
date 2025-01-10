@@ -1,4 +1,4 @@
-# Copyright 2013-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -10,8 +10,8 @@ from hamcrest import assert_that, contains_exactly
 from hamcrest.core import equal_to
 from typing_extensions import Self
 
+from wazo_agid import dialplan_variables as dv
 from wazo_agid import objects
-from wazo_agid.dialplan_variables import SELECTED_CALLER_ID
 from wazo_agid.handlers.outgoingfeatures import OutgoingFeatures
 
 
@@ -428,7 +428,7 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         self.outgoing_features._set_caller_id()
 
         self._agi.set_variable.assert_called_once_with(
-            SELECTED_CALLER_ID, caller_id_header
+            dv.SELECTED_CALLER_ID, caller_id_header
         )
 
     @patch('wazo_agid.objects.CallerID.set')

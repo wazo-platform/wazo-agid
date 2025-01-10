@@ -8,7 +8,9 @@ import logging
 from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Literal, Placeholder
 
-from wazo_agid import agid, call_rights, dialplan_variables, objects
+from wazo_agid import agid, call_rights
+from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 from wazo_agid.objects import join_column_names
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ def _user_set_call_rights(
 ) -> None:
     userid = agi.get_variable('WAZO_USERID')
     dstnum = agi.get_variable('WAZO_DSTNUM')
-    outcallid = agi.get_variable(dialplan_variables.OUTCALL_ID)
+    outcallid = agi.get_variable(dv.OUTCALL_ID)
 
     cursor.execute("SELECT rightcallid, exten FROM rightcallexten")
     res = cursor.fetchall()

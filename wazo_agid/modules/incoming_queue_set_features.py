@@ -5,7 +5,9 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from wazo_agid import agid, dialplan_variables, objects
+from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 
 
 def incoming_queue_set_features(agi, cursor, args):
@@ -54,8 +56,8 @@ def incoming_queue_set_features(agi, cursor, args):
     if queue.mark_answered_elsewhere:
         options += "C"
 
-    agi.set_variable(dialplan_variables.REAL_NUMBER, queue.number)
-    agi.set_variable(dialplan_variables.REAL_CONTEXT, queue.context)
+    agi.set_variable(dv.REAL_NUMBER, queue.number)
+    agi.set_variable(dv.REAL_CONTEXT, queue.context)
     agi.set_variable('__WAZO_QUEUENAME', queue.name)
     agi.set_variable('WAZO_QUEUEOPTIONS', options)
     agi.set_variable('XIVO_QUEUENEEDANSWER', needanswer)
@@ -89,10 +91,10 @@ def incoming_queue_set_features(agi, cursor, args):
 
     # schedule
     # 'incall' schedule has priority over queue's schedule
-    path = agi.get_variable(dialplan_variables.PATH)
+    path = agi.get_variable(dv.PATH)
     if not path:
-        agi.set_variable(dialplan_variables.PATH, 'queue')
-        agi.set_variable(dialplan_variables.PATH_ID, queue.id)
+        agi.set_variable(dv.PATH, 'queue')
+        agi.set_variable(dv.PATH_ID, queue.id)
 
     # pickup
     pickups = queue.pickupgroups()
@@ -104,7 +106,7 @@ def incoming_queue_set_features(agi, cursor, args):
 def _set_call_record_toggle(agi, queue):
     toggle_enabled = '1' if queue.dtmf_record_toggle else '0'
     agi.set_variable(
-        f'__{dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}',
+        f'__{dv.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}',
         toggle_enabled,
     )
 

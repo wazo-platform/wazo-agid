@@ -5,7 +5,8 @@ import logging
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid, dialplan_variables
+from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +18,12 @@ VARIABLE_MAP = {
     'WAZO_INTERFACE': 'XIVO_INTERFACE',
     'WAZO_GROUPNAME': 'XIVO_GROUPNAME',
     'WAZO_GROUPOPTIONS': 'XIVO_GROUPOPTIONS',
-    dialplan_variables.HANGUP_RING_TIME: 'XIVO_HANGUPRINGTIME',  # 25.01
+    dv.HANGUP_RING_TIME: 'XIVO_HANGUPRINGTIME',  # 25.01
     'WAZO_QUEUENAME': 'XIVO_QUEUENAME',
     'WAZO_PICKEDUP': 'XIVO_PICKEDUP',
     'WAZO_RINGSECONDS': 'XIVO_RINGSECONDS',
-    dialplan_variables.REAL_CONTEXT: 'XIVO_REAL_CONTEXT',  # 25.01
-    dialplan_variables.REAL_NUMBER: 'XIVO_REAL_NUMBER',  # 25.01
+    dv.REAL_CONTEXT: 'XIVO_REAL_CONTEXT',  # 25.01
+    dv.REAL_NUMBER: 'XIVO_REAL_NUMBER',  # 25.01
     'WAZO_CALLORIGIN': 'XIVO_CALLORIGIN',
     'WAZO_MOBILEPHONENUMBER': 'XIVO_MOBILEPHONENUMBER',
     'WAZO_QUEUEOPTIONS': 'XIVO_QUEUEOPTIONS',
