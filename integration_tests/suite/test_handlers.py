@@ -839,7 +839,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars[dv.REAL_CONTEXT] == extension['context']
     assert recv_vars['__WAZO_GROUPNAME'] == 'incoming_group_set_features'
     assert recv_vars['WAZO_GROUP_LABEL'] == 'incoming group set features'
-    assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
+    assert recv_vars[dv.GROUP_TIMEOUT] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
     assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
@@ -900,7 +900,7 @@ def test_incoming_group_set_features_linear_with_music(
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['WAZO_GROUPOPTIONS'] == 'im'
     assert recv_vars['XIVO_GROUPNEEDANSWER'] == '1'
-    assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
+    assert recv_vars[dv.GROUP_TIMEOUT] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
     assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
@@ -909,7 +909,7 @@ def test_incoming_group_set_features_linear_with_music(
 def test_linear_group_check_timeout_initial(base_asset: BaseAssetLaunchingHelper):
     variables = {
         'WAZO_DSTID': '1',
-        'XIVO_GROUPTIMEOUT': 25,
+        dv.GROUP_TIMEOUT: 25,
         'WAZO_GROUP_USER_TIMEOUT': 5,
     }
     start_time = time.time()
@@ -932,7 +932,7 @@ def test_linear_group_check_timeout_not_expired(base_asset: BaseAssetLaunchingHe
     start_time = time.time() - 21
     variables = {
         'WAZO_DSTID': '1',
-        'XIVO_GROUPTIMEOUT': 25,
+        dv.GROUP_TIMEOUT: 25,
         'WAZO_GROUP_START_TIME': start_time,
         'WAZO_GROUP_USER_TIMEOUT': 5,
     }
@@ -951,7 +951,7 @@ def test_linear_group_check_timeout_expired(base_asset: BaseAssetLaunchingHelper
     start_time = time.time() - 25
     variables = {
         'WAZO_DSTID': '1',
-        'XIVO_GROUPTIMEOUT': 25,
+        dv.GROUP_TIMEOUT: 25,
         'WAZO_GROUP_START_TIME': start_time,
         'WAZO_GROUP_USER_TIMEOUT': 5,
     }
