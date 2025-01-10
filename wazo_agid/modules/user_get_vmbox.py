@@ -44,7 +44,7 @@ def user_get_vmbox(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         vmmain_options = ""
 
     agi.set_variable('XIVO_VMMAIN_OPTIONS', vmmain_options)
-    agi.set_variable('XIVO_MAILBOX', user.vmbox.mailbox)
+    agi.set_variable(dv.MAILBOX, user.vmbox.mailbox)
     agi.set_variable(dv.MAILBOX_CONTEXT, user.vmbox.context)
     if user.vmbox.password:
         agi.set_variable('WAZO_VM_PASSWORD', user.vmbox.password)
