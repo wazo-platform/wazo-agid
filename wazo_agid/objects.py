@@ -12,6 +12,7 @@ from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Composable, Identifier
 from xivo_dao import user_dao
 
+from wazo_agid import dialplan_variables as dv
 from wazo_agid.schedule import (
     AlwaysOpenedSchedule,
     Schedule,
@@ -1127,21 +1128,21 @@ class CallerID:
     def rewrite(self, force_rewrite):
         """
         Set/Modify the caller ID if needed and allowed and create
-        the XIVO_CID_REWRITTEN channel variable in some cases.
+        the WAZO_CID_REWRITTEN channel variable in some cases.
 
         @force_rewrite:
             True <=> CID modification is always allowed in this case.
-                XIVO_CID_REWRITTEN is neither taken into account nor
+                WAZO_CID_REWRITTEN is neither taken into account nor
                 written.
             False <=> CID modification is only allowed if the channel
-                variable XIVO_CID_REWRITTEN is not set prior to the
+                variable WAZO_CID_REWRITTEN is not set prior to the
                 call to this method.  If the CID modification really
-                took place, XIVO_CID_REWRITTEN is created.
+                took place, WAZO_CID_REWRITTEN is created.
         """
         if not self.mode:
             return
 
-        cidrewritten = self.agi.get_variable('XIVO_CID_REWRITTEN')
+        cidrewritten = self.agi.get_variable(dv.CID_REWRITTEN)
 
         if force_rewrite or not cidrewritten:
             calleridname = self.agi.get_variable('CALLERID(name)')
@@ -1177,7 +1178,7 @@ class CallerID:
             self.agi.set_variable('CALLERID(all)', f'"{name}" <{calleridnum}>')
 
             if not force_rewrite:
-                self.agi.set_variable('XIVO_CID_REWRITTEN', 1)
+                self.agi.set_variable(dv.CID_REWRITTEN, 1)
 
 
 class ChanSIP:
