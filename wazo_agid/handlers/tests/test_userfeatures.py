@@ -601,9 +601,7 @@ class TestSetForwardBusy(_BaseTestCase):
         ):
             user_features._setbusy()
             user_features._set_rbusy_from_exten.assert_called_once_with()  # type: ignore
-            assert_that(
-                self._agi.set_variable.called_once_with('XIVO_ENABLEBUSY', True)
-            )
+            assert_that(self._agi.set_variable.called_once_with(dv.ENABLEBUSY, True))
 
     def test_set_busy_exten_disabled_noanswer_disabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)

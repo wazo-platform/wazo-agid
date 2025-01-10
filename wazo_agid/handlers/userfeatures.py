@@ -511,7 +511,7 @@ class UserFeatures(Handler):
 
     def _setbusy(self):
         if self._set_rbusy_from_exten() or self._set_rbusy_from_dialaction():
-            self._agi.set_variable('XIVO_ENABLEBUSY', True)
+            self._agi.set_variable(dv.ENABLEBUSY, True)
 
     def _set_enableunc(self):
         if self._user.enableunc:
