@@ -1445,7 +1445,7 @@ def test_phone_get_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_INCALLFILTER'] == '1'
     assert recv_vars['WAZO_ENABLEDND'] == '1'
 
-    assert recv_vars['XIVO_ENABLEBUSY'] == '1'
+    assert recv_vars[dv.ENABLEBUSY] == '1'
     assert recv_vars['XIVO_DESTBUSY'] == 'dest-busy'
     assert recv_vars[dv.ENABLERNA] == '1'
     assert recv_vars['XIVO_DESTRNA'] == 'dest-noanswer'

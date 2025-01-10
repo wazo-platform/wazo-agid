@@ -29,7 +29,7 @@ class TestGetFeatures(unittest.TestCase):
 
         self._client.users(self._user_id).list_forwards.assert_called_once_with()
         expected_calls = [
-            call('XIVO_ENABLEBUSY', 1),
+            call(dv.ENABLEBUSY, 1),
             call('XIVO_DESTBUSY', '1234'),
             call(dv.ENABLERNA, 0),
             call('XIVO_DESTRNA', '5678'),
@@ -44,7 +44,7 @@ class TestGetFeatures(unittest.TestCase):
         _set_current_forwards(self._agi, self._user_id)
 
         expected_calls = [
-            call('XIVO_ENABLEBUSY', 0),
+            call(dv.ENABLEBUSY, 0),
             call('XIVO_DESTBUSY', ''),
             call(dv.ENABLERNA, 0),
             call('XIVO_DESTRNA', ''),
