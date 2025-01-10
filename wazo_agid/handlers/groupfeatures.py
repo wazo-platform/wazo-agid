@@ -183,9 +183,9 @@ class GroupFeatures(Handler):
 
     def _set_timeout(self) -> None:
         if self._timeout:
-            self._agi.set_variable('XIVO_GROUPTIMEOUT', self._timeout)
+            self._agi.set_variable(dv.GROUP_TIMEOUT, self._timeout)
         else:
-            self._agi.set_variable('XIVO_GROUPTIMEOUT', "")
+            self._agi.set_variable(dv.GROUP_TIMEOUT, "")
 
         if self._user_timeout:
             self._agi.set_variable('WAZO_GROUP_USER_TIMEOUT', self._user_timeout)
