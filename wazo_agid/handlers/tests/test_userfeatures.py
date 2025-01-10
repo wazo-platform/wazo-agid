@@ -525,7 +525,7 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         ):
             user_features._setrna()
             user_features._set_rna_from_exten.assert_called_once_with()  # type: ignore
-            assert_that(self._agi.set_variable.called_once_with('XIVO_ENABLERNA', True))
+            assert_that(self._agi.set_variable.called_once_with(dv.ENABLERNA, True))
 
     def test_setrna_exten_disabled_noanswer_disabled(self):
         user_features = UserFeatures(self._agi, self._cursor, self._args)

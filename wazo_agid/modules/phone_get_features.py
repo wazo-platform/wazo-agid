@@ -1,4 +1,4 @@
-# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -7,7 +7,9 @@ import logging
 
 from psycopg2.extras import DictCursor
 
-from wazo_agid import agid, objects
+from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +45,7 @@ def _set_current_forwards(agi, user_id):
     agi.set_variable('XIVO_ENABLEBUSY', _extract_and_format_enabled(busy_forward))
     agi.set_variable('XIVO_DESTBUSY', _extract_and_format_destination(busy_forward))
     noanswer_forward = forwards['noanswer']
-    agi.set_variable('XIVO_ENABLERNA', _extract_and_format_enabled(noanswer_forward))
+    agi.set_variable(dv.ENABLERNA, _extract_and_format_enabled(noanswer_forward))
     agi.set_variable('XIVO_DESTRNA', _extract_and_format_destination(noanswer_forward))
     unconditional_forward = forwards['unconditional']
     agi.set_variable(
