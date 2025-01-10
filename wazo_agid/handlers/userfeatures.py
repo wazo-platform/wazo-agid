@@ -384,7 +384,7 @@ class UserFeatures(Handler):
             mbox_lang = vmbox.language
         elif self._user.language:
             mbox_lang = self._user.language
-        self._agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
+        self._agi.set_variable(dv.MAILBOX_LANGUAGE, mbox_lang)
 
     def _set_mobile_number(self):
         if self._user.mobilephonenumber:

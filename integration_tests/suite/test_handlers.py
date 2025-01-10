@@ -1695,7 +1695,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
     assert recv_vars['XIVO_MAILBOX'] == voicemail['mailbox']
     assert recv_vars[dv.MAILBOX_CONTEXT] == context['name']
-    assert recv_vars['XIVO_MAILBOX_LANGUAGE'] == 'fr_FR'
+    assert recv_vars[dv.MAILBOX_LANGUAGE] == 'fr_FR'
 
 
 DATETIME_REGEX = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{1,6})?\+00:00)'

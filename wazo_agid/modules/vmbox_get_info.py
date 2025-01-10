@@ -56,7 +56,7 @@ def vmbox_get_info(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> No
     agi.set_variable('XIVO_VMMAIN_OPTIONS', vmmain_options)
     agi.set_variable('XIVO_MAILBOX', vmbox.mailbox)
     agi.set_variable(dv.MAILBOX_CONTEXT, vmbox.context)
-    agi.set_variable('XIVO_MAILBOX_LANGUAGE', mbox_lang)
+    agi.set_variable(dv.MAILBOX_LANGUAGE, mbox_lang)
 
 
 agid.register(vmbox_get_info)
