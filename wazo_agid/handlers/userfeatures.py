@@ -208,7 +208,7 @@ class UserFeatures(Handler):
                 callerid_num = self.main_extension.exten
             else:
                 callerid_num = self._dstnum
-        self._agi.set_variable('XIVO_DST_REDIRECTING_NUM', callerid_num)
+        self._agi.set_variable(dv.DST_REDIRECTING_NUM, callerid_num)
 
         confd_client = self._agi.config['confd']['client']
         try:
