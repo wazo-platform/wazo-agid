@@ -1666,7 +1666,7 @@ def test_user_get_vmbox(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
+    assert recv_vars[dv.VMMAIN_OPTIONS] == 's'
     assert recv_vars[dv.MAILBOX] == voicemail['mailbox']
     assert recv_vars[dv.MAILBOX_CONTEXT] == context['name']
 
@@ -1715,7 +1715,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_VMMAIN_OPTIONS'] == 's'
+    assert recv_vars[dv.VMMAIN_OPTIONS] == 's'
     assert recv_vars[dv.MAILBOX] == voicemail['mailbox']
     assert recv_vars[dv.MAILBOX_CONTEXT] == context['name']
     assert recv_vars[dv.MAILBOX_LANGUAGE] == 'fr_FR'
