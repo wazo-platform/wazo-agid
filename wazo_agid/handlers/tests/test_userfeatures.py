@@ -297,7 +297,7 @@ class TestUserFeatures(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call(dv.DST_REDIRECTING_NAME, 'Foobar'),
                 call(dv.DST_REDIRECTING_NUM, '123'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
@@ -318,7 +318,7 @@ class TestUserFeatures(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_DST_REDIRECTING_NAME', 'First Last'),
+                call(dv.DST_REDIRECTING_NAME, 'First Last'),
                 call(dv.DST_REDIRECTING_NUM, '42'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
@@ -338,7 +338,7 @@ class TestUserFeatures(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call(dv.DST_REDIRECTING_NAME, 'Foobar'),
                 call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
@@ -359,7 +359,7 @@ class TestUserFeatures(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call(dv.DST_REDIRECTING_NAME, 'Foobar'),
                 call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
@@ -391,7 +391,7 @@ class TestUserFeatures(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call(dv.DST_REDIRECTING_NAME, 'Foobar'),
                 call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', '4242'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', '4242'),
@@ -423,7 +423,7 @@ class TestUserFeatures(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_DST_REDIRECTING_NAME', 'Foobar'),
+                call(dv.DST_REDIRECTING_NAME, 'Foobar'),
                 call(dv.DST_REDIRECTING_NUM, '32'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NAME', '4343'),
                 call('WAZO_DST_REDIRECTING_EXTERN_NUM', '4343'),

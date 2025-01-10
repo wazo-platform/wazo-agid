@@ -58,7 +58,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars['XIVO_DST_USERNUM'] == extension['exten']
     assert recv_vars['WAZO_DST_USER_CONTEXT'] == extension['context']
     assert recv_vars['WAZO_DST_NAME'] == 'Firstname Lastname'
-    assert recv_vars['XIVO_DST_REDIRECTING_NAME'] == 'Firstname Lastname'
+    assert recv_vars[dv.DST_REDIRECTING_NAME] == 'Firstname Lastname'
     assert recv_vars[dv.DST_REDIRECTING_NUM] == extension['exten']
     assert recv_vars['WAZO_DST_UUID'] == user['uuid']
     assert recv_vars['WAZO_DST_TENANT_UUID'] == user['tenant_uuid']
