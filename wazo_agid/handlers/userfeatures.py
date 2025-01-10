@@ -507,7 +507,7 @@ class UserFeatures(Handler):
 
     def _setrna(self):
         if self._set_rna_from_exten() or self._set_rna_from_dialaction():
-            self._agi.set_variable('XIVO_ENABLERNA', True)
+            self._agi.set_variable(dv.ENABLERNA, True)
 
     def _setbusy(self):
         if self._set_rbusy_from_exten() or self._set_rbusy_from_dialaction():
