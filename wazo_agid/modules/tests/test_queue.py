@@ -1,4 +1,4 @@
-# Copyright 2013-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -6,7 +6,7 @@ from __future__ import annotations
 import unittest
 from unittest.mock import Mock
 
-from wazo_agid import fastagi, objects
+from wazo_agid import dialplan_variables, fastagi, objects
 from wazo_agid.modules import incoming_queue_set_features
 
 QUEUE_WRAPUP_TIME = '__QUEUEWRAPUPTIME'
@@ -28,6 +28,26 @@ class TestQueue(unittest.TestCase):
         queue.wrapuptime = 30
         incoming_queue_set_features._set_wrapup_time(agi, queue)
         self.assert_dialplan_variable_set(agi, QUEUE_WRAPUP_TIME, 30)
+
+    def test_set_call_record_toggle_enabled(self):
+        queue = Mock(objects.Queue)
+        agi = Mock(fastagi.FastAGI)
+
+        queue.dtmf_record_toggle = True
+        incoming_queue_set_features._set_call_record_toggle(agi, queue)
+        self.assert_dialplan_variable_set(
+            agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '1'
+        )
+
+    def test_set_call_record_toggle_disabled(self):
+        queue = Mock(objects.Queue)
+        agi = Mock(fastagi.FastAGI)
+
+        queue.dtmf_record_toggle = False
+        incoming_queue_set_features._set_call_record_toggle(agi, queue)
+        self.assert_dialplan_variable_set(
+            agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '0'
+        )
 
     def assert_dialplan_variable_not_set(self, agi, unexpected_variable_name):
         value = self.get_channel_variable_value(agi, unexpected_variable_name)
