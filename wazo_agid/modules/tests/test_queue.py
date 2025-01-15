@@ -13,40 +13,35 @@ QUEUE_WRAPUP_TIME = '__QUEUEWRAPUPTIME'
 
 
 class TestQueue(unittest.TestCase):
+    def setUp(self):
+        self.queue = Mock(objects.Queue)
+        self.agi = Mock(fastagi.FastAGI)
+
     def test_set_wrapup_time(self):
-        queue = Mock(objects.Queue)
-        agi = Mock(fastagi.FastAGI)
+        self.queue.wrapuptime = None
+        incoming_queue_set_features._set_wrapup_time(self.agi, self.queue)
+        self.assert_dialplan_variable_not_set(self.agi, QUEUE_WRAPUP_TIME)
 
-        queue.wrapuptime = None
-        incoming_queue_set_features._set_wrapup_time(agi, queue)
-        self.assert_dialplan_variable_not_set(agi, QUEUE_WRAPUP_TIME)
+        self.queue.wrapuptime = 0
+        incoming_queue_set_features._set_wrapup_time(self.agi, self.queue)
+        self.assert_dialplan_variable_not_set(self.agi, QUEUE_WRAPUP_TIME)
 
-        queue.wrapuptime = 0
-        incoming_queue_set_features._set_wrapup_time(agi, queue)
-        self.assert_dialplan_variable_not_set(agi, QUEUE_WRAPUP_TIME)
-
-        queue.wrapuptime = 30
-        incoming_queue_set_features._set_wrapup_time(agi, queue)
-        self.assert_dialplan_variable_set(agi, QUEUE_WRAPUP_TIME, 30)
+        self.queue.wrapuptime = 30
+        incoming_queue_set_features._set_wrapup_time(self.agi, self.queue)
+        self.assert_dialplan_variable_set(self.agi, QUEUE_WRAPUP_TIME, 30)
 
     def test_set_call_record_toggle_enabled(self):
-        queue = Mock(objects.Queue)
-        agi = Mock(fastagi.FastAGI)
-
-        queue.dtmf_record_toggle = True
-        incoming_queue_set_features._set_call_record_toggle(agi, queue)
+        self.queue.dtmf_record_toggle = True
+        incoming_queue_set_features._set_call_record_toggle(self.agi, self.queue)
         self.assert_dialplan_variable_set(
-            agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '1'
+            self.agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '1'
         )
 
     def test_set_call_record_toggle_disabled(self):
-        queue = Mock(objects.Queue)
-        agi = Mock(fastagi.FastAGI)
-
-        queue.dtmf_record_toggle = False
-        incoming_queue_set_features._set_call_record_toggle(agi, queue)
+        self.queue.dtmf_record_toggle = False
+        incoming_queue_set_features._set_call_record_toggle(self.agi, self.queue)
         self.assert_dialplan_variable_set(
-            agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '0'
+            self.agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '0'
         )
 
     def assert_dialplan_variable_not_set(self, agi, unexpected_variable_name):
