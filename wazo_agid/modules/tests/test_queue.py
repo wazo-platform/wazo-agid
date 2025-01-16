@@ -46,7 +46,7 @@ class TestQueue(unittest.TestCase):
 
     def assert_dialplan_variable_not_set(self, agi, unexpected_variable_name):
         value = self.get_channel_variable_value(agi, unexpected_variable_name)
-        self.assertEqual(value, None)
+        self.assertIsNone(value)
 
     def assert_dialplan_variable_set(self, agi, expected_variable_name, expected_value):
         value = self.get_channel_variable_value(agi, expected_variable_name)
