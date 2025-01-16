@@ -481,7 +481,7 @@ class User:
 
 
 class Queue:
-    def __init__(self, agi, cursor: DictCursor, queue_id):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, queue_id: int):
         self.agi = agi
         self.cursor = cursor
 
