@@ -1,4 +1,4 @@
-# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class DbHelper:
-    TEMPLATE = "xivotemplate"
+    TEMPLATE = "wazotemplate"
 
     @classmethod
     def build(cls, user, password, host, port, db):
