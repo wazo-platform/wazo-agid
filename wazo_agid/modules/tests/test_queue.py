@@ -34,14 +34,14 @@ class TestQueue(unittest.TestCase):
         self.queue.dtmf_record_toggle = True
         incoming_queue_set_features._set_call_record_toggle(self.agi, self.queue)
         self.assert_dialplan_variable_set(
-            self.agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '1'
+            self.agi, f'__{dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}', '1'
         )
 
     def test_set_call_record_toggle_disabled(self):
         self.queue.dtmf_record_toggle = False
         incoming_queue_set_features._set_call_record_toggle(self.agi, self.queue)
         self.assert_dialplan_variable_set(
-            self.agi, dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED, '0'
+            self.agi, f'__{dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}', '0'
         )
 
     def assert_dialplan_variable_not_set(self, agi, unexpected_variable_name):

@@ -56,7 +56,7 @@ def incoming_queue_set_features(agi, cursor, args):
 
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
-    agi.set_variable('WAZO_QUEUENAME', queue.name)
+    agi.set_variable('__WAZO_QUEUENAME', queue.name)
     agi.set_variable('WAZO_QUEUEOPTIONS', options)
     agi.set_variable('XIVO_QUEUENEEDANSWER', needanswer)
     agi.set_variable('XIVO_QUEUEURL', queue.url)
@@ -104,7 +104,7 @@ def incoming_queue_set_features(agi, cursor, args):
 def _set_call_record_toggle(agi, queue):
     toggle_enabled = '1' if queue.dtmf_record_toggle else '0'
     agi.set_variable(
-        dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED,
+        f'__{dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}',
         toggle_enabled,
     )
 
