@@ -1,4 +1,4 @@
-# Copyright 2012-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ class GroupFeatures(Handler):
         self._context: str = None  # type: ignore[assignment]
         self._name: str = None  # type: ignore[assignment]
         self._label: str = None  # type: ignore[assignment]
+        self._dtmf_record_toggle: bool = False
         self._timeout = None
         self._transfer_user = None
         self._transfer_call = None
@@ -53,7 +54,7 @@ class GroupFeatures(Handler):
         self._set_schedule()
         if self._needs_rewrite_cid():
             self._set_rewrite_cid()
-        self._set_call_record_side()
+        self._set_call_record_options()
 
     def _display_queue(self) -> None:
         self._agi.verbose(
@@ -72,6 +73,7 @@ class GroupFeatures(Handler):
             'id',
             'name',
             'label',
+            'dtmf_record_toggle',
             'timeout',
             'transfer_user',
             'transfer_call',
@@ -111,6 +113,7 @@ class GroupFeatures(Handler):
         self._name = res['name']
         self._label = res['label']
         self._timeout = res['timeout']
+        self._dtmf_record_toggle = res['dtmf_record_toggle']
         self._transfer_user = res['transfer_user']
         self._transfer_call = res['transfer_call']
         self._write_caller = res['write_caller']
@@ -128,7 +131,7 @@ class GroupFeatures(Handler):
     def _set_vars(self) -> None:
         self._agi.set_variable('XIVO_REAL_NUMBER', self._exten)
         self._agi.set_variable('XIVO_REAL_CONTEXT', self._context)
-        self._agi.set_variable('WAZO_GROUPNAME', self._name)
+        self._agi.set_variable('__WAZO_GROUPNAME', self._name)
         self._agi.set_variable('WAZO_GROUP_LABEL', self._label)
         self._agi.set_variable('WAZO_GROUP_STRATEGY', self._group_strategy)
         self._agi.set_variable('WAZO_GROUP_MAX_CALLS', self._max_calls)
@@ -210,6 +213,11 @@ class GroupFeatures(Handler):
             self._agi.set_variable('XIVO_PATH', 'group')
             self._agi.set_variable('XIVO_PATH_ID', self._id)
 
-    def _set_call_record_side(self) -> None:
+    def _set_call_record_options(self) -> None:
         self._agi.set_variable('WAZO_CALL_RECORD_SIDE', 'caller')
         self._agi.set_variable('__WAZO_LOCAL_CHAN_MATCH_UUID', str(uuid4()))
+        toggle_enabled = '1' if self._dtmf_record_toggle else '0'
+        self._agi.set_variable(
+            f'__{dialplan_variables.GROUP_DTMF_RECORD_TOGGLE_ENABLED}',
+            toggle_enabled,
+        )
