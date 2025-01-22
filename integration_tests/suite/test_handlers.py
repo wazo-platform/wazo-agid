@@ -1,4 +1,4 @@
-# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -10,7 +10,11 @@ from textwrap import dedent
 import pytest
 from hamcrest import assert_that, calling, raises
 
-from wazo_agid.dialplan_variables import SELECTED_CALLER_ID, TRUNK_CID_FORMAT
+from wazo_agid.dialplan_variables import (
+    QUEUE_DTMF_RECORD_TOGGLE_ENABLED,
+    SELECTED_CALLER_ID,
+    TRUNK_CID_FORMAT,
+)
 
 from .helpers.agid import AGIFailException
 from .helpers.base import BaseAssetLaunchingHelper
@@ -1168,6 +1172,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
             context='default',
             timeout=25,
             data_quality=1,
+            dtmf_record_toggle=True,
             hitting_callee=1,
             hitting_caller=1,
             retries=1,
@@ -1215,8 +1220,9 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_REAL_NUMBER'] == queue['number']
     assert recv_vars['XIVO_REAL_CONTEXT'] == 'default'
-    assert recv_vars['WAZO_QUEUENAME'] == queue['name']
+    assert recv_vars['__WAZO_QUEUENAME'] == queue['name']
     assert recv_vars['WAZO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
+    assert recv_vars[f'__{QUEUE_DTMF_RECORD_TOGGLE_ENABLED}'] == '1'
     assert recv_vars['XIVO_QUEUENEEDANSWER'] == '0'
     assert recv_vars['XIVO_QUEUEURL'] == 'localhost'
     assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == 'override'

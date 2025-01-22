@@ -1,11 +1,11 @@
-# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 
 from uuid import uuid4
 
-from wazo_agid import agid, objects
+from wazo_agid import agid, dialplan_variables, objects
 
 
 def incoming_queue_set_features(agi, cursor, args):
@@ -56,7 +56,7 @@ def incoming_queue_set_features(agi, cursor, args):
 
     agi.set_variable('XIVO_REAL_NUMBER', queue.number)
     agi.set_variable('XIVO_REAL_CONTEXT', queue.context)
-    agi.set_variable('WAZO_QUEUENAME', queue.name)
+    agi.set_variable('__WAZO_QUEUENAME', queue.name)
     agi.set_variable('WAZO_QUEUEOPTIONS', options)
     agi.set_variable('XIVO_QUEUENEEDANSWER', needanswer)
     agi.set_variable('XIVO_QUEUEURL', queue.url)
@@ -65,6 +65,7 @@ def incoming_queue_set_features(agi, cursor, args):
         agi.set_variable('CHANNEL(musicclass)', queue.musiconhold)
 
     _set_wrapup_time(agi, queue)
+    _set_call_record_toggle(agi, queue)
 
     if queue.preprocess_subroutine:
         preprocess_subroutine = queue.preprocess_subroutine
@@ -98,6 +99,14 @@ def incoming_queue_set_features(agi, cursor, args):
     agi.set_variable('XIVO_PICKUPGROUP', ','.join(pickups))
 
     set_call_record_side(agi, queue)
+
+
+def _set_call_record_toggle(agi, queue):
+    toggle_enabled = '1' if queue.dtmf_record_toggle else '0'
+    agi.set_variable(
+        f'__{dialplan_variables.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}',
+        toggle_enabled,
+    )
 
 
 def _set_wrapup_time(agi, queue):

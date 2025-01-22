@@ -1,4 +1,4 @@
-# Copyright 2007-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2007-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -481,7 +481,7 @@ class User:
 
 
 class Queue:
-    def __init__(self, agi, cursor: DictCursor, queue_id):
+    def __init__(self, agi: FastAGI, cursor: DictCursor, queue_id: int):
         self.agi = agi
         self.cursor = cursor
 
@@ -492,6 +492,7 @@ class Queue:
             'context',
             'name',
             'data_quality',
+            'dtmf_record_toggle',
             'hitting_callee',
             'hitting_caller',
             'retries',
@@ -540,6 +541,7 @@ class Queue:
         self.context = res['context']
         self.name = res['name']
         self.data_quality = res['data_quality']
+        self.dtmf_record_toggle = res['dtmf_record_toggle']
         self.hitting_callee = res['hitting_callee']
         self.hitting_caller = res['hitting_caller']
         self.retries = res['retries']
