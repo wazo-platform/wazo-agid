@@ -11,6 +11,7 @@ import pytest
 from hamcrest import assert_that, calling, raises
 
 from wazo_agid.dialplan_variables import (
+    GROUP_DTMF_RECORD_TOGGLE_ENABLED,
     QUEUE_DTMF_RECORD_TOGGLE_ENABLED,
     SELECTED_CALLER_ID,
     TRUNK_CID_FORMAT,
@@ -814,6 +815,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
             user_timeout=10,
             ring_strategy='linear',
             retry_delay=5,
+            dtmf_record_toggle=True,
         )
         extension = queries.insert_extension(type='group', typeval=group['id'])
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
@@ -840,12 +842,13 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_GROUPNEEDANSWER'] == '0'
     assert recv_vars['XIVO_REAL_NUMBER'] == extension['exten']
     assert recv_vars['XIVO_REAL_CONTEXT'] == extension['context']
-    assert recv_vars['WAZO_GROUPNAME'] == 'incoming_group_set_features'
+    assert recv_vars['__WAZO_GROUPNAME'] == 'incoming_group_set_features'
     assert recv_vars['WAZO_GROUP_LABEL'] == 'incoming group set features'
     assert recv_vars['XIVO_GROUPTIMEOUT'] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
     assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
+    assert recv_vars[f'__{GROUP_DTMF_RECORD_TOGGLE_ENABLED}'] == '1'
 
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ACTION'] == 'group'
     assert recv_vars['XIVO_FWD_GROUP_NOANSWER_ISDA'] == '1'
