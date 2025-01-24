@@ -71,6 +71,7 @@ def _enable_call_recording(agi, calld, channel_id, tenant_uuid):
         calld.calls.start_record(channel_id, tenant_uuid=tenant_uuid)
     except Exception as e:
         logger.error('Error during enabling call recording: %s', e)
+        agi.verbose(f'Could not enable call recording: {e}')
 
 
 def _pause_call_recording(agi, calld, channel_id, tenant_uuid):
@@ -78,13 +79,15 @@ def _pause_call_recording(agi, calld, channel_id, tenant_uuid):
         calld.calls.pause_record(channel_id, tenant_uuid=tenant_uuid)
     except Exception as e:
         logger.error('Error during pausing call recording: %s', e)
+        agi.verbose(f'Could not pause call recording: {e}')
 
 
 def _resume_call_recording(agi, calld, channel_id, tenant_uuid):
     try:
         calld.calls.resume_record(channel_id, tenant_uuid=tenant_uuid)
     except Exception as e:
-        logger.error('Error during pausing call recording: %s', e)
+        logger.error('Error during resume call recording: %s', e)
+        agi.verbose(f'Could not resume call recording: {e}')
 
 
 def start_mix_monitor(agi, cursor, args):
