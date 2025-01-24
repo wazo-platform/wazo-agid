@@ -394,7 +394,7 @@ def test_call_recording_start(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
 
 
-def test_call_recording_stop(base_asset: BaseAssetLaunchingHelper):
+def test_call_recording_pause(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         user = queries.insert_user()
 
@@ -402,7 +402,7 @@ def test_call_recording_stop(base_asset: BaseAssetLaunchingHelper):
         'WAZO_CALL_RECORD_ACTIVE': '1',
     }
 
-    base_asset.calld.expect_calls_record_stop(1)
+    base_asset.calld.expect_calls_record_pause(1)
 
     recv_vars, recv_cmds = base_asset.agid.call_recording(
         agi_channel=f'Local/id-{user["id"]}@default-0000000a1;1',
@@ -410,7 +410,30 @@ def test_call_recording_stop(base_asset: BaseAssetLaunchingHelper):
         variables=variables,
     )
 
-    assert base_asset.calld.verify_calls_record_stop_called(1) is True
+    assert base_asset.calld.verify_calls_record_pause_called(1) is True
+    base_asset.calld.clear()
+
+    assert recv_cmds['FAILURE'] is False
+
+
+def test_call_recording_resume(base_asset: BaseAssetLaunchingHelper):
+    with base_asset.db.queries() as queries:
+        user = queries.insert_user()
+
+    variables = {
+        'WAZO_CALL_RECORD_ACTIVE': '1',
+        'WAZO_RECORDING_PAUSED': '1',
+    }
+
+    base_asset.calld.expect_calls_record_resume(1)
+
+    recv_vars, recv_cmds = base_asset.agid.call_recording(
+        agi_channel=f'Local/id-{user["id"]}@default-0000000a1;1',
+        agi_uniqueid='1',
+        variables=variables,
+    )
+
+    assert base_asset.calld.verify_calls_record_resume_called(1) is True
     base_asset.calld.clear()
 
     assert recv_cmds['FAILURE'] is False

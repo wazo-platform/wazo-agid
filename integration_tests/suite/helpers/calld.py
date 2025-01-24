@@ -20,3 +20,17 @@ class CalldMockClient(MockServerClient):
     def verify_calls_record_stop_called(self, call_id):
         response = self.verify_called('PUT', f'/calls/{call_id}/record/stop')
         return response.status_code == 202
+
+    def expect_calls_record_pause(self, call_id):
+        self.simple_expectation('PUT', f'/calls/{call_id}/record/pause', 200, {})
+
+    def verify_calls_record_pause_called(self, call_id):
+        response = self.verify_called('PUT', f'/calls/{call_id}/record/pause')
+        return response.status_code == 202
+
+    def expect_calls_record_resume(self, call_id):
+        self.simple_expectation('PUT', f'/calls/{call_id}/record/resume', 200, {})
+
+    def verify_calls_record_resume_called(self, call_id):
+        response = self.verify_called('PUT', f'/calls/{call_id}/record/resume')
+        return response.status_code == 202
