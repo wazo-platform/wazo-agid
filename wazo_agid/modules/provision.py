@@ -29,7 +29,7 @@ def _do_provision(client: ConfdClient, provcode: str, ip: str) -> None:
 
 
 def _get_device(client: ConfdClient, ip: str) -> dict[str, Any]:
-    response = client.devices.list(ip=ip, recurse=True)
+    response = client.devices.list(ip=ip, search='autoprov', recurse=True)
     if response['total'] != 1:
         raise Exception(f"Device with ip {ip} not found")
     return response['items'][0]

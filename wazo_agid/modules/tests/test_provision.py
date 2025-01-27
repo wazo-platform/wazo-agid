@@ -40,7 +40,9 @@ class TestDoProvision(unittest.TestCase):
 
         self.provision("123456", "127.0.0.1")
 
-        self.client.devices.list.assert_called_once_with(ip="127.0.0.1", recurse=True)
+        self.client.devices.list.assert_called_once_with(
+            ip="127.0.0.1", search="autoprov", recurse=True
+        )
         self.client.lines.list.assert_called_once_with(
             provisioning_code="123456", recurse=True
         )
