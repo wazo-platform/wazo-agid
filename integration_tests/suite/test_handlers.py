@@ -1676,7 +1676,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
 
     variables = {
         'WAZO_USERID': user['id'],
-        'XIVO_VMBOXID': voicemail['id'],
+        dv.VMBOXID: voicemail['id'],
         'WAZO_BASE_CONTEXT': context['name'],
     }
     recv_vars, recv_cmds = base_asset.agid.vmbox_get_info(
