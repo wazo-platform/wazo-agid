@@ -183,13 +183,13 @@ class TestSetTrunkInfo(BaseOutgoingFeaturesTestCase):
                 # Trunk 0
                 call('WAZO_OUTGOING_CALLER_ID_FORMAT0', '+E164'),
                 call('WAZO_INTERFACE0', 'PJSIP'),
-                call('XIVO_TRUNKEXTEN0', '911@abc'),
-                call('XIVO_TRUNKSUFFIX0', ''),
+                call(f'{dv.TRUNK_EXTEN}0', '911@abc'),
+                call(f'{dv.TRUNK_SUFFIX}0', ''),
                 # Trunk 1
                 call('WAZO_OUTGOING_CALLER_ID_FORMAT1', 'national'),
                 call('WAZO_INTERFACE1', 'PJSIP'),
-                call('XIVO_TRUNKEXTEN1', '911@def'),
-                call('XIVO_TRUNKSUFFIX1', ''),
+                call(f'{dv.TRUNK_EXTEN}1', '911@def'),
+                call(f'{dv.TRUNK_SUFFIX}1', ''),
             ),
         )
 
