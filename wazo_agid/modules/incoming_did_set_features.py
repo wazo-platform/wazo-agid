@@ -13,7 +13,7 @@ from wazo_agid import objects
 def incoming_did_set_features(
     agi: agid.FastAGI, cursor: DictCursor, args: list[str]
 ) -> None:
-    incall_id = agi.get_variable('XIVO_INCALL_ID')
+    incall_id = agi.get_variable(dv.INCALL_ID)
 
     did = objects.DID(agi, cursor, incall_id)
 
