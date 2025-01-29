@@ -51,9 +51,7 @@ def _set_current_forwards(agi, user_id):
     agi.set_variable(
         'WAZO_ENABLEUNC', _extract_and_format_enabled(unconditional_forward)
     )
-    agi.set_variable(
-        'XIVO_DESTUNC', _extract_and_format_destination(unconditional_forward)
-    )
+    agi.set_variable(dv.DESTUNC, _extract_and_format_destination(unconditional_forward))
 
 
 def _extract_and_format_enabled(forward):
