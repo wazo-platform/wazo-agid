@@ -857,7 +857,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['WAZO_GROUPOPTIONS'] == 'ir'
-    assert recv_vars['XIVO_GROUPNEEDANSWER'] == '0'
+    assert recv_vars[dv.GROUPNEEDANSWER] == '0'
     assert recv_vars[dv.REAL_NUMBER] == extension['exten']
     assert recv_vars[dv.REAL_CONTEXT] == extension['context']
     assert recv_vars['__WAZO_GROUPNAME'] == 'incoming_group_set_features'
@@ -922,7 +922,7 @@ def test_incoming_group_set_features_linear_with_music(
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['WAZO_GROUPOPTIONS'] == 'im'
-    assert recv_vars['XIVO_GROUPNEEDANSWER'] == '1'
+    assert recv_vars[dv.GROUPNEEDANSWER] == '1'
     assert recv_vars[dv.GROUP_TIMEOUT] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'

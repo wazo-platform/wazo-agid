@@ -173,7 +173,7 @@ class GroupFeatures(Handler):
                 options += "C"
 
         self._agi.set_variable('WAZO_GROUPOPTIONS', options)
-        self._agi.set_variable('XIVO_GROUPNEEDANSWER', needanswer)
+        self._agi.set_variable(dv.GROUPNEEDANSWER, needanswer)
 
     def _set_preprocess_subroutine(self) -> None:
         if self._preprocess_subroutine:
