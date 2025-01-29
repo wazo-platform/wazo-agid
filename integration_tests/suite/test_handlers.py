@@ -1661,7 +1661,7 @@ def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_AUTHORIZATION'] == 'DENY'
+    assert recv_vars[dv.AUTHORIZATION] == 'DENY'
 
 
 def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
