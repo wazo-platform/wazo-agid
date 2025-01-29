@@ -30,7 +30,7 @@ def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     referer_origin_fwd = f"{referer_origin}&forwarded"
     section = None
 
-    agi.set_variable('XIVO_RINGTYPE', "")
+    agi.set_variable(dv.RINGTYPE, "")
 
     if CONFIG_PARSER.has_option('number', f"!{dstnum_context}"):
         return
@@ -68,7 +68,7 @@ def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
         logger.debug('Ring type exception', exc_info=True)
         agi.verbose("Using the native phone ring tone")
     else:
-        agi.set_variable('XIVO_RINGTYPE', ringtype)
+        agi.set_variable(dv.RINGTYPE, ringtype)
         agi.set_variable('XIVO_PHONETYPE', phonetype)
         agi.verbose(f"Using ring tone {ringtype}")
 

@@ -583,7 +583,7 @@ def test_getring(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_PHONETYPE'] == 'linksys'
-    assert recv_vars['XIVO_RINGTYPE'] == 'test-ring'
+    assert recv_vars[dv.RINGTYPE] == 'test-ring'
 
 
 def test_get_user_interfaces(base_asset: BaseAssetLaunchingHelper):
