@@ -46,7 +46,7 @@ def _set_current_forwards(agi, user_id):
     agi.set_variable(dv.DESTBUSY, _extract_and_format_destination(busy_forward))
     noanswer_forward = forwards['noanswer']
     agi.set_variable(dv.ENABLERNA, _extract_and_format_enabled(noanswer_forward))
-    agi.set_variable('XIVO_DESTRNA', _extract_and_format_destination(noanswer_forward))
+    agi.set_variable(dv.DESTRNA, _extract_and_format_destination(noanswer_forward))
     unconditional_forward = forwards['unconditional']
     agi.set_variable(
         'WAZO_ENABLEUNC', _extract_and_format_enabled(unconditional_forward)
