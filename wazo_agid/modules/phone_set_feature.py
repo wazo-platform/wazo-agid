@@ -111,7 +111,7 @@ def _get_context_of_calling_user(agi):
 def _phone_set_unc(agi, cursor, args):
     enabled = _phone_set_forward(agi, 'unconditional', args)
     if enabled is not None:
-        agi.set_variable('XIVO_UNCENABLED', int(enabled))
+        agi.set_variable(dv.UNCENABLED, int(enabled))
 
 
 def _phone_set_rna(agi, cursor, args):
