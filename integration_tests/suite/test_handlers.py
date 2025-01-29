@@ -70,7 +70,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
     assert recv_vars[dv.ENABLEVOICEMAIL] == str(user['enablevoicemail'])
     assert recv_vars[dv.MAILBOX] == ''
     assert recv_vars[dv.MAILBOX_CONTEXT] == ''
-    assert recv_vars['XIVO_USEREMAIL'] == ''
+    assert recv_vars[dv.USEREMAIL] == ''
     assert recv_vars['WAZO_ENABLEUNC'] == str(user['enableunc'])
     assert recv_vars[dv.FWD_USER_UNC_ACTION] == 'none'
     assert recv_vars[dv.FWD_USER_UNC_ACTIONARG1] == ''
