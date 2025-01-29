@@ -484,10 +484,10 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_FWD_USER_NOANSWER_ACTION', 'user'),
-                call('XIVO_FWD_USER_NOANSWER_ISDA', '1'),
-                call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '5'),
-                call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', ''),
+                call(dv.FWD_USER_NOANSWER_ACTION, 'user'),
+                call(dv.FWD_USER_NOANSWER_ISDA, '1'),
+                call(dv.FWD_USER_NOANSWER_ACTIONARG1, '5'),
+                call(dv.FWD_USER_NOANSWER_ACTIONARG2, ''),
             ),
         )
 
@@ -510,9 +510,9 @@ class TestSetForwardNoAnswer(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_FWD_USER_NOANSWER_ACTION', 'extension'),
-                call('XIVO_FWD_USER_NOANSWER_ACTIONARG1', '555'),
-                call('XIVO_FWD_USER_NOANSWER_ACTIONARG2', sentinel.context),
+                call(dv.FWD_USER_NOANSWER_ACTION, 'extension'),
+                call(dv.FWD_USER_NOANSWER_ACTIONARG1, '555'),
+                call(dv.FWD_USER_NOANSWER_ACTIONARG2, sentinel.context),
             ),
         )
 
@@ -560,10 +560,10 @@ class TestSetForwardBusy(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_FWD_USER_BUSY_ACTION', 'user'),
-                call('XIVO_FWD_USER_BUSY_ISDA', '1'),
-                call('XIVO_FWD_USER_BUSY_ACTIONARG1', '5'),
-                call('XIVO_FWD_USER_BUSY_ACTIONARG2', ''),
+                call(dv.FWD_USER_BUSY_ACTION, 'user'),
+                call(dv.FWD_USER_BUSY_ISDA, '1'),
+                call(dv.FWD_USER_BUSY_ACTIONARG1, '5'),
+                call(dv.FWD_USER_BUSY_ACTIONARG2, ''),
             ),
         )
 
@@ -586,9 +586,9 @@ class TestSetForwardBusy(_BaseTestCase):
         assert_that(
             self._agi.set_variable.call_args_list,
             contains_exactly(
-                call('XIVO_FWD_USER_BUSY_ACTION', 'extension'),
-                call('XIVO_FWD_USER_BUSY_ACTIONARG1', '666'),
-                call('XIVO_FWD_USER_BUSY_ACTIONARG2', sentinel.context),
+                call(dv.FWD_USER_BUSY_ACTION, 'extension'),
+                call(dv.FWD_USER_BUSY_ACTIONARG1, '666'),
+                call(dv.FWD_USER_BUSY_ACTIONARG2, sentinel.context),
             ),
         )
 

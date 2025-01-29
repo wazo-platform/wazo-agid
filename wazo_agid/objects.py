@@ -663,18 +663,18 @@ class DialAction:
         agi, event, category, action, actionarg1, actionarg2, isda=True
     ):
         xtype = f"{category}_{event}".upper()
-        agi.set_variable(f"XIVO_FWD_{xtype}_ACTION", action)
+        agi.set_variable(f"WAZO_FWD_{xtype}_ACTION", action)
 
         # Sometimes, it's useful to know whether these variables were
         # set manually, or by this object.
         if isda:
-            agi.set_variable(f"XIVO_FWD_{xtype}_ISDA", "1")
+            agi.set_variable(f"WAZO_FWD_{xtype}_ISDA", "1")
 
         action_arg_1 = actionarg1.replace('|', ';') if actionarg1 else ""
         action_arg_2 = actionarg2 or ""
 
-        agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG1", action_arg_1)
-        agi.set_variable(f"XIVO_FWD_{xtype}_ACTIONARG2", action_arg_2)
+        agi.set_variable(f"WAZO_FWD_{xtype}_ACTIONARG1", action_arg_1)
+        agi.set_variable(f"WAZO_FWD_{xtype}_ACTIONARG2", action_arg_2)
 
     def __init__(self, agi, cursor: DictCursor, event, category, categoryval):
         self.agi = agi
