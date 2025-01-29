@@ -1513,7 +1513,7 @@ def test_provision_autoprov(base_asset: BaseAssetLaunchingHelper):
     assert base_asset.confd.verify_devices_synchronize_called(1) is True
     base_asset.confd.clear()
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_PROV_OK'] == '1'
+    assert recv_vars[dv.PROV_OK] == '1'
 
 
 def test_provision_add_device(base_asset: BaseAssetLaunchingHelper):
@@ -1543,7 +1543,7 @@ def test_provision_add_device(base_asset: BaseAssetLaunchingHelper):
     assert base_asset.confd.verify_devices_synchronize_called(2) is True
     base_asset.confd.clear()
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_PROV_OK'] == '1'
+    assert recv_vars[dv.PROV_OK] == '1'
 
 
 def test_queue_answered_call(base_asset: BaseAssetLaunchingHelper):
