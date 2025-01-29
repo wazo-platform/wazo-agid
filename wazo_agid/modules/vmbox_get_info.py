@@ -35,7 +35,7 @@ def vmbox_get_info(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> No
             agi.dp_break(str(e))
     else:
         try:
-            vmboxid = int(agi.get_variable('XIVO_VMBOXID'))
+            vmboxid = int(agi.get_variable(dv.VMBOXID))
             vmbox = objects.VMBox(agi, cursor, vmboxid)
         except (ValueError, LookupError) as e:
             logger.error('Error while retrieving vmbox from id', exc_info=True)
