@@ -32,7 +32,7 @@ class TestGetFeatures(unittest.TestCase):
             call(dv.ENABLEBUSY, 1),
             call(dv.DESTBUSY, '1234'),
             call(dv.ENABLERNA, 0),
-            call('XIVO_DESTRNA', '5678'),
+            call(dv.DESTRNA, '5678'),
             call('WAZO_ENABLEUNC', 0),
             call(dv.DESTUNC, ''),
         ]
@@ -47,7 +47,7 @@ class TestGetFeatures(unittest.TestCase):
             call(dv.ENABLEBUSY, 0),
             call(dv.DESTBUSY, ''),
             call(dv.ENABLERNA, 0),
-            call('XIVO_DESTRNA', ''),
+            call(dv.DESTRNA, ''),
             call('WAZO_ENABLEUNC', 0),
             call(dv.DESTUNC, ''),
         ]
