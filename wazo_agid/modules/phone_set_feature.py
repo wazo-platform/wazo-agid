@@ -117,7 +117,7 @@ def _phone_set_unc(agi, cursor, args):
 def _phone_set_rna(agi, cursor, args):
     enabled = _phone_set_forward(agi, 'noanswer', args)
     if enabled is not None:
-        agi.set_variable('XIVO_RNAENABLED', int(enabled))
+        agi.set_variable(dv.RNAENABLED, int(enabled))
 
 
 def _phone_set_busy(agi, cursor, args):
