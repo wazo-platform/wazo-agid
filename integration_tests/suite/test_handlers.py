@@ -1218,7 +1218,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_QUEUEOPTIONS'] == 'dhHnrtTxXiC'
     assert recv_vars[f'__{dv.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}'] == '1'
     assert recv_vars['XIVO_QUEUENEEDANSWER'] == '0'
-    assert recv_vars['XIVO_QUEUEURL'] == 'localhost'
+    assert recv_vars[dv.QUEUEURL] == 'localhost'
     assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == 'override'
     assert recv_vars['XIVO_QUEUEPREPROCESS_SUBROUTINE'] == 'subroutine'
     assert recv_vars['XIVO_QUEUETIMEOUT'] == '25'
