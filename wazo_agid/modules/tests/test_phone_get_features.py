@@ -34,7 +34,7 @@ class TestGetFeatures(unittest.TestCase):
             call(dv.ENABLERNA, 0),
             call('XIVO_DESTRNA', '5678'),
             call('WAZO_ENABLEUNC', 0),
-            call('XIVO_DESTUNC', ''),
+            call(dv.DESTUNC, ''),
         ]
         self._agi.set_variable.assert_has_calls(expected_calls)
 
@@ -49,6 +49,6 @@ class TestGetFeatures(unittest.TestCase):
             call(dv.ENABLERNA, 0),
             call('XIVO_DESTRNA', ''),
             call('WAZO_ENABLEUNC', 0),
-            call('XIVO_DESTUNC', ''),
+            call(dv.DESTUNC, ''),
         ]
         self._agi.set_variable.assert_has_calls(expected_calls)
