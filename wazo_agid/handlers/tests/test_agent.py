@@ -1,4 +1,4 @@
-# Copyright 2015-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2015-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -7,6 +7,7 @@ from unittest.mock import ANY, Mock
 from wazo_agentd_client import error
 from wazo_agentd_client.error import AgentdClientError
 
+from wazo_agid import dialplan_variables as dv
 from wazo_agid.fastagi import FastAGI
 from wazo_agid.handlers import agent
 
@@ -113,4 +114,4 @@ class TestAgent(unittest.TestCase):
         self.agentd_client.agents.get_agent_status.assert_called_once_with(
             self.agent_id, tenant_uuid=self.tenant
         )
-        self.agi.set_variable.assert_called_once_with('XIVO_AGENT_LOGIN_STATUS', ANY)
+        self.agi.set_variable.assert_called_once_with(dv.AGENT_LOGIN_STATUS, ANY)
