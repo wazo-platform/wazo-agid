@@ -1,4 +1,4 @@
-# Copyright 2012-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from wazo_dird_client.client import DirdClient
 from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
 from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
         if not _should_reverse_lookup(cid_name, cid_number):
             return
 
-        incall_id = int(agi.get_variable('XIVO_INCALL_ID'))
+        incall_id = int(agi.get_variable(dv.INCALL_ID))
         callee_info = directory_profile_dao.find_by_incall_id(incall_id)
         if callee_info is None:
             user_uuid = FAKE_XIVO_USER_UUID

@@ -337,7 +337,7 @@ def test_callerid_forphones_with_reverse_lookup_unknown(
     recv_vars, recv_cmds = base_asset.agid.callerid_forphones(
         calleridname='unknown',
         callerid='numero',
-        XIVO_INCALL_ID=1,
+        WAZO_INCALL_ID=1,
         WAZO_TENANT_UUID='123-456',
     )
 
@@ -807,7 +807,7 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
         extension = queries.insert_extension(type='incall', typeval=call['id'])
 
     variables = {
-        'XIVO_INCALL_ID': call['id'],
+        dv.INCALL_ID: call['id'],
         'WAZO_DSTID': call['id'],
     }
     recv_vars, recv_cmds = base_asset.agid.incoming_did_set_features(
