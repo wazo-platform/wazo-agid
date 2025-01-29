@@ -226,7 +226,7 @@ def test_agent_get_status(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_AGENT_LOGIN_STATUS'] == 'logged_in'
+    assert recv_vars[dv.AGENT_LOGIN_STATUS] == 'logged_in'
 
     assert base_asset.agentd.verify_get_agent_status_called(agent['id']) is True
 
