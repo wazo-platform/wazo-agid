@@ -15,7 +15,7 @@ from wazo_agid import dialplan_variables as dv
 
 logger = logging.getLogger(__name__)
 
-FAKE_XIVO_USER_UUID = '00000000-0000-0000-0000-000000000000'
+FAKE_WAZO_USER_UUID = '00000000-0000-0000-0000-000000000000'
 
 
 def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
@@ -33,7 +33,7 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
         incall_id = int(agi.get_variable(dv.INCALL_ID))
         callee_info = directory_profile_dao.find_by_incall_id(incall_id)
         if callee_info is None:
-            user_uuid = FAKE_XIVO_USER_UUID
+            user_uuid = FAKE_WAZO_USER_UUID
         else:
             user_uuid = callee_info.xivo_user_uuid
 
