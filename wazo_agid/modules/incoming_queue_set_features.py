@@ -61,7 +61,7 @@ def incoming_queue_set_features(agi, cursor, args):
     agi.set_variable('__WAZO_QUEUENAME', queue.name)
     agi.set_variable('WAZO_QUEUEOPTIONS', options)
     agi.set_variable('XIVO_QUEUENEEDANSWER', needanswer)
-    agi.set_variable('XIVO_QUEUEURL', queue.url)
+    agi.set_variable(dv.QUEUEURL, queue.url)
     agi.set_variable('XIVO_QUEUEANNOUNCEOVERRIDE', queue.announceoverride)
     if queue.musiconhold:
         agi.set_variable('CHANNEL(musicclass)', queue.musiconhold)
