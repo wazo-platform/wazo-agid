@@ -30,7 +30,7 @@ class TestGetFeatures(unittest.TestCase):
         self._client.users(self._user_id).list_forwards.assert_called_once_with()
         expected_calls = [
             call(dv.ENABLEBUSY, 1),
-            call('XIVO_DESTBUSY', '1234'),
+            call(dv.DESTBUSY, '1234'),
             call(dv.ENABLERNA, 0),
             call('XIVO_DESTRNA', '5678'),
             call('WAZO_ENABLEUNC', 0),
@@ -45,7 +45,7 @@ class TestGetFeatures(unittest.TestCase):
 
         expected_calls = [
             call(dv.ENABLEBUSY, 0),
-            call('XIVO_DESTBUSY', ''),
+            call(dv.DESTBUSY, ''),
             call(dv.ENABLERNA, 0),
             call('XIVO_DESTRNA', ''),
             call('WAZO_ENABLEUNC', 0),

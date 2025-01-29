@@ -43,7 +43,7 @@ def _set_current_forwards(agi, user_id):
     forwards = _get_forwards(agi, user_id)
     busy_forward = forwards['busy']
     agi.set_variable(dv.ENABLEBUSY, _extract_and_format_enabled(busy_forward))
-    agi.set_variable('XIVO_DESTBUSY', _extract_and_format_destination(busy_forward))
+    agi.set_variable(dv.DESTBUSY, _extract_and_format_destination(busy_forward))
     noanswer_forward = forwards['noanswer']
     agi.set_variable(dv.ENABLERNA, _extract_and_format_enabled(noanswer_forward))
     agi.set_variable('XIVO_DESTRNA', _extract_and_format_destination(noanswer_forward))
