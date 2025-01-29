@@ -367,7 +367,7 @@ class UserFeatures(Handler):
             mailbox_context = self._user.vmbox.context
             if self._user.vmbox.email:
                 useremail = self._user.vmbox.email
-        self._agi.set_variable('XIVO_ENABLEVOICEMAIL', self._user.enablevoicemail)
+        self._agi.set_variable(dv.ENABLEVOICEMAIL, self._user.enablevoicemail)
         self._agi.set_variable(dv.MAILBOX, mailbox)
         self._agi.set_variable(dv.MAILBOX_CONTEXT, mailbox_context)
         self._agi.set_variable('XIVO_USEREMAIL', useremail)

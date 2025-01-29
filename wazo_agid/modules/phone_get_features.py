@@ -30,7 +30,7 @@ def phone_get_features(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             agi.set_variable("XIVO_CALLRECORD", int(enabled))
         elif service == 'enablevm':
             enabled = user.enablevoicemail
-            agi.set_variable("XIVO_ENABLEVOICEMAIL", int(enabled))
+            agi.set_variable(dv.ENABLEVOICEMAIL, int(enabled))
         elif service == 'incallfilter':
             enabled = user.incallfilter
             agi.set_variable("XIVO_INCALLFILTER", int(enabled))
