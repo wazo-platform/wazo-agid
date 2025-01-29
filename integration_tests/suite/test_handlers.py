@@ -1580,13 +1580,13 @@ def test_queue_skill_rule_set(base_asset: BaseAssetLaunchingHelper):
         'queue_skill_rule_set',
         variables={
             'ARG2': f'timeout;{skill_rule["id"]};{{"opt1":1|"opt2": "val2"}}',
-            'XIVO_QUEUESKILLRULESET': 'call',
+            dv.QUEUESKILLRULESET: 'call',
         },
     )
 
     assert recv_cmds['FAILURE'] is False
     assert (
-        recv_vars['XIVO_QUEUESKILLRULESET']
+        recv_vars[dv.QUEUESKILLRULESET]
         == f'skillrule-{skill_rule["id"]}(opt1=1,opt2=val2)'
     )
     assert recv_vars['ARG2_TIMEOUT'] == 'timeout'
