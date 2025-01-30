@@ -27,7 +27,7 @@ def phone_get_features(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
     for service in objects.ExtenFeatures.FEATURES['services']:
         if service == 'callrecord':
             enabled = user.call_record_enabled
-            agi.set_variable("XIVO_CALLRECORD", int(enabled))
+            agi.set_variable(dv.CALLRECORD, int(enabled))
         elif service == 'enablevm':
             enabled = user.enablevoicemail
             agi.set_variable(dv.ENABLEVOICEMAIL, int(enabled))
