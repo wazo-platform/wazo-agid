@@ -1315,7 +1315,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_OUTGOING_CALLER_ID_FORMAT0'] == 'national'
     assert recv_vars[f'{dv.TRUNK_EXTEN}0'] == f'{extension["exten"]}@{sip["name"]}'
     assert recv_vars[f'{dv.TRUNK_SUFFIX}0'] == ''
-    assert recv_vars['XIVO_OUTCALLPREPROCESS_SUBROUTINE'] == 'test-subroutine'
+    assert recv_vars[dv.OUTCALL_PREPROCESS_SUBROUTINE] == 'test-subroutine'
     assert recv_vars[dv.HANGUP_RING_TIME] == '10'
     assert recv_vars[dv.OUTCALL_ID] == str(call['id'])
     assert recv_vars[dv.PATH] == 'outcall'
