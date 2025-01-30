@@ -66,7 +66,7 @@ def _phone_set_incallfilter(agi, cursor, args):
     except Exception as e:
         logger.error('Error during setting incallfilter : %s', e)
     else:
-        agi.set_variable('XIVO_INCALLFILTERENABLED', int(new_value['enabled']))
+        agi.set_variable(dv.INCALLFILTERENABLED, int(new_value['enabled']))
         agi.set_variable(dv.USERID_OWNER, user_id)
 
 
