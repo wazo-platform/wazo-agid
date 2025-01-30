@@ -299,7 +299,7 @@ def test_callback(base_asset: BaseAssetLaunchingHelper):
         RetryTime: 30
         WaitTime: 30
         CallerID: {extension_number}
-        Set: XIVO_DISACONTEXT={context}
+        Set: {dv.DISACONTEXT}={context}
         Context: xivo-callbackdisa
         Extension: s
         '''
