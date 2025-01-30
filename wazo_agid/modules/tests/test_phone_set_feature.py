@@ -51,7 +51,7 @@ class TestPhoneSetFeature(unittest.TestCase):
             'incallfilter', {'enabled': True}
         )
         expected_calls = [
-            call('XIVO_INCALLFILTERENABLED', True),
+            call(dv.INCALLFILTERENABLED, True),
             call(dv.USERID_OWNER, self._user_id),
         ]
         self._agi.set_variable.assert_has_calls(expected_calls)
