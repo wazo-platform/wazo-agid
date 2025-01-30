@@ -745,7 +745,7 @@ def test_incoming_agent_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_AGENT_INTERFACE'] == 'test-device'
     assert recv_vars['XIVO_AGENTPREPROCESS_SUBROUTINE'] == 'test-subroutine'
-    assert recv_vars['XIVO_QUEUECALLOPTIONS'] == 'hitwxk'
+    assert recv_vars[dv.QUEUECALLOPTIONS] == 'hitwxk'
 
 
 def test_incoming_conference_set_features(base_asset: BaseAssetLaunchingHelper):
