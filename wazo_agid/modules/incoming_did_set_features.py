@@ -23,7 +23,7 @@ def incoming_did_set_features(
         preprocess_subroutine = ""
 
     agi.set_variable('XIVO_DIDPREPROCESS_SUBROUTINE', preprocess_subroutine)
-    agi.set_variable('XIVO_EXTENPATTERN', did.exten)
+    agi.set_variable(dv.EXTENPATTERN, did.exten)
     agi.set_variable(dv.PATH, 'incall')
     agi.set_variable(dv.PATH_ID, did.id)
     agi.set_variable(dv.REAL_CONTEXT, did.context)
