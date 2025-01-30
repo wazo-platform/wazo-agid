@@ -1369,7 +1369,7 @@ def test_paging(base_asset: BaseAssetLaunchingHelper):
     assert recv_cmds['FAILURE'] is False
     assert f'PJSIP/{line_1["name"]}' in recv_vars[dv.PAGING_LINES]
     assert f'PJSIP/{line_2["name"]}' in recv_vars[dv.PAGING_LINES]
-    assert recv_vars['XIVO_PAGING_TIMEOUT'] == '25'
+    assert recv_vars[dv.PAGING_TIMEOUT] == '25'
     tenant_uuid = paging['tenant_uuid']
     opts_part_1 = 'sb(paging^add-sip-headers^1)dqri'
     opts_part_2 = f'A(/var/lib/wazo/sounds/tenants/{tenant_uuid}/playback/sounds.wav)'
