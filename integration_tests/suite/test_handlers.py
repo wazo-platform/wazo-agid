@@ -1243,7 +1243,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['XIVO_QUEUENEEDANSWER'] == '0'
     assert recv_vars[dv.QUEUEURL] == 'localhost'
     assert recv_vars['XIVO_QUEUEANNOUNCEOVERRIDE'] == 'override'
-    assert recv_vars['XIVO_QUEUEPREPROCESS_SUBROUTINE'] == 'subroutine'
+    assert recv_vars[dv.QUEUEPREPROCESS_SUBROUTINE] == 'subroutine'
     assert recv_vars[dv.QUEUETIMEOUT] == '25'
 
     assert recv_vars[dv.FWD_QUEUE_NOANSWER_ACTION] == 'queue'
