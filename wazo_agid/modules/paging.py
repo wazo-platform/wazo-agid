@@ -27,7 +27,7 @@ def paging(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
 
     paging_line = '&'.join(paging_entry.lines)
     agi.set_variable(dv.PAGING_LINES, paging_line)
-    agi.set_variable('XIVO_PAGING_TIMEOUT', paging_entry.timeout)
+    agi.set_variable(dv.PAGING_TIMEOUT, paging_entry.timeout)
     agi.set_variable('XIVO_PAGING_OPTS', build_options(paging_entry))
 
 
