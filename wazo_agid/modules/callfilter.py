@@ -43,7 +43,7 @@ def callfilter(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
 
     new_state = 0 if callfiltermember.active == 1 else 1
     callfilter_dao.update_callfiltermember_state(callfiltermember_id, new_state)
-    agi.set_variable('XIVO_BSFILTERENABLED', new_state)
+    agi.set_variable(dv.BSFILTERENABLED, new_state)
 
 
 agid.register(callfilter)

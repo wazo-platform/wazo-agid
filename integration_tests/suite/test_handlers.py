@@ -364,7 +364,7 @@ def test_callfilter(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_BSFILTERENABLED'] == '0'
+    assert recv_vars[dv.BSFILTERENABLED] == '0'
 
 
 def test_call_recording_start(base_asset: BaseAssetLaunchingHelper):
