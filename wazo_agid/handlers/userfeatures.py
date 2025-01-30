@@ -141,7 +141,7 @@ class UserFeatures(Handler):
             except (ValueError, LookupError) as e:
                 self._agi.dp_break(str(e))
             else:
-                self._agi.set_variable('XIVO_DST_USERNUM', self.main_extension.exten)
+                self._agi.set_variable(dv.DST_USERNUM, self.main_extension.exten)
                 self._agi.set_variable(
                     'WAZO_DST_USER_CONTEXT', self.main_extension.context
                 )

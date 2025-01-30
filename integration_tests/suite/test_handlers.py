@@ -55,7 +55,7 @@ def test_incoming_user_set_features_with_dstid(base_asset: BaseAssetLaunchingHel
 
     assert recv_cmds['FAILURE'] is False
 
-    assert recv_vars['XIVO_DST_USERNUM'] == extension['exten']
+    assert recv_vars[dv.DST_USERNUM] == extension['exten']
     assert recv_vars['WAZO_DST_USER_CONTEXT'] == extension['context']
     assert recv_vars['WAZO_DST_NAME'] == 'Firstname Lastname'
     assert recv_vars[dv.DST_REDIRECTING_NAME] == 'Firstname Lastname'
