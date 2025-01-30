@@ -69,7 +69,7 @@ def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
         agi.verbose("Using the native phone ring tone")
     else:
         agi.set_variable(dv.RINGTYPE, ringtype)
-        agi.set_variable('XIVO_PHONETYPE', phonetype)
+        agi.set_variable(dv.PHONETYPE, phonetype)
         agi.verbose(f"Using ring tone {ringtype}")
 
 
