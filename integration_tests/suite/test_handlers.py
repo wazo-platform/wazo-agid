@@ -1269,7 +1269,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
     assert recv_vars['CHANNEL(musicclass)'] == 'test-music'
     assert recv_vars['__QUEUEWRAPUPTIME'] == '20'
-    assert recv_vars['XIVO_PICKUPGROUP'] == str(pickup['id'])
+    assert recv_vars[dv.PICKUPGROUP] == str(pickup['id'])
     assert (
         re.match(r'^[a-f0-9\-]{36}$', recv_vars['__WAZO_LOCAL_CHAN_MATCH_UUID'])
         is not None
