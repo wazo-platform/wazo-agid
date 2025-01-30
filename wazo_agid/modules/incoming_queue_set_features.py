@@ -79,7 +79,7 @@ def incoming_queue_set_features(agi, cursor, args):
     else:
         timeout = ""
 
-    agi.set_variable('XIVO_QUEUEPREPROCESS_SUBROUTINE', preprocess_subroutine)
+    agi.set_variable(dv.QUEUEPREPROCESS_SUBROUTINE, preprocess_subroutine)
     agi.set_variable(dv.QUEUETIMEOUT, timeout)
 
     queue.set_dial_actions()
