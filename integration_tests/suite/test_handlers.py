@@ -1459,7 +1459,7 @@ def test_phone_progfunckey(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['XIVO_PHONE_PROGFUNCKEY'] == extension['exten']
-    assert recv_vars['XIVO_PHONE_PROGFUNCKEY_FEATURE'] == 'fwdbusy'
+    assert recv_vars[dv.PHONE_PROGFUNCKEY_FEATURE] == 'fwdbusy'
 
 
 def test_provision_autoprov(base_asset: BaseAssetLaunchingHelper):
