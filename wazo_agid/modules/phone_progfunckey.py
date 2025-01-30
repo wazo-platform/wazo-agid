@@ -35,7 +35,7 @@ def phone_progfunckey(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) ->
         feature = ""
         agi.verbose(str(e))
 
-    agi.set_variable('XIVO_PHONE_PROGFUNCKEY', ''.join(fklist[1:]))
+    agi.set_variable(dv.PHONE_PROGFUNCKEY, ''.join(fklist[1:]))
     agi.set_variable(dv.PHONE_PROGFUNCKEY_FEATURE, feature)
 
 
