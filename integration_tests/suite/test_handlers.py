@@ -792,7 +792,7 @@ def test_incoming_did_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_DIDPREPROCESS_SUBROUTINE'] == 'test-subroutine'
+    assert recv_vars[dv.DIDPREPROCESS_SUBROUTINE] == 'test-subroutine'
     assert recv_vars[dv.EXTENPATTERN] == extension['exten']
     assert recv_vars[dv.PATH] == 'incall'
     assert recv_vars[dv.PATH_ID] == str(call['id'])
