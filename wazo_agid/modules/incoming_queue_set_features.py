@@ -98,7 +98,7 @@ def incoming_queue_set_features(agi, cursor, args):
 
     # pickup
     pickups = queue.pickupgroups()
-    agi.set_variable('XIVO_PICKUPGROUP', ','.join(pickups))
+    agi.set_variable(dv.PICKUPGROUP, ','.join(pickups))
 
     set_call_record_side(agi, queue)
 
