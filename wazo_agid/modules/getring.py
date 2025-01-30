@@ -22,7 +22,7 @@ def getring(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     context = agi.get_variable(dv.REAL_CONTEXT)
     origin = agi.get_variable('WAZO_CALLORIGIN')
     referer = agi.get_variable('WAZO_FWD_REFERER').split(':', 1)[0]
-    forwarded = agi.get_variable('XIVO_CALLFORWARDED')
+    forwarded = agi.get_variable(dv.CALLFORWARDED)
     # TODO: maybe replace number@context with user id in conf file ?
     dstnum_context = f"{dstnum}@{context}"
     referer_origin = f"{referer}@{origin}"

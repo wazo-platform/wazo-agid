@@ -576,7 +576,7 @@ def test_getring(base_asset: BaseAssetLaunchingHelper):
         dv.REAL_CONTEXT: 'default',
         'WAZO_CALLORIGIN': 'patate',
         'WAZO_FWD_REFERER': 'foo:bar',
-        'XIVO_CALLFORWARDED': '1',
+        dv.CALLFORWARDED: '1',
     }
 
     recv_vars, recv_cmds = base_asset.agid.getring(variables=variables)
