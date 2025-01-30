@@ -66,7 +66,7 @@ class TestPhoneSetFeature(unittest.TestCase):
         )
         expected_calls = [
             call(dv.USERID_OWNER, self._user_id),
-            call('XIVO_BUSYENABLED', 1),
+            call(dv.BUSYENABLED, 1),
         ]
         self._agi.set_variable.assert_has_calls(expected_calls)
 

@@ -123,7 +123,7 @@ def _phone_set_rna(agi, cursor, args):
 def _phone_set_busy(agi, cursor, args):
     enabled = _phone_set_forward(agi, 'busy', args)
     if enabled is not None:
-        agi.set_variable('XIVO_BUSYENABLED', int(enabled))
+        agi.set_variable(dv.BUSYENABLED, int(enabled))
 
 
 def _phone_set_forward(agi, forward_name, args):
