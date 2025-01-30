@@ -87,7 +87,7 @@ def incoming_queue_set_features(agi, cursor, args):
     if referer == f"queue:{queue.id}":
         queue.rewrite_cid()
 
-    agi.set_variable('XIVO_QUEUESTATUS', 'ok')
+    agi.set_variable(dv.QUEUESTATUS, 'ok')
 
     # schedule
     # 'incall' schedule has priority over queue's schedule

@@ -1240,7 +1240,7 @@ def test_incoming_queue_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars[dv.FWD_QUEUE_CHANUNAVAIL_ACTIONARG1] == 'chanunavail-actionarg1'
     assert recv_vars[dv.FWD_QUEUE_CHANUNAVAIL_ACTIONARG2] == 'chanunavail-actionarg2'
 
-    assert recv_vars['XIVO_QUEUESTATUS'] == 'ok'
+    assert recv_vars[dv.QUEUESTATUS] == 'ok'
     assert recv_vars[dv.PATH] == 'queue'
     assert recv_vars[dv.PATH_ID] == str(queue['id'])
     assert recv_vars['WAZO_CALL_RECORD_SIDE'] == 'caller'
