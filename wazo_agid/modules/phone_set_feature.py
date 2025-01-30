@@ -55,7 +55,7 @@ def _phone_set_dnd(agi, cursor, args):
     except Exception as e:
         logger.error('Error during setting dnd : %s', e)
     else:
-        agi.set_variable('XIVO_DNDENABLED', int(new_value['enabled']))
+        agi.set_variable(dv.DNDENABLED, int(new_value['enabled']))
         agi.set_variable(dv.USERID_OWNER, user_id)
 
 

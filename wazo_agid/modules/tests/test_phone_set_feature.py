@@ -34,7 +34,7 @@ class TestPhoneSetFeature(unittest.TestCase):
             'dnd', {'enabled': False}
         )
         expected_calls = [
-            call('XIVO_DNDENABLED', False),
+            call(dv.DNDENABLED, False),
             call(dv.USERID_OWNER, self._user_id),
         ]
         self._agi.set_variable.assert_has_calls(expected_calls)
