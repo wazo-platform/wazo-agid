@@ -582,7 +582,7 @@ def test_getring(base_asset: BaseAssetLaunchingHelper):
     recv_vars, recv_cmds = base_asset.agid.getring(variables=variables)
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['XIVO_PHONETYPE'] == 'linksys'
+    assert recv_vars[dv.PHONETYPE] == 'linksys'
     assert recv_vars[dv.RINGTYPE] == 'test-ring'
 
 
