@@ -107,7 +107,9 @@ class UserFeatures(Handler):
                 self._caller = None
 
             if self._caller:
-                self._agi.set_variable(dv.CALLER_SIMULTCALLS, self._caller.simultcalls)
+                self._agi.set_variable(
+                    f'__{dv.CALLER_SIMULTCALLS}', self._caller.simultcalls
+                )
 
     def _set_line(self) -> None:
         if self._dstid:
@@ -453,7 +455,9 @@ class UserFeatures(Handler):
             self._agi.set_variable(name, '')
 
     def _set_callee_simultcalls(self):
-        return self._agi.set_variable(dv.CALLEE_SIMULTCALLS, self._user.simultcalls)
+        return self._agi.set_variable(
+            f'__{dv.CALLEE_SIMULTCALLS}', self._user.simultcalls
+        )
 
     def _set_enablednd(self):
         self._agi.set_variable('WAZO_ENABLEDND', self._user.enablednd)

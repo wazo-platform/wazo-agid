@@ -123,7 +123,10 @@ class TestUserFeatures(_BaseTestCase):
             user_init.assert_called_with(
                 self._agi, self._cursor, int(self._variables['WAZO_USERID'])
             )
-            self._agi.set_variable.assert_called_once_with('WAZO_CALLER_SIMULTCALLS', 5)
+            self._agi.set_variable.assert_called_once_with(
+                f'__{dv.CALLER_SIMULTCALLS}',
+                5,
+            )
         self.assertTrue(userfeatures._caller is not None)
 
     def test_set_call_record_enabled_incoming_external_call(self):
