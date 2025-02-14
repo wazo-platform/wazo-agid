@@ -7,7 +7,9 @@ import logging
 import uuid
 from typing import TYPE_CHECKING
 
-from wazo_agid import agid, dialplan_variables, objects
+from wazo_agid import agid
+from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 
 if TYPE_CHECKING:
     from psycopg2.extras import DictCursor
@@ -43,11 +45,11 @@ def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         return
 
     argument: dict[str, str | int] = {}
-    user_uuid = agi.get_variable(dialplan_variables.USERUUID)
+    user_uuid = agi.get_variable(dv.USERUUID)
     if user_uuid:
         argument['xid'] = user_uuid
     else:
-        user_id = agi.get_variable(dialplan_variables.USERID)
+        user_id = agi.get_variable(dv.USERID)
         if not user_id:
             return
         argument['xid'] = int(user_id)
@@ -56,7 +58,7 @@ def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     if not caller:
         return
 
-    is_external = agi.get_variable(dialplan_variables.OUTCALL_ID) != ''
+    is_external = agi.get_variable(dv.OUTCALL_ID) != ''
     should_record = (
         not is_external and caller.call_record_outgoing_internal_enabled
     ) or (is_external and caller.call_record_outgoing_external_enabled)
@@ -95,7 +97,7 @@ def start_mix_monitor(agi, cursor, args):
 
 
 def _start_mix_monitor(agi):
-    tenant_uuid = agi.get_variable(dialplan_variables.TENANT_UUID)
+    tenant_uuid = agi.get_variable(dv.TENANT_UUID)
     recording_uuid = str(uuid.uuid4())
     filename = CALL_RECORDING_FILENAME_TEMPLATE.format(
         tenant_uuid=tenant_uuid,
