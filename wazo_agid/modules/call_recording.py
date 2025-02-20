@@ -106,6 +106,7 @@ def _start_mix_monitor(agi):
     mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
 
     agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}')
+    agi.set_variable('WAZO_RECORDING_UUID', recording_uuid)
     agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
 
 

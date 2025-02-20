@@ -455,6 +455,10 @@ def test_call_record_caller(base_asset: BaseAssetLaunchingHelper):
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['WAZO_CALL_RECORD_ACTIVE'] == '1'
+    assert (
+        recv_vars['WAZO_RECORDING_UUID'] is not None
+        and recv_vars['WAZO_RECORDING_UUID'] != ''
+    )
     tenant_uuid = user['tenant_uuid']
     uuid_reg = r'[a-f0-9\-]{36}'
     matches = re.match(
