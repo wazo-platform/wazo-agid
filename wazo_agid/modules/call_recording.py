@@ -103,7 +103,13 @@ def _start_mix_monitor(agi):
         tenant_uuid=tenant_uuid,
         recording_uuid=recording_uuid,
     )
-    mix_monitor_options = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
+    mix_monitor_options: str = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
+    if 'p(' in mix_monitor_options:
+        p_position = mix_monitor_options.index('p(')
+        ending_paren_position = mix_monitor_options.index(')')
+        pre_p = mix_monitor_options[:p_position]
+        post_p = mix_monitor_options[ending_paren_position + 1 :]
+        mix_monitor_options = pre_p + post_p
 
     agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}')
     agi.set_variable('WAZO_RECORDING_UUID', recording_uuid)
