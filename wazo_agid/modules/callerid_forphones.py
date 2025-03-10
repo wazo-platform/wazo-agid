@@ -7,7 +7,9 @@ import logging
 
 import phonenumbers
 from psycopg2.extras import DictCursor
+from wazo_confd_client.client import ConfdClient
 from wazo_dird_client.client import DirdClient
+from xivo.reverse_lookup import format_number
 from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
 from wazo_agid import agid
@@ -20,6 +22,7 @@ FAKE_WAZO_USER_UUID = '00000000-0000-0000-0000-000000000000'
 
 def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> None:
     dird_client: DirdClient = agi.config['dird']['client']
+    confd_client: ConfdClient = agi.config['confd']['client']
     try:
         cid_name = agi.env['agi_calleridname']
         cid_number = agi.env['agi_callerid']
@@ -38,7 +41,12 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             user_uuid = callee_info.user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
+        tenant_country = confd_client.localization.get(tenant_uuid=tenant_uuid).get(
+            'country'
+        )
         # It is not possible to associate a profile to a reverse configuration in the web
+        formatted_number = format_number(cid_number, tenant_country)
+        cid_number = formatted_number if formatted_number is not None else cid_number
         lookup_result = dird_client.directories.reverse(
             profile='default',
             user_uuid=user_uuid,
