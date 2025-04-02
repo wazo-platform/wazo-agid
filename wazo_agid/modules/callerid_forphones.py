@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 
 import phonenumbers
@@ -68,22 +67,22 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
         #     exten=cid_number,
         #     tenant_uuid=tenant_uuid,
         # )
+        # TODO: add the tenant to the query
         query = {
             'query': '''
-            {{
-                user(uuid: "{}") {{
-                    contacts(profile: "default", extens: {}) {{
-                        edges {{
-                            node {{
+            query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
+                user(uuid: $uuid) {
+                    contacts(profile: "default", extens: $extens) {
+                        edges {
+                            node {
                                 wazoReverse
-                            }}
-                        }}
-                    }}
-                }}
-            }}
-            '''.format(
-                user_uuid, json.dumps(numbers)
-            )
+                            }
+                        }
+                    }
+                }
+            }
+            ''',
+            'variables': {'uuid': user_uuid, 'extens': numbers},
         }
         response = dird_client.graphql.query(query)
         logger.info('response: %s', response)
