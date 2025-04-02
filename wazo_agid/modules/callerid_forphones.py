@@ -84,7 +84,10 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
         logger.info('response: %s', response)
         edges = response['data']['user']['contacts']['edges']
         for edge in edges:
-            result = edge['node']['wazoReverse']
+            node = edge['node']
+            if not node:
+                continue
+            result = node['wazoReverse']
             if result is not None:
                 logger.debug(
                     'Found caller ID from reverse lookup: "%s"<%s>',
