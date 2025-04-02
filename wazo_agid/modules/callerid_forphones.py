@@ -60,18 +60,10 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                 )
             )
 
-        # It is not possible to associate a profile to a reverse configuration in the web
-        # lookup_result = dird_client.directories.reverse(
-        #     profile='default',
-        #     user_uuid=user_uuid,
-        #     exten=cid_number,
-        #     tenant_uuid=tenant_uuid,
-        # )
-        # TODO: add the tenant to the query
         query = {
             'query': '''
-            query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
-                user(uuid: $uuid) {
+            query GetExtensFromUser($uuid: String!, $extens: [String!]!, $tenantUuid: String!) {
+                user(uuid: $uuid, tenantUuid: $tenantUuid) {
                     contacts(profile: "default", extens: $extens) {
                         edges {
                             node {
@@ -82,7 +74,11 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                 }
             }
             ''',
-            'variables': {'uuid': user_uuid, 'extens': numbers},
+            'variables': {
+                'uuid': user_uuid,
+                'extens': numbers,
+                'tenantUuid': tenant_uuid,
+            },
         }
         response = dird_client.graphql.query(query)
         logger.info('response: %s', response)
