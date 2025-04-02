@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 
 import phonenumbers
@@ -12,6 +13,7 @@ from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
 from wazo_agid import agid
 from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
 
@@ -38,23 +40,71 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             user_uuid = callee_info.user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
-        # It is not possible to associate a profile to a reverse configuration in the web
-        lookup_result = dird_client.directories.reverse(
-            profile='default',
-            user_uuid=user_uuid,
-            exten=cid_number,
-            tenant_uuid=tenant_uuid,
-        )
-        if lookup_result['display'] is not None:
-            logger.debug(
-                'Found caller ID from reverse lookup: "%s"<%s>',
-                lookup_result['display'],
-                cid_number,
+        tenant = objects.Tenant(agi, cursor, tenant_uuid)
+        numbers = [cid_number]
+        country = tenant.country
+        if country:
+            parsed_number = phonenumbers.parse(cid_number, country)
+            numbers.append(
+                phonenumbers.format_number(
+                    parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+                )
             )
-            _set_new_caller_id(agi, lookup_result['display'], cid_number)
-            _set_reverse_lookup_variable(agi, lookup_result['fields'])
+            numbers.append(
+                phonenumbers.format_number(
+                    parsed_number, phonenumbers.PhoneNumberFormat.E164
+                )
+            )
+            numbers.append(
+                phonenumbers.format_number(
+                    parsed_number, phonenumbers.PhoneNumberFormat.NATIONAL
+                )
+            )
+
+        # It is not possible to associate a profile to a reverse configuration in the web
+        # lookup_result = dird_client.directories.reverse(
+        #     profile='default',
+        #     user_uuid=user_uuid,
+        #     exten=cid_number,
+        #     tenant_uuid=tenant_uuid,
+        # )
+        query = {
+            'query': '''
+            {{
+                user(uuid: "{}") {{
+                    contacts(profile: "default", extens: {}) {{
+                        edges {{
+                            node {{
+                                wazoReverse
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+            '''.format(
+                user_uuid, json.dumps(numbers)
+            )
+        }
+        response = dird_client.graphql.query(query)
+        logger.info('response: %s', response)
+        edges = response['data']['user']['contacts']['edges']
+        for edge in edges:
+            result = edge['node']['wazoReverse']
+            if result is not None:
+                logger.debug(
+                    'Found caller ID from reverse lookup: "%s"<%s>',
+                    result,
+                    cid_number,
+                )
+                _set_new_caller_id(agi, result, cid_number)
+                # TODO check what should be here
+                # _set_reverse_lookup_variable(agi, lookup_result['fields'])
+                break
+        # else:
+        #     lookup_result = {'display': None, 'fields': {}}
     except Exception as e:
         msg = f'Reverse lookup failed: {e}'
+        raise
         logger.info(msg)
         agi.verbose(msg)
 
