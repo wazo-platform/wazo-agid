@@ -81,11 +81,19 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
         }
         response = dird_client.graphql.query(query, tenant_uuid=tenant_uuid)
         logger.debug('reverse lookup response: %s', response)
-        for edge in response['data']['user']['contacts']['edges']:
-            node = edge['node']
+
+        if 'errors' in response:
+            raise ValueError("Errors in GraphQL response: %s", response)
+
+        reponse_user = response['data']['user']
+        if not reponse_user:
+            raise ValueError("No user data in GraphQL response")
+
+        for edge in reponse_user['contacts']['edges']:
+            node = edge.get('node')
             if not node:
                 continue
-            result = node['wazoReverse']
+            result = node.get('wazoReverse')
             if result is not None:
                 logger.debug(
                     'Found caller ID from reverse lookup: "%s"<%s>',
