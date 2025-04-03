@@ -30,3 +30,26 @@ class DirdMockClient(MockServerClient):
             graphql_result,
             body_json_payload={'variables': {'uuid': user_uuid, 'extens': lookup_extens}},
         )
+
+    def expect_reverse_lookup_fails(
+        self, lookup_extens, user_uuid
+    ):
+        graphql_result = {
+            'data': {
+                'user': {
+                    'contacts': {
+                        'edges': [
+                            {'node': None},
+                            {'node': None},
+                        ]
+                    }
+                }
+            }
+        }
+        self.simple_expectation(
+            'POST',
+            '/graphql',
+            200,
+            graphql_result,
+            body_json_payload={'variables': {'uuid': user_uuid, 'extens': lookup_extens}},
+        )
