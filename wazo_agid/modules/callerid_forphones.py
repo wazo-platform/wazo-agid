@@ -80,9 +80,8 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             },
         }
         response = dird_client.graphql.query(query, tenant_uuid=tenant_uuid)
-        logger.info('response: %s', response)
-        edges = response['data']['user']['contacts']['edges']
-        for edge in edges:
+        logger.debug('reverse lookup response: %s', response)
+        for edge in response['data']['user']['contacts']['edges']:
             node = edge['node']
             if not node:
                 continue
