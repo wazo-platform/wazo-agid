@@ -3,6 +3,7 @@
 
 import logging
 import random
+import uuid
 from contextlib import contextmanager
 
 import sqlalchemy as sa
@@ -87,6 +88,17 @@ class DatabaseQueries:
         session = self.Session()
         yield ItemInserter(session, tenant_uuid=TENANT_UUID)
         session.commit()
+
+    def insert_tenant(self, **kwargs):
+        with self.inserter() as inserter:
+            tenant = inserter.add_tenant(
+                uuid=kwargs.pop('uuid', str(uuid.uuid4())),
+                **kwargs,
+            )
+            return {
+                'uuid': tenant.uuid,
+                'country': tenant.country
+            }
 
     def insert_conference(self, **kwargs):
         with self.inserter() as inserter:
