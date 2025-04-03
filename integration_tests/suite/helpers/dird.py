@@ -1,3 +1,6 @@
+# Copyright 2023-2025 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 from .mock_clients import MockServerClient
 
 
@@ -6,12 +9,24 @@ class DirdMockClient(MockServerClient):
         super().__init__(host, port, version)
 
     def expect_reverse_lookup_succeeds(
-        self, lookup_term, user_uuid, display_name, fields
+        self, lookup_extens, user_uuid, display_name
     ):
+        graphql_result = {
+            'data': {
+                'user': {
+                    'contacts': {
+                        'edges': [
+                            {'node': {'wazoReverse': display_name}},
+                            {'node': None},
+                        ]
+                    }
+                }
+            }
+        }
         self.simple_expectation(
-            'GET',
-            f'/directories/reverse/default/{user_uuid}',
+            'POST',
+            '/graphql',
             200,
-            {'display': display_name, 'fields': fields},
-            query_string_params={'exten': [lookup_term]},
+            graphql_result,
+            body_json_payload={'variables': {'uuid': user_uuid, 'extens': lookup_extens}},
         )
