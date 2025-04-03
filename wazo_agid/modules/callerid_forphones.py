@@ -62,8 +62,8 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
 
         query = {
             'query': '''
-            query GetExtensFromUser($uuid: String!, $extens: [String!]!, $tenantUuid: String!) {
-                user(uuid: $uuid, tenantUuid: $tenantUuid) {
+            query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
+                user(uuid: $uuid) {
                     contacts(profile: "default", extens: $extens) {
                         edges {
                             node {
@@ -77,10 +77,9 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             'variables': {
                 'uuid': user_uuid,
                 'extens': numbers,
-                'tenantUuid': tenant_uuid,
             },
         }
-        response = dird_client.graphql.query(query)
+        response = dird_client.graphql.query(query, tenant_uuid=tenant_uuid)
         logger.info('response: %s', response)
         edges = response['data']['user']['contacts']['edges']
         for edge in edges:
@@ -95,14 +94,9 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                     cid_number,
                 )
                 _set_new_caller_id(agi, result, cid_number)
-                # TODO check what should be here
-                # _set_reverse_lookup_variable(agi, lookup_result['fields'])
                 break
-        # else:
-        #     lookup_result = {'display': None, 'fields': {}}
     except Exception as e:
         msg = f'Reverse lookup failed: {e}'
-        raise
         logger.info(msg)
         agi.verbose(msg)
 
