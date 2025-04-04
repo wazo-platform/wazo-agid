@@ -408,6 +408,28 @@ def test_callerid_forphones_with_reverse_lookup_unkown_number_format(
     assert recv_cmds['FAILURE'] is False
     assert 'SET CALLERID' not in recv_cmds
 
+
+def test_callerid_forphones_with_reverse_lookup_auth_fail(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    with base_asset.db.queries() as queries:
+        tenant = queries.insert_tenant(country=None)
+
+    base_asset.dird.expect_reverse_lookup_fails_authentication(
+        ['346346'],
+        '00000000-0000-0000-0000-000000000000',
+    )
+    recv_vars, recv_cmds = base_asset.agid.callerid_forphones(
+        calleridname='unknown',
+        callerid='346346',
+        WAZO_INCALL_ID=1,
+        WAZO_TENANT_UUID=tenant['uuid'],
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert 'SET CALLERID' not in recv_cmds
+
+
 def test_callerid_forphones_with_reverse_lookup_different_country_number_format_e164(
     base_asset: BaseAssetLaunchingHelper,
 ):
