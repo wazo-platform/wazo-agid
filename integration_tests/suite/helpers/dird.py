@@ -8,9 +8,7 @@ class DirdMockClient(MockServerClient):
     def __init__(self, host, port, version='1.0'):
         super().__init__(host, port, version)
 
-    def expect_reverse_lookup_succeeds(
-        self, lookup_extens, user_uuid, display_name
-    ):
+    def expect_reverse_lookup_succeeds(self, lookup_extens, user_uuid, display_name):
         graphql_result = {
             'data': {
                 'user': {
@@ -28,12 +26,12 @@ class DirdMockClient(MockServerClient):
             '/graphql',
             200,
             graphql_result,
-            body_json_payload={'variables': {'uuid': user_uuid, 'extens': lookup_extens}},
+            body_json_payload={
+                'variables': {'uuid': user_uuid, 'extens': lookup_extens}
+            },
         )
 
-    def expect_reverse_lookup_fails(
-        self, lookup_extens, user_uuid
-    ):
+    def expect_reverse_lookup_fails(self, lookup_extens, user_uuid):
         graphql_result = {
             'data': {
                 'user': {
@@ -51,12 +49,12 @@ class DirdMockClient(MockServerClient):
             '/graphql',
             200,
             graphql_result,
-            body_json_payload={'variables': {'uuid': user_uuid, 'extens': lookup_extens}},
+            body_json_payload={
+                'variables': {'uuid': user_uuid, 'extens': lookup_extens}
+            },
         )
 
-    def expect_reverse_lookup_fails_authentication(
-        self, lookup_extens, user_uuid
-    ):
+    def expect_reverse_lookup_fails_authentication(self, lookup_extens, user_uuid):
         graphql_result = {
             'errors': [
                 {
@@ -67,7 +65,7 @@ class DirdMockClient(MockServerClient):
                         'error_id': 'unauthorized',
                         'details': {'invalid_token': 'invalid-token-uuid'},
                         'timestamp': 1743708960.290326,
-                    }
+                    },
                 },
             ],
             'data': {'user': None},
@@ -77,5 +75,7 @@ class DirdMockClient(MockServerClient):
             '/graphql',
             200,
             graphql_result,
-            body_json_payload={'variables': {'uuid': user_uuid, 'extens': lookup_extens}},
+            body_json_payload={
+                'variables': {'uuid': user_uuid, 'extens': lookup_extens}
+            },
         )

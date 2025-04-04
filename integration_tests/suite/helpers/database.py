@@ -95,10 +95,7 @@ class DatabaseQueries:
                 uuid=kwargs.pop('uuid', str(uuid.uuid4())),
                 **kwargs,
             )
-            return {
-                'uuid': tenant.uuid,
-                'country': tenant.country
-            }
+            return {'uuid': tenant.uuid, 'country': tenant.country}
 
     def insert_conference(self, **kwargs):
         with self.inserter() as inserter:
