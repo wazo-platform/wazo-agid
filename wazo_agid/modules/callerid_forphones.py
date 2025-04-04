@@ -40,9 +40,16 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             user_uuid = callee_info.user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
-        tenant = objects.Tenant(agi, cursor, tenant_uuid)
         numbers = [cid_number]
-        country = tenant.country
+        country = None
+        try:
+            tenant = objects.Tenant(agi, cursor, tenant_uuid)
+            country = tenant.country
+        except Exception as e:
+            msg = f'Could not fetch tenant: {e}'
+            logger.info(msg)
+            agi.verbose(msg)
+
         if country:
             parsed_number = phonenumbers.parse(cid_number, country)
             numbers.append(
