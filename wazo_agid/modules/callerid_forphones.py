@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+from textwrap import dedent
 
 import phonenumbers
 from psycopg2.extras import DictCursor
@@ -61,7 +62,8 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             )
 
         query = {
-            'query': '''
+            'query': dedent(
+                '''
             query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
                 user(uuid: $uuid) {
                     contacts(profile: "default", extens: $extens) {
@@ -72,8 +74,8 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                         }
                     }
                 }
-            }
-            ''',
+            }'''
+            ),
             'variables': {
                 'uuid': user_uuid,
                 'extens': numbers,
