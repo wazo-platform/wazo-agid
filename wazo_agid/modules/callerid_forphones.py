@@ -67,6 +67,11 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                     parsed_number, phonenumbers.PhoneNumberFormat.NATIONAL
                 )
             )
+            numbers.append(
+                phonenumbers.format_out_of_country_calling_number(
+                    parsed_number, region_calling_from=country
+                )
+            )
 
         query = {
             'query': dedent(

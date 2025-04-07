@@ -54,6 +54,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -76,6 +77,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                 'user': {
                     'contacts': {
                         'edges': [
+                            {'node': None},
                             {'node': None},
                             {'node': None},
                             {'node': None},
@@ -106,6 +108,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -128,6 +131,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                 'user': {
                     'contacts': {
                         'edges': [
+                            {'node': None},
                             {'node': None},
                             {'node': None},
                             {'node': None},
@@ -158,6 +162,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -192,6 +197,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                     '+1 555-555-1234',
                     '+15555551234',
                     '(555) 555-1234',
+                    '1 (555) 555-1234',
                 ],
             },
         }
@@ -219,6 +225,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -254,6 +261,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                     '+1 555-555-1234',
                     '+15555551234',
                     '(555) 555-1234',
+                    '1 (555) 555-1234',
                 ],
             },
         }
@@ -277,6 +285,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                 'user': {
                     'contacts': {
                         'edges': [
+                            {'node': None},
                             {'node': None},
                             {'node': None},
                             {'node': None},
