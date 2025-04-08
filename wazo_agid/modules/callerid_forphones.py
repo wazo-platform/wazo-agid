@@ -74,8 +74,9 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                         parsed_number, region_calling_from=country
                     )
                 )
+                numbers.append(str(parsed_number.national_number))
             except phonenumbers.NumberParseException:
-                numbers.append(cid_number)
+                logger.debug('Could not parse number %s', cid_number)
 
         query = {
             'query': dedent(

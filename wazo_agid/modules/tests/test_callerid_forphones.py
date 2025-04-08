@@ -55,6 +55,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -77,6 +78,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                 'user': {
                     'contacts': {
                         'edges': [
+                            {'node': None},
                             {'node': None},
                             {'node': None},
                             {'node': None},
@@ -109,6 +111,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -131,6 +134,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                 'user': {
                     'contacts': {
                         'edges': [
+                            {'node': None},
                             {'node': None},
                             {'node': None},
                             {'node': None},
@@ -163,6 +167,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -198,6 +203,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                     '+15555551234',
                     '(555) 555-1234',
                     '1 (555) 555-1234',
+                    '5555551234',
                 ],
             },
         }
@@ -226,6 +232,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -262,6 +269,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                     '+15555551234',
                     '(555) 555-1234',
                     '1 (555) 555-1234',
+                    '5555551234',
                 ],
             },
         }
@@ -285,6 +293,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                 'user': {
                     'contacts': {
                         'edges': [
+                            {'node': None},
                             {'node': None},
                             {'node': None},
                             {'node': None},
@@ -357,6 +366,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                             {'node': None},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -386,10 +396,7 @@ class TestCallerIdForPhone(unittest.TestCase):
             ),
             'variables': {
                 'uuid': 'user_uuid',
-                'extens': [
-                    self.agi.env['agi_callerid'],
-                    '555555123455555555',
-                ],
+                'extens': [self.agi.env['agi_callerid']],
             },
         }
         self.dird_client.graphql.query.assert_called_once_with(

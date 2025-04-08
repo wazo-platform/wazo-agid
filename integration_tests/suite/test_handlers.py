@@ -352,7 +352,14 @@ def test_callerid_forphones_with_reverse_lookup_unknown_tenant_in_canada(
 
     # Input, International, E164, National
     base_asset.dird.expect_reverse_lookup_succeeds(
-        ['5551234567', '+1 555-123-4567', '+15551234567', '(555) 123-4567'],
+        [
+            '5551234567',
+            '+1 555-123-4567',
+            '+15551234567',
+            '(555) 123-4567',
+            '1 (555) 123-4567',
+            '5551234567',
+        ],
         '00000000-0000-0000-0000-000000000000',
         'Mr. Numero',
     )
@@ -437,7 +444,14 @@ def test_callerid_forphones_with_reverse_lookup_different_country_number_format_
         tenant = queries.insert_tenant(country='CA')
 
     base_asset.dird.expect_reverse_lookup_succeeds(
-        ['+33123456789', '+33 1 23 45 67 89', '+33123456789', '01 23 45 67 89'],
+        [
+            '+33123456789',
+            '+33 1 23 45 67 89',
+            '+33123456789',
+            '01 23 45 67 89',
+            '011 33 1 23 45 67 89',
+            '123456789',
+        ],
         '00000000-0000-0000-0000-000000000000',
         'French number',
     )
@@ -450,6 +464,35 @@ def test_callerid_forphones_with_reverse_lookup_different_country_number_format_
 
     assert recv_cmds['FAILURE'] is False
     assert recv_cmds['SET CALLERID'] == r'\"French number\" <+33123456789>'
+
+
+def test_callerid_forphones_with_reverse_lookup_different_country_number_format_nanp(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    with base_asset.db.queries() as queries:
+        tenant = queries.insert_tenant(country='CA')
+
+    base_asset.dird.expect_reverse_lookup_succeeds(
+        [
+            '01133123456789',
+            '+33 1 23 45 67 89',
+            '+33123456789',
+            '01 23 45 67 89',
+            '011 33 1 23 45 67 89',
+            '123456789',
+        ],
+        '00000000-0000-0000-0000-000000000000',
+        'French number',
+    )
+    recv_vars, recv_cmds = base_asset.agid.callerid_forphones(
+        calleridname='unknown',
+        callerid='01133123456789',  # NANP format
+        WAZO_INCALL_ID=1,
+        WAZO_TENANT_UUID=tenant['uuid'],
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_cmds['SET CALLERID'] == r'\"French number\" <01133123456789>'
 
 
 def test_callfilter(base_asset: BaseAssetLaunchingHelper):

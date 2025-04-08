@@ -19,6 +19,7 @@ class DirdMockClient(MockServerClient):
                             {'node': {'wazoReverse': display_name}},
                             {'node': None},
                             {'node': None},
+                            {'node': None},
                         ]
                     }
                 }
@@ -40,6 +41,7 @@ class DirdMockClient(MockServerClient):
                 'user': {
                     'contacts': {
                         'edges': [
+                            {'node': None},
                             {'node': None},
                             {'node': None},
                             {'node': None},
