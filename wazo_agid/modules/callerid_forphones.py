@@ -51,27 +51,31 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             agi.verbose(msg)
 
         if country:
-            parsed_number = phonenumbers.parse(cid_number, country)
-            numbers.append(
-                phonenumbers.format_number(
-                    parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+            try:
+                parsed_number = phonenumbers.parse(cid_number, country)
+
+                numbers.append(
+                    phonenumbers.format_number(
+                        parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+                    )
                 )
-            )
-            numbers.append(
-                phonenumbers.format_number(
-                    parsed_number, phonenumbers.PhoneNumberFormat.E164
+                numbers.append(
+                    phonenumbers.format_number(
+                        parsed_number, phonenumbers.PhoneNumberFormat.E164
+                    )
                 )
-            )
-            numbers.append(
-                phonenumbers.format_number(
-                    parsed_number, phonenumbers.PhoneNumberFormat.NATIONAL
+                numbers.append(
+                    phonenumbers.format_number(
+                        parsed_number, phonenumbers.PhoneNumberFormat.NATIONAL
+                    )
                 )
-            )
-            numbers.append(
-                phonenumbers.format_out_of_country_calling_number(
-                    parsed_number, region_calling_from=country
+                numbers.append(
+                    phonenumbers.format_out_of_country_calling_number(
+                        parsed_number, region_calling_from=country
+                    )
                 )
-            )
+            except phonenumbers.NumberParseException:
+                numbers.append(cid_number)
 
         query = {
             'query': dedent(

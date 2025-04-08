@@ -334,8 +334,67 @@ class TestCallerIdForPhone(unittest.TestCase):
             'agi_calleridname': '5555551234',
             'agi_callerid': '5555551234',
         }
-        self.dird_client.directories.reverse.side_effect = AssertionError(
-            'Should not raise'
-        )
+        self.dird_client.graphql.query.side_effect = AssertionError('Should not raise')
 
         callerid_forphones(self.agi, Mock(), Mock())
+
+    @patch('wazo_agid.modules.callerid_forphones.objects.Tenant')
+    @patch('wazo_agid.modules.callerid_forphones.directory_profile_dao')
+    def test_that_callerid_forphones_never_raises_and_queries_when_invalid_number(
+        self, mock_dao, mock_tenant
+    ):
+        self.agi.env = {
+            'agi_calleridname': '5555551234',
+            'agi_callerid': '555555123455555555',
+        }
+        self.dird_client.graphql.query.return_value = {
+            'data': {
+                'user': {
+                    'contacts': {
+                        'edges': [
+                            {'node': None},
+                            {'node': None},
+                            {'node': None},
+                            {'node': None},
+                            {'node': None},
+                        ]
+                    }
+                }
+            }
+        }
+        mock_dao.find_by_incall_id.return_value.user_uuid = 'user_uuid'
+        mock_tenant.return_value.country = 'CA'
+
+        self.agi.get_variable.side_effect = [0, sentinel.agi_variable]
+
+        callerid_forphones(self.agi, Mock(), Mock())
+
+        query = {
+            'query': dedent(
+                '''
+            query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
+                user(uuid: $uuid) {
+                    contacts(profile: "default", extens: $extens) {
+                        edges {
+                            node {
+                                wazoReverse
+                            }
+                        }
+                    }
+                }
+            }'''
+            ),
+            'variables': {
+                'uuid': 'user_uuid',
+                'extens': [
+                    self.agi.env['agi_callerid'],
+                    '555555123455555555',
+                ],
+            },
+        }
+        self.dird_client.graphql.query.assert_called_once_with(
+            query,
+            tenant_uuid=sentinel.agi_variable,
+        )
+
+        assert_that(self.agi.set_callerid.call_count, equal_to(0))
