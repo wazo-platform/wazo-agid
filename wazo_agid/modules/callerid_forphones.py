@@ -74,7 +74,13 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                         parsed_number, region_calling_from=country
                     )
                 )
-                numbers.append(str(parsed_number.national_number))
+                numbers.append(
+                    phonenumbers.normalize_diallable_chars_only(
+                        phonenumbers.format_number(
+                            parsed_number, phonenumbers.PhoneNumberFormat.NATIONAL
+                        )
+                    )
+                )
             except phonenumbers.NumberParseException:
                 logger.debug('Could not parse number %s', cid_number)
 
