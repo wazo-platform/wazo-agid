@@ -1,3 +1,6 @@
+# Copyright 2023-2025 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 import requests
 
 
@@ -16,6 +19,7 @@ class MockServerClient:
         expected_body,
         headers=None,
         query_string_params=None,
+        body_json_payload=None,
     ):
         expectation = {
             'httpRequest': {
@@ -29,6 +33,8 @@ class MockServerClient:
         }
         if query_string_params:
             expectation['httpRequest']['queryStringParameters'] = query_string_params
+        if body_json_payload:
+            expectation['httpRequest']['body'] = body_json_payload
 
         expectation_kwargs = {}
         if headers:

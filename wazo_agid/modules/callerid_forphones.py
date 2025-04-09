@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+from textwrap import dedent
 
 import phonenumbers
 from psycopg2.extras import DictCursor
@@ -12,6 +13,7 @@ from xivo_dao.resources.directory_profile import dao as directory_profile_dao
 
 from wazo_agid import agid
 from wazo_agid import dialplan_variables as dv
+from wazo_agid import objects
 
 logger = logging.getLogger(__name__)
 
@@ -38,21 +40,93 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
             user_uuid = callee_info.user_uuid
 
         tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
-        # It is not possible to associate a profile to a reverse configuration in the web
-        lookup_result = dird_client.directories.reverse(
-            profile='default',
-            user_uuid=user_uuid,
-            exten=cid_number,
-            tenant_uuid=tenant_uuid,
-        )
-        if lookup_result['display'] is not None:
-            logger.debug(
-                'Found caller ID from reverse lookup: "%s"<%s>',
-                lookup_result['display'],
-                cid_number,
-            )
-            _set_new_caller_id(agi, lookup_result['display'], cid_number)
-            _set_reverse_lookup_variable(agi, lookup_result['fields'])
+        numbers = [cid_number]
+        country = None
+        try:
+            tenant = objects.Tenant(agi, cursor, tenant_uuid)
+            country = tenant.country
+        except Exception as e:
+            msg = f'Could not fetch tenant: {e}'
+            logger.info(msg)
+            agi.verbose(msg)
+
+        if country:
+            try:
+                parsed_number = phonenumbers.parse(cid_number, country)
+
+                numbers.append(
+                    phonenumbers.format_number(
+                        parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+                    )
+                )
+                numbers.append(
+                    phonenumbers.format_number(
+                        parsed_number, phonenumbers.PhoneNumberFormat.E164
+                    )
+                )
+                numbers.append(
+                    phonenumbers.format_number(
+                        parsed_number, phonenumbers.PhoneNumberFormat.NATIONAL
+                    )
+                )
+                numbers.append(
+                    phonenumbers.format_out_of_country_calling_number(
+                        parsed_number, region_calling_from=country
+                    )
+                )
+                numbers.append(
+                    phonenumbers.normalize_diallable_chars_only(
+                        phonenumbers.format_number(
+                            parsed_number, phonenumbers.PhoneNumberFormat.NATIONAL
+                        )
+                    )
+                )
+            except phonenumbers.NumberParseException:
+                logger.debug('Could not parse number %s', cid_number)
+
+        query = {
+            'query': dedent(
+                '''
+            query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
+                user(uuid: $uuid) {
+                    contacts(profile: "default", extens: $extens) {
+                        edges {
+                            node {
+                                wazoReverse
+                            }
+                        }
+                    }
+                }
+            }'''
+            ),
+            'variables': {
+                'uuid': user_uuid,
+                'extens': numbers,
+            },
+        }
+        response = dird_client.graphql.query(query, tenant_uuid=tenant_uuid)
+        logger.debug('reverse lookup response: %s', response)
+
+        if 'errors' in response:
+            raise ValueError("Errors in GraphQL response: %s", response)
+
+        reponse_user = response['data']['user']
+        if not reponse_user:
+            raise ValueError("No user data in GraphQL response")
+
+        for edge in reponse_user['contacts']['edges']:
+            node = edge.get('node')
+            if not node:
+                continue
+            result = node.get('wazoReverse')
+            if result is not None:
+                logger.debug(
+                    'Found caller ID from reverse lookup: "%s"<%s>',
+                    result,
+                    cid_number,
+                )
+                _set_new_caller_id(agi, result, cid_number)
+                break
     except Exception as e:
         msg = f'Reverse lookup failed: {e}'
         logger.info(msg)
