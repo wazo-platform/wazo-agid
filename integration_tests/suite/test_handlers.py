@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 import time
 from textwrap import dedent
+from uuid import uuid4
 
 import pytest
 from hamcrest import assert_that, calling, raises
@@ -1918,3 +1919,51 @@ def test_check_vmbox_password_without_password(base_asset: BaseAssetLaunchingHel
     )
 
     assert recv_vars['WAZO_VM_HAS_PASSWORD'] == 'False'
+
+
+def test_screen_blocklist_number_blocked(base_asset: BaseAssetLaunchingHelper):
+    with base_asset.db.queries() as queries:
+        tenant = queries.insert_tenant(country='CA')
+        user = queries.insert_user(tenant_uuid=tenant['uuid'])
+
+    blocklist_number = '+1234567890'
+    blocklist_number_uuid = str(uuid4())
+    blocklist_number_label = 'bad number'
+    base_asset.confd.expect_user_blocklist_number_lookup_match(
+        user['uuid'],
+        blocklist_number,
+        blocklist_number_uuid,
+        blocklist_number_label,
+    )
+
+    recv_vars, recv_cmds = base_asset.agid.screen_blocklist(
+        user['uuid'],
+        variables={
+            'CALLERID(num)': blocklist_number,
+        },
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['WAZO_BLOCKED_NUMBER_UUID'] == blocklist_number_uuid
+
+
+def test_screen_blocklist_number_not_blocked(base_asset: BaseAssetLaunchingHelper):
+    with base_asset.db.queries() as queries:
+        tenant = queries.insert_tenant(country='CA')
+        user = queries.insert_user(tenant_uuid=tenant['uuid'])
+
+    blocklist_number = '+1234567890'
+    base_asset.confd.expect_user_blocklist_number_lookup_no_match(
+        user['uuid'],
+        blocklist_number,
+    )
+
+    recv_vars, recv_cmds = base_asset.agid.screen_blocklist(
+        user['uuid'],
+        variables={
+            'CALLERID(num)': blocklist_number,
+        },
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert 'WAZO_BLOCKED_NUMBER_UUID' not in recv_vars
