@@ -52,6 +52,7 @@ def screen_blocklist(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> 
     # get user's country for number interpretation
     user = user_dao.get_by(uuid=user_uuid)
     user_country = user.country
+    user_tenant_uuid = user.tenant_uuid
 
     logger.debug(
         'screening caller id number %s calling user %s(country=%s)',
@@ -77,7 +78,8 @@ def screen_blocklist(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> 
     logger.debug('looking up number %s in blocklist of user %s', e164_number, user_uuid)
     # lookup caller id number in wazo-confd blocklist API
     result = confd_client.users(user_uuid).blocklist.numbers.lookup(
-        number_exact=e164_number
+        number_exact=e164_number,
+        tenant_uuid=user_tenant_uuid,
     )
     if result:
         logger.debug(

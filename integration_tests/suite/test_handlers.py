@@ -1934,6 +1934,7 @@ def test_screen_blocklist_number_blocked(base_asset: BaseAssetLaunchingHelper):
         blocklist_number,
         blocklist_number_uuid,
         blocklist_number_label,
+        tenant_uuid=tenant['uuid'],
     )
 
     recv_vars, recv_cmds = base_asset.agid.screen_blocklist(
@@ -1956,6 +1957,7 @@ def test_screen_blocklist_number_not_blocked(base_asset: BaseAssetLaunchingHelpe
     base_asset.confd.expect_user_blocklist_number_lookup_no_match(
         user['uuid'],
         blocklist_number,
+        tenant_uuid=tenant['uuid'],
     )
 
     recv_vars, recv_cmds = base_asset.agid.screen_blocklist(

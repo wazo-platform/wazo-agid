@@ -21,6 +21,7 @@ class MockServerClient:
         query_string_params=None,
         body_json_payload=None,
         response_headers=None,
+        request_headers=None,
     ):
         expectation = {
             'httpRequest': {
@@ -36,6 +37,8 @@ class MockServerClient:
             expectation['httpRequest']['queryStringParameters'] = query_string_params
         if body_json_payload:
             expectation['httpRequest']['body'] = body_json_payload
+        if request_headers:
+            expectation['httpRequest']['headers'] = request_headers
         if response_headers:
             expectation['httpResponse']['headers'] = response_headers
         expectation_kwargs = {}
