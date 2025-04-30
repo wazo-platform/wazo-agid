@@ -56,3 +56,36 @@ class ConfdMockClient(MockServerClient):
     def verify_groups_get_called(self, group_id):
         response = self.verify_called('GET', f'/groups/{group_id}')
         return response.status_code == 202
+
+    def expect_user_blocklist_number_lookup_match(
+        self,
+        user_uuid,
+        number,
+        blocklist_number_uuid,
+        blocklist_number_label,
+        tenant_uuid,
+    ):
+        self.simple_expectation(
+            'HEAD',
+            f'/users/{user_uuid}/blocklist/numbers',
+            204,
+            '',
+            query_string_params={'number_exact': number},
+            request_headers={'Wazo-Tenant': [tenant_uuid]},
+            response_headers={
+                'Wazo-Blocklist-Number-Uuid': blocklist_number_uuid,
+                'Wazo-Blocklist-Number-Label': blocklist_number_label,
+            },
+        )
+
+    def expect_user_blocklist_number_lookup_no_match(
+        self, user_uuid, number, tenant_uuid
+    ):
+        self.simple_expectation(
+            'HEAD',
+            f'/users/{user_uuid}/blocklist/numbers',
+            404,
+            '',
+            query_string_params={'number_exact': number},
+            request_headers={'Wazo-Tenant': [tenant_uuid]},
+        )
