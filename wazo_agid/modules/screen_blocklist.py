@@ -14,7 +14,7 @@ from wazo_agid import agid
 logger = logging.getLogger(__name__)
 
 
-def interpret_number(number: str, country: str) -> phonenumbers.PhoneNumber:
+def interpret_number(number: str, country: str | None) -> phonenumbers.PhoneNumber:
     try:
         return phonenumbers.parse(number, country)
     except phonenumbers.NumberParseException as ex:
@@ -31,6 +31,20 @@ def interpret_number(number: str, country: str) -> phonenumbers.PhoneNumber:
             'number %s cannot be parsed as a valid number international number +%s: %s',
             number,
             number,
+            str(ex),
+        )
+
+        if country:
+            raise
+
+    country = country or 'FR'
+    try:
+        return phonenumbers.parse(number, country)
+    except phonenumbers.NumberParseException as ex:
+        logger.debug(
+            'number %s cannot be parsed as a valid number from default country %s: %s',
+            number,
+            country,
             str(ex),
         )
         raise

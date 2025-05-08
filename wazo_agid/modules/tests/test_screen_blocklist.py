@@ -25,7 +25,7 @@ class TestInterpretNumber(unittest.TestCase):
 
     def test_european_number_dialling_prefix(self):
         raw_number = '0033123456789'
-        for country in ('FR', 'DE', 'ES', 'IT'):
+        for country in ('FR', 'DE', 'ES', 'IT', None):
             with self.subTest(country=country):
                 number = screen_blocklist.interpret_number(raw_number, country)
                 self.assertEqual(number.country_code, 33)
