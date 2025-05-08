@@ -5,6 +5,7 @@ import logging
 import re
 
 import phonenumbers
+from xivo.reverse_lookup import format_phone_number_e164
 
 from wazo_agid import dialplan_variables as dv
 from wazo_agid import objects
@@ -24,6 +25,10 @@ def _remove_none_numeric_char(raw: str) -> str:
 class CallerIDFormatter(handler.Handler):
     def execute(self) -> None:
         self.set_caller_id()
+
+        extern_num = self._agi.get_variable('WAZO_DST_REDIRECTING_EXTERN_NUM')
+        if extern_num:
+            self.set_diversion(extern_num)
 
     def set_caller_id(self) -> None:
         selected_cid = self._agi.get_variable(dv.SELECTED_CALLER_ID)
@@ -56,6 +61,21 @@ class CallerIDFormatter(handler.Handler):
             self._set_raw_number(cid_name, cid_number)
         else:
             self._set_formated_number(cid_name, parsed_cid_number, cid_format)
+
+    def set_diversion(self, extern_num) -> None:
+        tenant_country = self._agi.get_variable('WAZO_TENANT_COUNTRY')
+        extern_name = self._agi.get_variable('WAZO_DST_REDIRECTING_EXTERN_NAME')
+        logger.debug(
+            'country: %s\tnum: %s\tname:%s', tenant_country, extern_num, extern_name
+        )
+
+        formatted_extern_num = format_phone_number_e164(extern_num, tenant_country)
+        if not formatted_extern_num:
+            logger.debug('could not format number "%s" to E.164', extern_num)
+            self._agi.set_variable('REDIRECTING(from-num,i)', extern_num)
+        else:
+            self._agi.set_variable('REDIRECTING(from-num,i)', formatted_extern_num)
+        self._agi.set_variable('REDIRECTING(from-name,i)', extern_name)
 
     def _set_raw_number(self, name: str, number: str) -> None:
         matches = VALID_PHONE_NUMBER_RE.match(number)
