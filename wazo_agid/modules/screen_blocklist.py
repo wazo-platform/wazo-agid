@@ -38,6 +38,7 @@ def interpret_number(number: str, country: str | None) -> phonenumbers.PhoneNumb
             raise
 
     country = country or 'FR'
+    logger.debug('Trying to parse number %s with default country %s', number, country)
     try:
         return phonenumbers.parse(number, country)
     except phonenumbers.NumberParseException as ex:
@@ -69,7 +70,7 @@ def screen_blocklist(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> 
     user_tenant_uuid = user.tenant_uuid
 
     logger.debug(
-        'screening caller id number %s calling user %s(country=%s)',
+        'screening caller id number %s calling user %s (country=%s)',
         caller_id_number,
         user_uuid,
         user_country,
@@ -89,7 +90,7 @@ def screen_blocklist(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> 
     e164_number = phonenumbers.format_number(
         number, phonenumbers.PhoneNumberFormat.E164
     )
-    logger.debug('looking up number %s in blocklist of user %s', e164_number, user_uuid)
+    logger.debug('Looking up number %s in blocklist of user %s', e164_number, user_uuid)
     # lookup caller id number in wazo-confd blocklist API
     result = confd_client.users(user_uuid).blocklist.numbers.lookup(
         number_exact=e164_number,
