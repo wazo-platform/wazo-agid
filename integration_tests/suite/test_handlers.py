@@ -1457,6 +1457,8 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
         'WAZO_SRCNUM': extension['exten'],
         'WAZO_BASE_CONTEXT': extension['context'],
         'WAZO_TENANT_UUID': '',
+        'PJSIP_HEADER(read,To)': '"Test"<123456@1.2.3.4>',
+        'PJSIP_PARSE_URI(<123456@1.2.3.4>,host)': '1.2.3.4',
         dv.PATH: '',
     }
     recv_vars, recv_cmds = base_asset.agid.outgoing_user_set_features(
@@ -1479,6 +1481,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['CALLERID(pres)'] == 'prohib'
     assert recv_vars['WAZO_OUTGOING_ANONYMOUS_CALL'] == '1'
     assert recv_vars['_WAZO_OUTCALL_PAI_NUMBER'] == '123456'
+    assert recv_vars[f'__{dv.TRUNK_HOST}'] == '1.2.3.4'
 
 
 def test_meeting_user(base_asset: BaseAssetLaunchingHelper):

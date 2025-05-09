@@ -156,6 +156,15 @@ class OutgoingFeatures(Handler):
                 exten = f'{self.dstnum}@{name}'
                 self._agi.set_variable(f'{dv.INTERFACE}{i:d}', 'PJSIP')
                 self._agi.set_variable(f'{dv.TRUNK_EXTEN}{i:d}', exten)
+                trunk_uri = self._agi.get_variable('PJSIP_HEADER(read,To)')
+                if trunk_uri:
+                    trunk_uri = trunk_uri[trunk_uri.index("<") :]
+                    trunk_host = self._agi.get_variable(
+                        f'PJSIP_PARSE_URI({trunk_uri},host)'
+                    )
+                    self._agi.set_variable(f'__{dv.TRUNK_HOST}', trunk_host)
+                else:
+                    self._agi.verbose("Could not read To header")
             else:
                 self._agi.set_variable(f'{dv.INTERFACE}{i:d}', trunk.interface)
                 self._agi.set_variable(f'{dv.TRUNK_EXTEN}{i:d}', self.dstnum)
@@ -198,8 +207,8 @@ class OutgoingFeatures(Handler):
         self._retrieve_user()
         self._set_userfield()
         self._set_user_music_on_hold()
-        self._set_caller_id()
         self._set_trunk_info()
+        self._set_caller_id()
         self._set_preprocess_subroutine()
         self._set_hangup_ring_time()
         self._agi.set_variable(dv.OUTCALL_ID, self.outcall.id)
