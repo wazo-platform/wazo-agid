@@ -17,7 +17,7 @@ CALLER_ID_ALL_REGEX = re.compile(r'^"(.*)" <(\+?\d{3,15})>$')
 logger = logging.getLogger(__name__)
 
 
-def _remove_none_numeric_char(raw: str) -> str:
+def _remove_non_numeric_char(raw: str) -> str:
     return ''.join(c for c in raw if c.isdigit())
 
 
@@ -70,14 +70,14 @@ class CallerIDFormatter(handler.Handler):
         self, cid_name: str, number: phonenumbers.PhoneNumber, cid_format: str
     ) -> None:
         if cid_format == 'national':
-            formated_number = _remove_none_numeric_char(
+            formated_number = _remove_non_numeric_char(
                 phonenumbers.format_number(
                     number,
                     phonenumbers.PhoneNumberFormat.NATIONAL,
                 )
             )
         elif cid_format == 'E164':
-            formated_number = _remove_none_numeric_char(
+            formated_number = _remove_non_numeric_char(
                 phonenumbers.format_number(
                     number,
                     phonenumbers.PhoneNumberFormat.E164,
