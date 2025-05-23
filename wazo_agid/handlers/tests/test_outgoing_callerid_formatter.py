@@ -33,7 +33,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
     def test_selected_going_national(self) -> None:
         channel_vars = {
-            dv.SELECTED_CALLER_ID: '+15551234567',
+            dv.SELECTED_CALLER_ID: '+14189990000',
             dv.TRUNK_CID_FORMAT: 'national',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -42,12 +42,12 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
-            '"5551234567" <5551234567>',
+            '"4189990000" <4189990000>',
         )
 
     def test_selected_going_E164(self) -> None:
         channel_vars = {
-            dv.SELECTED_CALLER_ID: '+15551234567',
+            dv.SELECTED_CALLER_ID: '+14189990000',
             dv.TRUNK_CID_FORMAT: 'E164',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -56,12 +56,12 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
-            '"15551234567" <15551234567>',
+            '"14189990000" <14189990000>',
         )
 
     def test_selected_going_plusE164(self) -> None:
         channel_vars = {
-            dv.SELECTED_CALLER_ID: '+15551234567',
+            dv.SELECTED_CALLER_ID: '+14189990000',
             dv.TRUNK_CID_FORMAT: '+E164',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -70,12 +70,12 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
-            '"+15551234567" <+15551234567>',
+            '"+14189990000" <+14189990000>',
         )
 
     def test_selected_going_plusE164_cid_name_preserved(self) -> None:
         channel_vars = {
-            dv.SELECTED_CALLER_ID: '"Foobar" <+15551234567>',
+            dv.SELECTED_CALLER_ID: '"Foobar" <+14189990000>',
             dv.TRUNK_CID_FORMAT: '+E164',
         }
         self.agi.get_variable.side_effect = channel_vars.get
@@ -84,12 +84,12 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
-            '"Foobar" <+15551234567>',
+            '"Foobar" <+14189990000>',
         )
 
     def test_selected_E164_going_plusE164(self) -> None:
         channel_vars = {
-            dv.SELECTED_CALLER_ID: '15551234567',
+            dv.SELECTED_CALLER_ID: '14189990000',
             dv.TRUNK_CID_FORMAT: '+E164',
             'WAZO_TENANT_COUNTRY': 'CA',
         }
@@ -99,12 +99,12 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
-            '"+15551234567" <+15551234567>',
+            '"+14189990000" <+14189990000>',
         )
 
     def test_selected_national_going_plusE164(self) -> None:
         channel_vars = {
-            dv.SELECTED_CALLER_ID: '5551234567',
+            dv.SELECTED_CALLER_ID: '4189990000',
             dv.TRUNK_CID_FORMAT: '+E164',
             'WAZO_TENANT_COUNTRY': 'CA',
         }
@@ -114,7 +114,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
-            '"+15551234567" <+15551234567>',
+            '"+14189990000" <+14189990000>',
         )
 
     def test_selected_invalid(self) -> None:
