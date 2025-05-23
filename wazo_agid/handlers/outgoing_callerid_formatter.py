@@ -1,5 +1,6 @@
 # Copyright 2024-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
 
 import logging
 import re
@@ -17,8 +18,8 @@ CALLER_ID_ALL_REGEX = re.compile(r'^"(.*)" <(\+?\d{3,15})>$')
 logger = logging.getLogger(__name__)
 
 
-def _remove_none_numeric_char(raw: str) -> str:
-    return ''.join(c for c in raw if c.isdigit())
+def _remove_non_numeric_char(raw: str | None) -> str | None:
+    return ''.join(c for c in raw if c.isdigit()) if raw else None
 
 
 class CallerIDFormatter(handler.Handler):
