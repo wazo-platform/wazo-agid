@@ -27,7 +27,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_not_called()
 
@@ -38,7 +38,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -52,7 +52,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -66,7 +66,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -80,7 +80,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -95,7 +95,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -110,7 +110,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -125,7 +125,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_not_called()
 
@@ -137,7 +137,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -152,7 +152,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
