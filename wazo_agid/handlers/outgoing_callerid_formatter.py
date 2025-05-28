@@ -25,6 +25,7 @@ def _remove_non_numeric_char(raw: str) -> str:
 class CallerIDFormatter(handler.Handler):
     def execute(self) -> None:
         self.cid_format = self._agi.get_variable(dv.TRUNK_CID_FORMAT)
+        self.tenant_country = self._agi.get_variable('WAZO_TENANT_COUNTRY')
         if self.cid_format:
             self.set_caller_id()
 
@@ -34,7 +35,6 @@ class CallerIDFormatter(handler.Handler):
 
     def set_caller_id(self) -> None:
         selected_cid = self._agi.get_variable(dv.SELECTED_CALLER_ID)
-        tenant_country = self._agi.get_variable('WAZO_TENANT_COUNTRY')
 
         if not selected_cid:
             return
@@ -47,26 +47,28 @@ class CallerIDFormatter(handler.Handler):
             cid_name = ''
             cid_number = selected_cid
 
-        formatted_cid_number = self._format_number(cid_number, tenant_country)
+        formatted_cid_number = self._format_number(cid_number)
         if not formatted_cid_number:
             logger.info(
                 'caller id number %s cannot be parsed '
                 'as a valid number for tenant country %s',
                 cid_number,
-                tenant_country,
+                self.tenant_country,
             )
             self._set_raw_number(cid_name, cid_number)
         else:
             self._set_caller_id(cid_name, formatted_cid_number)
 
     def set_diversion(self, extern_num) -> None:
-        tenant_country = self._agi.get_variable('WAZO_TENANT_COUNTRY')
         extern_name = self._agi.get_variable('WAZO_DST_REDIRECTING_EXTERN_NAME')
         logger.debug(
-            'country: %s\tnum: %s\tname:%s', tenant_country, extern_num, extern_name
+            'country: %s\tnum: %s\tname:%s',
+            self.tenant_country,
+            extern_num,
+            extern_name,
         )
 
-        formatted_extern_num = self._format_number(extern_num, tenant_country)
+        formatted_extern_num = self._format_number(extern_num)
         if not formatted_extern_num:
             logger.debug(
                 'could not format number "%s" to %s',
@@ -87,19 +89,19 @@ class CallerIDFormatter(handler.Handler):
                 f'Ignoring selected caller ID {number} not matching supported pattern'
             )
 
-    def _format_number(self, number: str, country: str) -> str | None:
+    def _format_number(self, number: str) -> str | None:
         if self.cid_format == 'national':
-            formatted_num = format_phone_number_national(number, country)
+            formatted_num = format_phone_number_national(number, self.tenant_country)
             formatted_num = (
                 _remove_non_numeric_char(formatted_num) if formatted_num else None
             )
         elif self.cid_format == 'E164':
-            formatted_num = format_phone_number_e164(number, country)
+            formatted_num = format_phone_number_e164(number, self.tenant_country)
             formatted_num = (
                 _remove_non_numeric_char(formatted_num) if formatted_num else None
             )
         elif self.cid_format == '+E164':
-            formatted_num = format_phone_number_e164(number, country)
+            formatted_num = format_phone_number_e164(number, self.tenant_country)
         else:
             self._agi.verbose(f'Unsupported {dv.TRUNK_CID_FORMAT} "{self.cid_format}"')
         return formatted_num
