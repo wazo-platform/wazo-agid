@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 from psycopg2.extras import DictCursor
 
@@ -27,7 +27,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_not_called()
 
@@ -38,7 +38,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -52,7 +52,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -66,7 +66,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -80,7 +80,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -95,7 +95,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -110,7 +110,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -125,7 +125,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_not_called()
 
@@ -137,7 +137,7 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
@@ -152,9 +152,85 @@ class TestOutgoingCallerIdFormatter(TestCase):
         }
         self.agi.get_variable.side_effect = channel_vars.get
 
-        self.handler.set_caller_id()
+        self.handler.execute()
 
         self.agi.set_variable.assert_called_once_with(
             'CALLERID(all)',
             '"Foobar" <123>',
+        )
+
+    def test_diversion_going_national(self) -> None:
+        channel_vars = {
+            dv.SELECTED_CALLER_ID: '+14189990000',
+            dv.TRUNK_CID_FORMAT: 'national',
+            dv.DST_REDIRECTING_EXTERN_NUM: '+14189990000',
+            'WAZO_TENANT_COUNTRY': 'CA',
+            'WAZO_DST_REDIRECTING_EXTERN_NAME': 'Test',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_has_calls(
+            [
+                call('REDIRECTING(from-num,i)', '4189990000'),
+                call('REDIRECTING(from-name,i)', 'Test'),
+            ]
+        )
+
+    def test_diversion_going_e164(self) -> None:
+        channel_vars = {
+            dv.SELECTED_CALLER_ID: '+14189990000',
+            dv.TRUNK_CID_FORMAT: 'E164',
+            dv.DST_REDIRECTING_EXTERN_NUM: '+14189990000',
+            'WAZO_TENANT_COUNTRY': 'CA',
+            'WAZO_DST_REDIRECTING_EXTERN_NAME': 'Test',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_has_calls(
+            [
+                call('REDIRECTING(from-num,i)', '14189990000'),
+                call('REDIRECTING(from-name,i)', 'Test'),
+            ]
+        )
+
+    def test_diversion_going_plus_E164(self) -> None:
+        channel_vars = {
+            dv.SELECTED_CALLER_ID: '+14189990000',
+            dv.TRUNK_CID_FORMAT: '+E164',
+            dv.DST_REDIRECTING_EXTERN_NUM: '+14189990000',
+            'WAZO_TENANT_COUNTRY': 'CA',
+            'WAZO_DST_REDIRECTING_EXTERN_NAME': 'Test',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_has_calls(
+            [
+                call('REDIRECTING(from-num,i)', '+14189990000'),
+                call('REDIRECTING(from-name,i)', 'Test'),
+            ]
+        )
+
+    def test_diversion_going_extension(self) -> None:
+        channel_vars = {
+            dv.SELECTED_CALLER_ID: '+14189990000',
+            dv.TRUNK_CID_FORMAT: '+E164',
+            dv.DST_REDIRECTING_EXTERN_NUM: '1000',
+            'WAZO_TENANT_COUNTRY': 'CA',
+            'WAZO_DST_REDIRECTING_EXTERN_NAME': 'Test',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_has_calls(
+            [
+                call('REDIRECTING(from-num,i)', '1000'),
+                call('REDIRECTING(from-name,i)', 'Test'),
+            ]
         )

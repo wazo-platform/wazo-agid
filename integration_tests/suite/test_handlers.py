@@ -709,6 +709,26 @@ def test_format_and_set_outgoing_caller_id(base_asset: BaseAssetLaunchingHelper)
 
     assert recv_cmds['FAILURE'] is False
     assert recv_vars['CALLERID(all)'] == '\\"+14185551234\\" <+14185551234>'
+    assert 'REDIRECTING(from-num,i)' not in recv_vars.keys()
+    assert 'REDIRECTING(from-name,i)' not in recv_vars.keys()
+
+
+def test_format_and_set_outgoing_diversion(base_asset: BaseAssetLaunchingHelper):
+    variables = {
+        dv.SELECTED_CALLER_ID: '4185551234',
+        dv.TRUNK_CID_FORMAT: '+E164',
+        dv.DST_REDIRECTING_EXTERN_NUM: '4185551234',
+        'WAZO_DST_REDIRECTING_EXTERN_NAME': 'test',
+        'WAZO_TENANT_COUNTRY': 'CA',
+    }
+
+    recv_vars, recv_cmds = base_asset.agid.format_and_set_outgoing_caller_id(
+        variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars['REDIRECTING(from-num,i)'] == '+14185551234'
+    assert recv_vars['REDIRECTING(from-name,i)'] == 'test'
 
 
 def test_format_and_set_outgoing_caller_id_cannot_be_parsed(
