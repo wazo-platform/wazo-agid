@@ -1009,6 +1009,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
             ring_strategy='linear',
             retry_delay=5,
             dtmf_record_toggle=True,
+            ignore_forward=0,
         )
         extension = queries.insert_extension(type='group', typeval=group['id'])
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
@@ -1031,7 +1032,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['WAZO_GROUPOPTIONS'] == 'ir'
+    assert recv_vars['WAZO_GROUPOPTIONS'] == 'r'
     assert recv_vars[dv.GROUPNEEDANSWER] == '0'
     assert recv_vars[dv.REAL_NUMBER] == extension['exten']
     assert recv_vars[dv.REAL_CONTEXT] == extension['context']
@@ -1080,6 +1081,7 @@ def test_incoming_group_set_features_linear_with_music(
             ring_strategy='linear',
             retry_delay=5,
             music_on_hold='some-music-class',
+            ignore_forward=1,
         )
 
     variables = {
