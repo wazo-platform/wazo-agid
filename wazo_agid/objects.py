@@ -513,7 +513,7 @@ class Queue:
             'mark_answered_elsewhere',
         ]
         queuefeatures_columns = ["queuefeatures." + c for c in queuefeatures_columns]
-        queue_columns = ['queue.wrapuptime', 'queue.musicclass']
+        queue_columns = ['base_queue.wrapuptime', 'base_queue.musicclass']
 
         columns = queuefeatures_columns + queue_columns
 
@@ -522,11 +522,11 @@ class Queue:
 
         query = SQL(
             "SELECT {columns} FROM queuefeatures "
-            "INNER JOIN queue "
-            "ON queuefeatures.name = queue.name "
+            "INNER JOIN base_queue "
+            "ON queuefeatures.name = base_queue.name "
             "WHERE queuefeatures.id = %s "
-            "AND queue.commented = 0 "
-            "AND queue.category = 'queue'"
+            "AND base_queue.commented = 0 "
+            "AND base_queue.category = 'queue'"
         )
         cursor.execute(
             query.format(columns=join_column_names(columns)),

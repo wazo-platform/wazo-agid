@@ -223,9 +223,9 @@ class DatabaseQueries:
                 if 'name' in kwargs:
                     queue_kwargs['name'] = kwargs['name']
                 queue_kwargs.setdefault('category', 'queue')
-                queue = inserter.add_queue(**queue_kwargs)
-                kwargs['_queue'] = queue
-                kwargs.setdefault('name', queue.name)
+                base_queue = inserter.add_base_queue(**queue_kwargs)
+                kwargs['base_queue'] = base_queue
+                kwargs.setdefault('name', base_queue.name)
             queue_feature = inserter.add_queuefeatures(**kwargs)
             return {
                 'id': queue_feature.id,
