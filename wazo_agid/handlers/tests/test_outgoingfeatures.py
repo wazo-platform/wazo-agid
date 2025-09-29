@@ -372,6 +372,8 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         user = a_user().with_anonymous_out_caller_id().build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
 
+        self._channel_variables['WAZO_TRUNK_HOST'] = 'test-123'
+
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
 
@@ -380,6 +382,7 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         expected_calls = [
             call('CALLERID(pres)', 'prohib'),
             call('WAZO_OUTGOING_ANONYMOUS_CALL', '1'),
+            call('_WAZO_FORMATTED_PAI_NUMBER', 'sip:27857218@test-123'),
             call('_WAZO_OUTCALL_PAI_NUMBER', '27857218'),
         ]
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
@@ -441,6 +444,8 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         self._channel_variables[
             'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
         ] = caller_id_header
+        self._channel_variables['WAZO_TRUNK_HOST'] = 'test-123'
+        self._channel_variables['WAZO_PAI_FORMAT'] = 'bob:{host}@{number}'
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -450,6 +455,7 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         calls = [
             call('CALLERID(pres)', 'prohib'),
             call('WAZO_OUTGOING_ANONYMOUS_CALL', '1'),
+            call('_WAZO_FORMATTED_PAI_NUMBER', 'bob:test-123@27857218'),
             call('_WAZO_OUTCALL_PAI_NUMBER', '27857218'),
         ]
         for mock_call in calls:

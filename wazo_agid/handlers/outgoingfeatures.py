@@ -139,10 +139,22 @@ class OutgoingFeatures(Handler):
 
     def _set_anonymous(self):
         self._agi.set_variable('CALLERID(pres)', 'prohib')
-        self._agi.set_variable('WAZO_OUTGOING_ANONYMOUS_CALL', '1')
+        self._agi.set_variable(dv.OUTGOING_ANONYMOUS_CALL, '1')
         if self.outcall.callerid:
             _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
             if pai_tel:
+                pai_format = self._agi.get_variable(dv.PAI_FORMAT)
+                if not pai_format:
+                    pai_format = 'sip:{number}@{host}'
+                trunk_host = self._agi.get_variable(dv.TRUNK_HOST)
+                try:
+                    formatted_number = pai_format.format(
+                        number=pai_tel, host=trunk_host
+                    )
+                except KeyError as ke:
+                    self._agi.verbose(f'Invalid variable in PAI template: {ke}')
+
+                self._agi.set_variable(f'_{dv.FORMATTED_PAI_NUMBER}', formatted_number)
                 self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
 
     def _set_trunk_info(self) -> None:
