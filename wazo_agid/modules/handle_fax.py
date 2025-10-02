@@ -1,4 +1,4 @@
-# Copyright 2006-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -7,8 +7,8 @@ import ftplib
 import logging
 import os
 import subprocess
+from collections.abc import Callable
 from configparser import RawConfigParser
-from typing import Callable
 
 from psycopg2.extras import DictCursor
 
