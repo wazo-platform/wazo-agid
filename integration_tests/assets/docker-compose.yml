@@ -17,8 +17,8 @@ services:
       - "./etc/xivo/asterisk/xivo_ring.conf:/etc/xivo/asterisk/xivo_ring.conf"
       - "./etc/xivo/asterisk/xivo_fax.conf:/etc/xivo/asterisk/xivo_fax.conf"
       - "./etc/xivo/mail.txt:/etc/xivo/mail.txt"
-      # - "${LOCAL_GIT_REPOS}/xivo-dao/xivo_dao:/opt/venv/lib/python3.9/site-packages/xivo_dao"
-      # - "${LOCAL_GIT_REPOS}/xivo-lib-python/xivo:/opt/venv/lib/python3.9/site-packages/xivo"
+      # - "${LOCAL_GIT_REPOS}/xivo-dao/xivo_dao:/opt/venv/lib/python3.11/site-packages/xivo_dao"
+      # - "${LOCAL_GIT_REPOS}/xivo-lib-python/xivo:/opt/venv/lib/python3.11/site-packages/xivo"
 
   auth:
     image: wazoplatform/wazo-auth-mock
