@@ -3,12 +3,11 @@
 
 import unittest
 from collections import defaultdict
-from typing import Any
+from typing import Any, Self
 from unittest.mock import Mock, call, patch
 
 from hamcrest import assert_that, contains_exactly
 from hamcrest.core import equal_to
-from typing_extensions import Self
 
 from wazo_agid import dialplan_variables as dv
 from wazo_agid import objects
