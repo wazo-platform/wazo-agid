@@ -14,7 +14,7 @@ from typing import Any
 
 import psycopg2
 from psycopg2.extras import DictCursor
-from sqlalchemy.engine.url import make_url
+from sqlalchemy.engine.url import URL, make_url
 from xivo import agitb, moresynchro
 from xivo_dao.helpers.db_utils import session_scope
 
@@ -32,14 +32,14 @@ _handlers: dict[str, Handler] = {}
 
 
 def info_from_db_uri(db_uri: str) -> dict[str, str | int]:
-    parsed_url = make_url(db_uri)
+    parsed_url: URL = make_url(db_uri)
     exceptions = {'database': 'dbname', 'username': 'user'}
     connect_args = {
         exceptions.get(name, name): value
         for name, value in parsed_url.translate_connect_args().items()
     }
     query_args = parsed_url.query
-    return query_args | connect_args
+    return dict(query_args, **connect_args)
 
 
 class Database:
