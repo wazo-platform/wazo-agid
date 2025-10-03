@@ -3,6 +3,8 @@
 #
 # see: dh_installdeb(1)
 
+set -e
+
 DAEMONNAME='wazo-agid'
 USER='wazo-agid'
 GROUP=$USER
