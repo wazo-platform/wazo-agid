@@ -32,10 +32,12 @@ repos:
     rev: v1.7.1
     hooks:
       - id: mypy
-        args: ["--ignore-missing-imports", "--check-untyped-defs"]
         exclude: "bin/"
         language_version: "3.11"
-        additional_dependencies: ["types-pytz", "types-requests"]
+        additional_dependencies:
+          - "types-pytz"
+          - "types-requests"
+          - "types-sqlalchemy-utils"
   - repo: https://github.com/wazo-platform/wazo-git-hooks
     rev: 1.0.0
     hooks:
