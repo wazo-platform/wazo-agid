@@ -33,6 +33,10 @@ class CallerIDFormatter(handler.Handler):
         if extern_num:
             self.set_diversion(extern_num)
 
+        anonymous_call = self._agi.get_variable(dv.OUTGOING_ANONYMOUS_CALL)
+        if anonymous_call == '1':
+            self.set_anonymous_pai()
+
     def set_caller_id(self) -> None:
         selected_cid = self._agi.get_variable(dv.SELECTED_CALLER_ID)
 
@@ -79,6 +83,31 @@ class CallerIDFormatter(handler.Handler):
         else:
             self._agi.set_variable('REDIRECTING(from-num,i)', formatted_extern_num)
         self._agi.set_variable('REDIRECTING(from-name,i)', extern_name)
+
+    def set_anonymous_pai(self) -> None:
+        pai_format = self._agi.get_variable(dv.PAI_FORMAT)
+        pai_tel = self._agi.get_variable(dv.OUTCALL_PAI_NUMBER)
+
+        if not pai_tel:
+            self._agi.verbose('Could not get outcall PAI number')
+            return
+
+        if not pai_format:
+            pai_format = 'sip:{number}@{host}'
+
+        trunk_host = self._agi.get_variable(dv.TRUNK_HOST)
+        if not trunk_host:
+            self._agi.verbose('Could not get trunk host')
+            return
+
+        try:
+            formatted_number = pai_format.format(
+                number=pai_tel, host=trunk_host
+            )
+        except KeyError as ke:
+            self._agi.verbose(f'Invalid variable in PAI template: {ke}')
+
+        self._agi.set_variable(f'_{dv.FORMATTED_PAI_NUMBER}', formatted_number)
 
     def _set_raw_number(self, name: str, number: str) -> None:
         matches = VALID_PHONE_NUMBER_RE.match(number)

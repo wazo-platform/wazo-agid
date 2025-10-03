@@ -143,19 +143,11 @@ class OutgoingFeatures(Handler):
         if self.outcall.callerid:
             _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
             if pai_tel:
-                pai_format = self._agi.get_variable(dv.PAI_FORMAT)
-                if not pai_format:
-                    pai_format = 'sip:{number}@{host}'
-                trunk_host = self._agi.get_variable(dv.TRUNK_HOST)
-                try:
-                    formatted_number = pai_format.format(
-                        number=pai_tel, host=trunk_host
-                    )
-                except KeyError as ke:
-                    self._agi.verbose(f'Invalid variable in PAI template: {ke}')
-
-                self._agi.set_variable(f'_{dv.FORMATTED_PAI_NUMBER}', formatted_number)
-                self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
+                self._agi.set_variable(f'_{dv.OUTCALL_PAI_NUMBER}', pai_tel)
+            else:
+                self._agi.verbose("Could not parse outcall callerid. Could not set anonymous.")
+        else:
+            self._agi.verbose('Missing default outcall callerid. Could not set anonymous.')
 
     def _set_trunk_info(self) -> None:
         for i, trunk in enumerate(self.outcall.trunks):
@@ -168,6 +160,7 @@ class OutgoingFeatures(Handler):
                 exten = f'{self.dstnum}@{name}'
                 self._agi.set_variable(f'{dv.INTERFACE}{i:d}', 'PJSIP')
                 self._agi.set_variable(f'{dv.TRUNK_EXTEN}{i:d}', exten)
+                self._agi.set_variable(f'WAZO_TRUNK_INTERFACE{i:d}', name)
                 trunk_uri = self._agi.get_variable('PJSIP_HEADER(read,To)')
                 if trunk_uri:
                     trunk_uri = trunk_uri[trunk_uri.index("<") :]
