@@ -139,11 +139,19 @@ class OutgoingFeatures(Handler):
 
     def _set_anonymous(self):
         self._agi.set_variable('CALLERID(pres)', 'prohib')
-        self._agi.set_variable('WAZO_OUTGOING_ANONYMOUS_CALL', '1')
+        self._agi.set_variable(dv.OUTGOING_ANONYMOUS_CALL, '1')
         if self.outcall.callerid:
             _, pai_tel = objects.CallerID.parse(self.outcall.callerid)
             if pai_tel:
-                self._agi.set_variable('_WAZO_OUTCALL_PAI_NUMBER', pai_tel)
+                self._agi.set_variable(f'_{dv.OUTCALL_PAI_NUMBER}', pai_tel)
+            else:
+                self._agi.verbose(
+                    "Could not parse outcall callerid. Could not set anonymous."
+                )
+        else:
+            self._agi.verbose(
+                'Missing default outcall callerid. Could not set anonymous.'
+            )
 
     def _set_trunk_info(self) -> None:
         for i, trunk in enumerate(self.outcall.trunks):
@@ -156,6 +164,7 @@ class OutgoingFeatures(Handler):
                 exten = f'{self.dstnum}@{name}'
                 self._agi.set_variable(f'{dv.INTERFACE}{i:d}', 'PJSIP')
                 self._agi.set_variable(f'{dv.TRUNK_EXTEN}{i:d}', exten)
+                self._agi.set_variable(f'{dv.TRUNK_INTERFACE}{i:d}', name)
                 trunk_uri = self._agi.get_variable('PJSIP_HEADER(read,To)')
                 if trunk_uri:
                     trunk_uri = trunk_uri[trunk_uri.index("<") :]

@@ -1478,6 +1478,7 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
         'WAZO_DSTNUM': extension['exten'],
         'WAZO_SRCNUM': extension['exten'],
         'WAZO_BASE_CONTEXT': extension['context'],
+        'WAZO_PAI_FORMAT': 'tel:{number}',
         'WAZO_TENANT_UUID': '',
         'PJSIP_HEADER(read,To)': '"Test"<123456@1.2.3.4>',
         'PJSIP_PARSE_URI(<123456@1.2.3.4>,host)': '1.2.3.4',

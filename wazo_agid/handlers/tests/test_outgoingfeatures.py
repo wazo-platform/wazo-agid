@@ -184,11 +184,13 @@ class TestSetTrunkInfo(BaseOutgoingFeaturesTestCase):
                 call('WAZO_OUTGOING_CALLER_ID_FORMAT0', '+E164'),
                 call('WAZO_INTERFACE0', 'PJSIP'),
                 call(f'{dv.TRUNK_EXTEN}0', '911@abc'),
+                call(f'{dv.TRUNK_INTERFACE}0', 'abc'),
                 call(f'{dv.TRUNK_SUFFIX}0', ''),
                 # Trunk 1
                 call('WAZO_OUTGOING_CALLER_ID_FORMAT1', 'national'),
                 call('WAZO_INTERFACE1', 'PJSIP'),
                 call(f'{dv.TRUNK_EXTEN}1', '911@def'),
+                call(f'{dv.TRUNK_INTERFACE}1', 'def'),
                 call(f'{dv.TRUNK_SUFFIX}1', ''),
             ),
         )
@@ -371,6 +373,8 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
     ) -> None:
         user = a_user().with_anonymous_out_caller_id().build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
+
+        self._channel_variables['WAZO_TRUNK_HOST'] = 'test-123'
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
