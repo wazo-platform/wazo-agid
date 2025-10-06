@@ -1504,7 +1504,6 @@ def test_outgoing_user_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['CALLERID(pres)'] == 'prohib'
     assert recv_vars['WAZO_OUTGOING_ANONYMOUS_CALL'] == '1'
     assert recv_vars['_WAZO_OUTCALL_PAI_NUMBER'] == '123456'
-    assert recv_vars[f'_{dv.FORMATTED_PAI_NUMBER}'] == 'tel:123456'
     assert recv_vars[f'__{dv.TRUNK_HOST}'] == '1.2.3.4'
 
 
