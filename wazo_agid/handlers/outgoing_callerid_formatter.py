@@ -93,6 +93,9 @@ class CallerIDFormatter(handler.Handler):
             return
 
         if not pai_format:
+            self._agi.verbose(
+                'No PAI format defined. Using default "sip:{number}@{host}"'
+            )
             pai_format = 'sip:{number}@{host}'
 
         trunk_host = self._agi.get_variable(dv.TRUNK_HOST)
