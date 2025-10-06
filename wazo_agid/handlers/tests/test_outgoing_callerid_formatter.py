@@ -234,3 +234,58 @@ class TestOutgoingCallerIdFormatter(TestCase):
                 call('REDIRECTING(from-name,i)', 'Test'),
             ]
         )
+
+    def test_set_anonymous_call_pai(self) -> None:
+        channel_vars = {
+            dv.OUTGOING_ANONYMOUS_CALL: '1',
+            dv.PAI_FORMAT: 'tel:{number}@{host}',
+            dv.OUTCALL_PAI_NUMBER: '1234',
+            dv.TRUNK_HOST: 'abc',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_has_calls(
+            [
+                call(f'_{dv.FORMATTED_PAI_NUMBER}', 'tel:1234@abc'),
+            ]
+        )
+
+    def test_set_anonymous_call_pai_no_format(self) -> None:
+        channel_vars = {
+            dv.OUTGOING_ANONYMOUS_CALL: '1',
+            dv.OUTCALL_PAI_NUMBER: '1234',
+            dv.TRUNK_HOST: 'abc',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_has_calls(
+            [
+                call(f'_{dv.FORMATTED_PAI_NUMBER}', 'sip:1234@abc'),
+            ]
+        )
+
+    def test_set_anonymous_call_pai_no_number(self) -> None:
+        channel_vars = {
+            dv.OUTGOING_ANONYMOUS_CALL: '1',
+            dv.TRUNK_HOST: 'abc',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_not_called()
+
+    def test_set_anonymous_call_pai_no_trunk_host(self) -> None:
+        channel_vars = {
+            dv.OUTGOING_ANONYMOUS_CALL: '1',
+            dv.OUTCALL_PAI_NUMBER: '1234',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_not_called()

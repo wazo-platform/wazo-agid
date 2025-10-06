@@ -101,9 +101,7 @@ class CallerIDFormatter(handler.Handler):
             return
 
         try:
-            formatted_number = pai_format.format(
-                number=pai_tel, host=trunk_host
-            )
+            formatted_number = pai_format.format(number=pai_tel, host=trunk_host)
         except KeyError as ke:
             self._agi.verbose(f'Invalid variable in PAI template: {ke}')
 

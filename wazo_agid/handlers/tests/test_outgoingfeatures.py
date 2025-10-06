@@ -184,11 +184,13 @@ class TestSetTrunkInfo(BaseOutgoingFeaturesTestCase):
                 call('WAZO_OUTGOING_CALLER_ID_FORMAT0', '+E164'),
                 call('WAZO_INTERFACE0', 'PJSIP'),
                 call(f'{dv.TRUNK_EXTEN}0', '911@abc'),
+                call(f'{dv.TRUNK_INTERFACE}0', 'abc'),
                 call(f'{dv.TRUNK_SUFFIX}0', ''),
                 # Trunk 1
                 call('WAZO_OUTGOING_CALLER_ID_FORMAT1', 'national'),
                 call('WAZO_INTERFACE1', 'PJSIP'),
                 call(f'{dv.TRUNK_EXTEN}1', '911@def'),
+                call(f'{dv.TRUNK_INTERFACE}1', 'def'),
                 call(f'{dv.TRUNK_SUFFIX}1', ''),
             ),
         )
@@ -382,7 +384,6 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         expected_calls = [
             call('CALLERID(pres)', 'prohib'),
             call('WAZO_OUTGOING_ANONYMOUS_CALL', '1'),
-            call('_WAZO_FORMATTED_PAI_NUMBER', 'sip:27857218@test-123'),
             call('_WAZO_OUTCALL_PAI_NUMBER', '27857218'),
         ]
         self.assertEqual(self._agi.set_variable.call_args_list, expected_calls)
@@ -444,8 +445,6 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         self._channel_variables[
             'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
         ] = caller_id_header
-        self._channel_variables['WAZO_TRUNK_HOST'] = 'test-123'
-        self._channel_variables['WAZO_PAI_FORMAT'] = 'bob:{host}@{number}'
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -455,7 +454,6 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         calls = [
             call('CALLERID(pres)', 'prohib'),
             call('WAZO_OUTGOING_ANONYMOUS_CALL', '1'),
-            call('_WAZO_FORMATTED_PAI_NUMBER', 'bob:test-123@27857218'),
             call('_WAZO_OUTCALL_PAI_NUMBER', '27857218'),
         ]
         for mock_call in calls:
