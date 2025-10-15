@@ -1,4 +1,4 @@
-# Copyright 2008-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2008-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -7,13 +7,14 @@ import logging
 import signal
 import socketserver
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
 from types import FrameType
-from typing import Any, Callable
+from typing import Any
 
 import psycopg2
 from psycopg2.extras import DictCursor
-from sqlalchemy.engine.url import make_url
+from sqlalchemy.engine.url import URL, make_url
 from xivo import agitb, moresynchro
 from xivo_dao.helpers.db_utils import session_scope
 
@@ -31,14 +32,14 @@ _handlers: dict[str, Handler] = {}
 
 
 def info_from_db_uri(db_uri: str) -> dict[str, str | int]:
-    parsed_url = make_url(db_uri)
+    parsed_url: URL = make_url(db_uri)
     exceptions = {'database': 'dbname', 'username': 'user'}
     connect_args = {
         exceptions.get(name, name): value
         for name, value in parsed_url.translate_connect_args().items()
     }
     query_args = parsed_url.query
-    return query_args | connect_args
+    return dict(query_args, **connect_args)
 
 
 class Database:
@@ -112,13 +113,8 @@ class AGID(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     initialized = False
     request_queue_size = 20
-    # Use Daemon threads to avoid memory leak in Python 3.7.
-    # The ThreadingMixin in Python 3.7 sets daemon_threads to false, but block_on_close to True
-    # and this causes a reference to accumulate over time and fills the memory.
-    # Using daemon threads avoids this problem, and they will be killed along with the main
-    # process if killed. This did not exist in Python 2.7. For reference:
-    # https://salsa.debian.org/debian/python-prometheus-client/-/commit/5aa256d8aab3b81604b855dc03f260342fc391fb
-    # Should be patched in later versions of Python so re-check after the upgrade to Bullseye
+    # Use Daemon threads to avoid memory leak
+    # see bpo-37193 https://bugs.python.org/issue37193
     daemon_threads = True
 
     def __init__(self, config: dict[str, Any]) -> None:

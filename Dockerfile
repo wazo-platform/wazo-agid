@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bullseye AS compile-image
+FROM python:3.11-slim-bookworm AS compile-image
 LABEL maintainer="Wazo Maintainers <dev@wazo.community>"
 
 RUN python3 -m venv /opt/venv
@@ -14,7 +14,7 @@ COPY bin /usr/local/src/wazo-agid/bin
 COPY wazo_agid /usr/local/src/wazo-agid/wazo_agid
 RUN python3 setup.py install
 
-FROM python:3.9-slim-bullseye AS build-image
+FROM python:3.11-slim-bookworm AS build-image
 COPY --from=compile-image /opt/venv /opt/venv
 
 COPY ./etc/wazo-agid /etc/wazo-agid
