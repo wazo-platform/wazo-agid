@@ -1,4 +1,4 @@
-# Copyright 2004-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2004-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Modifications by Proformatique from pyst-0.2:
@@ -17,13 +17,13 @@ from __future__ import annotations
 
 import pprint
 import re
-from typing import TYPE_CHECKING, Any, BinaryIO, NoReturn, Union
+from typing import TYPE_CHECKING, Any, BinaryIO, NoReturn
 
 if TYPE_CHECKING:
     from typing import Literal
 
 
-DigitList = Union[list[Union[str, int]], str]
+DigitList = list[str | int] | str
 ResultDict = dict[str, tuple[str, str]]
 
 DEFAULT_TIMEOUT = 2000  # 2sec timeout used as default for functions that take timeouts
