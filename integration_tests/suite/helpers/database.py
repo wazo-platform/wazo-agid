@@ -14,6 +14,7 @@ from xivo_dao.alchemy.all import (
     LineFeatures,
     OutcallTrunk,
     RightCallExten,
+    RightCallMember,
     UserFeatures,
 )
 from xivo_dao.tests.test_dao import ItemInserter
@@ -195,6 +196,12 @@ class DatabaseQueries:
         with self.inserter() as inserter:
             user_call_permission = inserter.add_user_call_permission(**kwargs)
             return {'id': user_call_permission.id}
+
+    def insert_outcall_call_permission(self, **kwargs):
+        with self.inserter() as inserter:
+            outcall_call_permission = RightCallMember(**kwargs)
+            inserter.add_me(outcall_call_permission)
+            return {'id': outcall_call_permission.id}
 
     def insert_endpoint_sip(self, **kwargs):
         with self.inserter() as inserter:

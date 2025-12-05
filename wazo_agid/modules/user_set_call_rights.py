@@ -25,6 +25,7 @@ def _user_set_call_rights(
 
     cursor.execute("SELECT rightcallid, exten FROM rightcallexten")
     res = cursor.fetchall()
+    logger.debug("%d call permissions to evaluate", len(res))
 
     if not res:
         call_rights.allow(agi)
@@ -34,6 +35,11 @@ def _user_set_call_rights(
         for row in res
         if call_rights.extension_matches(dstnum, row['exten'])
     }
+    logger.debug(
+        "%d call permissions match destination number %s",
+        len(rightcallidset),
+        dstnum,
+    )
 
     if not rightcallidset:
         call_rights.allow(agi)
@@ -119,6 +125,7 @@ def _user_set_call_rights(
             call_rights.apply_rules(agi, member_res)
 
     if outcallid:
+        logger.debug("evaluating call permissions for outcallid: %s", outcallid)
         columns = (
             call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
             call_rights.RIGHTCALL_PASSWD_COLNAME,

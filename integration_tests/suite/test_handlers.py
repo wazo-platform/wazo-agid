@@ -1868,6 +1868,37 @@ def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars[dv.AUTHORIZATION] == 'DENY'
 
 
+def test_user_set_call_rights_outcall_with_hyphenated_number(
+    base_asset: BaseAssetLaunchingHelper,
+):
+    dstnum = '9989-0695395788'
+    with base_asset.db.queries() as queries:
+        user, line, extension = queries.insert_user_line_extension()
+        outcall = queries.insert_outgoing_call()
+        # a call permission that matches and deny any destination number
+        call_permission = queries.insert_call_permission(authorization=0)
+        queries.insert_call_extension_permission(
+            rightcallid=call_permission['id'], exten='_X.'
+        )
+        queries.insert_outcall_call_permission(
+            type='outcall',
+            typeval=str(outcall['id']),
+            rightcallid=call_permission['id'],
+        )
+
+    variables = {
+        'WAZO_USERID': user['id'],
+        'WAZO_DSTNUM': dstnum,
+        dv.OUTCALL_ID: str(outcall['id']),
+    }
+    recv_vars, recv_cmds = base_asset.agid.user_set_call_rights(
+        dstnum, variables=variables
+    )
+
+    assert recv_cmds['FAILURE'] is False
+    assert recv_vars[dv.AUTHORIZATION] == 'DENY'
+
+
 def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         context = queries.insert_context()
