@@ -125,7 +125,7 @@ def _user_set_call_rights(
             call_rights.apply_rules(agi, member_res)
 
     if outcallid:
-        logger.debug(f"evaluating call permissions for outcallid: {outcallid}")
+        logger.debug("evaluating call permissions for outcallid: %s", outcallid)
         columns = (
             call_rights.RIGHTCALL_AUTHORIZATION_COLNAME,
             call_rights.RIGHTCALL_PASSWD_COLNAME,
