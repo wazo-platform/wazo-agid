@@ -1868,7 +1868,6 @@ def test_user_set_call_rights(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars[dv.AUTHORIZATION] == 'DENY'
 
 
-# test user_set_call_rights with a WAZO_DSTNUM with '-' characters
 def test_user_set_call_rights_outcall_with_hyphenated_number(
     base_asset: BaseAssetLaunchingHelper,
 ):
