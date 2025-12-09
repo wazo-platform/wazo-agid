@@ -20,6 +20,7 @@ class TestAgent(unittest.TestCase):
         self.agent_id = 11
         self.extension = '1234'
         self.context = 'foobar'
+        self.endpoint = 'endpoint'
         self.tenant = 'eeeeeeee-eeee--eeee-eeee-eeeeeeeeeeee'
 
     def test_login_agent(self):
@@ -28,11 +29,16 @@ class TestAgent(unittest.TestCase):
             self.agent_id,
             self.extension,
             self.context,
-            tenant_uuid=self.tenant,
+            self.endpoint,
+            self.tenant,
         )
 
         self.agentd_client.agents.login_agent.assert_called_once_with(
-            self.agent_id, self.extension, self.context, tenant_uuid=self.tenant
+            self.agent_id,
+            self.extension,
+            self.context,
+            endpoint=self.endpoint,
+            tenant_uuid=self.tenant,
         )
         self.agi.set_variable.assert_called_once_with(dv.AGENTSTATUS, 'logged')
 
@@ -46,7 +52,8 @@ class TestAgent(unittest.TestCase):
             self.agent_id,
             self.extension,
             self.context,
-            tenant_uuid=self.tenant,
+            self.endpoint,
+            self.tenant,
         )
 
         self.agi.set_variable.assert_called_once_with(dv.AGENTSTATUS, 'already_logged')
@@ -61,7 +68,8 @@ class TestAgent(unittest.TestCase):
             self.agent_id,
             self.extension,
             self.context,
-            tenant_uuid=self.tenant,
+            self.endpoint,
+            self.tenant,
         )
 
         self.agi.set_variable.assert_called_once_with(dv.AGENTSTATUS, 'already_in_use')
@@ -76,7 +84,8 @@ class TestAgent(unittest.TestCase):
             self.agent_id,
             self.extension,
             self.context,
-            tenant_uuid=self.tenant,
+            self.endpoint,
+            self.tenant,
         )
 
     def test_logoff_agent(self):

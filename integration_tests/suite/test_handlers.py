@@ -236,18 +236,21 @@ def test_agent_login(base_asset: BaseAssetLaunchingHelper):
     with base_asset.db.queries() as queries:
         agent = queries.insert_agent()
         extension = queries.insert_extension()
+        line = queries.insert_line()
 
     base_asset.agentd.expect_agent_login(
         agent['id'],
         agent['tenant_uuid'],
         extension['context'],
         extension['exten'],
+        line['name'],
     )
     recv_vars, recv_cmds = base_asset.agid.agent_login(
         agent['tenant_uuid'],
         agent['id'],
         extension['exten'],
         extension['context'],
+        line['name'],
     )
 
     assert recv_cmds['FAILURE'] is False
