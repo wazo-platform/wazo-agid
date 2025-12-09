@@ -5,12 +5,12 @@ class AgentdMockClient(MockServerClient):
     def __init__(self, host, port, version='1.0'):
         super().__init__(host, port, version)
 
-    def expect_agent_login(self, agent_id, tenant_uuid, context, extension):
+    def expect_agent_login(self, agent_id, tenant_uuid, context, extension, endpoint):
         self.simple_expectation(
             'POST',
             f'/agents/by-id/{agent_id}/login',
             204,
-            {'context': context, 'extension': extension},
+            {'context': context, 'extension': extension, 'endpoint': endpoint},
             headers={'Wazo-Tenant': tenant_uuid},
         )
 

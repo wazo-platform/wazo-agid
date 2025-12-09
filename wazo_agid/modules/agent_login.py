@@ -1,4 +1,4 @@
-# Copyright 2012-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -23,8 +23,8 @@ def agent_login(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
         agent_id = int(args[1])
         extension = args[2]
         context = args[3]
-
-        agent.login_agent(agi, agent_id, extension, context, tenant_uuid)
+        endpoint = args[4]
+        agent.login_agent(agi, agent_id, extension, context, endpoint, tenant_uuid)
     except Exception as e:
         logger.exception("Error while logging in agent")
         agi.dp_break(e)
