@@ -21,11 +21,18 @@ TIMEOUT = 10
 
 def _do_provision(client: ConfdClient, provcode: str, ip: str) -> None:
     if provcode == "autoprov":
+        logger.debug(f"putting device with ip {ip} in autoprov mode")
         device = _get_device(client, ip)
+        logger.debug(f"device found: {device}")
         client.devices.autoprov(device['id'])
     else:
+        logger.debug(
+            f"adding device with ip {ip} to line with provisioning code {provcode}"
+        )
         line = _get_line(client, provcode)
+        logger.debug(f"line found: {line}")
         device = _get_device(client, ip, only_autoprov=True)
+        logger.debug(f"device found: {device}")
         client.lines(line).add_device(device)
     client.devices.synchronize(device['id'])
 
