@@ -1681,7 +1681,12 @@ def test_provision_autoprov(base_asset: BaseAssetLaunchingHelper):
         '192.168.1.1:1234',
     )
 
-    assert base_asset.confd.verify_devices_called() is True
+    assert (
+        base_asset.confd.verify_devices_called(
+            search_term='autoprov', negate_search=True
+        )
+        is True
+    )
     assert base_asset.confd.verify_devices_autoprov_called(1) is True
     assert base_asset.confd.verify_devices_synchronize_called(1) is True
     base_asset.confd.clear()
@@ -1710,7 +1715,7 @@ def test_provision_add_device(base_asset: BaseAssetLaunchingHelper):
         '192.168.1.2:1234',
     )
 
-    assert base_asset.confd.verify_devices_called() is True
+    assert base_asset.confd.verify_devices_called(search_term='autoprov') is True
     assert base_asset.confd.verify_lines_called() is True
     assert base_asset.confd.verify_lines_devices_called(1, 2) is True
     assert base_asset.confd.verify_devices_synchronize_called(2) is True

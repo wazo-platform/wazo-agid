@@ -16,10 +16,23 @@ class ConfdMockClient(MockServerClient):
         return response.status_code == 202
 
     def expect_devices(self, devices):
-        self.simple_expectation('GET', '/devices', 200, devices)
+        self.simple_expectation(
+            'GET',
+            '/devices',
+            200,
+            devices,
+        )
 
-    def verify_devices_called(self):
-        response = self.verify_called('GET', '/devices')
+    def verify_devices_called(self, search_term=None, negate_search=False):
+        query_string_params = {}
+        if search_term is not None:
+            if negate_search:
+                query_string_params['!search'] = '.*'
+            else:
+                query_string_params['search'] = f'{search_term}'
+        response = self.verify_called(
+            'GET', '/devices', query_string_params=query_string_params
+        )
         return response.status_code == 202
 
     def expect_devices_autoprov(self, device_id):

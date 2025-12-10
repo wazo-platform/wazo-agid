@@ -55,7 +55,9 @@ class MockServerClient:
     def clear(self):
         return requests.put(f'{self._url}/clear')
 
-    def verify_called(self, method, path, times_called=1, **kwargs):
+    def verify_called(
+        self, method, path, times_called=1, query_string_params=None, **kwargs
+    ):
         verification = {
             'httpRequest': {
                 'method': method,
@@ -66,6 +68,8 @@ class MockServerClient:
                 'atMost': times_called,
             },
         }
+        if query_string_params is not None:
+            verification['httpRequest']['queryStringParameters'] = query_string_params
         verification.update(kwargs)
         return requests.put(f'{self._url}/verify', json=verification)
 

@@ -1,4 +1,4 @@
-# Copyright 2016-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -60,5 +60,6 @@ class TestDoProvision(unittest.TestCase):
 
         self.provision("autoprov", "127.0.0.1")
 
+        self.client.devices.list.assert_called_once_with(ip="127.0.0.1", recurse=True)
         self.client.devices.autoprov.assert_called_once_with(device['id'])
         self.client.devices.synchronize.assert_called_once_with(device['id'])
