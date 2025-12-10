@@ -20,17 +20,24 @@ TIMEOUT = 10
 
 
 def _do_provision(client: ConfdClient, provcode: str, ip: str) -> None:
-    device = _get_device(client, ip)
     if provcode == "autoprov":
+        device = _get_device(client, ip)
         client.devices.autoprov(device['id'])
     else:
         line = _get_line(client, provcode)
+        device = _get_device(client, ip, only_autoprov=True)
         client.lines(line).add_device(device)
     client.devices.synchronize(device['id'])
 
 
-def _get_device(client: ConfdClient, ip: str) -> dict[str, Any]:
-    response = client.devices.list(ip=ip, search='autoprov', recurse=True)
+def _get_device(
+    client: ConfdClient, ip: str, only_autoprov: bool = False
+) -> dict[str, Any]:
+    if only_autoprov:
+        response = client.devices.list(ip=ip, search='autoprov', recurse=True)
+    else:
+        response = client.devices.list(ip=ip, recurse=True)
+
     if response['total'] != 1:
         raise Exception(f"Device with ip {ip} not found")
     return response['items'][0]
