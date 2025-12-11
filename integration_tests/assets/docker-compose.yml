@@ -10,6 +10,7 @@ services:
       - "4573"
     environment:
       - PYTHONUNBUFFERED=TRUE
+      - SQLALCHEMY_WARN_20=1
     volumes:
       - "../..:/usr/src/wazo-agid"
       - "./etc/wazo-agid/conf.d/50-default.yml:/etc/wazo-agid/conf.d/50-default.yml"
