@@ -39,7 +39,7 @@ def queue_skill_rule_set(
         return
 
     with session_scope() as session:
-        skill_rule = session.query(QueueSkillRule).get(int(skill_rule_id))
+        skill_rule = session.get(QueueSkillRule, int(skill_rule_id))
         if not skill_rule:
             _set_variables(agi, call, timeout)
             return
