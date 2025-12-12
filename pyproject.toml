@@ -24,3 +24,6 @@ exclude = [
 [tool.isort]
 py_version = 311
 profile = "black"
+
+[tool.pytest]
+testpaths = ["wazo_agid"]
