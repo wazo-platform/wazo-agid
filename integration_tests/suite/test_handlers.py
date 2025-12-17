@@ -243,14 +243,14 @@ def test_agent_login(base_asset: BaseAssetLaunchingHelper):
         agent['tenant_uuid'],
         extension['context'],
         extension['exten'],
-        line['name'],
+        'PJSIP/' + line['name'],
     )
     recv_vars, recv_cmds = base_asset.agid.agent_login(
         agent['tenant_uuid'],
         agent['id'],
         extension['exten'],
         extension['context'],
-        line['name'],
+        'PJSIP/' + line['name'],
     )
 
     assert recv_cmds['FAILURE'] is False
