@@ -1,4 +1,4 @@
-# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2025 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -145,9 +145,11 @@ class _BaseAgidClient:
 
 
 class AgidClient(_BaseAgidClient):
-    def agent_login(self, tenant_uuid, agent_id, exten, context):
+    def agent_login(self, tenant_uuid, agent_id, exten, context, endpoint):
         with self._connect():
-            self._send_handler('agent_login', tenant_uuid, agent_id, exten, context)
+            self._send_handler(
+                'agent_login', tenant_uuid, agent_id, exten, context, endpoint
+            )
             variables, commands = self._process_communicate()
         return variables, commands
 

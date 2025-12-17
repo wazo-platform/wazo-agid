@@ -11,12 +11,17 @@ from wazo_agid.fastagi import FastAGI
 
 
 def login_agent(
-    agi: FastAGI, agent_id: int, extension: str, context: str, tenant_uuid: str
+    agi: FastAGI,
+    agent_id: int,
+    extension: str,
+    context: str,
+    endpoint: str,
+    tenant_uuid: str,
 ) -> None:
     agentd_client = agi.config['agentd']['client']
     try:
         agentd_client.agents.login_agent(
-            agent_id, extension, context, tenant_uuid=tenant_uuid
+            agent_id, extension, context, endpoint=endpoint, tenant_uuid=tenant_uuid
         )
     except AgentdClientError as e:
         if e.error == error.ALREADY_LOGGED:
