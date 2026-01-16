@@ -1,4 +1,4 @@
-# Copyright 2004-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2004-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Modifications by Proformatique from pyst-0.2:
@@ -17,7 +17,8 @@ from __future__ import annotations
 
 import pprint
 import re
-from typing import TYPE_CHECKING, Any, BinaryIO, NoReturn
+from io import BufferedIOBase
+from typing import TYPE_CHECKING, Any, NoReturn
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -101,7 +102,9 @@ class FastAGI:
     Asterisk.
     """
 
-    def __init__(self, inf: BinaryIO, outf: BinaryIO, config: dict[str, Any]) -> None:
+    def __init__(
+        self, inf: BufferedIOBase, outf: BufferedIOBase, config: dict[str, Any]
+    ) -> None:
         self.inf = inf
         self.outf = outf
         self.config = config
