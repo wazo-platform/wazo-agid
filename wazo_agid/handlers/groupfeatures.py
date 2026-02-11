@@ -1,4 +1,4 @@
-# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -191,6 +191,8 @@ class GroupFeatures(Handler):
             self._agi.set_variable('WAZO_GROUP_USER_TIMEOUT', self._user_timeout)
         else:
             self._agi.set_variable('WAZO_GROUP_USER_TIMEOUT', "")
+        ring_time = self._user_timeout or ''
+        self._agi.set_variable('__WAZO_RING_TIME', ring_time)
 
         if self._group_retry_delay:
             self._agi.set_variable('WAZO_GROUP_RETRY_DELAY', self._group_retry_delay)
