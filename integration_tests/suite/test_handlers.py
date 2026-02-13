@@ -1,4 +1,4 @@
-# Copyright 2021-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -1043,6 +1043,7 @@ def test_incoming_group_set_features(base_asset: BaseAssetLaunchingHelper):
     assert recv_vars['WAZO_GROUP_LABEL'] == 'incoming group set features'
     assert recv_vars[dv.GROUP_TIMEOUT] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
+    assert recv_vars['__WAZO_RING_TIME'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
     assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
     assert recv_vars[f'__{dv.GROUP_DTMF_RECORD_TOGGLE_ENABLED}'] == '1'
@@ -1101,6 +1102,7 @@ def test_incoming_group_set_features_linear_with_music(
     assert recv_vars[dv.GROUPNEEDANSWER] == '1'
     assert recv_vars[dv.GROUP_TIMEOUT] == '25'
     assert recv_vars['WAZO_GROUP_USER_TIMEOUT'] == '10'
+    assert recv_vars['__WAZO_RING_TIME'] == '10'
     assert recv_vars['WAZO_GROUP_STRATEGY'] == 'linear'
     assert recv_vars['WAZO_GROUP_RETRY_DELAY'] == '5'
 
