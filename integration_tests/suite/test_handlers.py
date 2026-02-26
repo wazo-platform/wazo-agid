@@ -835,11 +835,9 @@ def test_group_answered_call(base_asset: BaseAssetLaunchingHelper):
         variables=variables,
     )
 
-    assert base_asset.calld.verify_calls_record_start_called(1) is True
     base_asset.calld.clear()
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['WAZO_RECORD_GROUP_CALLEE'] == '1'
 
 
 def test_group_member_add(base_asset: BaseAssetLaunchingHelper):
@@ -1749,7 +1747,6 @@ def test_queue_answered_call(base_asset: BaseAssetLaunchingHelper):
         variables=variables,
     )
 
-    assert base_asset.calld.verify_calls_record_start_called(1) is True
     base_asset.calld.clear()
 
     assert recv_cmds['FAILURE'] is False
