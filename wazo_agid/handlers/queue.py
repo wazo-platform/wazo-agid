@@ -1,4 +1,4 @@
-# Copyright 2021-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -68,11 +68,22 @@ class AnswerHandler(handler.Handler):
         if not should_record:
             return
 
+        local_channel_2 = self._agi.env['agi_channel'].replace(';1', ';2')
+        callee_channel = self._agi.get_full_variable('${BRIDGEPEER}', local_channel_2)
+        if not callee_channel:
+            logger.error('Could not determine callee channel from %s', local_channel_2)
+            return
+        callee_channel_id = self._agi.get_full_variable(
+            '${CHANNEL(uniqueid)}', callee_channel
+        )
+        if not callee_channel_id:
+            logger.error('Could not get uniqueid for channel %s', callee_channel)
+            return
+
         calld = self._agi.config['calld']['client']
-        channel_id = self._agi.env['agi_uniqueid']
         tenant_uuid = self._agi.get_variable('WAZO_TENANT_UUID')
         self._agi.set_variable('WAZO_RECORD_QUEUE_CALLEE', '1')
         try:
-            calld.calls.start_record(channel_id, tenant_uuid=tenant_uuid)
+            calld.calls.start_record(callee_channel_id, tenant_uuid=tenant_uuid)
         except Exception as e:
             logger.error('Error during enabling call recording: %s', e)
