@@ -56,16 +56,8 @@ class AnswerHandler(handler.Handler):
         if not should_record:
             return
 
-        local_channel_2 = self._agi.env['agi_channel'].replace(';1', ';2')
-        callee_channel = self._agi.get_full_variable('${BRIDGEPEER}', local_channel_2)
-        if not callee_channel:
-            logger.error('Could not determine callee channel from %s', local_channel_2)
-            return
-        callee_channel_id = self._agi.get_full_variable(
-            '${CHANNEL(uniqueid)}', callee_channel
-        )
+        callee_channel_id = self.get_callee_channel_id()
         if not callee_channel_id:
-            logger.error('Could not get uniqueid for channel %s', callee_channel)
             return
 
         calld = self._agi.config['calld']['client']
