@@ -1936,6 +1936,7 @@ def test_vmbox_get_info(base_asset: BaseAssetLaunchingHelper):
 
 
 DATETIME_REGEX = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{1,6})?\+00:00)'
+UUID_REGEX = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 
 
 def test_wake_mobile(base_asset: BaseAssetLaunchingHelper) -> None:
@@ -1954,7 +1955,8 @@ def test_wake_mobile(base_asset: BaseAssetLaunchingHelper) -> None:
         (
             rf'Pushmobile,WAZO_DST_UUID: {user["uuid"]},'
             rf'WAZO_VIDEO_ENABLED: 1,WAZO_RING_TIME: 42,'
-            rf'WAZO_TIMESTAMP: {DATETIME_REGEX}'
+            rf'WAZO_TIMESTAMP: {DATETIME_REGEX},'
+            rf'WAZO_PUSH_TRACE_ID: {UUID_REGEX}'
         ),
         recv_cmds['EXEC UserEvent'],
     )
