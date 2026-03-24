@@ -4,7 +4,8 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from collections import deque
+from typing import TYPE_CHECKING, Deque
 
 from wazo_agid import dialplan_variables as dv
 
@@ -30,16 +31,20 @@ class Handler:
             self._agi.set_variable(dv.PATH_ID, path_id)
 
     def get_callee_channel_id(self):
-        local_channel_2 = self._agi.env['agi_channel'].replace(';1', ';2')
-        callee_channel = self._agi.get_full_variable('${BRIDGEPEER}', local_channel_2)
-        if not callee_channel:
-            logger.error('Could not determine callee channel from %s', local_channel_2)
-            return
-        callee_channel_id = self._agi.get_full_variable(
-            '${CHANNEL(uniqueid)}', callee_channel
-        )
-        if not callee_channel_id:
-            logger.error('Could not get uniqueid for channel %s', callee_channel)
-            return
+        visited: Deque = deque()
+        channel = self._agi.env['agi_channel']
+        while channel.startswith('Local/') and channel.endswith(';1'):
+            if channel in visited:
+                logger.debug('channel already visited, stopping infinite loop')
+                break
+            visited.append(channel)
+            channel = channel.replace(';1', ';2')
+            channel = self._agi.get_full_variable('${BRIDGEPEER}', channel)
+
+        if not (
+            callee_channel_id := self._agi.get_full_variable('${CHANNEL(uniqueid)}')
+        ):
+            logger.error('Could not get uniqueid for channel %s', channel)
+            return None
 
         return callee_channel_id
