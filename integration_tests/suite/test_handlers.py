@@ -827,14 +827,21 @@ def test_group_answered_call(base_asset: BaseAssetLaunchingHelper):
         'WAZO_CALLORIGIN': 'extern',
     }
 
+    full_variables = {
+        '${BRIDGEPEER}': 'PJSIP/test-000001',
+        '${CHANNEL(uniqueid)}': '1',
+    }
+
     base_asset.calld.expect_calls_record_start(1)
 
     recv_vars, recv_cmds = base_asset.agid.group_answered_call(
         agi_channel=f'Local/{extension["exten"]}@{extension["context"]}-0000000a1;1',
         agi_uniqueid='1',
         variables=variables,
+        full_variables=full_variables,
     )
 
+    assert base_asset.calld.verify_calls_record_start_called(1) is True
     base_asset.calld.clear()
 
     assert recv_cmds['FAILURE'] is False
@@ -1739,14 +1746,21 @@ def test_queue_answered_call(base_asset: BaseAssetLaunchingHelper):
         'WAZO_CALLORIGIN': 'extern',
     }
 
+    full_variables = {
+        '${BRIDGEPEER}': 'PJSIP/test-000001',
+        '${CHANNEL(uniqueid)}': '1',
+    }
+
     base_asset.calld.expect_calls_record_start(1)
 
     recv_vars, recv_cmds = base_asset.agid.queue_answered_call(
         agi_channel=f'Local/id-{agent["id"]}@agentcallback-0000000a1;1',
         agi_uniqueid='1',
         variables=variables,
+        full_variables=full_variables,
     )
 
+    assert base_asset.calld.verify_calls_record_start_called(1) is True
     base_asset.calld.clear()
 
     assert recv_cmds['FAILURE'] is False

@@ -42,7 +42,9 @@ class Handler:
             channel = self._agi.get_full_variable('${BRIDGEPEER}', channel)
 
         if not (
-            callee_channel_id := self._agi.get_full_variable('${CHANNEL(uniqueid)}')
+            callee_channel_id := self._agi.get_full_variable(
+                '${CHANNEL(uniqueid)}', channel
+            )
         ):
             logger.error('Could not get uniqueid for channel %s', channel)
             return None

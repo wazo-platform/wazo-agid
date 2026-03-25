@@ -1,4 +1,4 @@
-# Copyright 2021-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 
 GET_VARIABLE_REGEX = r'^GET VARIABLE "(.*)"$'
+GET_FULL_VARIABLE_REGEX = r'^GET FULL VARIABLE "([^"]*)"(?: "([^"]*)")?$'
 SET_VARIABLE_REGEX = r'^SET VARIABLE "(.*)" "(.*)"$'
 CMD_STATUS_REGEX = r'^Status: OK$'
 CMD_VERBOSE_REGEX = r'^VERBOSE "(.*)" (\d)$'
@@ -87,7 +88,7 @@ class _BaseAgidClient:
 
             recved += self._socket.recv(1024)
 
-    def _process_communicate(self, variables=None):
+    def _process_communicate(self, variables=None, full_variables=None):
         received_variables: dict[str, str] = {}
         received_commands: dict[str, list[str] | bool | str] = {
             'VERBOSE': [],
@@ -98,6 +99,15 @@ class _BaseAgidClient:
             if result:
                 received_commands['FAILURE'] = True
                 raise AGIFailException(received_commands)
+
+            result = re.search(GET_FULL_VARIABLE_REGEX, data)
+            if result:
+                name = result.group(1)
+                self._send_result(
+                    result=1 if full_variables and (name in full_variables) else 0,
+                    data=full_variables.get(name, '') if full_variables else '',
+                )
+                continue
 
             result = re.search(GET_VARIABLE_REGEX, data)
             if result:
@@ -170,10 +180,12 @@ class AgidClient(_BaseAgidClient):
         return variables, commands
 
     def __getattr__(self, handler_name):
-        def generic_call_handler(*args, variables=None, **kwargs):
+        def generic_call_handler(*args, variables=None, full_variables=None, **kwargs):
             with self._connect():
                 self._send_handler(handler_name, *args, **kwargs)
-                variables, commands = self._process_communicate(variables)
+                variables, commands = self._process_communicate(
+                    variables, full_variables
+                )
             return variables, commands
 
         return generic_call_handler
