@@ -84,14 +84,14 @@ def _user_set_call_rights(
             "SELECT groupfeatures.id FROM groupfeatures "
             "INNER JOIN queuemember "
             "ON groupfeatures.name = queuemember.queue_name "
-            "INNER JOIN queue "
-            "ON queue.name = queuemember.queue_name "
+            "INNER JOIN base_queue "
+            "ON base_queue.name = queuemember.queue_name "
             "WHERE queuemember.userid = %s "
             "AND queuemember.usertype = 'user' "
             "AND queuemember.category = 'group' "
             "AND queuemember.commented = 0 "
-            "AND queue.category = 'group' "
-            "AND queue.commented = 0",
+            "AND base_queue.category = 'group' "
+            "AND base_queue.commented = 0",
             (user.id,),
         )
         group_feature_res: list[DictRow] = cursor.fetchall()
