@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import logging
-from collections import deque
 from typing import TYPE_CHECKING
 
 from wazo_agid import dialplan_variables as dv
@@ -31,13 +30,13 @@ class Handler:
             self._agi.set_variable(dv.PATH_ID, path_id)
 
     def get_callee_channel_id(self):
-        visited: deque[str] = deque()
+        visited: set[str] = set()
         channel = self._agi.env['agi_channel']
         while channel.startswith('Local/') and channel.endswith(';1'):
             if channel in visited:
                 logger.debug('channel already visited, stopping infinite loop')
                 break
-            visited.append(channel)
+            visited.add(channel)
             channel = channel.replace(';1', ';2')
             channel = self._agi.get_full_variable('${BRIDGEPEER}', channel)
 
