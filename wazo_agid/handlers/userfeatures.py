@@ -1,4 +1,4 @@
-# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -405,7 +405,15 @@ class UserFeatures(Handler):
     def _set_call_record_enabled(self):
         is_being_recorded = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
         is_a_group_extension_member = self._agi.get_variable('WAZO_FROMGROUP') == '1'
-        if is_being_recorded or is_a_group_extension_member:
+
+        # group.AnswerHandler owns recording for group calls, except for blind
+        # transfer targets where it never runs.
+        is_a_blind_transfer = bool(self._agi.get_variable('BLINDTRANSFER'))
+        group_handler_will_record = (
+            is_a_group_extension_member and not is_a_blind_transfer
+        )
+
+        if is_being_recorded or group_handler_will_record:
             return
 
         is_internal = self._zone == 'intern'
