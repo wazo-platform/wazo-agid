@@ -1,4 +1,4 @@
-# Copyright 2021-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2021-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -8,7 +8,7 @@ from unittest.mock import Mock, call, patch
 
 from wazo_agid import dialplan_variables as dv
 
-from ..call_recording import record_caller
+from ..call_recording import record_caller, start_mix_monitor
 
 
 class TestRecordCaller(TestCase):
@@ -256,3 +256,25 @@ class TestRecordCaller(TestCase):
         self.agi.get_variable.assert_has_calls(calls)
 
         start_mix_monitor.assert_called_once()
+
+
+class TestStartMixMonitor(TestCase):
+    def setUp(self):
+        self.agi = Mock()
+        self.cursor = Mock()
+
+    @patch('wazo_agid.modules.call_recording._start_mix_monitor')
+    def test_does_not_record_when_already_recording(self, mock_start):
+        self.agi.get_variable.return_value = '1'
+
+        start_mix_monitor(self.agi, self.cursor, [])
+
+        mock_start.assert_not_called()
+
+    @patch('wazo_agid.modules.call_recording._start_mix_monitor')
+    def test_records_when_not_already_recording(self, mock_start):
+        self.agi.get_variable.return_value = ''
+
+        start_mix_monitor(self.agi, self.cursor, [])
+
+        mock_start.assert_called_once()

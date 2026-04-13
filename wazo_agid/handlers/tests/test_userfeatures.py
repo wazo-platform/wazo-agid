@@ -1,4 +1,4 @@
-# Copyright 2013-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -196,6 +196,23 @@ class TestUserFeatures(_BaseTestCase):
         userfeatures._set_call_record_enabled()
 
         self._agi.set_variable.assert_not_called()
+
+    def test_set_call_record_enabled_from_group_blind_transfer(self):
+        self._variables['WAZO_FROMGROUP'] = '1'
+        self._variables['BLINDTRANSFER'] = 'PJSIP/some-channel-00000001'
+
+        userfeatures = UserFeatures(self._agi, self._cursor, self._args)
+        userfeatures._user = Mock(
+            call_record_incoming_internal_enabled=True,
+            call_record_incoming_external_enabled=True,
+        )
+        userfeatures._zone = 'intern'
+
+        userfeatures._set_call_record_enabled()
+
+        self._agi.set_variable.assert_called_once_with(
+            '__WAZO_PEER_CALL_RECORD_ENABLED', '1'
+        )
 
     @patch('wazo_agid.handlers.userfeatures.extension_dao')
     @patch('wazo_agid.handlers.userfeatures.line_extension_dao')
