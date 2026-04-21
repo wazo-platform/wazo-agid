@@ -62,7 +62,9 @@ class AnswerHandler(handler.Handler):
 
         calld = self._agi.config['calld']['client']
         tenant_uuid = self._agi.get_variable('WAZO_TENANT_UUID')
-        self._agi.set_variable('WAZO_RECORD_GROUP_CALLEE', '1')
+        self._agi.set_variable(
+            f'SHARED(WAZO_RECORD_GROUP_CALLEE,{callee_channel_id})', '1'
+        )
         try:
             calld.calls.start_record(callee_channel_id, tenant_uuid=tenant_uuid)
         except Exception as e:
