@@ -29,7 +29,7 @@ class Handler:
             self._agi.set_variable(dv.PATH, path_type)
             self._agi.set_variable(dv.PATH_ID, path_id)
 
-    def get_callee_channel_id(self):
+    def get_callee_channel(self) -> tuple[str, str] | None:
         visited: set[str] = set()
         channel = self._agi.env['agi_channel']
         while channel.startswith('Local/') and channel.endswith(';1'):
@@ -48,4 +48,4 @@ class Handler:
             logger.error('Could not get uniqueid for channel %s', channel)
             return None
 
-        return callee_channel_id
+        return channel, callee_channel_id
