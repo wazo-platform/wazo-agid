@@ -56,14 +56,15 @@ class AnswerHandler(handler.Handler):
         if not should_record:
             return
 
-        callee_channel_id = self.get_callee_channel_id()
-        if not callee_channel_id:
+        if (callee_channel := self.get_callee_channel()) is None:
             return
+
+        callee_channel_name, callee_channel_id = callee_channel
 
         calld = self._agi.config['calld']['client']
         tenant_uuid = self._agi.get_variable('WAZO_TENANT_UUID')
         self._agi.set_variable(
-            f'SHARED(WAZO_RECORD_GROUP_CALLEE,{callee_channel_id})', '1'
+            f'SHARED(WAZO_RECORD_GROUP_CALLEE,{callee_channel_name})', '1'
         )
         try:
             calld.calls.start_record(callee_channel_id, tenant_uuid=tenant_uuid)
