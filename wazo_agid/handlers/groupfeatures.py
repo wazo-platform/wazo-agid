@@ -49,6 +49,7 @@ class GroupFeatures(Handler):
         self._display_queue()
         self._set_options()
         self._set_vars()
+        self._set_redirecting_info()
         self._set_preprocess_subroutine()
         self._set_timeout()
         self._set_dial_action()
@@ -198,6 +199,22 @@ class GroupFeatures(Handler):
             self._agi.set_variable('WAZO_GROUP_RETRY_DELAY', self._group_retry_delay)
         else:
             self._agi.set_variable('WAZO_GROUP_RETRY_DELAY', "0")
+
+    def _set_redirecting_info(self) -> None:
+        incall_id = self._agi.get_variable(dv.INCALL_ID)
+        dstnum = self._agi.get_variable(dv.DESTINATION_NUMBER)
+
+        if incall_id and dstnum:
+            redirecting_num = dstnum
+            extern_num = dstnum
+        else:
+            redirecting_num = self._exten
+            extern_num = ''
+
+        self._agi.set_variable(dv.DST_REDIRECTING_NAME, self._label)
+        self._agi.set_variable(dv.DST_REDIRECTING_NUM, redirecting_num)
+        self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NAME', extern_num)
+        self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NUM', extern_num)
 
     def _set_dial_action(self) -> None:
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
