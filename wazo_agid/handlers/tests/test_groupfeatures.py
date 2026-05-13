@@ -1,4 +1,4 @@
-# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -91,8 +91,8 @@ class TestGroupFeatures(unittest.TestCase):
             [
                 call(dv.DST_REDIRECTING_NAME, 'Support'),
                 call(dv.DST_REDIRECTING_NUM, '5551234567'),
-                call('WAZO_DST_REDIRECTING_EXTERN_NAME', '5551234567'),
-                call('WAZO_DST_REDIRECTING_EXTERN_NUM', '5551234567'),
+                call(dv.DST_REDIRECTING_EXTERN_NAME, '5551234567'),
+                call(dv.DST_REDIRECTING_EXTERN_NUM, '5551234567'),
             ]
         )
 
@@ -110,8 +110,8 @@ class TestGroupFeatures(unittest.TestCase):
             [
                 call(dv.DST_REDIRECTING_NAME, 'Support'),
                 call(dv.DST_REDIRECTING_NUM, '4001'),
-                call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
-                call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
+                call(dv.DST_REDIRECTING_EXTERN_NAME, ''),
+                call(dv.DST_REDIRECTING_EXTERN_NUM, ''),
             ]
         )
 
@@ -129,8 +129,8 @@ class TestGroupFeatures(unittest.TestCase):
             [
                 call(dv.DST_REDIRECTING_NAME, 'Support'),
                 call(dv.DST_REDIRECTING_NUM, '4001'),
-                call('WAZO_DST_REDIRECTING_EXTERN_NAME', ''),
-                call('WAZO_DST_REDIRECTING_EXTERN_NUM', ''),
+                call(dv.DST_REDIRECTING_EXTERN_NAME, ''),
+                call(dv.DST_REDIRECTING_EXTERN_NUM, ''),
             ]
         )
 

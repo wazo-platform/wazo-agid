@@ -213,8 +213,8 @@ class GroupFeatures(Handler):
 
         self._agi.set_variable(dv.DST_REDIRECTING_NAME, self._label)
         self._agi.set_variable(dv.DST_REDIRECTING_NUM, redirecting_num)
-        self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NAME', extern_num)
-        self._agi.set_variable('WAZO_DST_REDIRECTING_EXTERN_NUM', extern_num)
+        self._agi.set_variable(dv.DST_REDIRECTING_EXTERN_NAME, extern_num)
+        self._agi.set_variable(dv.DST_REDIRECTING_EXTERN_NUM, extern_num)
 
     def _set_dial_action(self) -> None:
         for event in ('noanswer', 'congestion', 'busy', 'chanunavail'):
