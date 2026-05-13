@@ -1,4 +1,4 @@
-# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -18,6 +18,7 @@ class TestGroupFeatures(unittest.TestCase):
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_members')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_options')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_vars')
+    @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_redirecting_info')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_preprocess_subroutine')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_timeout')
     @patch('wazo_agid.handlers.groupfeatures.GroupFeatures._set_dial_action')
@@ -33,6 +34,7 @@ class TestGroupFeatures(unittest.TestCase):
         _set_dial_action,
         _set_timeout,
         _set_preprocess_subroutine,
+        _set_redirecting_info,
         _set_vars,
         _set_options,
         _set_members,
@@ -45,6 +47,7 @@ class TestGroupFeatures(unittest.TestCase):
         _set_members.assert_called_once_with()
         _set_options.assert_called_once_with()
         _set_vars.assert_called_once_with()
+        _set_redirecting_info.assert_called_once_with()
         _set_preprocess_subroutine.assert_called_once_with()
         _set_timeout.assert_called_once_with()
         _set_dial_action.assert_called_once_with()
@@ -73,6 +76,63 @@ class TestGroupFeatures(unittest.TestCase):
 
         self._agi.set_variable.assert_any_call(dv.PATH, 'group')
         self._agi.set_variable.assert_any_call(dv.PATH_ID, 34)
+
+    def test_set_redirecting_info_from_did(self):
+        self.group_features._label = 'Support'
+        self.group_features._exten = '4001'
+        self._agi.get_variable.side_effect = lambda name: {
+            dv.INCALL_ID: '42',
+            dv.DESTINATION_NUMBER: '5551234567',
+        }[name]
+
+        self.group_features._set_redirecting_info()
+
+        self._agi.set_variable.assert_has_calls(
+            [
+                call(dv.DST_REDIRECTING_NAME, 'Support'),
+                call(dv.DST_REDIRECTING_NUM, '5551234567'),
+                call(dv.DST_REDIRECTING_EXTERN_NAME, '5551234567'),
+                call(dv.DST_REDIRECTING_EXTERN_NUM, '5551234567'),
+            ]
+        )
+
+    def test_set_redirecting_info_internal_call(self):
+        self.group_features._label = 'Support'
+        self.group_features._exten = '4001'
+        self._agi.get_variable.side_effect = lambda name: {
+            dv.INCALL_ID: '',
+            dv.DESTINATION_NUMBER: '4001',
+        }[name]
+
+        self.group_features._set_redirecting_info()
+
+        self._agi.set_variable.assert_has_calls(
+            [
+                call(dv.DST_REDIRECTING_NAME, 'Support'),
+                call(dv.DST_REDIRECTING_NUM, '4001'),
+                call(dv.DST_REDIRECTING_EXTERN_NAME, ''),
+                call(dv.DST_REDIRECTING_EXTERN_NUM, ''),
+            ]
+        )
+
+    def test_set_redirecting_info_missing_dstnum(self):
+        self.group_features._label = 'Support'
+        self.group_features._exten = '4001'
+        self._agi.get_variable.side_effect = lambda name: {
+            dv.INCALL_ID: '42',
+            dv.DESTINATION_NUMBER: '',
+        }[name]
+
+        self.group_features._set_redirecting_info()
+
+        self._agi.set_variable.assert_has_calls(
+            [
+                call(dv.DST_REDIRECTING_NAME, 'Support'),
+                call(dv.DST_REDIRECTING_NUM, '4001'),
+                call(dv.DST_REDIRECTING_EXTERN_NAME, ''),
+                call(dv.DST_REDIRECTING_EXTERN_NUM, ''),
+            ]
+        )
 
     def test_set_call_record_options_toggle_enabled(self):
         self.group_features._dtmf_record_toggle = True
