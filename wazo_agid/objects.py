@@ -1,4 +1,4 @@
-# Copyright 2007-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2007-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -1018,7 +1018,7 @@ class Context:
 
 
 CALLERID_MATCHER = re.compile(
-    r'^(?:"(.+)"|([a-zA-Z0-9\-\.\!%\*_\+`\'\~]+)) ?(?:<(\+?[0-9\*#]+)>)?$'
+    r'^ *(?:"(.+)"|([\w\-\.\!%\*\+`\'\~ ]*[^ "])) *(?:<(\+?[0-9\*#]+)>)?$'
 ).match
 CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
 
@@ -1027,7 +1027,7 @@ class CallerID:
     @staticmethod
     def parse(callerid):
         logger.debug('caller_id parse: parsing "%s"', callerid)
-        m = CALLERID_MATCHER(callerid)
+        m = CALLERID_MATCHER(callerid) if callerid else None
 
         if not m:
             logger.debug('caller_id parse: could not match callerid, giving up')
