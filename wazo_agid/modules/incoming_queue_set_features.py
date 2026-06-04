@@ -1,4 +1,4 @@
-# Copyright 2006-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -101,6 +101,7 @@ def incoming_queue_set_features(agi, cursor, args):
     agi.set_variable(dv.PICKUPGROUP, ','.join(pickups))
 
     set_call_record_side(agi, queue)
+    _set_redirecting_info(agi, queue)
 
 
 def _set_call_record_toggle(agi, queue):
@@ -109,6 +110,23 @@ def _set_call_record_toggle(agi, queue):
         f'__{dv.QUEUE_DTMF_RECORD_TOGGLE_ENABLED}',
         toggle_enabled,
     )
+
+
+def _set_redirecting_info(agi, queue: objects.Queue) -> None:
+    incall_id = agi.get_variable(dv.INCALL_ID)
+    dstnum = agi.get_variable(dv.DESTINATION_NUMBER)
+
+    if incall_id and dstnum:
+        redirecting_num = dstnum
+        extern_num = dstnum
+    else:
+        redirecting_num = queue.number
+        extern_num = ''
+
+    agi.set_variable(dv.DST_REDIRECTING_NAME, queue.name)
+    agi.set_variable(dv.DST_REDIRECTING_NUM, redirecting_num)
+    agi.set_variable(dv.DST_REDIRECTING_EXTERN_NAME, extern_num)
+    agi.set_variable(dv.DST_REDIRECTING_EXTERN_NUM, extern_num)
 
 
 def _set_wrapup_time(agi, queue):
