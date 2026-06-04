@@ -1018,7 +1018,7 @@ class Context:
 
 
 CALLERID_MATCHER = re.compile(
-    r'^ *(?:"(.+)"|([\w\-\.\!%\*_\+`\'\~ ]*[^ "])) *(?:<(\+?[0-9\*#]+)>)?$'
+    r'^ *(?:"(.+)"|([\w\-\.\!%\*\+`\'\~ ]*[^ "])) *(?:<(\+?[0-9\*#]+)>)?$'
 ).match
 CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
 
