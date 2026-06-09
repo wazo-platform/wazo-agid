@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import logging
-import uuid
 from typing import TYPE_CHECKING
 
 from wazo_agid import agid
@@ -19,18 +18,12 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# The recording file name template must be kept synced with RECORDING_PATH_REGEX
-# in wazo-call-logd
-CALL_RECORDING_FILENAME_TEMPLATE = (
-    '/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{recording_uuid}.wav'
-)
-
 
 def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     calld = agi.config['calld']['client']
     channel_id = agi.env['agi_uniqueid']
     tenant_uuid = agi.get_variable('WAZO_TENANT_UUID')
-    if agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1':
+    if agi.get_variable(dv.CALL_RECORD_ACTIVE) == '1':
         if agi.get_variable('WAZO_RECORDING_PAUSED') == '1':
             _resume_call_recording(agi, calld, channel_id, tenant_uuid)
         else:
@@ -40,7 +33,7 @@ def call_recording(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
 
 
 def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
-    is_being_recorded = agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
+    is_being_recorded = agi.get_variable(dv.CALL_RECORD_ACTIVE) == '1'
     if is_being_recorded:
         return
 
@@ -65,7 +58,8 @@ def record_caller(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     if not should_record:
         return
 
-    _start_mix_monitor(agi)
+    agi.set_variable(f'__{dv.RECORD_PENDING}', '1')
+    agi.set_variable(f'__{dv.RECORD_TARGET_CHANNEL}', agi.env['agi_uniqueid'])
 
 
 def _enable_call_recording(agi, calld, channel_id, tenant_uuid):
@@ -93,31 +87,24 @@ def _resume_call_recording(agi, calld, channel_id, tenant_uuid):
 
 
 def start_mix_monitor(agi, cursor, args):
-    if agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1':
+    if agi.get_variable(dv.CALL_RECORD_ACTIVE) == '1':
         return
-    _start_mix_monitor(agi)
+    agi.set_variable(f'__{dv.RECORD_PENDING}', '1')
 
 
-def _start_mix_monitor(agi):
+def record_answered(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
+    if agi.get_variable(dv.RECORD_PENDING) != '1':
+        return
+    if agi.get_variable(dv.CALL_RECORD_ACTIVE) == '1':
+        return
+
+    channel_id = agi.get_variable(dv.RECORD_TARGET_CHANNEL) or agi.env['agi_uniqueid']
+    calld = agi.config['calld']['client']
     tenant_uuid = agi.get_variable(dv.TENANT_UUID)
-    recording_uuid = str(uuid.uuid4())
-    filename = CALL_RECORDING_FILENAME_TEMPLATE.format(
-        tenant_uuid=tenant_uuid,
-        recording_uuid=recording_uuid,
-    )
-    mix_monitor_options: str = agi.get_variable('WAZO_MIXMONITOR_OPTIONS')
-    if 'p(' in mix_monitor_options:
-        p_position = mix_monitor_options.index('p(')
-        ending_paren_position = mix_monitor_options.index(')')
-        pre_p = mix_monitor_options[:p_position]
-        post_p = mix_monitor_options[ending_paren_position + 1 :]
-        mix_monitor_options = pre_p + post_p
-
-    agi.appexec('MixMonitor', f'{filename},{mix_monitor_options}')
-    agi.set_variable(dv.RECORDING_UUID, recording_uuid)
-    agi.set_variable('WAZO_CALL_RECORD_ACTIVE', '1')
+    _enable_call_recording(agi, calld, channel_id, tenant_uuid)
 
 
 agid.register(call_recording)
 agid.register(record_caller)
 agid.register(start_mix_monitor)
+agid.register(record_answered)
