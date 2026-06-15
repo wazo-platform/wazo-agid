@@ -68,6 +68,8 @@ def _enable_call_recording(agi, calld, channel_id, tenant_uuid):
     except Exception as e:
         logger.error('Error during enabling call recording: %s', e)
         agi.verbose(f'Could not enable call recording: {e}')
+        return False
+    return True
 
 
 def _pause_call_recording(agi, calld, channel_id, tenant_uuid):
@@ -101,7 +103,9 @@ def record_answered(agi: FastAGI, cursor: DictCursor, args: list[str]) -> None:
     channel_id = agi.get_variable(dv.RECORD_TARGET_CHANNEL) or agi.env['agi_uniqueid']
     calld = agi.config['calld']['client']
     tenant_uuid = agi.get_variable(dv.TENANT_UUID)
-    _enable_call_recording(agi, calld, channel_id, tenant_uuid)
+    if _enable_call_recording(agi, calld, channel_id, tenant_uuid):
+        # Consume the flag so later legs don't re-record the same target.
+        agi.set_variable(f'__{dv.RECORD_PENDING}', '')
 
 
 agid.register(call_recording)

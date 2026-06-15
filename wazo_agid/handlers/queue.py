@@ -24,7 +24,8 @@ class AnswerHandler(handler.Handler):
             self._agi.verbose(e)
             return
 
-        self.record_call(callee)
+        if not self.record_call(callee):
+            self.record_pending_caller()
 
     def get_user(self) -> objects.User:
         channel_name = self._agi.env['agi_channel']
@@ -44,10 +45,10 @@ class AnswerHandler(handler.Handler):
 
         raise LookupError(f'Failed to find a matching user from {channel_name}')
 
-    def record_call(self, callee: objects.User) -> None:
+    def record_call(self, callee: objects.User) -> bool:
         recording_is_on = self._agi.get_variable('WAZO_CALL_RECORD_ACTIVE') == '1'
         if recording_is_on:
-            return
+            return True
 
         call_origin = self._agi.get_variable('WAZO_CALLORIGIN')
         external = call_origin == 'extern'
@@ -66,10 +67,10 @@ class AnswerHandler(handler.Handler):
         )
 
         if not should_record:
-            return
+            return False
 
         if (callee_channel := self.get_callee_channel()) is None:
-            return
+            return False
 
         callee_channel_name, callee_channel_id = callee_channel
 
@@ -82,3 +83,5 @@ class AnswerHandler(handler.Handler):
             calld.calls.start_record(callee_channel_id, tenant_uuid=tenant_uuid)
         except Exception as e:
             logger.error('Error during enabling call recording: %s', e)
+            return False
+        return True

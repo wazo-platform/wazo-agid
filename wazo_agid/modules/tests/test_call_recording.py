@@ -309,6 +309,31 @@ class TestRecordAnswered(TestCase):
             'caller-channel-id', tenant_uuid='the-tenant-uuid'
         )
 
+    def test_consumes_pending_flag_after_starting(self):
+        self.agi.get_variable.side_effect = {
+            dv.RECORD_PENDING: '1',
+            'WAZO_CALL_RECORD_ACTIVE': '',
+            dv.RECORD_TARGET_CHANNEL: 'caller-channel-id',
+            dv.TENANT_UUID: 'the-tenant-uuid',
+        }.get
+
+        record_answered(self.agi, self.cursor, [])
+
+        self.agi.set_variable.assert_called_once_with(RECORD_PENDING, '')
+
+    def test_does_not_consume_pending_flag_when_start_fails(self):
+        self.agi.get_variable.side_effect = {
+            dv.RECORD_PENDING: '1',
+            'WAZO_CALL_RECORD_ACTIVE': '',
+            dv.RECORD_TARGET_CHANNEL: 'caller-channel-id',
+            dv.TENANT_UUID: 'the-tenant-uuid',
+        }.get
+        self.calld.calls.start_record.side_effect = Exception('boom')
+
+        record_answered(self.agi, self.cursor, [])
+
+        self.agi.set_variable.assert_not_called()
+
     def test_starts_recording_on_own_channel_when_no_target(self):
         self.agi.get_variable.side_effect = {
             dv.RECORD_PENDING: '1',

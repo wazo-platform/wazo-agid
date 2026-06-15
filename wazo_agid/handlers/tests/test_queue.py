@@ -59,3 +59,27 @@ class TestAnswerHandler(TestCase):
         self.agi.env = {'agi_channel': 'PJSIP/wedontcare-00000001;1'}
 
         assert_that(calling(self.handler.get_user), raises(LookupError))
+
+    def test_execute_honors_pending_caller_when_callee_not_recorded(self):
+        record_pending_caller = Mock()
+        with patch.multiple(
+            self.handler,
+            get_user=Mock(return_value=Mock()),
+            record_call=Mock(return_value=False),
+            record_pending_caller=record_pending_caller,
+        ):
+            self.handler.execute()
+
+        record_pending_caller.assert_called_once_with()
+
+    def test_execute_skips_pending_caller_when_callee_recorded(self):
+        record_pending_caller = Mock()
+        with patch.multiple(
+            self.handler,
+            get_user=Mock(return_value=Mock()),
+            record_call=Mock(return_value=True),
+            record_pending_caller=record_pending_caller,
+        ):
+            self.handler.execute()
+
+        record_pending_caller.assert_not_called()
