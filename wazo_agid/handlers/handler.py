@@ -46,7 +46,7 @@ class Handler:
         try:
             calld.calls.start_record(channel_id, tenant_uuid=tenant_uuid)
         except Exception as e:
-            logger.error('Error during enabling call recording: %s', e)
+            logger.error('Error enabling call recording: %s', e)
             return False
         # Consume the flag so later legs don't re-record the same target.
         self._agi.set_variable(f'__{dv.RECORD_PENDING}', '')
