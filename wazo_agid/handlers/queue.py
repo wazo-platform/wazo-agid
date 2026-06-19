@@ -24,8 +24,8 @@ class AnswerHandler(handler.Handler):
             self._agi.verbose(e)
             return
 
-        if not self.record_call(callee):
-            self.record_pending_caller()
+        if not self.record_pending_caller():
+            self.record_call(callee)
 
     def get_user(self) -> objects.User:
         channel_name = self._agi.env['agi_channel']

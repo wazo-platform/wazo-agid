@@ -68,3 +68,27 @@ class TestAnswerHandler(TestCase):
         }
 
         assert_that(calling(self.handler.get_user), raises(LookupError))
+
+    def test_execute_pending_caller_takes_priority_over_callee(self):
+        record_call = Mock()
+        with patch.multiple(
+            self.handler,
+            get_user=Mock(return_value=Mock()),
+            record_pending_caller=Mock(return_value=True),
+            record_call=record_call,
+        ):
+            self.handler.execute()
+
+        record_call.assert_not_called()
+
+    def test_execute_records_callee_when_no_pending_caller(self):
+        record_call = Mock()
+        with patch.multiple(
+            self.handler,
+            get_user=Mock(return_value=Mock()),
+            record_pending_caller=Mock(return_value=False),
+            record_call=record_call,
+        ):
+            self.handler.execute()
+
+        record_call.assert_called_once()
