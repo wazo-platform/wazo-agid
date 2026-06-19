@@ -29,6 +29,29 @@ class Handler:
             self._agi.set_variable(dv.PATH, path_type)
             self._agi.set_variable(dv.PATH_ID, path_id)
 
+    def record_pending_caller(self) -> bool:
+        # Honor a deferred caller record preference (WAZO_RECORD_PENDING) set by
+        # record_caller before the call entered the queue/group.
+        if self._agi.get_variable(dv.RECORD_PENDING) != '1':
+            return False
+        if self._agi.get_variable(dv.CALL_RECORD_ACTIVE) == '1':
+            return False
+
+        channel_id = (
+            self._agi.get_variable(dv.RECORD_TARGET_CHANNEL)
+            or self._agi.env['agi_uniqueid']
+        )
+        calld = self._agi.config['calld']['client']
+        tenant_uuid = self._agi.get_variable(dv.TENANT_UUID)
+        try:
+            calld.calls.start_record(channel_id, tenant_uuid=tenant_uuid)
+        except Exception as e:
+            logger.error('Error enabling call recording: %s', e)
+            return False
+        # Consume the flag so later legs don't re-record the same target.
+        self._agi.set_variable(f'__{dv.RECORD_PENDING}', '')
+        return True
+
     def get_callee_channel(self) -> tuple[str, str] | None:
         visited: set[str] = set()
         channel = self._agi.env['agi_channel']

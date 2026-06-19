@@ -598,7 +598,6 @@ def test_call_record_caller(base_asset: BaseAssetLaunchingHelper):
         'WAZO_TENANT_UUID': user['tenant_uuid'],
         'WAZO_CALLORIGIN': 'intern',
         dv.OUTCALL_ID: '',
-        'WAZO_MIXMONITOR_OPTIONS': 'mix-options',
     }
 
     recv_vars, recv_cmds = base_asset.agid.record_caller(
@@ -608,18 +607,33 @@ def test_call_record_caller(base_asset: BaseAssetLaunchingHelper):
     )
 
     assert recv_cmds['FAILURE'] is False
-    assert recv_vars['WAZO_CALL_RECORD_ACTIVE'] == '1'
-    assert (
-        recv_vars['WAZO_RECORDING_UUID'] is not None
-        and recv_vars['WAZO_RECORDING_UUID'] != ''
+    assert recv_vars[f'__{dv.RECORD_PENDING}'] == '1'
+    assert recv_vars[f'__{dv.RECORD_TARGET_CHANNEL}'] == '1'
+
+
+def test_record_answered(base_asset: BaseAssetLaunchingHelper):
+    with base_asset.db.queries() as queries:
+        user = queries.insert_user()
+
+    variables = {
+        dv.RECORD_PENDING: '1',
+        'WAZO_CALL_RECORD_ACTIVE': '0',
+        dv.RECORD_TARGET_CHANNEL: '1',
+        'WAZO_TENANT_UUID': user['tenant_uuid'],
+    }
+
+    base_asset.calld.expect_calls_record_start(1)
+
+    recv_vars, recv_cmds = base_asset.agid.record_answered(
+        agi_channel=f'Local/id-{user["id"]}@default-0000000a1;1',
+        agi_uniqueid='1',
+        variables=variables,
     )
-    tenant_uuid = user['tenant_uuid']
-    uuid_reg = r'[a-f0-9\-]{36}'
-    matches = re.match(
-        f'/var/lib/wazo/sounds/tenants/{tenant_uuid}/monitor/{uuid_reg}.wav,mix-options',
-        recv_cmds['EXEC MixMonitor'],
-    )
-    assert matches is not None
+
+    assert base_asset.calld.verify_calls_record_start_called(1) is True
+    base_asset.calld.clear()
+
+    assert recv_cmds['FAILURE'] is False
 
 
 def test_check_diversion_hold_time(base_asset: BaseAssetLaunchingHelper):
