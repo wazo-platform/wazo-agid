@@ -1,4 +1,4 @@
-# Copyright 2013-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -181,8 +181,7 @@ class TestCallerIdForPhone(unittest.TestCase):
         callerid_forphones(self.agi, Mock(), Mock())
 
         query = {
-            'query': dedent(
-                '''
+            'query': dedent('''
             query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
                 user(uuid: $uuid) {
                     contacts(profile: "default", extens: $extens) {
@@ -193,8 +192,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                         }
                     }
                 }
-            }'''
-            ),
+            }'''),
             'variables': {
                 'uuid': 'user_uuid',
                 'extens': [
@@ -247,8 +245,7 @@ class TestCallerIdForPhone(unittest.TestCase):
         callerid_forphones(self.agi, Mock(), Mock())
 
         query = {
-            'query': dedent(
-                '''
+            'query': dedent('''
             query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
                 user(uuid: $uuid) {
                     contacts(profile: "default", extens: $extens) {
@@ -259,8 +256,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                         }
                     }
                 }
-            }'''
-            ),
+            }'''),
             'variables': {
                 'uuid': 'user_uuid',
                 'extens': [
@@ -312,8 +308,7 @@ class TestCallerIdForPhone(unittest.TestCase):
         callerid_forphones(self.agi, Mock(), Mock())
 
         query = {
-            'query': dedent(
-                '''
+            'query': dedent('''
             query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
                 user(uuid: $uuid) {
                     contacts(profile: "default", extens: $extens) {
@@ -324,8 +319,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                         }
                     }
                 }
-            }'''
-            ),
+            }'''),
             'variables': {
                 'uuid': FAKE_WAZO_USER_UUID,
                 'extens': [self.agi.env['agi_callerid']],
@@ -380,8 +374,7 @@ class TestCallerIdForPhone(unittest.TestCase):
         callerid_forphones(self.agi, Mock(), Mock())
 
         query = {
-            'query': dedent(
-                '''
+            'query': dedent('''
             query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
                 user(uuid: $uuid) {
                     contacts(profile: "default", extens: $extens) {
@@ -392,8 +385,7 @@ class TestCallerIdForPhone(unittest.TestCase):
                         }
                     }
                 }
-            }'''
-            ),
+            }'''),
             'variables': {
                 'uuid': 'user_uuid',
                 'extens': [self.agi.env['agi_callerid']],

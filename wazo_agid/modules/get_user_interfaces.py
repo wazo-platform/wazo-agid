@@ -1,4 +1,4 @@
-# Copyright 2018-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ class _UserLine:
             for interface in self._find_matching_interfaces(endpoint):
                 self.interfaces.append(interface)
 
-    def _find_matching_interfaces(self, endpoint: str) -> Generator[str, None, None]:
+    def _find_matching_interfaces(self, endpoint: str) -> Generator[str]:
         protocol, name = endpoint.split('/', 1)
         if protocol == 'PJSIP':
             contacts = build_sip_interface(self._agi, self._user_uuid, name)

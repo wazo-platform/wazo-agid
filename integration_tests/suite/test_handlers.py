@@ -296,8 +296,7 @@ def test_callback(base_asset: BaseAssetLaunchingHelper):
         '/var/spool/asterisk/outgoing/', f'{extension_number}-*.call'
     )
     assert file_name
-    expected_content = dedent(
-        f'''\
+    expected_content = dedent(f'''\
         Channel: Local/{extension_number}@{context}
         MaxRetries: 0
         RetryTime: 30
@@ -306,8 +305,7 @@ def test_callback(base_asset: BaseAssetLaunchingHelper):
         Set: {dv.DISACONTEXT}={context}
         Context: wazo-callbackdisa
         Extension: s
-        '''
-    ).strip('\n')
+        ''').strip('\n')
     assert base_asset.filesystem.read_file(file_name) == expected_content
 
 
