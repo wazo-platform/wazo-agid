@@ -1,4 +1,4 @@
-# Copyright 2018-2024 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -40,14 +40,6 @@ class GroupInfo:
     members: list[UserMemberInfo | ExtensionMemberInfo]
     name: str
     ring_in_use: bool
-
-
-def build_user_interface(user_uuid: str, user_interfaces):
-    return f'Local/{user_uuid}@usersharedlines'
-
-
-def build_extension_interface(extension: str, context: str):
-    return f'Local/{extension}@{context}'
 
 
 def get_group_info(group_id: int) -> GroupInfo:

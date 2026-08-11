@@ -214,21 +214,6 @@ class VMBox:
         self.language = res['language']
         self.skipcheckpass = res['skipcheckpass']
 
-    def toggle_enable(self, enabled=None):
-        if enabled is None:
-            enabled = int(not self.commented)
-        else:
-            enabled = int(not bool(enabled))
-
-        self.cursor.execute(
-            "UPDATE voicemail SET commented = %s WHERE uniqueid = %s",
-            (enabled, self.id),
-        )
-
-        if self.cursor.rowcount != 1:
-            raise DBUpdateException("Unable to perform the requested update")
-        self.commented = enabled
-
     def has_password(self) -> bool:
         return bool(self.password) and self.skipcheckpass == 0
 
