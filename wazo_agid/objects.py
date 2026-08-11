@@ -140,7 +140,6 @@ class VMBox:
     context: str
     password: str | None
     email: str | None
-    commented: Literal[0, 1]
     language: str | None
     skipcheckpass: Literal[0, 1]
 
@@ -162,7 +161,6 @@ class VMBox:
             'context',
             'password',
             'email',
-            'commented',
             'language',
             'skipcheckpass',
         )
@@ -210,7 +208,6 @@ class VMBox:
         self.context = res['context']
         self.password = res['password']
         self.email = res['email']
-        self.commented = res['commented']
         self.language = res['language']
         self.skipcheckpass = res['skipcheckpass']
 
@@ -974,7 +971,7 @@ class Context:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('context.name', 'context.displayname', 'contextinclude.include')
+        columns = ('context.name', 'contextinclude.include')
         query = SQL(
             "SELECT {columns} FROM context "
             "LEFT JOIN contextinclude "
@@ -994,7 +991,6 @@ class Context:
             raise LookupError(f"Unable to find context entry (name: {context})")
 
         self.name = res[0]['name']
-        self.displayname = res[0]['displayname']
         self.include = [self.name]
 
         for row in res:

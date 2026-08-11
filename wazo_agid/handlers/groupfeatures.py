@@ -40,7 +40,6 @@ class GroupFeatures(Handler):
         self._ignore_forward = None
         self._preprocess_subroutine = None
         self._musicclass = None
-        self._pickup_member = None
         self._max_calls: int = None  # type: ignore[assignment]
         self._tenant_uuid = None
 
