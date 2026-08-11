@@ -40,7 +40,6 @@ class UserFeatures(Handler):
         self._zone: str | None = None
         self._srcnum: str | None = None
         self._dstnum: str | None = None
-        self._feature_list = None
         self._caller: objects.User | None = None
         self._user: objects.User = None  # type: ignore[assignment]
         self._moh_uuid: str | None = None

@@ -1,4 +1,4 @@
-# Copyright 2006-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2006-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -32,7 +32,6 @@ class OutgoingFeatures(Handler):
         self.user: objects.User | None = None
         self.userid: int | str | None = None
         self.callerid = None
-        self.callrecord = False
         self.options = ""
         self._context: str | None = None
         self.outcall = objects.Outcall(self._agi, self._cursor)
@@ -72,7 +71,6 @@ class OutgoingFeatures(Handler):
             if not self.outcall.internal:
                 if self.user.enableonlinerec:
                     self.options += "X"
-                self.callrecord = self.user.call_record_outgoing_external_enabled
         except (ValueError, LookupError):
             logger.debug('Could not retrieve user %s', self.userid)
         self._agi.set_variable(dv.CALL_OPTIONS, self.options)
@@ -203,7 +201,6 @@ class OutgoingFeatures(Handler):
         self.dialpattern_id = self._agi.get_variable(dv.DESTINATION_ID)
         self.dstnum = self._agi.get_variable(dv.DESTINATION_NUMBER)
         self.srcnum = self._agi.get_variable(dv.SOURCE_NUMBER)
-        self.orig_dstnum = self.dstnum
         self._context = self._agi.get_variable(dv.BASE_CONTEXT)
         self._tenant_uuid = self._agi.get_variable(dv.TENANT_UUID)
 

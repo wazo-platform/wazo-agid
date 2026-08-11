@@ -140,7 +140,6 @@ class VMBox:
     context: str
     password: str | None
     email: str | None
-    commented: Literal[0, 1]
     language: str | None
     skipcheckpass: Literal[0, 1]
 
@@ -162,7 +161,6 @@ class VMBox:
             'context',
             'password',
             'email',
-            'commented',
             'language',
             'skipcheckpass',
         )
@@ -210,24 +208,8 @@ class VMBox:
         self.context = res['context']
         self.password = res['password']
         self.email = res['email']
-        self.commented = res['commented']
         self.language = res['language']
         self.skipcheckpass = res['skipcheckpass']
-
-    def toggle_enable(self, enabled=None):
-        if enabled is None:
-            enabled = int(not self.commented)
-        else:
-            enabled = int(not bool(enabled))
-
-        self.cursor.execute(
-            "UPDATE voicemail SET commented = %s WHERE uniqueid = %s",
-            (enabled, self.id),
-        )
-
-        if self.cursor.rowcount != 1:
-            raise DBUpdateException("Unable to perform the requested update")
-        self.commented = enabled
 
     def has_password(self) -> bool:
         return bool(self.password) and self.skipcheckpass == 0
@@ -989,7 +971,7 @@ class Context:
         self.agi = agi
         self.cursor = cursor
 
-        columns = ('context.name', 'context.displayname', 'contextinclude.include')
+        columns = ('context.name', 'contextinclude.include')
         query = SQL(
             "SELECT {columns} FROM context "
             "LEFT JOIN contextinclude "
@@ -1009,7 +991,6 @@ class Context:
             raise LookupError(f"Unable to find context entry (name: {context})")
 
         self.name = res[0]['name']
-        self.displayname = res[0]['displayname']
         self.include = [self.name]
 
         for row in res:
