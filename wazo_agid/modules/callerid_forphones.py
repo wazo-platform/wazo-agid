@@ -1,4 +1,4 @@
-# Copyright 2012-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2012-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -85,8 +85,7 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                 logger.debug('Could not parse number %s', cid_number)
 
         query = {
-            'query': dedent(
-                '''
+            'query': dedent('''
             query GetExtensFromUser($uuid: String!, $extens: [String!]!) {
                 user(uuid: $uuid) {
                     contacts(profile: "default", extens: $extens) {
@@ -97,8 +96,7 @@ def callerid_forphones(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -
                         }
                     }
                 }
-            }'''
-            ),
+            }'''),
             'variables': {
                 'uuid': user_uuid,
                 'extens': numbers,

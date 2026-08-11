@@ -1,4 +1,4 @@
-# Copyright 2013-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
@@ -421,9 +421,9 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
         caller_id_header = '5555551234'
-        self._channel_variables[
-            'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
-        ] = caller_id_header
+        self._channel_variables['PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'] = (
+            caller_id_header
+        )
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -441,9 +441,9 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
         caller_id_header = 'anonymous'
-        self._channel_variables[
-            'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
-        ] = caller_id_header
+        self._channel_variables['PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'] = (
+            caller_id_header
+        )
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -465,9 +465,9 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         user = a_user().with_custom_out_caller_id('"Custom1"').build()
         outcall = an_outcall().external().build()
         caller_id_header = 'anonymous'
-        self._channel_variables[
-            'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
-        ] = caller_id_header
+        self._channel_variables['PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'] = (
+            caller_id_header
+        )
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user
@@ -488,9 +488,9 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         user = a_user().with_custom_out_caller_id('default').build()
         outcall = an_outcall().external().build()
         caller_id_header = 'anonymous'
-        self._channel_variables[
-            'PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'
-        ] = caller_id_header
+        self._channel_variables['PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'] = (
+            caller_id_header
+        )
 
         self.outgoing_features.outcall = outcall
         self.outgoing_features.user = user

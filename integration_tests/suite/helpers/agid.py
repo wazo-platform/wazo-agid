@@ -76,7 +76,7 @@ class _BaseAgidClient:
         fragment = fragment + '\n'
         self._socket.send(fragment.encode('utf-8'))
 
-    def _readlines(self) -> Generator[str, None, None]:
+    def _readlines(self) -> Generator[str]:
         recved = self._socket.recv(1024)
 
         while recved:
