@@ -80,7 +80,7 @@ def screen_blocklist(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> 
     try:
         number = interpret_number(caller_id_number, user_country)
     except phonenumbers.NumberParseException as ex:
-        logger.error(
+        logger.warning(
             'Failed to screen number %s with blocklist of user %s: %s',
             caller_id_number,
             user_uuid,
