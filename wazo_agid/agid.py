@@ -1,4 +1,4 @@
-# Copyright 2008-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2008-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -112,7 +112,6 @@ class FastAGIRequestHandler(socketserver.StreamRequestHandler):
 class AGID(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     initialized = False
-    request_queue_size = 20
     # Use Daemon threads to avoid memory leak
     # see bpo-37193 https://bugs.python.org/issue37193
     daemon_threads = True
@@ -140,6 +139,9 @@ class AGID(socketserver.ThreadingTCPServer):
 
             self.listen_port = int(self.config["listen_port"])
             logger.debug("listen_port: %d", self.listen_port)
+
+            self.request_queue_size = int(self.config["listen_backlog"])
+            logger.debug("listen_backlog: %d", self.request_queue_size)
 
         for i in range(1, CONNECTION_TIMEOUT + 1):
             try:
