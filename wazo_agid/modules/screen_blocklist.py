@@ -1,4 +1,4 @@
-# Copyright 2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2025-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
@@ -92,10 +92,23 @@ def screen_blocklist(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> 
     )
     logger.debug('Looking up number %s in blocklist of user %s', e164_number, user_uuid)
     # lookup caller id number in wazo-confd blocklist API
-    result = confd_client.users(user_uuid).blocklist.numbers.lookup(
-        number_exact=e164_number,
-        tenant_uuid=user_tenant_uuid,
-    )
+    try:
+        result = confd_client.users(user_uuid).blocklist.numbers.lookup(
+            number_exact=e164_number,
+            tenant_uuid=user_tenant_uuid,
+        )
+    except Exception:
+        # Screening is advisory, so it must fail open: an exception escaping this
+        # handler sends the dialplan to agi_fail, which hangs the caller up. That
+        # turns an unreachable blocklist API into "every caller is blocked"
+        # instead of "no caller is blocked", which is the opposite of the intent.
+        logger.exception(
+            'Failed to look up number %s in blocklist of user %s, letting the call through',
+            e164_number,
+            user_uuid,
+        )
+        return
+
     if result:
         logger.debug(
             'Caller ID number %s is blocked by user %s(blocklist number uuid=%s)',
