@@ -58,6 +58,7 @@ _DEFAULT_CONFIG = {
     'logfile': '/var/log/wazo-agid.log',
     'listen_port': 4573,
     'listen_address': '127.0.0.1',
+    'listen_backlog': 128,
     'config_file': '/etc/wazo-agid/config.yml',
     'extra_config_files': '/etc/wazo-agid/conf.d/',
     'connection_pool_size': 10,
