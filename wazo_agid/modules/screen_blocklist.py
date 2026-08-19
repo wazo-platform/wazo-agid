@@ -7,6 +7,7 @@ import logging
 
 import phonenumbers
 from psycopg2.extras import DictCursor
+from requests import RequestException
 from xivo_dao.resources.user import dao as user_dao
 
 from wazo_agid import agid
@@ -97,15 +98,12 @@ def screen_blocklist(agi: agid.FastAGI, cursor: DictCursor, args: list[str]) -> 
             number_exact=e164_number,
             tenant_uuid=user_tenant_uuid,
         )
-    except Exception:
-        # Screening is advisory, so it must fail open: an exception escaping this
-        # handler sends the dialplan to agi_fail, which hangs the caller up. That
-        # turns an unreachable blocklist API into "every caller is blocked"
-        # instead of "no caller is blocked", which is the opposite of the intent.
-        logger.exception(
-            'Failed to look up number %s in blocklist of user %s, letting the call through',
+    except RequestException as e:
+        logger.error(
+            'Failed to look up number %s in blocklist of user %s, letting the call through: %s',
             e164_number,
             user_uuid,
+            e,
         )
         return
 

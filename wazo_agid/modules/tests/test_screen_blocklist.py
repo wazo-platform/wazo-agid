@@ -8,7 +8,6 @@ from unittest.mock import Mock, patch
 
 import phonenumbers
 import requests
-from hamcrest import assert_that, is_
 
 from wazo_agid.fastagi import FastAGI
 from wazo_agid.modules import screen_blocklist
@@ -74,14 +73,20 @@ class TestScreenBlocklist(unittest.TestCase):
 
         screen_blocklist.screen_blocklist(self.agi, Mock(), ['user-uuid'])
 
-        assert_that(self.agi.set_variable.called, is_(False))
+        self.agi.set_variable.assert_not_called()
 
-    def test_lookup_failure_lets_the_call_through(self):
-        # An exception escaping the handler sends the dialplan to agi_fail, which
-        # hangs the caller up: an unreachable blocklist API would then block every
-        # caller rather than the few that are listed.
+    def test_http_error_lets_the_call_through(self):
         self.lookup.side_effect = requests.exceptions.HTTPError('401 Unauthorized')
 
         screen_blocklist.screen_blocklist(self.agi, Mock(), ['user-uuid'])
 
-        assert_that(self.agi.set_variable.called, is_(False))
+        self.agi.set_variable.assert_not_called()
+
+    def test_connection_error_lets_the_call_through(self):
+        self.lookup.side_effect = requests.exceptions.ConnectionError(
+            'Connection refused'
+        )
+
+        screen_blocklist.screen_blocklist(self.agi, Mock(), ['user-uuid'])
+
+        self.agi.set_variable.assert_not_called()
