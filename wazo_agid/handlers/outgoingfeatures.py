@@ -133,7 +133,11 @@ class OutgoingFeatures(Handler):
                 '%s: _set_caller_id: using user outgoing caller ID',
                 self._agi.env['agi_channel'],
             )
+            # set it directly, then hand it to format_and_set_outgoing_caller_id
+            # like a header-supplied one: that AGI applies the trunk's caller ID
+            # format, but only runs once a trunk declaring one is known
             objects.CallerID.set(self._agi, self.user.outcallerid)
+            self._agi.set_variable(dv.SELECTED_CALLER_ID, self.user.outcallerid)
 
     def _set_anonymous(self):
         self._agi.set_variable('CALLERID(pres)', 'prohib')
