@@ -1,4 +1,4 @@
-# Copyright 2024-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2024-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
@@ -12,7 +12,6 @@ from wazo_agid import objects
 from wazo_agid.handlers import handler
 
 VALID_PHONE_NUMBER_RE = re.compile(r'^\+?\d{3,15}$')
-CALLER_ID_ALL_REGEX = re.compile(r'^"(.*)" <(\+?\d{3,15})>$')
 
 
 logger = logging.getLogger(__name__)
@@ -43,13 +42,7 @@ class CallerIDFormatter(handler.Handler):
         if not selected_cid:
             return
 
-        matches = CALLER_ID_ALL_REGEX.match(selected_cid)
-        if matches:
-            cid_name = matches.group(1)
-            cid_number = matches.group(2)
-        else:
-            cid_name = ''
-            cid_number = selected_cid
+        cid_name, cid_number = self._split_caller_id(selected_cid)
 
         formatted_cid_number = self._format_number(cid_number)
         if not formatted_cid_number:
@@ -109,6 +102,19 @@ class CallerIDFormatter(handler.Handler):
             self._agi.verbose(f'Invalid variable in PAI template: {ke}')
 
         self._agi.set_variable(f'_{dv.FORMATTED_PAI_NUMBER}', formatted_number)
+
+    @staticmethod
+    def _split_caller_id(caller_id: str) -> tuple[str, str]:
+        '''
+        split as CallerID.set does, so both present the same name. Without a
+        number in angle brackets, the whole value is taken as the number.
+        '''
+        parsed = objects.CallerID.parse(caller_id)
+        # a bare number parses as both name and number, and has no brackets
+        if parsed and parsed[1] is not None and '<' in caller_id:
+            name, number = parsed
+            return name, number
+        return '', caller_id
 
     def _set_raw_number(self, name: str, number: str) -> None:
         matches = VALID_PHONE_NUMBER_RE.match(number)

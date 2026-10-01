@@ -137,7 +137,8 @@ class OutgoingFeatures(Handler):
             # like a header-supplied one: that AGI applies the trunk's caller ID
             # format, but only runs once a trunk declaring one is known
             objects.CallerID.set(self._agi, self.user.outcallerid)
-            self._agi.set_variable(dv.SELECTED_CALLER_ID, self.user.outcallerid)
+            if objects.CallerID.parse(self.user.outcallerid):
+                self._agi.set_variable(dv.SELECTED_CALLER_ID, self.user.outcallerid)
 
     def _set_anonymous(self):
         self._agi.set_variable('CALLERID(pres)', 'prohib')

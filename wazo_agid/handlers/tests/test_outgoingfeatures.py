@@ -564,6 +564,23 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
             c.args[0] for c in self._agi.set_variable.call_args_list if c.args
         ]
 
+    def test_stored_value_the_dialplan_cannot_parse_does_not_reach_the_formatter(
+        self,
+    ) -> None:
+        # stored before wazo-confd validated it: CallerID.set ignores it, so the
+        # formatter must not present it either
+        user = a_user().with_custom_out_caller_id('"" <+15555551234>').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        assert dv.SELECTED_CALLER_ID not in [
+            c.args[0] for c in self._agi.set_variable.call_args_list if c.args
+        ]
+
     @patch('wazo_agid.objects.CallerID.set')
     def test_stored_default_token_does_not_reach_the_formatter(
         self, mock_set_caller_id
