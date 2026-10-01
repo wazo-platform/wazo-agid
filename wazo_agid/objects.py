@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import logging
-import re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from psycopg2.extras import DictCursor, DictRow
 from psycopg2.sql import SQL, Composable, Identifier
+from xivo.caller_id import parse_caller_id
 from xivo_dao import user_dao
 
 from wazo_agid import dialplan_variables as dv
@@ -998,49 +998,12 @@ class Context:
                 self.include.append(row['include'])
 
 
-CALLERID_MATCHER = re.compile(
-    r'^ *(?:"(.+)"|([\w\-\.\!%\*\+`\'\~ ]*[^ "])) *(?:<(\+?[0-9\*#]+)>)?$'
-).match
-CALLERIDNUM_MATCHER = re.compile(r'^\+?[0-9\*#]+$').match
-
-
 class CallerID:
     @staticmethod
     def parse(callerid):
-        logger.debug('caller_id parse: parsing "%s"', callerid)
-        m = CALLERID_MATCHER(callerid) if callerid else None
-
-        if not m:
-            logger.debug('caller_id parse: could not match callerid, giving up')
-            return
-
-        calleridname = m.group(1)
-        calleridnum = m.group(3)
-        logger.debug(
-            'caller_id parse: calleridname: "%s", calleridnum: "%s"',
-            calleridname,
-            calleridnum,
-        )
-
-        if calleridname is None:
-            calleridname = m.group(2)
-            logger.debug(
-                'caller_id parse: using fallback calleridname: '
-                'calleridname: "%s", calleridnum: "%s"',
-                calleridname,
-                calleridnum,
-            )
-
-            if calleridnum is None and CALLERIDNUM_MATCHER(calleridname):
-                calleridnum = m.group(2)
-                logger.debug(
-                    'caller_id parse: using fallback calleridnum: '
-                    'calleridname: "%s", calleridnum: "%s"',
-                    calleridname,
-                    calleridnum,
-                )
-
-        return calleridname, calleridnum
+        parsed = parse_caller_id(callerid)
+        logger.debug('caller_id parse: "%s" parsed as %s', callerid, parsed)
+        return parsed
 
     @staticmethod
     def set(agi, callerid):

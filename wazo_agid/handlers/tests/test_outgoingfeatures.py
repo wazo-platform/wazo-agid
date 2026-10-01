@@ -504,6 +504,100 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         for mock_call in calls:
             assert mock_call in self._agi.set_variable.call_args_list
 
+    @patch('wazo_agid.objects.CallerID.set')
+    def test_stored_default_is_handed_to_the_formatter(
+        self, mock_set_caller_id
+    ) -> None:
+        # a desk phone sends no header, so the stored caller ID applies and must
+        # reach the formatter like a header-supplied one
+        user = a_user().with_custom_out_caller_id('"Custom1" <+15555551234>').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        assert (
+            call(dv.SELECTED_CALLER_ID, '"Custom1" <+15555551234>')
+            in self._agi.set_variable.call_args_list
+        )
+        # still applied directly, in case the formatter never runs
+        mock_set_caller_id.assert_called_once_with(
+            self._agi, '"Custom1" <+15555551234>'
+        )
+
+    @patch('wazo_agid.objects.CallerID.set')
+    def test_header_takes_precedence_over_the_stored_default(
+        self, mock_set_caller_id
+    ) -> None:
+        user = a_user().with_custom_out_caller_id('"Stored" <+15555550000>').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
+        self._channel_variables['PJSIP_HEADER(read,X-Wazo-Selected-Caller-ID)'] = (
+            '"Picked" <+15555551234>'
+        )
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        self._agi.set_variable.assert_called_once_with(
+            dv.SELECTED_CALLER_ID, '"Picked" <+15555551234>'
+        )
+        mock_set_caller_id.assert_not_called()
+
+    @patch('wazo_agid.objects.CallerID.set')
+    def test_internal_outcall_ignores_the_stored_default(
+        self, mock_set_caller_id
+    ) -> None:
+        user = a_user().with_custom_out_caller_id('"Custom1" <+15555551234>').build()
+        outcall = an_outcall().internal().build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        mock_set_caller_id.assert_not_called()
+        assert dv.SELECTED_CALLER_ID not in [
+            c.args[0] for c in self._agi.set_variable.call_args_list if c.args
+        ]
+
+    def test_stored_value_the_dialplan_cannot_parse_does_not_reach_the_formatter(
+        self,
+    ) -> None:
+        # stored before wazo-confd validated it: CallerID.set ignores it, so the
+        # formatter must not present it either
+        user = a_user().with_custom_out_caller_id('"" <+15555551234>').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        assert dv.SELECTED_CALLER_ID not in [
+            c.args[0] for c in self._agi.set_variable.call_args_list if c.args
+        ]
+
+    @patch('wazo_agid.objects.CallerID.set')
+    def test_stored_default_token_does_not_reach_the_formatter(
+        self, mock_set_caller_id
+    ) -> None:
+        # `default` and `anonymous` are routing tokens, not caller IDs
+        user = a_user().with_custom_out_caller_id('default').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        assert dv.SELECTED_CALLER_ID not in [
+            c.args[0] for c in self._agi.set_variable.call_args_list if c.args
+        ]
+
 
 class TestRetrieveOutcall(BaseOutgoingFeaturesTestCase):
     def test_retreive_outcall(self) -> None:
