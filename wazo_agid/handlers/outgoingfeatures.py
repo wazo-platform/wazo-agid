@@ -110,7 +110,12 @@ class OutgoingFeatures(Handler):
                     dv.SELECTED_CALLER_ID,
                     selected_caller_id,
                 )
-        elif self.user is None or self.user.outcallerid == 'default':
+        elif (
+            self.user is None
+            # never set reads as `default` in wazo-confd, so it behaves as one
+            or not self.user.outcallerid
+            or self.user.outcallerid == 'default'
+        ):
             if self.outcall.callerid:
                 logger.debug(
                     '%s: _set_caller_id: using outcall caller ID',

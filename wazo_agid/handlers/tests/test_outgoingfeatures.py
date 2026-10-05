@@ -324,6 +324,25 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
         mock_set_caller_id.assert_called_once_with(self._agi, '27857218')
 
     @patch('wazo_agid.objects.CallerID.set')
+    def test_user_never_set_and_outcall_external_caller_id(
+        self, mock_set_caller_id
+    ) -> None:
+        # a user who never chose a default is treated as `default`, as
+        # wazo-confd reports it
+        user = a_user().with_custom_out_caller_id('').build()
+        outcall = an_outcall().external().with_caller_id('27857218').build()
+
+        self.outgoing_features.outcall = outcall
+        self.outgoing_features.user = user
+
+        self.outgoing_features._set_caller_id()
+
+        mock_set_caller_id.assert_called_once_with(self._agi, '27857218')
+        assert dv.SELECTED_CALLER_ID not in [
+            c.args[0] for c in self._agi.set_variable.call_args_list if c.args
+        ]
+
+    @patch('wazo_agid.objects.CallerID.set')
     def test_user_default_and_outcall_external(self, mock_set_caller_id) -> None:
         user = a_user().with_default_outgoing_caller_id().build()
         outcall = an_outcall().external().build()
