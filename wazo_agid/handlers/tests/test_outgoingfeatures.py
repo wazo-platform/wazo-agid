@@ -588,7 +588,7 @@ class TestSetCallerId(BaseOutgoingFeaturesTestCase):
     ) -> None:
         # stored before wazo-confd validated it: CallerID.set ignores it, so the
         # formatter must not present it either
-        user = a_user().with_custom_out_caller_id('"" <+15555551234>').build()
+        user = a_user().with_custom_out_caller_id('"Unclosed <+15555551234>').build()
         outcall = an_outcall().external().with_caller_id('27857218').build()
 
         self.outgoing_features.outcall = outcall
