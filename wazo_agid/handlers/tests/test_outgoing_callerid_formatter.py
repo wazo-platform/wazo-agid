@@ -1,4 +1,4 @@
-# Copyright 2024-2025 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2024-2026 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from unittest import TestCase
@@ -86,6 +86,50 @@ class TestOutgoingCallerIdFormatter(TestCase):
             'CALLERID(all)',
             '"Foobar" <+15551234567>',
         )
+
+    def test_selected_unquoted_cid_name_preserved(self) -> None:
+        # the dialplan and the user API both accept an unquoted name
+        channel_vars = {
+            dv.SELECTED_CALLER_ID: 'Hursule <4185551234>',
+            dv.TRUNK_CID_FORMAT: '+E164',
+            'WAZO_TENANT_COUNTRY': 'CA',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_called_once_with(
+            'CALLERID(all)',
+            '"Hursule" <+14185551234>',
+        )
+
+    def test_selected_number_with_spaces_is_formatted(self) -> None:
+        # parses as a name only, so the whole value is taken as the number
+        channel_vars = {
+            dv.SELECTED_CALLER_ID: '+1 418 555 1234',
+            dv.TRUNK_CID_FORMAT: '+E164',
+            'WAZO_TENANT_COUNTRY': 'CA',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_called_once_with(
+            'CALLERID(all)',
+            '"+14185551234" <+14185551234>',
+        )
+
+    def test_selected_name_only_with_angle_bracket_is_ignored(self) -> None:
+        channel_vars = {
+            dv.SELECTED_CALLER_ID: '"Acme <Corp"',
+            dv.TRUNK_CID_FORMAT: '+E164',
+            'WAZO_TENANT_COUNTRY': 'CA',
+        }
+        self.agi.get_variable.side_effect = channel_vars.get
+
+        self.handler.execute()
+
+        self.agi.set_variable.assert_not_called()
 
     def test_selected_E164_going_plusE164(self) -> None:
         channel_vars = {
