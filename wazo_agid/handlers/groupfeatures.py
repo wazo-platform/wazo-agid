@@ -85,24 +85,25 @@ class GroupFeatures(Handler):
             'mark_answered_elsewhere',
             'tenant_uuid',
         )
-        queue_columns = ('musicclass', 'timeout', 'strategy', 'retry', 'maxlen')
+        base_queue_columns = ('musicclass', 'timeout', 'strategy', 'retry', 'maxlen')
         extensions_columns = ('exten', 'context')
         columns = [sanitize_column(f"groupfeatures.{c}") for c in groupfeatures_columns]
         columns += [
-            sanitize_aliased_column(f"queue.{c}", f"queue_{c}") for c in queue_columns
+            sanitize_aliased_column(f"base_queue.{c}", f"base_queue_{c}")
+            for c in base_queue_columns
         ]
         columns += [sanitize_column(f"extensions.{c}") for c in extensions_columns]
 
         query = SQL(
             "SELECT {columns} FROM groupfeatures "
-            "INNER JOIN queue "
-            "ON groupfeatures.name = queue.name "
+            "INNER JOIN base_queue "
+            "ON groupfeatures.name = base_queue.name "
             "LEFT JOIN extensions "
             "ON groupfeatures.id::text = extensions.typeval "
             "AND extensions.type = 'group' "
             "WHERE groupfeatures.id = %s "
-            "AND queue.category = 'group' "
-            "AND queue.commented = 0"
+            "AND base_queue.category = 'group' "
+            "AND base_queue.commented = 0"
         )
         self._cursor.execute(query.format(columns=SQL(", ").join(columns)), (self._id,))
         res: DictRow = self._cursor.fetchone()
@@ -121,13 +122,13 @@ class GroupFeatures(Handler):
         self._write_calling = res['write_calling']
         self._ignore_forward = res['ignore_forward']
         self._preprocess_subroutine = res['preprocess_subroutine']
-        self._musicclass = res['queue_musicclass']
+        self._musicclass = res['base_queue_musicclass']
         self._mark_answered_elsewhere = res['mark_answered_elsewhere']
         self._tenant_uuid = res['tenant_uuid']
-        self._user_timeout = res['queue_timeout']
-        self._group_strategy = res['queue_strategy']
-        self._group_retry_delay = res['queue_retry']
-        self._max_calls = res['queue_maxlen']
+        self._user_timeout = res['base_queue_timeout']
+        self._group_strategy = res['base_queue_strategy']
+        self._group_retry_delay = res['base_queue_retry']
+        self._max_calls = res['base_queue_maxlen']
 
     def _set_vars(self) -> None:
         self._agi.set_variable(dv.REAL_NUMBER, self._exten)
